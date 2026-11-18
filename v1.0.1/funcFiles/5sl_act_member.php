@@ -750,7 +750,7 @@ try {
                 }
                 $rand_num   = mt_rand(1, $total_weight);
                 $acc_weight = 0;
-                $won_item   = $items;
+                $won_item   = $items[0];
 
                 foreach ($items as $it) {
                     $acc_weight += max(1, (int)$it['loti_weight']);
@@ -894,9 +894,7 @@ try {
                 
                 // 查詢更新後的最新可用總點數，確保 pt_available 帳務精準
                 $new_pts = (int)$DB->single("SELECT mb_points FROM members WHERE mb_id = ?", [$mb_id]);
-                if (isset($_SESSION['mbPoints'])) {
-                    $_SESSION['mbPoints'] = $new_pts;
-                }
+                $_SESSION['mbPoints'] = $new_pts;
 
                 // 寫入點數明細子表 (pt_income=1收入, pt_type=2活動贈點, pt_for=4禮品領取, pt_forid=$grec_id)
                 $memo = '領取禮品：' . $rec['gift_title'];
