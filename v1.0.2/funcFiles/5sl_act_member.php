@@ -27,7 +27,18 @@ $mb_id  = isset($_SESSION['mbID']) ? (int)$_SESSION['mbID'] : 0;
 $mb_lvl = isset($_SESSION['mbLevel']) ? (int)$_SESSION['mbLevel'] : 3; // 預設黃金VIP等級3
 
 try {
-    $guest_allowed = ['act_member_login', 'act_member_logout', 'act_member_addnew', 'act_cart_add', 'act_toggle_wishlist','act_resend_verify'];
+
+    $guest_allowed = [
+        'act_member_login',
+        'act_member_logout',
+        'act_member_addnew',
+        'act_resend_verify',
+        'act_send_reset_pwd',
+        'act_do_reset_pwd',
+        'act_cart_add',
+        'act_toggle_wishlist'
+    ];
+
     if ($mb_id <= 0 && !in_array($action, $guest_allowed, true)) {
         echo json_encode(['success' => 0, 'need_login' => 1, 'code' => '[@-errorcode-@]', 'message' => '登入已逾時，請重新登入會員帳號']);
         exit();
@@ -522,29 +533,100 @@ try {
             $enc_cellphone = _fn_secure_crypto($mb_cellphone, 'en');
             $enc_add       = _fn_secure_crypto($mb_add, 'en');
 
-            // 4. 更新 members 資料表（原生 SQL 一律使用 $DB->query）
-            $sql_upd = "
-                UPDATE members 
-                SET mb_name = ?, mb_gender = ?, mb_title = ?, mb_cellphone = ?, mb_birth = ?, mb_city = ?, mb_district = ?, mb_add = ?
-                WHERE mb_id = ?
-            ";
-            $DB->query($sql_upd, [
-                $enc_name, $mb_gender, $mb_title, $enc_cellphone, $birth_db, $mb_city, $mb_district, $enc_add, $mb_id
-            ]);
+            // 4. 檢查「完善個人資料」全欄位與「個人專屬頭像」是否皆已完備
+            $required_profile_fields = [
+                $mb_name,
+                $mb_gender,
+                $mb_title,
+                $mb_cellphone,
+                $mb_birth,
+                $mb_city,
+                $mb_district,
+                $mb_add
+            ];
+
+            // 檢查伺服器是否已存有該會員的專屬大頭貼（包含本次剛上傳裁切或先前已上傳）
+            $avatar_disk_path = '../5sladmin/uploadFiles/mb/mbphoto_' . $mb_id . '_.jpg';
+            $has_avatar       = ($main_photo_name !== null) || file_exists($avatar_disk_path);
+
+            $is_all_filled = $has_avatar;
+            if ($is_all_filled) {
+                foreach ($required_profile_fields as $val) {
+                    if ($val === '' || $val === null || $val === '0') {
+                        $is_all_filled = false;
+                        break;
+                    }
+                }
+            }
+
+
+            // 查詢會員目前資料庫狀態，僅當原本 mb_status === 2 且全欄位皆已填妥時，執行首次升級與點數獎勵
+            $curr_member   = $DB->row("SELECT mb_status, mb_points FROM members WHERE mb_id = ?", [$mb_id]);
+            $orig_status   = (int)($curr_member['mb_status'] ?? 1);
+            $profile_bonus = 100; // 首次完善個人資料獎勵點數（可依需求調整）
+            $grant_reward  = ($orig_status === 2 && $is_all_filled);
+
+            $DB->beginTransaction();
+            try {
+                // 5. 更新 members 資料表（若符合首次完善條件，同步將 mb_status 升級為 1 並加上獎勵點數）
+                if ($grant_reward) {
+                    $sql_upd = "
+                        UPDATE members 
+                        SET mb_name = ?, mb_gender = ?, mb_title = ?, mb_cellphone = ?, mb_birth = ?, mb_city = ?, mb_district = ?, mb_add = ?,
+                            mb_status = 1, mb_points = mb_points + ?, mb_updated = NOW()
+                        WHERE mb_id = ?
+                    ";
+                    $DB->query($sql_upd, [
+                        $enc_name, $mb_gender, $mb_title, $enc_cellphone, $birth_db, $mb_city, $mb_district, $enc_add, $profile_bonus, $mb_id
+                    ]);
+
+                    $new_pts = (int)$DB->single("SELECT mb_points FROM members WHERE mb_id = ?", [$mb_id]);
+                    $_SESSION['mbStatus'] = 1;
+                    $_SESSION['mbPoints'] = $new_pts;
+
+                    // 同步寫入 fsl_points 紅利點數明細流水帳
+                    $DB->query(
+                        "INSERT INTO fsl_points (mb_id, pt_income, pt_type, pt_for, pt_forid, pt_trade, pt_redeem, pt_freepoints, pt_available, pt_memo, pt_status)
+                         VALUES (?, 1, 2, 1, ?, ?, 0, ?, ?, '首次完整填寫個人基本資料獎勵', 1)",
+                        [$mb_id, $mb_id, $profile_bonus, $profile_bonus, $new_pts]
+                    );
+                } else {
+                    $sql_upd = "
+                        UPDATE members 
+                        SET mb_name = ?, mb_gender = ?, mb_title = ?, mb_cellphone = ?, mb_birth = ?, mb_city = ?, mb_district = ?, mb_add = ?, mb_updated = NOW()
+                        WHERE mb_id = ?
+                    ";
+                    $DB->query($sql_upd, [
+                        $enc_name, $mb_gender, $mb_title, $enc_cellphone, $birth_db, $mb_city, $mb_district, $enc_add, $mb_id
+                    ]);
+                }
+
+                $DB->commit();
+            } catch (Exception $e) {
+                $DB->rollBack();
+                throw $e;
+            }
 
             if ($main_photo_name !== null) {
-                $_SESSION['mbAvatar']       = './5sladmin/uploadFiles/mb/' . $main_photo_name . '?t=' . time();
+                $_SESSION['mbAvatar']      = './5sladmin/uploadFiles/mb/' . $main_photo_name . '?t=' . time();
                 $_SESSION['mbAvatarThumb'] = './5sladmin/uploadFiles/mb/' . $thumb_photo_name . '?t=' . time();
             }
 
-            // 5. 同步更新 Session 顯示暱稱
+            // 6. 同步更新 Session 顯示暱稱
             $_SESSION['mbTitle'] = $mb_title;
-
+            $tip_msg = ($orig_status === 2 && !$has_avatar)
+            ? '個人資料已加密更新！（提示：上傳您的專屬個人頭像並補齊所有欄位，即可正式啟用帳戶並領取 ' . $profile_bonus . ' PTS 獎勵！）'
+            : '個人資料已加密更新，頭像亦已同步裁切儲存！';
             echo json_encode([
-                'success'    => 1,
-                'code'       => '[@-successcode-@]',
-                'message'    => '個人資料已加密更新，頭像亦已同步裁切儲存！',
-                'avatar_url' => $_SESSION['mbAvatarThumb'] ?? null
+                'success'          => 1,
+                'code'             => '[@-successcode-@]',
+                'message' => $grant_reward
+                    ? "恭喜您完成所有個人資料與頭像設定！帳戶已正式啟用，並獲得 {$profile_bonus} PTS 獎勵點數！"
+                    : $tip_msg,
+                'avatar_url'       => $_SESSION['mbAvatarThumb'] ?? null,
+                'profile_upgraded' => $grant_reward ? 1 : 0,
+                'reward_pts'       => $grant_reward ? $profile_bonus : 0,
+                'new_pts'          => $_SESSION['mbPoints'] ?? null
             ]);
             exit;
         break;
@@ -1724,7 +1806,7 @@ try {
                 }
             }
 
-            $cart_count = (int)$DB->single("SELECT COALESCE(SUM(cart_qty), 0) FROM fsl_cart_items WHERE mb_id = ?", [$mb_id]);
+            $cart_count = (int)$DB->single("SELECT COUNT(*) FROM fsl_cart_items WHERE mb_id = ?", [$mb_id]);
 
             echo json_encode([
                 'success'    => 1,
@@ -1755,7 +1837,7 @@ try {
                 $DB->query("DELETE FROM fsl_cart_items WHERE cart_id = ? AND mb_id = ?", [$cart_id, $mb_id]);
             }
 
-            $cart_count = (int)$DB->single("SELECT COALESCE(SUM(cart_qty), 0) FROM fsl_cart_items WHERE mb_id = ?", [$mb_id]);
+            $cart_count = (int)$DB->single("SELECT COUNT(*) FROM fsl_cart_items WHERE mb_id = ?", [$mb_id]);
 
             echo json_encode([
                 'success'    => 1,
@@ -2031,6 +2113,119 @@ try {
             exit;
         break;
 
+        // =========================================================================
+        // 動作 act_book_consult ：立即預約一對一顧問輔導 (支援免費次數扣除 或 付費加入購物車)
+        // =========================================================================
+        case "act_book_consult":
+            $course_id      = (int)($_POST['course_id'] ?? 0);
+            $sess_id        = (int)($_POST['sess_id'] ?? 0);
+            $use_free_quota = (int)($_POST['use_free_quota'] ?? 0);
+            $topic_note     = trim((string)($_POST['topic_note'] ?? ''));
+
+            if ($course_id <= 0 || $sess_id <= 0 || $topic_note === '') {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '請完整選擇輔導主題、時段並填寫諮詢重點！']);
+                exit();
+            }
+
+            // 1. 驗證服務與時段有效性
+            $sess = $DB->row(
+                "SELECT s.sess_id, s.course_id, s.sess_enrollee, s.sess_startdate, s.sess_starttime, c.course_title, c.course_max
+                 FROM course_sessions s
+                 INNER JOIN courses c ON s.course_id = c.course_id
+                 WHERE s.sess_id = ? AND s.course_id = ? AND c.course_type = 2 AND c.course_status = 1 AND s.sess_status = 1",
+                [$sess_id, $course_id]
+            );
+            if (!$sess) {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '找不到該顧問時段或已停止開放']);
+                exit();
+            }
+
+            // 檢查該會員是否已預約過同一時段
+            $dup = $DB->single(
+                "SELECT enr_id FROM fsl_course_enrolls WHERE mb_id = ? AND course_id = ? AND sess_id = ? AND enr_status != 0",
+                [$mb_id, $course_id, $sess_id]
+            );
+            if ($dup) {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '您已經預約過此時段囉，請勿重複預約！']);
+                exit();
+            }
+
+            // =====================================================================
+            // 分支 A：使用 VIP 免費輔導額度扣除（立即寫入 fsl_course_enrolls 完成預約）
+            // =====================================================================
+            if ($use_free_quota === 1) {
+                $DB->beginTransaction();
+                try {
+                    // 鎖定會員額度與時段名額，防止併發超扣
+                    $curr_quota = (int)$DB->single("SELECT mb_free_consult_quota FROM members WHERE mb_id = ? FOR UPDATE", [$mb_id]);
+                    if ($curr_quota <= 0) {
+                        $DB->rollBack();
+                        echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '您的免費一對一輔導額度已用畢，請改選「單次付費加購預約」！']);
+                        exit();
+                    }
+
+                    $curr_enrollee = (int)$DB->single("SELECT sess_enrollee FROM course_sessions WHERE sess_id = ? FOR UPDATE", [$sess_id]);
+                    if ($curr_enrollee >= (int)$sess['course_max']) {
+                        $DB->rollBack();
+                        echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '很抱歉，該時段剛剛已被其他會員預約額滿，請選擇其他時段！']);
+                        exit();
+                    }
+
+                    // 1) 扣除 1 次免費額度
+                    $DB->query("UPDATE members SET mb_free_consult_quota = mb_free_consult_quota - 1 WHERE mb_id = ? AND mb_free_consult_quota > 0", [$mb_id]);
+
+                    // 2) 佔用該時段名額 +1
+                    $DB->query("UPDATE course_sessions SET sess_enrollee = sess_enrollee + 1 WHERE sess_id = ?", [$sess_id]);
+
+                    // 3) 寫入 fsl_course_enrolls（enr_pay_status=2 免費折抵完成, enr_quota_type=2 免費額度扣除）
+                    $DB->query(
+                        "INSERT INTO fsl_course_enrolls (mb_id, course_id, sess_id, ord_id, enr_quota_type, enr_pay_status, enr_status, enr_note, enr_topic)
+                         VALUES (?, ?, ?, NULL, 2, 2, 1, '使用 VIP 免費輔導額度預約', ?)",
+                        [$mb_id, $course_id, $sess_id, $topic_note]
+                    );
+
+                    $DB->commit();
+
+                    echo json_encode([
+                        'success' => 1,
+                        'code'    => '[@-successcode-@]',
+                        'mode'    => 'free_booked',
+                        'message' => "預約成功！已為您扣除 1 次免費輔導額度並鎖定「{$sess['course_title']}」時段。"
+                    ]);
+                    exit();
+                } catch (Exception $e) {
+                    $DB->rollBack();
+                    throw $e;
+                }
+            }
+
+            // =====================================================================
+            // 分支 B：單次付費購買（加入購物車 fsl_cart_items 並跳轉 5sl_myCart.php 結帳）
+            // =====================================================================
+            if ((int)$sess['sess_enrollee'] >= (int)$sess['course_max']) {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '很抱歉，該時段已額滿，請選擇其他空檔時段！']);
+                exit();
+            }
+
+            $exist_cart = $DB->row(
+                "SELECT cart_id FROM fsl_cart_items WHERE mb_id = ? AND cart_item_type = 1 AND course_id = ? AND sess_id = ?",
+                [$mb_id, $course_id, $sess_id]
+            );
+            if (!$exist_cart) {
+                $DB->query(
+                    "INSERT INTO fsl_cart_items (mb_id, cart_item_type, course_id, sess_id, merch_id, cart_qty) VALUES (?, 1, ?, ?, NULL, 1)",
+                    [$mb_id, $course_id, $sess_id]
+                );
+            }
+
+            echo json_encode([
+                'success' => 1,
+                'code'    => '[@-successcode-@]',
+                'mode'    => 'paid_cart',
+                'message' => '已將一對一顧問預約加入購物車，正在為您導向結帳頁面...'
+            ]);
+            exit();
+        break;
 
 
 
