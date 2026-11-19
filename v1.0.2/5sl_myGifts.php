@@ -8,9 +8,15 @@ include_once '5sl_include_header.php';
 $mb_id = (int)($_SESSION['mbID'] ?? $_SESSION['user_id'] ?? 0);
 $mb_lvl = isset($_SESSION['mbLevel']) ? (int)$_SESSION['mbLevel'] : 3;
 
-// 1. 查詢會員目前真實 PTS 點數餘額（若無資料庫則預設 1250）
+// 1. 查詢會員目前真實 PTS 點數餘額（若無資料庫則預設 0
 $db_pts = ($mb_id > 0) ? $DB->single("SELECT mb_points FROM members WHERE mb_id = ?", [$mb_id]) : false;
-$member_pts = ($db_pts !== false && $db_pts !== null) ? (int)$db_pts : 1250;
+$member_pts = ($db_pts !== false && $db_pts !== null) ? (int)$db_pts : 0;
+
+// 在頂部 PHP 查詢區補上真實累計消費金額
+$total_spent = ($mb_id > 0) ? (int)$DB->single("SELECT COALESCE(SUM(ord_total), 0) FROM fsl_orders WHERE mb_id = ? AND ord_status IN (2, 3, 4)", [$mb_id]) : 0;
+$next_target = 50000;
+$spent_pct   = min(100, (int)round(($total_spent / $next_target) * 100));
+$remain_amt  = max(0, $next_target - $total_spent);
 
 // 2. 查詢該會員的所有禮品領收紀錄 (關聯 fsl_gifts 主表)
 $sql_gifts = "
@@ -138,19 +144,19 @@ $lvl_names = [
                                     </div>
                                     <div>
                                         <div class="small text-warning fw-bold tracking-wide">CURRENT TIER • 目前會員等級</div>
-                                        <h4 class="fw-bold text-white mb-0">黃金尊榮會員 (Gold VIP)</h4>
+                                        <h4 class="fw-bold text-white mb-0"><?php echo $lvl_names[$mb_lvl]; ?> </h4>
                                     </div>
                                 </div>
                                 <p class="text-white-50 small mb-3">
-                                    年度累積消費金額已達 <strong class="text-white">NT$ 38,500</strong>。再累積消費 <strong class="text-warning">NT$ 11,500</strong>，即可自動晉升為最高階「黑鑽領袖會員 (Black Diamond)」，享全站課程 85 折與專屬顧問優先排程！
+                                    年度累積消費金額已達 <strong class="text-white">NT$ <?php echo number_format($total_spent); ?></strong>。再累積消費 <strong class="text-warning">NT$ <?php echo number_format($remain_amt); ?></strong>，即可自動晉升為最高階「黑鑽領袖會員 (Black Diamond)」，享全站課程 85 折與專屬顧問優先排程！
                                 </p>
                                 <!-- 升級進度條 -->
                                 <div class="d-flex justify-content-between small mb-1">
-                                    <span class="text-white-50">升級進度 (NT$ 38,500 / NT$ 50,000)</span>
-                                    <span class="fw-bold text-warning">77%</span>
+                                    <span class="text-white-50">升級進度 (NT$ <?php echo number_format($total_spent); ?> / NT$ <?php echo number_format($next_target); ?>)</span>
+                                    <span class="fw-bold text-warning"><?php echo $spent_pct; ?>%</span>
                                 </div>
                                 <div class="progress bg-dark border border-secondary" style="height: 10px;">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" style="width: 77%;" aria-valuenow="77" aria-valuemin="0" aria-valuemax="100"></div>
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" style="width: <?php echo $spent_pct; ?>%;" aria-valuenow="<?php echo $spent_pct; ?>" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                             </div>
 
@@ -185,7 +191,7 @@ $lvl_names = [
                     <ul class="nav nav-pills mb-4 gap-2" id="giftsTab" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active fw-bold px-4" id="vouchers-tab" data-bs-toggle="pill" data-bs-target="#vouchers-pane" type="button" role="tab">
-                                <i class="bi bi-ticket-perforated-fill me-2"></i>我的折價券與代碼 (<span id="voucherCountBadge">3</span>)
+                                <i class="bi bi-ticket-perforated-fill me-2"></i>我的折價券與代碼 (<span id="voucherCountBadge"><?php echo count($gift_records); ?></span>)
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
@@ -212,7 +218,7 @@ $lvl_names = [
                                         </label>
                                     </div>
                                     <div class="col-md-5">
-                                        <input type="text" class="form-control form-control-sm text-uppercase" id="inputPromoCode" placeholder="請輸入序號（測試碼：WELCOME_500）" required>
+                                        <input type="text" class="form-control form-control-sm text-uppercase" id="inputPromoCode" placeholder="請輸入優惠代碼（測試：WELCOME_500）" required>
                                     </div>
                                     <div class="col-md-3">
                                         <button type="submit" class="btn btn-dark text-warning fw-bold btn-sm w-100">
@@ -341,76 +347,7 @@ $lvl_names = [
 
 
                             <!-- 票券卡片列表 -->
-                            <div class="row g-3" id="voucherCardList">
-                                <!-- 票券 1 -->
-                                <div class="col-md-6">
-                                    <div class="border border-warning rounded-3 p-3 bg-white shadow-sm h-100 d-flex flex-column justify-content-between position-relative">
-                                        <div>
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <span class="badge bg-warning text-dark fw-bold">現金折價券</span>
-                                                <small class="text-danger fw-bold"><i class="bi bi-alarm me-1"></i>2026/12/31 到期</small>
-                                            </div>
-                                            <h5 class="fw-bold text-dark mb-1">NT$ 500 專案建置折抵金</h5>
-                                            <p class="text-muted small mb-3">單筆消費滿 NT$ 3,000 即可全額折抵，適用於全站課程與網站方案。</p>
-                                        </div>
-                                        <div class="pt-2 border-top d-flex justify-content-between align-items-center bg-light p-2 rounded">
-                                            <div class="small">
-                                                <span class="text-muted">代碼：</span>
-                                                <code class="fw-bold text-dark fs-6">5SLVIP500</code>
-                                            </div>
-                                            <button type="button" class="btn btn-outline-dark btn-sm py-0 px-2 btn-copy-code" data-code="5SLVIP500">
-                                                <i class="bi bi-clipboard me-1"></i>複製代碼
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- 票券 2 -->
-                                <div class="col-md-6">
-                                    <div class="border rounded-3 p-3 bg-white shadow-sm h-100 d-flex flex-column justify-content-between">
-                                        <div>
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <span class="badge bg-primary">課程專屬折扣</span>
-                                                <small class="text-muted">2027/02/28 到期</small>
-                                            </div>
-                                            <h5 class="fw-bold text-dark mb-1">全系列線上課程 88 折優惠券</h5>
-                                            <p class="text-muted small mb-3">結帳輸入代碼享單門課程 88 折禮遇，不限最低消費金額。</p>
-                                        </div>
-                                        <div class="pt-2 border-top d-flex justify-content-between align-items-center bg-light p-2 rounded">
-                                            <div class="small">
-                                                <span class="text-muted">代碼：</span>
-                                                <code class="fw-bold text-dark fs-6">LEARN88VIP</code>
-                                            </div>
-                                            <button type="button" class="btn btn-outline-dark btn-sm py-0 px-2 btn-copy-code" data-code="LEARN88VIP">
-                                                <i class="bi bi-clipboard me-1"></i>複製代碼
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- 票券 3 -->
-                                <div class="col-md-6">
-                                    <div class="border rounded-3 p-3 bg-white shadow-sm h-100 d-flex flex-column justify-content-between">
-                                        <div>
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <span class="badge bg-success">免費服務兌換</span>
-                                                <small class="text-muted">2027/05/14 到期</small>
-                                            </div>
-                                            <h5 class="fw-bold text-dark mb-1">一對一網站架構健檢體驗券 (60分鐘)</h5>
-                                            <p class="text-muted small mb-3">黃金會員年度續約專屬禮遇，可免費預約資深架構師線上諮詢一次。</p>
-                                        </div>
-                                        <div class="pt-2 border-top d-flex justify-content-between align-items-center bg-light p-2 rounded">
-                                            <div class="small">
-                                                <span class="text-muted">代碼：</span>
-                                                <code class="fw-bold text-dark fs-6">AUDITFREE1</code>
-                                            </div>
-                                            <button type="button" class="btn btn-outline-dark btn-sm py-0 px-2 btn-copy-code" data-code="AUDITFREE1">
-                                                <i class="bi bi-clipboard me-1"></i>複製代碼
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="row g-3" id="voucherCardList"></div>
 
                         </div> <!-- 結束區塊 2：vouchers-pane -->
 
@@ -576,7 +513,7 @@ $lvl_names = [
 <script>
 $(function() {
     let currentPts = <?php echo (int)$member_pts; ?>;
-    let currentVoucherCount = 3;
+    let currentVoucherCount = <?php echo count($gift_records); ?>;
 
     // 1. 通用提示框控制
     function showGiftsAlert(type, msg) {
@@ -721,7 +658,7 @@ $(function() {
                     window.fslEpicEngine.trigger({
                         contentType: 'html',
                         contentSource: window.fslEpicEngine.createCouponTemplate({
-                            bgUrl: 'https://picsum.photos' + Math.floor(Math.random() * 1000),
+                            bgUrl: 'imageFiles/test/<?php echo rand(1,18); ?>.jpg',
                             points: (res.added_pts > 0) ? res.added_pts.toString() : 'VIP GIFT',
                             unit: (res.added_pts > 0) ? 'PTS' : 'UNLOCKED',
                             title: 'VIP REWARD CLAIMED!',
@@ -800,7 +737,7 @@ $(function() {
                     window.fslEpicEngine.trigger({
                         contentType: 'html',
                         contentSource: window.fslEpicEngine.createCouponTemplate({
-                            bgUrl: 'https://picsum.photos' + Math.floor(Math.random() * 1000),
+                            bgUrl: 'imageFiles/test/<?php echo rand(1,18); ?>.jpg',
                             points: (res.added_pts > 0) ? res.added_pts.toString() : 'GIFT',
                             unit: (res.added_pts > 0) ? 'PTS' : 'UNLOCKED',
                             title: 'GIFT CLAIMED!',
@@ -822,30 +759,6 @@ $(function() {
         });
     });
 
-
-/*
-        }, 'json').fail(function(xhr) {
-            if (window.fslLoader) window.fslLoader.hide();
-            console.error('Server Response:', xhr.status, xhr.responseText);
-            showGiftsAlert('danger', '錯誤狀態：' + xhr.status + '｜詳情：' + xhr.responseText.substring(0, 150));
-        });
-
-*/
-
-/*
-
--- 1. 將會員 1 的前 3 筆禮品紀錄還原為「0-待領取」且清除領取時間
-UPDATE `fsl_gift_records`
-SET `grec_status` = 0,
-    `grec_claimed_at` = NULL
-WHERE `grec_id` IN (1, 2, 3) AND `mb_id` = 1;
-
--- 2. 將會員 1 的紅利點數扣回剛剛測試領取的 500 點 (200 + 300)
-UPDATE `members`
-SET `mb_points` = GREATEST(0, `mb_points` - 500)
-WHERE `mb_id` = 1;
-
-*/
 
 
 });
