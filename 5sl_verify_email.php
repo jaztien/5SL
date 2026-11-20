@@ -11,7 +11,7 @@ $memberTitle = '';
 if ($token !== '' && preg_match('/^[a-f0-9]{32}$/i', $token) && isset($DB)) {
     $vcRow = $DB->row(
         "SELECT vc.vc_id, vc.mb_id, vc.vc_expiretime, m.mb_title, m.mb_email_verified
-         FROM data_verify_codes vc
+         FROM fsl_verify_codes vc
          INNER JOIN fsl_members m ON vc.mb_id = m.mb_id
          WHERE vc.vc_verifycode = ? AND vc.vc_mode = 1
          LIMIT 1",
@@ -24,7 +24,7 @@ if ($token !== '' && preg_match('/^[a-f0-9]{32}$/i', $token) && isset($DB)) {
 
         if ((int)$vcRow['mb_email_verified'] === 1) {
             // 已經驗證過
-            $DB->query("DELETE FROM data_verify_codes WHERE vc_id = ?", [(int)$vcRow['vc_id']]);
+            $DB->query("DELETE FROM fsl_verify_codes WHERE vc_id = ?", [(int)$vcRow['vc_id']]);
             $verifyState = 'success';
             $statusTitle = '您的電子信箱已完成驗證！';
             $statusMsg   = "親愛的 {$memberTitle}，您的電子信箱先前已通過認證，現在即可直接登入會員中心。";
@@ -38,7 +38,7 @@ if ($token !== '' && preg_match('/^[a-f0-9]{32}$/i', $token) && isset($DB)) {
             $DB->beginTransaction();
             try {
                 $DB->query("UPDATE fsl_members SET mb_email_verified = 1, mb_updated = NOW() WHERE mb_id = ?", [$mId]);
-                $DB->query("DELETE FROM data_verify_codes WHERE mb_id = ? AND vc_mode = 1", [$mId]);
+                $DB->query("DELETE FROM fsl_verify_codes WHERE mb_id = ? AND vc_mode = 1", [$mId]);
                 $DB->commit();
 
                 $verifyState = 'success';

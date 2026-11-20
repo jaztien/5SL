@@ -62,6 +62,7 @@ $ord_status_map = [
     6 => ['code' => 'refunded',   'label' => '已退費',       'badge' => 'bg-secondary',         'icon' => 'bi-arrow-counterclockwise'],
     9 => ['code' => 'cancelled',  'label' => '已取消',       'badge' => 'bg-secondary',         'icon' => 'bi-x-circle'],
 ];
+
 ?>
 
 <div class="container my-5 py-4">
@@ -468,7 +469,6 @@ $ord_status_map = [
 <script>
     $(function() {
         let currentStatusFilter = 'all';
-        let rmaCount = 1;
 
         // 1. 通用提示框控制
         function showOrdersAlert(type, msg) {
@@ -535,58 +535,95 @@ $ord_status_map = [
             $('#modalOrderInvoice').text($(this).attr('data-invoice'));
             $('#modalOrderNote').text($(this).attr('data-note'));
 
-            const detailModal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
-            detailModal.show();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('orderDetailModal')).show();
         });
 
         // 4. 開啟退換貨 / 退款申請視窗 (自動帶入訂單編號)
         $(document).on('click', '.btn-open-rma', function() {
             const orderId = $(this).attr('data-id');
             $('#inputRmaOrderId').val(orderId);
-            const rmaModal = new bootstrap.Modal(document.getElementById('rmaRequestModal'));
-            rmaModal.show();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('rmaRequestModal')).show();
         });
 
-        // 5. 送出退換貨售後申請單
+        // 5. 送出退換貨售後申請單 (真實寫入資料庫 act_submit_refund)
         $('#formSubmitRma').on('submit', function(e) {
             e.preventDefault();
             const orderId = $('#inputRmaOrderId').val().trim().toUpperCase();
-            const rmaType = $('#selectRmaType').val();
-            const reason = $('#inputRmaReason').val().trim();
+            const rawType = $('#selectRmaType').val();
+            const reason  = $('#inputRmaReason').val().trim();
+
+            if (!orderId || !reason) {
+                showOrdersAlert('danger', '請完整填寫訂單編號與詳細原因說明！');
+                return;
+            }
+
+            // 相容下拉選單 value 為數字 (1/2/3) 或文字說明，自動轉換為後端對應的 ref_type
+            let refType = parseInt(rawType, 10);
+            if (isNaN(refType)) {
+                if (String(rawType).indexOf('換貨') !== -1) refType = 3;
+                else if (String(rawType).indexOf('部分') !== -1) refType = 2;
+                else refType = 1;
+            }
 
             bootstrap.Modal.getInstance(document.getElementById('rmaRequestModal')).hide();
             if (window.fslLoader) window.fslLoader.show();
 
-            setTimeout(function() {
+            $.post('./funcFiles/5sl_act_member.php', {
+                action: 'act_submit_refund',
+                ord_no: orderId,
+                ref_type: refType,
+                ref_detail: reason
+            }, function(res) {
                 if (window.fslLoader) window.fslLoader.hide();
-                rmaCount++;
-                $('#rmaCountBadge').text(rmaCount);
 
-                const newRmaNo = 'RMA-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.floor(100 + Math.random() * 900);
-                const newCaseHtml = `
-                <div class="border border-primary rounded-3 p-4 bg-white shadow-sm">
-                    <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-2 mb-3 gap-2">
-                        <div class="small">
-                            <span class="text-muted">售後單號：</span>
-                            <strong class="text-dark">${newRmaNo}</strong>
-                            <span class="text-muted ms-3">原訂單：${orderId}</span>
+                if (res.success === 1) {
+                    const currentRmaCnt = parseInt($('#rmaCountBadge').text(), 10) || 0;
+                    $('#rmaCountBadge').text(currentRmaCnt + 1);
+
+                    // 若原本顯示「尚無售後紀錄」空狀態提示，先清空
+                    if ($('#rmaCasesContainer').find('.order-card-item, .border').length === 0) {
+                        $('#rmaCasesContainer').empty();
+                    }
+
+                    const safeReason = $('<div>').text(reason).html();
+                    const newCaseHtml = `
+                    <div class="border border-primary rounded-3 p-4 bg-white shadow-sm mb-3">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-2 mb-3 gap-2">
+                            <div class="small">
+                                <span class="text-muted">售後單號：</span>
+                                <strong class="text-dark">${res.ref_no}</strong>
+                                <span class="text-muted ms-3">原訂單：${res.ord_no}</span>
+                            </div>
+                            <span class="badge bg-primary px-3 py-1"><i class="bi bi-clock me-1"></i>已受理，等待客服審核</span>
                         </div>
-                        <span class="badge bg-primary px-3 py-1"><i class="bi bi-clock me-1"></i>已受理，等待客服審核</span>
-                    </div>
-                    <h6 class="fw-bold text-dark mb-2">申請項目：${rmaType}</h6>
-                    <p class="text-muted small mb-3">申請原因：${$('<div>').text(reason).html()}</p>
-                    <div class="bg-light p-2 rounded border small text-primary">
-                        <i class="bi bi-info-circle-fill me-1"></i>系統已收到您的申請，專屬客服將於 1 個工作天內主動與您聯繫處理後續事宜。
-                    </div>
-                </div>`;
+                        <h6 class="fw-bold text-dark mb-2">申請項目：${res.ref_type_txt}</h6>
+                        <p class="text-muted small mb-3">申請原因：${safeReason}</p>
+                        <div class="bg-light p-2 rounded border small text-primary">
+                            <i class="bi bi-info-circle-fill me-1"></i>系統已收到您的申請（原訂單狀態已更新為退費申請中），專屬客服將於 3 個工作日內完成審核。
+                        </div>
+                    </div>`;
 
-                $('#rmaCasesContainer').prepend(newCaseHtml);
-                $('#formSubmitRma')[0].reset();
+                    $('#rmaCasesContainer').prepend(newCaseHtml);
+                    $('#formSubmitRma')[0].reset();
 
-                const rmaTabTrigger = new bootstrap.Tab(document.getElementById('rma-tab'));
-                rmaTabTrigger.show();
-                showOrdersAlert('success', `售後申請單（${newRmaNo}）已成功送出！您可於下方隨時追蹤審核進度。`);
-            }, 700);
+                    // 同步更新畫面上該筆訂單卡片的標籤為「退費申請中」並隱藏該卡的申請退費鈕
+                    $(`.btn-open-rma[data-id="${res.ord_no}"]`).closest('.order-card-item')
+                        .attr('data-status', 'refund')
+                        .find('.badge').first().removeClass('bg-success bg-primary bg-info text-dark').addClass('bg-warning text-dark').text('退費申請中');
+                    $(`.btn-open-rma[data-id="${res.ord_no}"]`).remove();
+
+                    const rmaTabTrigger = document.getElementById('rma-tab');
+                    if (rmaTabTrigger) {
+                        bootstrap.Tab.getOrCreateInstance(rmaTabTrigger).show();
+                    }
+                    showOrdersAlert('success', res.message);
+                } else {
+                    showOrdersAlert('danger', res.message || '送出申請失敗，請稍後再試。');
+                }
+            }, 'json').fail(function() {
+                if (window.fslLoader) window.fslLoader.hide();
+                showOrdersAlert('danger', '網路連線異常，請稍後再試。');
+            });
         });
     });
 </script>

@@ -8,7 +8,7 @@ $errMsg     = '無效或已過期的密碼重設連結，請返回登入頁重�
 
 if ($token !== '' && preg_match('/^[a-f0-9]{32}$/i', $token) && isset($DB)) {
     $vcRow = $DB->row(
-        "SELECT vc_id, vc_expiretime FROM data_verify_codes WHERE vc_verifycode = ? AND vc_mode = 2 LIMIT 1",
+        "SELECT vc_id, vc_expiretime FROM fsl_verify_codes WHERE vc_verifycode = ? AND vc_mode = 2 LIMIT 1",
         [$token]
     );
     if ($vcRow) {

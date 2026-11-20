@@ -1,0 +1,1589 @@
+
+    body {
+        background-image: url("../imageFiles/mainBG-3.jpg");
+        background-attachment: fixed;
+        background-size: cover;
+        background-position: center left;
+        background-repeat: no-repeat;
+    }
+
+    /* A. 網頁元素滾動智慧緩入 (Reveal On Scroll) */
+    .reveal-on-scroll {
+        opacity: 0;
+        transform: translateY(60px);
+        transition: opacity 1.8s cubic-bezier(0.1, 0.8, 0.2, 1), transform 1.8s cubic-bezier(0.1, 0.8, 0.2, 1);
+        will-change: opacity, transform;
+    }
+
+    .reveal-from-left {
+        opacity: 0;
+        transform: translateX(-60px);
+        transition: opacity 1.8s cubic-bezier(0.1, 0.8, 0.2, 1), transform 1.8s cubic-bezier(0.1, 0.8, 0.2, 1);
+        will-change: opacity, transform;
+    }
+
+    .reveal-from-right {
+        opacity: 0;
+        transform: translateX(60px);
+        transition: opacity 1.8s cubic-bezier(0.1, 0.8, 0.2, 1), transform 1.8s cubic-bezier(0.1, 0.8, 0.2, 1);
+        will-change: opacity, transform;
+    }
+
+    .reveal-on-scroll.active,
+    .reveal-from-left.active,
+    .reveal-from-right.active {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+
+    .delay-1 {
+        transition-delay: 0.1s;
+    }
+
+    .delay-2 {
+        transition-delay: 0.3s;
+    }
+
+    .delay-3 {
+        transition-delay: 0.5s;
+    }
+
+    .delay-4 {
+        transition-delay: 0.7s;
+    }
+
+    /* B. 原生滾動視差景深引擎 (Parallax Scrolling Layout) */
+    .parallax-bg-zone {
+        position: relative;
+        overflow: hidden;
+        background-color: #000;
+    }
+
+    .parallax-bg-zone .parallax-bg {
+        position: absolute;
+        top: -40%;
+        left: 0;
+        width: 100%;
+        height: 180%;
+        object-fit: cover;
+        z-index: 1;
+        will-change: transform;
+        pointer-events: none;
+    }
+
+    .parallax-bg-zone .parallax-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.4) 100%);
+        z-index: 2;
+    }
+
+    .parallax-bg-zone .container {
+        position: relative;
+        z-index: 3;
+    }
+
+    /* C. 第一區塊 (#whyneed)：五行情境依序滑入與 READ MORE 按鈕 */
+    .fsl-subtle-divider {
+        width: 100%;
+        max-width: 560px;
+        border: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.28);
+        opacity: 1;
+    }
+
+    .fsl-stagger-group.reveal-on-scroll {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+
+    .fsl-fifth-season-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .fsl-list-item {
+        opacity: 0;
+        transform: translateX(-45px);
+        transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: opacity, transform;
+    }
+
+    .fsl-stagger-group.active .fsl-list-item {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .fsl-stagger-group.active .fsl-list-item:nth-child(1) {
+        transition-delay: 0.15s;
+    }
+
+    .fsl-stagger-group.active .fsl-list-item:nth-child(2) {
+        transition-delay: 0.35s;
+    }
+
+    .fsl-stagger-group.active .fsl-list-item:nth-child(3) {
+        transition-delay: 0.55s;
+    }
+
+    .fsl-stagger-group.active .fsl-list-item:nth-child(4) {
+        transition-delay: 0.75s;
+    }
+
+    .fsl-stagger-group.active .fsl-list-item:nth-child(5) {
+        transition-delay: 0.95s;
+    }
+
+    .fsl-item-inner {
+        display: flex;
+        align-items: center;
+        font-size: calc(1.25rem + 0.45vw);
+        font-weight: 700;
+        line-height: 1.5;
+        letter-spacing: 1.5px;
+        color: rgba(255, 255, 255, 0.72);
+        padding: 6px 16px 6px 6px;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.3s ease, background-color 0.3s ease;
+    }
+
+    @media (min-width: 1200px) {
+        .fsl-item-inner {
+            font-size: 1.5rem;
+        }
+    }
+
+    .fsl-circle-icon {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        border-radius: 50%;
+        border: 1.5px solid rgba(255, 193, 7, 0.6);
+        background-color: rgba(255, 193, 7, 0.12);
+        color: rgba(255, 193, 7, 0.85);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        margin-right: 16px;
+        transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .fsl-item-inner:hover {
+        transform: translateX(12px);
+        color: rgba(255, 255, 255, 0.95);
+        background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .fsl-item-inner:hover .fsl-circle-icon {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #16181b;
+        transform: scale(1.1);
+    }
+
+    .fsl-btn-reveal-wrap {
+        opacity: 0;
+        transform: translateY(15px);
+        transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: opacity, transform;
+    }
+
+    .fsl-stagger-group.active .fsl-btn-reveal-wrap {
+        opacity: 1;
+        transform: translateY(0);
+        transition-delay: 1.65s;
+    }
+
+    .fsl-read-more-btn {
+        letter-spacing: 1.5px;
+        border-width: 1.5px;
+        transition: all 0.3s ease;
+    }
+
+    .fsl-read-more-btn:hover {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #16181b !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 193, 7, 0.3);
+    }
+
+    .fsl-read-more-btn i {
+        display: inline-block;
+        transition: transform 0.3s ease;
+    }
+
+    .fsl-read-more-btn:hover i {
+        transform: translateX(4px);
+    }
+
+    @media (max-width: 575.98px) {
+        .fsl-fifth-season-list {
+            gap: 0.85rem;
+        }
+
+        .fsl-item-inner {
+            font-size: 1.25rem;
+            letter-spacing: 1px;
+            line-height: 1.45;
+        }
+
+        .fsl-circle-icon {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            font-size: 0.85rem;
+            margin-right: 12px;
+        }
+    }
+
+    /* D. 第二區塊 (#coreservices)：四欄引導卡片與品牌核心宣言三欄 */
+    .fsl-guide-section-dark {
+        position: relative;
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+    }
+
+    .fsl-guide-section-dark::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 1;
+    }
+
+    .fsl-guide-card {
+        background-color: rgba(255, 255, 255, 0.72) !important;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
+        border-radius: 16px;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.9) !important;
+        transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.35s ease, background-color 0.35s ease, border-color 0.35s ease;
+    }
+
+    .fsl-guide-card:hover {
+        background-color: rgba(255, 255, 255, 0.88) !important;
+        border-color: rgba(255, 193, 7, 0.85) !important;
+        box-shadow: 0 22px 44px rgba(0, 0, 0, 0.24), 0 4px 12px rgba(255, 193, 7, 0.18), inset 0 1px 2px rgba(255, 255, 255, 1) !important;
+    }
+
+    .fsl-guide-icon {
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        background-color: #212529;
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        line-height: 1;
+        box-shadow: 0 10px 24px rgba(33, 37, 41, 0.22);
+        transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.35s ease, color 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .fsl-guide-card:hover .fsl-guide-icon {
+        background-color: #ffc107;
+        color: #16181b;
+        transform: translateY(-4px) scale(1.06);
+        box-shadow: 0 12px 28px rgba(255, 193, 7, 0.38);
+    }
+
+    .fsl-guide-title {
+        white-space: nowrap;
+        font-size: clamp(0.95rem, 1.15vw, 1.18rem);
+        letter-spacing: 0.5px;
+        color: #16181b;
+        line-height: 1.4;
+    }
+
+    @media (max-width: 991.98px) {
+        .fsl-guide-title {
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+    }
+
+    .fsl-credo-section {
+        position: relative;
+        border-top: 1px solid rgba(255, 193, 7, 0.16);
+    }
+
+    .fsl-credo-card {
+        position: relative;
+        padding: 36px 32px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0%, rgba(255, 255, 255, 0.005) 100%);
+        border: 1px solid rgba(255, 193, 7, 0.15);
+        border-radius: 12px;
+        transition: transform 0.4s ease, border-color 0.4s ease, background 0.4s ease;
+    }
+
+    .fsl-credo-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(255, 193, 7, 0.45);
+        background: linear-gradient(180deg, rgba(255, 193, 7, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+    }
+
+    .fsl-credo-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 18px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid rgba(255, 193, 7, 0.25);
+    }
+
+    .fsl-credo-icon {
+        flex-shrink: 0;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: rgba(255, 193, 7, 0.14);
+        border: 1px solid rgba(255, 193, 7, 0.4);
+        color: #ffc107;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        line-height: 1;
+        transition: background 0.35s ease, color 0.35s ease, transform 0.35s ease;
+    }
+
+    .fsl-credo-icon i {
+        transform: translateX(1px);
+    }
+
+    .fsl-credo-card:hover .fsl-credo-icon {
+        background: #ffc107;
+        color: #121316;
+        transform: translateX(3px);
+    }
+
+    .fsl-credo-title {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 200;
+        color: #ffffff;
+        letter-spacing: 4px;
+    }
+
+    .fsl-credo-body {
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 1.02rem;
+        line-height: 2;
+        letter-spacing: 1.2px;
+    }
+
+    .fsl-credo-body p {
+        margin-bottom: 0;
+    }
+
+    .fsl-credo-lead {
+        color: #ffffff;
+        font-size: 1.12rem;
+        font-weight: 500;
+        margin-bottom: 6px !important;
+    }
+
+    .fsl-credo-divider {
+        width: 36px;
+        height: 1px;
+        margin: 20px 0;
+        border: 0;
+        background-color: #ffc107;
+        opacity: 0.55;
+        transition: width 0.4s ease;
+    }
+
+    .fsl-credo-card:hover .fsl-credo-divider {
+        width: 56px;
+    }
+
+    .fsl-credo-accent {
+        display: inline-block;
+        margin-top: 4px;
+        color: #ffc107;
+        font-weight: 500;
+    }
+
+    @media (max-width: 991.98px) {
+        .fsl-credo-card {
+            padding: 28px 24px;
+        }
+
+        .fsl-credo-icon {
+            width: 30px;
+            height: 30px;
+            font-size: 0.9rem;
+        }
+
+        .fsl-credo-title {
+            font-size: 1.55rem;
+        }
+    }
+
+    /* E. 價格方案景深輪播與四種階級樣式 (#pricing) */
+    .fsl-pricing-carousel {
+        position: relative;
+        padding: 10px 0;
+        user-select: none;
+    }
+
+    .fsl-pricing-viewport {
+        position: relative;
+        width: 100%;
+        height: 510px;
+        overflow: hidden;
+        cursor: grab;
+        touch-action: pan-y;
+    }
+
+    .fsl-pricing-viewport:active {
+        cursor: grabbing;
+    }
+
+    .fsl-pricing-stage {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .fsl-plan-slide {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 330px;
+        height: 470px !important;
+        margin-left: -165px;
+        margin-top: -235px;
+        transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform, opacity;
+    }
+
+    .fsl-plan-slide.is-side-clickable {
+        cursor: pointer;
+    }
+
+    .fsl-plan-slide.is-side-clickable:hover {
+        opacity: 0.95 !important;
+    }
+
+    .fsl-plan-slide.is-far-blur .card-body>* {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        transition: opacity 0.25s ease;
+    }
+
+    .fsl-plan-card {
+        height: 100% !important;
+        padding: 1.2rem 1.15rem !important;
+        border-radius: 18px;
+        overflow: hidden;
+        display: flex !important;
+        flex-direction: column !important;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .fsl-plan-card .card-body {
+        height: 100% !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+    }
+
+    .fsl-plan-header {
+        margin-bottom: 0.35rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    .fsl-plan-price-wrap {
+        flex-shrink: 0 !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: baseline !important;
+        justify-content: center !important;
+        gap: 0.15rem 0.35rem !important;
+        margin-top: 0.55rem !important;
+        margin-bottom: 0.65rem !important;
+        padding: 0.52rem 0 !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .fsl-plan-badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        letter-spacing: 1.5px;
+        padding: 0.3rem 0.9rem;
+        border-radius: 50px;
+    }
+
+    .fsl-plan-title {
+        font-size: 1.35rem;
+        letter-spacing: 1px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background-color: rgba(0, 0, 0, 0.26);
+        border-radius: 10px;
+        padding: 0.42rem 0.75rem !important;
+        margin-top: 0.42rem !important;
+        margin-bottom: 0.32rem !important;
+    }
+
+    .fsl-plan-currency,
+    .fsl-plan-price,
+    .fsl-plan-unit {
+        white-space: nowrap !important;
+    }
+
+    .fsl-plan-currency {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .fsl-plan-price {
+        font-size: 2.75rem;
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -0.5px;
+    }
+
+    .fsl-plan-unit {
+        font-size: 0.85rem;
+    }
+
+    .fsl-plan-desc {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        display: -webkit-box !important;
+        -webkit-box-orient: vertical !important;
+        line-clamp: 5 !important;
+        -webkit-line-clamp: 5 !important;
+        line-height: 1.55 !important;
+        margin-top: 0.2rem !important;
+        margin-bottom: 0.45rem !important;
+    }
+
+    .fsl-plan-card .mt-auto {
+        margin-top: auto !important;
+        flex-shrink: 0 !important;
+        padding-top: 0.45rem !important;
+    }
+
+    .fsl-plan-btn {
+        border-radius: 10px;
+        letter-spacing: 1.5px;
+        transition: all 0.3s ease;
+    }
+
+    #fslPricingStage .fsl-plan-spacer .fsl-plan-card {
+        background: linear-gradient(155deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 193, 7, 0.08) 100%) !important;
+        border: 2px dashed rgba(255, 193, 7, 0.55) !important;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 0 24px rgba(255, 193, 7, 0.08) !important;
+    }
+
+    #fslPricingStage .fsl-plan-spacer .card-body::after {
+        content: "FIFTH SEASON LIFE";
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: rgba(255, 193, 7, 0.42);
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 3px;
+    }
+
+    .plan-tier-basic {
+        background: linear-gradient(180deg, #1c1f23 0%, #16181b 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
+        color: #ced4da !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    }
+
+    .plan-tier-basic .fsl-plan-badge {
+        background-color: rgba(255, 255, 255, 0.06);
+        color: #adb5bd;
+    }
+
+    .plan-tier-basic .fsl-plan-title {
+        color: #e9ecef;
+        background-color: rgba(0, 0, 0, 0.32) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .plan-tier-basic .fsl-plan-subtitle,
+    .plan-tier-basic .fsl-plan-unit,
+    .plan-tier-basic .fsl-plan-desc {
+        color: #868e96;
+    }
+
+    .plan-tier-basic .fsl-plan-price,
+    .plan-tier-basic .fsl-plan-currency {
+        color: #dee2e6;
+    }
+
+    .plan-tier-basic .fsl-plan-btn {
+        background-color: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #ced4da;
+    }
+
+    .plan-tier-basic .fsl-plan-btn:hover {
+        background-color: rgba(255, 255, 255, 0.12);
+        border-color: #ffffff;
+        color: #ffffff;
+    }
+
+    .plan-tier-standard {
+        background: linear-gradient(165deg, #282d34 0%, #1b1e23 100%) !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.36) !important;
+        color: #f8f9fa !important;
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    }
+
+    .plan-tier-standard .fsl-plan-badge {
+        background-color: rgba(255, 255, 255, 0.14);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .plan-tier-standard .fsl-plan-title {
+        color: #ffffff;
+        background-color: rgba(255, 255, 255, 0.08) !important;
+        border-color: rgba(255, 255, 255, 0.24) !important;
+    }
+
+    .plan-tier-standard .fsl-plan-subtitle,
+    .plan-tier-standard .fsl-plan-unit {
+        color: #adb5bd;
+    }
+
+    .plan-tier-standard .fsl-plan-desc {
+        color: #ced4da;
+    }
+
+    .plan-tier-standard .fsl-plan-price,
+    .plan-tier-standard .fsl-plan-currency {
+        color: #ffffff;
+    }
+
+    .plan-tier-standard .fsl-plan-btn {
+        background-color: #f8f9fa;
+        border: 1px solid #f8f9fa;
+        color: #16181b;
+    }
+
+    .plan-tier-standard .fsl-plan-btn:hover {
+        background-color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(255, 255, 255, 0.25);
+    }
+
+    .plan-tier-premium {
+        background: linear-gradient(155deg, #2b2416 0%, #191714 55%, #241d11 100%) !important;
+        border: 2px solid #ffc107 !important;
+        color: #ffffff !important;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 32px rgba(255, 193, 7, 0.28), inset 0 0 20px rgba(255, 193, 7, 0.1);
+    }
+
+    .plan-tier-premium .fsl-plan-badge {
+        background: linear-gradient(90deg, #ffc107, #ffda6a);
+        color: #16181b;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.35);
+    }
+
+    .plan-tier-premium .fsl-plan-title {
+        color: #ffda6a;
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.16) 0%, rgba(0, 0, 0, 0.35) 100%) !important;
+        border-color: rgba(255, 193, 7, 0.45) !important;
+    }
+
+    .plan-tier-premium .fsl-plan-subtitle {
+        color: rgba(255, 255, 255, 0.78);
+    }
+
+    .plan-tier-premium .fsl-plan-price-wrap {
+        border-top-color: rgba(255, 193, 7, 0.32) !important;
+        border-bottom-color: rgba(255, 193, 7, 0.32) !important;
+    }
+
+    .plan-tier-premium .fsl-plan-currency,
+    .plan-tier-premium .fsl-plan-price {
+        color: #ffc107;
+        text-shadow: 0 2px 16px rgba(255, 193, 7, 0.35);
+    }
+
+    .plan-tier-premium .fsl-plan-unit {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .plan-tier-premium .fsl-plan-desc {
+        color: rgba(255, 255, 255, 0.88);
+    }
+
+    .plan-tier-premium .fsl-plan-btn {
+        background: linear-gradient(90deg, #ffc107 0%, #ffca2c 100%);
+        border: none;
+        color: #16181b;
+        box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+    }
+
+    .plan-tier-premium .fsl-plan-btn:hover {
+        background: linear-gradient(90deg, #ffca2c 0%, #ffe082 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 26px rgba(255, 193, 7, 0.55);
+    }
+
+    .fsl-plan-card.plan-tier-special {
+        position: relative;
+        overflow: hidden;
+        background-color: #bef264 !important;
+        background-image: none !important;
+        border: 2px solid #1a2e05 !important;
+        color: #1a2e05 !important;
+        box-shadow: 0 14px 32px rgba(26, 46, 5, 0.35), inset 0 0 28px rgba(255, 255, 255, 0.72), inset 0 0 60px rgba(236, 252, 203, 0.55) !important;
+        transition: transform 0.35s ease, box-shadow 0.35s ease, background-color 0.35s ease, border-color 0.35s ease;
+        animation: fslSpecialInnerGlow 3.2s ease-in-out infinite alternate;
+    }
+
+    .fsl-plan-card.plan-tier-special:hover {
+        background-color: #d9f99d !important;
+        border: 2px solid #0d1902 !important;
+        box-shadow: 0 18px 40px rgba(26, 46, 5, 0.5), inset 0 0 36px rgba(255, 255, 255, 0.9), inset 0 0 72px rgba(236, 252, 203, 0.75) !important;
+    }
+
+    .fsl-plan-card.plan-tier-special::after {
+        content: "";
+        position: absolute;
+        top: -10%;
+        left: -120%;
+        width: 55%;
+        height: 120%;
+        background: linear-gradient(115deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.15) 35%, rgba(255, 255, 255, 0.65) 50%, rgba(255, 255, 255, 0.15) 65%, rgba(255, 255, 255, 0) 100%);
+        transform: skewX(-22deg);
+        pointer-events: none;
+        z-index: 3;
+        animation: fslSpecialCardSheen 4.2s ease-in-out infinite;
+    }
+
+    .fsl-plan-card.plan-tier-special .fsl-plan-badge {
+        background-color: #365314 !important;
+        background-image: none !important;
+        color: #ffffff !important;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        padding: 0.35em 1em;
+        border-radius: 50rem;
+    }
+
+    .fsl-plan-card.plan-tier-special .fsl-plan-title {
+        color: #1a2e05 !important;
+        letter-spacing: 1.5px;
+        background-color: rgba(26, 46, 5, 0.12) !important;
+        border-color: rgba(26, 46, 5, 0.32) !important;
+    }
+
+    .fsl-plan-card.plan-tier-special .fsl-plan-subtitle {
+        color: #3f6212 !important;
+        font-weight: 600;
+    }
+
+    .fsl-plan-card.plan-tier-special .fsl-plan-price-wrap {
+        border-top: 1px solid rgba(26, 46, 5, 0.24) !important;
+        border-bottom: 1px solid rgba(26, 46, 5, 0.24) !important;
+    }
+
+    .fsl-plan-card.plan-tier-special .fsl-plan-currency,
+    .fsl-plan-card.plan-tier-special .fsl-plan-price {
+        color: #365314 !important;
+        text-shadow: none !important;
+    }
+
+    .fsl-plan-card.plan-tier-special .fsl-plan-unit {
+        color: #4d7c0f !important;
+        font-weight: 600;
+    }
+
+    .fsl-plan-card.plan-tier-special .fsl-plan-desc {
+        color: #1a2e05 !important;
+    }
+
+    .fsl-plan-card.plan-tier-special .fsl-plan-btn {
+        background-color: #365314 !important;
+        background-image: none !important;
+        border: none !important;
+        color: #ffffff !important;
+        letter-spacing: 1.5px;
+        box-shadow: 0 6px 16px rgba(54, 83, 20, 0.28) !important;
+        transition: all 0.25s ease;
+    }
+
+    .fsl-plan-card.plan-tier-special .fsl-plan-btn:hover {
+        background-color: #1a2e05 !important;
+        color: #ffffff !important;
+        transform: translateY(-2px);
+    }
+
+    .fsl-plan-card.plan-tier-special .btn-fsl-wishlist {
+        border-color: #365314 !important;
+        color: #365314 !important;
+    }
+
+    .fsl-plan-card.plan-tier-special .btn-fsl-wishlist:hover {
+        background-color: #365314 !important;
+        color: #ffffff !important;
+    }
+
+    @keyframes fslSpecialInnerGlow {
+        0% {
+            box-shadow: 0 14px 32px rgba(26, 46, 5, 0.35), inset 0 0 20px rgba(255, 255, 255, 0.5), inset 0 0 42px rgba(236, 252, 203, 0.35);
+        }
+
+        100% {
+            box-shadow: 0 16px 36px rgba(26, 46, 5, 0.42), inset 0 0 34px rgba(255, 255, 255, 0.85), inset 0 0 68px rgba(236, 252, 203, 0.7);
+        }
+    }
+
+    @keyframes fslSpecialCardSheen {
+        0% {
+            left: -120%;
+        }
+
+        38% {
+            left: 165%;
+        }
+
+        100% {
+            left: 165%;
+        }
+    }
+
+    .fsl-carousel-nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background-color: rgba(33, 37, 41, 0.88);
+        border: 1.5px solid rgba(255, 193, 7, 0.55);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        cursor: pointer;
+        z-index: 65;
+        backdrop-filter: blur(4px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+        transition: all 0.25s ease;
+    }
+
+    .fsl-carousel-nav-btn:hover:not(:disabled) {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #16181b;
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .fsl-carousel-nav-btn:disabled {
+        opacity: 0.25;
+        cursor: not-allowed;
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .fsl-nav-prev {
+        left: 12px;
+    }
+
+    .fsl-nav-next {
+        right: 12px;
+    }
+
+    .fsl-pricing-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: none;
+        background-color: rgba(255, 255, 255, 0.25);
+        padding: 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .fsl-pricing-dot.active {
+        width: 28px;
+        border-radius: 10px;
+        background-color: #ffc107;
+    }
+
+    @media (min-width: 992px) {
+        #fslPricingStage .fsl-plan-slide {
+            visibility: visible !important;
+        }
+
+        #fslPricingStage .fsl-plan-slide:not(.fsl-plan-spacer) .fsl-plan-card,
+        #fslPricingStage .fsl-plan-slide:not(.fsl-plan-spacer) .card-body,
+        #fslPricingStage .fsl-plan-slide:not(.fsl-plan-spacer) .fsl-plan-header,
+        #fslPricingStage .fsl-plan-slide:not(.fsl-plan-spacer) .fsl-plan-price-wrap,
+        #fslPricingStage .fsl-plan-slide:not(.fsl-plan-spacer) .fsl-plan-desc {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        #fslPricingStage .fsl-plan-slide:not(.is-center):not(.active) {
+            opacity: 0.72 !important;
+            transition: transform 0.45s ease, opacity 0.45s ease;
+        }
+
+        #fslPricingStage .fsl-plan-slide:not(.is-center):not(.active):hover {
+            opacity: 0.95 !important;
+        }
+    }
+
+    @media (max-width: 991.98px) {
+
+        #fslPricingCarousel,
+        #fslPricingViewport,
+        #fslPricingStage {
+            height: 550px !important;
+            min-height: 550px !important;
+            max-height: none !important;
+        }
+
+        #fslPricingViewport {
+            overflow-x: clip !important;
+            overflow-y: visible !important;
+            padding-top: 10px !important;
+            padding-bottom: 20px !important;
+        }
+
+        #fslPricingStage .fsl-plan-slide {
+            top: 10px !important;
+            margin-top: 0 !important;
+            height: 510px !important;
+            max-height: 510px !important;
+        }
+
+        #fslPricingStage .fsl-plan-unit {
+            display: block !important;
+            width: 100% !important;
+            text-align: center !important;
+            margin-top: 0.15rem !important;
+            font-size: 0.85rem !important;
+        }
+
+        #fslPricingStage .fsl-plan-card .fsl-plan-desc {
+            line-clamp: 4 !important;
+            -webkit-line-clamp: 4 !important;
+        }
+
+        #fslPricingCarousel #fslPricingPrev,
+        #fslPricingCarousel #fslPricingNext {
+            position: absolute !important;
+            top: 265px !important;
+            bottom: auto !important;
+            transform: translateY(-50%) !important;
+            z-index: 65 !important;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        #fslPricingStage .fsl-plan-slide {
+            width: 280px !important;
+            margin-left: -140px !important;
+        }
+
+        #fslPricingCarousel .fsl-carousel-nav-btn {
+            width: 40px !important;
+            height: 40px !important;
+            font-size: 1.05rem !important;
+        }
+
+        #fslPricingCarousel #fslPricingPrev {
+            left: 4px !important;
+            right: auto !important;
+        }
+
+        #fslPricingCarousel #fslPricingNext {
+            right: 4px !important;
+            left: auto !important;
+        }
+    }
+
+    /* F. 首頁課程&活動花絮水平滑動藝廊 (#portfolio) */
+    .fsl-highlights-wrapper {
+        position: relative;
+        padding: 0 12px;
+    }
+
+    .fsl-highlights-viewport {
+        width: 100%;
+        overflow: hidden;
+        cursor: grab;
+        padding: 16px 4px;
+        touch-action: pan-y;
+    }
+
+    .fsl-highlights-viewport.is-dragging {
+        cursor: grabbing;
+    }
+
+    .fsl-highlights-viewport.is-dragging .portfolio-card,
+    .fsl-highlights-viewport.is-gliding .portfolio-card {
+        pointer-events: none !important;
+        transition: none !important;
+    }
+
+    .fsl-highlights-track {
+        display: flex;
+        gap: 24px;
+        width: max-content;
+        will-change: transform;
+        transform: translate3d(0px, 0, 0);
+    }
+
+    .fsl-highlight-item {
+        width: 290px;
+        height: 360px;
+        flex-shrink: 0;
+        contain: layout paint;
+    }
+
+    .fsl-highlight-card {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .fsl-highlight-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        user-select: none;
+        -webkit-user-drag: none;
+    }
+
+    .fsl-highlight-card .portfolio-overlay {
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    .fsl-card-play-btn {
+        position: absolute !important;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 64px;
+        height: 64px;
+        z-index: 5;
+    }
+
+    .fsl-card-play-btn .play-icon-triangle {
+        border-top-width: 10px;
+        border-bottom-width: 10px;
+        border-left-width: 16px;
+        margin-left: 4px;
+    }
+
+    .fsl-card-play-btn:hover {
+        transform: translate(-50%, -50%) scale(1.12);
+    }
+
+    @media (max-width: 575.98px) {
+        .fsl-highlight-item {
+            width: 250px;
+            height: 310px;
+        }
+
+        .fsl-highlights-track {
+            gap: 16px;
+        }
+    }
+
+    /* G. 常見問題 FAQ 手風琴 (#faqSection) */
+    .fsl-faq-accordion .accordion-item {
+        background-color: transparent !important;
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        border: 1px solid rgba(255, 193, 7, 0.45) !important;
+        transition: transform 0.25s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .fsl-faq-accordion .accordion-item:hover {
+        transform: translateY(-2px);
+        border-color: #ffc107 !important;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    .fsl-faq-accordion .accordion-button {
+        padding: 1.15rem 1.35rem;
+        font-size: 1.05rem;
+        letter-spacing: 0.5px;
+        color: #121316 !important;
+        background-color: rgba(252, 248, 236, 0.68) !important;
+        box-shadow: none !important;
+        transition: color 0.25s ease, background-color 0.25s ease;
+    }
+
+    .fsl-faq-accordion .accordion-button:not(.collapsed) {
+        color: #000000 !important;
+        background: linear-gradient(90deg, rgba(255, 241, 200, 0.78) 0%, rgba(255, 230, 165, 0.72) 100%) !important;
+    }
+
+    .fsl-faq-accordion .accordion-button::after {
+        filter: none !important;
+    }
+
+    .fsl-faq-accordion .accordion-button:focus {
+        box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.35) !important;
+    }
+
+    .fsl-faq-accordion .accordion-body {
+        background-color: rgba(255, 255, 255, 0.55) !important;
+        color: #16181b !important;
+        font-weight: 500;
+        padding: 1.15rem 1.4rem;
+        font-size: 0.98rem;
+    }
+
+    .fsl-faq-accordion .accordion-body strong {
+        color: #000000;
+        font-weight: 700;
+    }
+
+    .fsl-faq-filter-btn {
+        color: #adb5bd;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        background-color: rgba(255, 255, 255, 0.04);
+        border-radius: 50px;
+        padding: 0.4rem 1.15rem;
+        letter-spacing: 1px;
+        transition: all 0.25s ease;
+    }
+
+    .fsl-faq-filter-btn:hover {
+        color: #ffffff;
+        border-color: rgba(255, 193, 7, 0.65);
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+
+    .fsl-faq-filter-btn.active {
+        color: #16181b;
+        background-color: #ffc107;
+        border-color: #ffc107;
+        font-weight: 700;
+        box-shadow: 0 4px 14px rgba(255, 193, 7, 0.3);
+    }
+
+    /* H. 課程系統介紹 (#courseinfo) */
+    .fsl-book-frame {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+        max-width: 500px;
+        padding: 24px;
+        border-radius: 16px;
+        background: radial-gradient(circle at center, rgba(255, 193, 7, 0.05) 0%, rgba(255, 193, 7, 0) 70%);
+        transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .fsl-book-frame .fsl-corner {
+        position: absolute;
+        width: 28px;
+        height: 28px;
+        pointer-events: none;
+        transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        z-index: 2;
+    }
+
+    .fsl-book-frame .fsl-corner::before {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-color: rgba(255, 193, 7, 0.75);
+        border-style: solid;
+    }
+
+    .fsl-book-frame .fsl-corner::after {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border-color: rgba(255, 193, 7, 0.35);
+        border-style: solid;
+    }
+
+    .fsl-corner-tl {
+        top: 6px;
+        left: 6px;
+    }
+
+    .fsl-corner-tl::before {
+        top: 0;
+        left: 0;
+        border-width: 1.5px 0 0 1.5px;
+        border-top-left-radius: 6px;
+    }
+
+    .fsl-corner-tl::after {
+        top: 5px;
+        left: 5px;
+        border-width: 1px 0 0 1px;
+    }
+
+    .fsl-corner-tr {
+        top: 6px;
+        right: 6px;
+    }
+
+    .fsl-corner-tr::before {
+        top: 0;
+        right: 0;
+        border-width: 1.5px 1.5px 0 0;
+        border-top-right-radius: 6px;
+    }
+
+    .fsl-corner-tr::after {
+        top: 5px;
+        right: 5px;
+        border-width: 1px 1px 0 0;
+    }
+
+    .fsl-corner-bl {
+        bottom: 6px;
+        left: 6px;
+    }
+
+    .fsl-corner-bl::before {
+        bottom: 0;
+        left: 0;
+        border-width: 0 0 1.5px 1.5px;
+        border-bottom-left-radius: 6px;
+    }
+
+    .fsl-corner-bl::after {
+        bottom: 5px;
+        left: 5px;
+        border-width: 0 0 1px 1px;
+    }
+
+    .fsl-corner-br {
+        bottom: 6px;
+        right: 6px;
+    }
+
+    .fsl-corner-br::before {
+        bottom: 0;
+        right: 0;
+        border-width: 0 1.5px 1.5px 0;
+        border-bottom-right-radius: 6px;
+    }
+
+    .fsl-corner-br::after {
+        bottom: 5px;
+        right: 5px;
+        border-width: 0 1px 1px 0;
+    }
+
+    .fsl-book-frame:hover .fsl-corner-tl {
+        transform: translate(-4px, -4px);
+    }
+
+    .fsl-book-frame:hover .fsl-corner-tr {
+        transform: translate(4px, -4px);
+    }
+
+    .fsl-book-frame:hover .fsl-corner-bl {
+        transform: translate(-4px, 4px);
+    }
+
+    .fsl-book-frame:hover .fsl-corner-br {
+        transform: translate(4px, 4px);
+    }
+
+    .fsl-book-frame:hover .fsl-corner::before {
+        border-color: #ffc107;
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.35);
+    }
+
+    #courseinfo .fsl-course-book-img {
+        width: 100%;
+        height: auto !important;
+        max-height: none !important;
+        object-fit: contain !important;
+        aspect-ratio: auto !important;
+        border-radius: 8px;
+        filter: drop-shadow(0 24px 42px rgba(0, 0, 0, 0.85));
+        transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), filter 0.5s ease;
+    }
+
+    .fsl-book-frame:hover .fsl-course-book-img {
+        transform: translateY(-6px) scale(1.02);
+        filter: drop-shadow(0 30px 50px rgba(255, 193, 7, 0.22));
+    }
+
+    .fsl-course-content-box {
+        text-align: left;
+    }
+
+    .fsl-course-divider {
+        border: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 193, 7, 0.25), transparent);
+    }
+
+    .fsl-course-feature-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .fsl-course-feature-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 1.02rem;
+        line-height: 1.6;
+        letter-spacing: 1px;
+    }
+
+    .fsl-course-feature-list li i {
+        font-size: 1.12rem;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .fsl-course-feature-list li strong {
+        color: #ffffff;
+        font-weight: 600;
+        margin-right: 4px;
+    }
+
+    .fsl-course-quote-box {
+        padding: 14px 20px;
+        border-left: 2px solid #ffc107;
+        background: linear-gradient(90deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0) 100%);
+        border-radius: 0 8px 8px 0;
+        font-size: 1.02rem;
+        line-height: 1.8;
+        letter-spacing: 1.5px;
+    }
+
+    .fsl-course-series-group {
+        padding: 20px 22px;
+        background: rgba(255, 255, 255, 0.025);
+        border: 1px solid rgba(255, 193, 7, 0.18);
+        border-radius: 12px;
+    }
+
+    .fsl-series-header {
+        padding-bottom: 12px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    .fsl-series-items {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .fsl-subcourse-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .fsl-subcourse-num {
+        flex-shrink: 0;
+        font-family: Georgia, 'Times New Roman', serif;
+        font-style: italic;
+        font-size: 1rem;
+        color: #ffc107;
+        line-height: 1.5;
+        padding-top: 1px;
+    }
+
+    .fsl-subcourse-info h5 {
+        margin: 0 0 4px 0;
+        font-size: 1.06rem;
+        font-weight: 600;
+        color: #ffffff;
+        letter-spacing: 1px;
+    }
+
+    .fsl-subcourse-info p {
+        margin: 0;
+        font-size: 0.92rem;
+        line-height: 1.65;
+        color: rgba(255, 255, 255, 0.72);
+        letter-spacing: 0.5px;
+    }
+
+    @media (max-width: 991.98px) {
+        .fsl-book-frame {
+            max-width: 380px;
+            padding: 18px;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .fsl-book-frame {
+            max-width: 300px;
+            padding: 14px;
+        }
+
+        .fsl-book-frame .fsl-corner {
+            width: 22px;
+            height: 22px;
+        }
+
+        .fsl-course-series-group {
+            padding: 16px 16px;
+        }
+    }
+
+    /* I. 顧問&講師 (#mentor) */
+    .fsl-instructor-frame {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+        max-width: 420px;
+        padding: 18px;
+        border-radius: 16px;
+        background: radial-gradient(circle at center, rgba(255, 193, 7, 0.06) 0%, rgba(255, 193, 7, 0) 75%);
+    }
+
+    .fsl-instructor-frame .fsl-corner {
+        position: absolute;
+        width: 26px;
+        height: 26px;
+        pointer-events: none;
+        transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        z-index: 2;
+    }
+
+    .fsl-instructor-frame .fsl-corner::before {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-color: rgba(255, 193, 7, 0.75);
+        border-style: solid;
+    }
+
+    .fsl-instructor-frame .fsl-corner::after {
+        content: "";
+        position: absolute;
+        width: 15px;
+        height: 15px;
+        border-color: rgba(255, 193, 7, 0.35);
+        border-style: solid;
+    }
+
+    .fsl-instructor-frame:hover .fsl-corner-tl {
+        transform: translate(-4px, -4px);
+    }
+
+    .fsl-instructor-frame:hover .fsl-corner-tr {
+        transform: translate(4px, -4px);
+    }
+
+    .fsl-instructor-frame:hover .fsl-corner-bl {
+        transform: translate(-4px, 4px);
+    }
+
+    .fsl-instructor-frame:hover .fsl-corner-br {
+        transform: translate(4px, 4px);
+    }
+
+    #mentor .fsl-instructor-img {
+        width: 100%;
+        height: auto !important;
+        max-height: none !important;
+        object-fit: contain !important;
+        aspect-ratio: auto !important;
+        border-radius: 10px;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.75);
+        transition: transform 0.5s ease;
+    }
+
+    .fsl-instructor-frame:hover .fsl-instructor-img {
+        transform: scale(1.015);
+    }
+
+    .fsl-instructor-bio p {
+        font-size: 1.02rem;
+        line-height: 1.9;
+        letter-spacing: 1px;
+        margin-bottom: 1rem;
+    }
+
+    .fsl-book-feature-card {
+        padding: 20px 24px;
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+        border: 1px solid rgba(255, 193, 7, 0.25);
+        border-radius: 14px;
+        transition: border-color 0.4s ease, transform 0.4s ease;
+    }
+
+    .fsl-book-feature-card:hover {
+        border-color: rgba(255, 193, 7, 0.55);
+        transform: translateY(-3px);
+    }
+
+    #mentor .fsl-reina-book-img {
+        width: 100%;
+        max-width: 135px;
+        height: auto !important;
+        border-radius: 6px;
+        filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.8));
+    }
+
+    .fsl-book-feature-card:hover .fsl-reina-book-img {
+        transform: translateY(-5px) scale(1.03);
+    }
+
+    @media (max-width: 991.98px) {
+        .fsl-instructor-frame {
+            max-width: 340px;
+            padding: 14px;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .fsl-book-feature-card {
+            padding: 24px 20px;
+            text-align: center;
+        }
+
+        .fsl-book-feature-card .d-flex {
+            justify-content: center;
+        }
+
+        #mentor .fsl-reina-book-img {
+            max-width: 180px;
+            margin-bottom: 8px;
+        }
+    }

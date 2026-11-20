@@ -44,6 +44,9 @@ try {
         exit();
     }
     switch ($action) {
+        // =========================================================================
+        // 動作 act_member_login ：會員登入
+        // =========================================================================
         case 'act_member_login':
             // 取得前端傳來的輸入帳號密碼，未定義時預設為空值
             $loginAccount = trim((string)($_POST['loginAccount'] ?? ''));
@@ -184,7 +187,9 @@ try {
                 exit();
             }
         break;
-
+        // =========================================================================
+        // 動作 act_member_logout ：會員登出
+        // =========================================================================
         case 'act_member_logout':
             // ==========================================
             // 💡 3. 【實體核心】安全登出清除機制
@@ -281,13 +286,13 @@ try {
                     throw new Exception('建立會員基本資料失敗');
                 }
 
-                // 5. 產生 32 碼安全驗證 Token 與 4 碼識別碼，寫入 data_verify_codes (有效期限 30 分鐘)
+                // 5. 產生 32 碼安全驗證 Token 與 4 碼識別碼，寫入 fsl_verify_codes (有效期限 30 分鐘)
                 $verifyToken = bin2hex(random_bytes(16));
                 $acsCode     = substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 4);
                 $expireTime  = date('Y-m-d H:i:s', strtotime('+30 minutes'));
 
                 $DB->query(
-                    "INSERT INTO data_verify_codes (mb_id, vc_verifycode, vc_acscode, vc_expiretime, vc_mode) VALUES (?, ?, ?, ?, 1)",
+                    "INSERT INTO fsl_verify_codes (mb_id, vc_verifycode, vc_acscode, vc_expiretime, vc_mode) VALUES (?, ?, ?, ?, 1)",
                     [$mbID, $verifyToken, $acsCode, $expireTime]
                 );
 
@@ -306,6 +311,8 @@ try {
                          . "安全識別碼：{$acsCode}\n"
                          . "若您未曾註冊本網站，請直接忽略此信件。";
                 $headers = "From: noreply@5sl-studio.com\r\nContent-Type: text/plain; charset=UTF-8\r\n";
+                
+                
                 @mail($deAccount, $subject, $body, $headers);
 
                 echo json_encode([
@@ -323,7 +330,6 @@ try {
                 exit();
             }
         break;
-
         // =========================================================================
         // 動作 act_resend_verify ：重發會員註冊信箱驗證連結 (對齊 mb_email_verified + 60秒冷卻)
         // =========================================================================
@@ -367,7 +373,7 @@ try {
 
             // 2. 60 秒冷卻檢查（比對該會員最新一筆驗證碼的到期時間，防止惡意連點重發）
             $latestVc = $DB->row(
-                "SELECT vc_expiretime FROM data_verify_codes WHERE mb_id = ? AND vc_mode = 1 ORDER BY vc_id DESC LIMIT 1",
+                "SELECT vc_expiretime FROM fsl_verify_codes WHERE mb_id = ? AND vc_mode = 1 ORDER BY vc_id DESC LIMIT 1",
                 [$mId]
             );
             if ($latestVc && !empty($latestVc['vc_expiretime'])) {
@@ -384,14 +390,14 @@ try {
             }
 
             // 3. 清除舊驗證碼並產生全新 32 碼 Token
-            $DB->query("DELETE FROM data_verify_codes WHERE mb_id = ? AND vc_mode = 1", [$mId]);
+            $DB->query("DELETE FROM fsl_verify_codes WHERE mb_id = ? AND vc_mode = 1", [$mId]);
 
             $verifyToken = bin2hex(random_bytes(16));
             $acsCode     = substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 4);
             $expireTime  = date('Y-m-d H:i:s', strtotime('+30 minutes'));
 
             $DB->query(
-                "INSERT INTO data_verify_codes (mb_id, vc_verifycode, vc_acscode, vc_expiretime, vc_mode) VALUES (?, ?, ?, ?, 1)",
+                "INSERT INTO fsl_verify_codes (mb_id, vc_verifycode, vc_acscode, vc_expiretime, vc_mode) VALUES (?, ?, ?, ?, 1)",
                 [$mId, $verifyToken, $acsCode, $expireTime]
             );
 
@@ -417,9 +423,6 @@ try {
             ]);
             exit();
         break;
-
-
-
         // =========================================================================
         // 動作 act_update_profile ：更新會員個人資料(強制加密) + 頭像中心裁切雙尺寸 JPG
         // =========================================================================
@@ -630,8 +633,9 @@ try {
             ]);
             exit;
         break;
-
-        //主動變更密碼
+        // =========================================================================
+        // 動作 act_change_password ：主動變更密碼
+        // =========================================================================
         case "act_change_password":
             $current_pwd = $_POST['current_password'] ?? '';
             $new_pwd     = $_POST['new_password'] ?? '';
@@ -683,7 +687,6 @@ try {
             ]);
             exit;
         break;
-        //忘記密碼找回 (寄發重設驗證信)
         // =========================================================================
         // 動作 act_send_reset_pwd ：寄發密碼重設驗證信（同時支援登入頁輸入信箱與已登入會員）
         // =========================================================================
@@ -714,14 +717,14 @@ try {
             $userName   = $member['mb_title'] ?: '第五季尊榮會員';
 
             // 清除舊的重設密碼 Token（vc_mode = 2）並寫入全新 30 分鐘有效 Token
-            $DB->query("DELETE FROM data_verify_codes WHERE mb_id = ? AND vc_mode = 2", [$targetMbId]);
+            $DB->query("DELETE FROM fsl_verify_codes WHERE mb_id = ? AND vc_mode = 2", [$targetMbId]);
 
             $resetToken = bin2hex(random_bytes(16));
             $acsCode    = substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 4);
             $expireTime = date('Y-m-d H:i:s', strtotime('+30 minutes'));
 
             $DB->query(
-                "INSERT INTO data_verify_codes (mb_id, vc_verifycode, vc_acscode, vc_expiretime, vc_mode) VALUES (?, ?, ?, ?, 2)",
+                "INSERT INTO fsl_verify_codes (mb_id, vc_verifycode, vc_acscode, vc_expiretime, vc_mode) VALUES (?, ?, ?, ?, 2)",
                 [$targetMbId, $resetToken, $acsCode, $expireTime]
             );
 
@@ -746,7 +749,6 @@ try {
             ]);
             exit;
         break;
-
         // =========================================================================
         // 動作 act_do_reset_pwd ：驗證 Token 並更新會員新密碼 (vc_mode = 2)
         // =========================================================================
@@ -769,7 +771,7 @@ try {
             }
 
             $vcRow = $DB->row(
-                "SELECT vc_id, mb_id, vc_expiretime FROM data_verify_codes WHERE vc_verifycode = ? AND vc_mode = 2 LIMIT 1",
+                "SELECT vc_id, mb_id, vc_expiretime FROM fsl_verify_codes WHERE vc_verifycode = ? AND vc_mode = 2 LIMIT 1",
                 [$token]
             );
             if (!$vcRow) {
@@ -777,7 +779,7 @@ try {
                 exit;
             }
             if (strtotime($vcRow['vc_expiretime']) < time()) {
-                $DB->query("DELETE FROM data_verify_codes WHERE vc_id = ?", [(int)$vcRow['vc_id']]);
+                $DB->query("DELETE FROM fsl_verify_codes WHERE vc_id = ?", [(int)$vcRow['vc_id']]);
                 echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '重設連結已超過 30 分鐘有效期限，請返回登入頁重新申請']);
                 exit;
             }
@@ -788,7 +790,7 @@ try {
             $DB->beginTransaction();
             try {
                 $DB->query("UPDATE fsl_members SET mb_password = ?, mb_updated = NOW() WHERE mb_id = ?", [$newHash, $targetMbId]);
-                $DB->query("DELETE FROM data_verify_codes WHERE mb_id = ? AND vc_mode = 2", [$targetMbId]);
+                $DB->query("DELETE FROM fsl_verify_codes WHERE mb_id = ? AND vc_mode = 2", [$targetMbId]);
                 $DB->commit();
 
                 echo json_encode([
@@ -802,8 +804,9 @@ try {
                 throw $e;
             }
         break;
-
+        // =========================================================================
         // 動作 act_read_one ：單則訊息標記為已讀
+        // =========================================================================
         case "act_read_one":
             $no_id = (int)($_POST['no_id'] ?? 0);
             if ($no_id > 0) {
@@ -814,7 +817,9 @@ try {
             echo json_encode(['success' => 1, 'code' => '[@-successcode-@]', 'message' => '訊息標記為已讀']);
             exit;
         break;
-        //動作 act_read_all ：全部訊息標示為已讀
+        // =========================================================================
+        // 動作 act_read_all ：全部訊息標示為已讀
+        // =========================================================================
         case "act_read_all":
             $sql = "
                 INSERT IGNORE INTO fsl_notification_reads (no_id, mb_id)
@@ -829,7 +834,9 @@ try {
             echo json_encode(['success' => 1, 'code' => '[@-successcode-@]', 'message' => '全部訊息標示為已讀']);
             exit;
         break;
+        // =========================================================================
         // 動作 act_submit_ticket ：送出客服諮詢工單（寫入主表 + 明細表）
+        // =========================================================================
         case "act_submit_ticket":
             $category = trim($_POST['category'] ?? '');
             $subject  = trim($_POST['subject'] ?? '');
@@ -1242,7 +1249,6 @@ try {
             ]);
             exit;
         break;
-
         // =========================================================================
         // 動作 act_claim_vip_gift ：領取 VIP 等級專屬每月優惠禮遇 (gifts.gift_target_type = 1)
         // =========================================================================
@@ -1817,7 +1823,6 @@ try {
             ]);
             exit;
         break;
-
         // =========================================================================
         // 動作 act_cart_update ：購物車調整商品數量 或 刪除單項
         // =========================================================================
@@ -1851,23 +1856,54 @@ try {
         // 動作 act_checkout ：極簡一鍵結帳 (寫入訂單 + 明細 + 課程報名 + 發票 + 點數流水)
         // =========================================================================
         case "act_checkout":
-            $use_pts     = max(0, (int)($_POST['use_pts'] ?? 0));
-            $grec_id     = (int)($_POST['grec_id'] ?? 0);
-            $pay_gateway = trim($_POST['pay_gateway'] ?? 'ECPay');
-            $pay_method  = trim($_POST['pay_method'] ?? 'Credit');
-            $inv_type    = (int)($_POST['inv_type'] ?? 1); // 1=個人二聯式, 2=公司三聯式
-            $inv_tax_id  = trim($_POST['inv_tax_id'] ?? '');
-            $inv_comp    = trim($_POST['inv_company_title'] ?? '');
-            $inv_carrier = trim($_POST['inv_carrier_code'] ?? '');
-            $recv_name   = trim($_POST['receiver_name'] ?? '');
-            $recv_phone  = trim($_POST['receiver_phone'] ?? '');
-            $recv_addr   = trim($_POST['receiver_address'] ?? '');
-            $ord_note    = trim($_POST['ord_note'] ?? '');
+            $use_pts      = max(0, (int)($_POST['use_pts'] ?? 0));
+            $grec_id      = (int)($_POST['grec_id'] ?? 0);
+            $pay_gateway  = trim((string)($_POST['pay_gateway'] ?? 'ECPay'));
+            $pay_method   = trim((string)($_POST['pay_method'] ?? 'Credit'));
+            $inv_type     = (int)($_POST['inv_type'] ?? 1); // 1=個人二聯式, 2=公司三聯式
+            $carrier_type = (int)($_POST['carrier_type'] ?? -1); // 0=會員載具, 1=手機條碼, 2=自然人憑證
+            $inv_tax_id   = trim((string)($_POST['inv_tax_id'] ?? ''));
+            $inv_comp     = trim((string)($_POST['inv_company_title'] ?? ''));
+            $inv_carrier  = strtoupper(trim((string)($_POST['inv_carrier_code'] ?? '')));
+            $save_def_inv = (int)($_POST['save_default_inv'] ?? 0);
+            $recv_name    = trim((string)($_POST['receiver_name'] ?? ''));
+            $recv_phone   = trim((string)($_POST['receiver_phone'] ?? ''));
+            $recv_addr    = trim((string)($_POST['receiver_address'] ?? ''));
+            $ord_note     = trim((string)($_POST['ord_note'] ?? ''));
 
-            // 1. 撈取購物車內所有項目與最新價格
+            // 若前端未傳 carrier_type，則依是否有填寫載具條碼自動判斷
+            if ($carrier_type === -1) {
+                $carrier_type = ($inv_carrier !== '') ? 1 : 0;
+            }
+
+            // 0. 檢核電子發票與載具格式
+            if ($inv_type === 1) {
+                if ($carrier_type === 1 && !preg_match('/^\/[0-9A-Z.\-+]{7}$/', $inv_carrier)) {
+                    echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '手機條碼載具格式不符（應為 / 開頭加上 7 碼英數字或符號，如 /AB12345）']);
+                    exit;
+                }
+                if ($carrier_type === 2 && !preg_match('/^[A-Z]{2}[0-9]{14}$/', $inv_carrier)) {
+                    echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '自然人憑證條碼格式不符（應為 2 碼大寫英文 + 14 碼數字）']);
+                    exit;
+                }
+                if ($carrier_type === 0) {
+                    $inv_carrier = '';
+                }
+                $inv_tax_id = '';
+                $inv_comp   = '';
+            } else {
+                if (!preg_match('/^\d{8}$/', $inv_tax_id) || $inv_comp === '') {
+                    echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '開立三聯式公司發票請完整填寫 8 碼統一編號與公司抬頭']);
+                    exit;
+                }
+                $carrier_type = 0;
+                $inv_carrier  = '';
+            }
+
+            // 1. 撈取購物車內所有項目與最新價格（含 parent_id 支援特惠子方案）
             $sql_cart = "
                 SELECT ci.*,
-                       c.course_title, c.course_cost, c.course_type,
+                       c.parent_id, c.course_title, c.course_cost, c.course_type,
                        s.sess_batch, s.sess_startdate, s.sess_starttime,
                        m.merch_title, m.merch_type, m.merch_price_twd, m.merch_price_usd, m.merch_sale_usd
                 FROM fsl_cart_items ci
@@ -1883,7 +1919,7 @@ try {
                 exit;
             }
 
-            // 2. 計算商品小計、是否包含實體商品、整理明細快照
+            // 2. 計算商品小計、是否包含實體商品、驗證資格條件、整理明細快照
             $subtotal        = 0.00;
             $has_physical    = false;
             $order_snapshots = [];
@@ -1891,6 +1927,17 @@ try {
             foreach ($cart_rows as $cr) {
                 $qty = max(1, (int)$cr['cart_qty']);
                 if ((int)$cr['cart_item_type'] === 1) {
+                    $cid = (int)$cr['course_id'];
+
+                    // 結帳前再次核對該課程/特惠子方案是否符合優惠資格規則
+                    if (function_exists('_fn_checkEligibility')) {
+                        $elig = _fn_checkEligibility($DB, $mb_id, 1, $cid);
+                        if (!$elig['pass']) {
+                            echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => $elig['message']]);
+                            exit;
+                        }
+                    }
+
                     $title = $cr['course_title'];
                     if (!empty($cr['sess_startdate'])) {
                         $title .= ' (' . $cr['sess_startdate'] . ' ' . substr($cr['sess_starttime'], 0, 5) . ')';
@@ -1899,15 +1946,19 @@ try {
                     $item_sub   = $unit_price * $qty;
                     $subtotal  += $item_sub;
 
+                    // 若為特惠子方案 (parent_id > 0)，修課報名紀錄一律綁定主課程 ID
+                    $master_cid = ((int)($cr['parent_id'] ?? 0) > 0) ? (int)$cr['parent_id'] : $cid;
+
                     $order_snapshots[] = [
-                        'ordi_type'       => 1,
-                        'course_id'       => (int)$cr['course_id'],
-                        'sess_id'         => !empty($cr['sess_id']) ? (int)$cr['sess_id'] : null,
-                        'merch_id'        => null,
-                        'ordi_title'      => $title,
-                        'ordi_unit_price' => $unit_price,
-                        'ordi_qty'        => $qty,
-                        'ordi_subtotal'   => $item_sub
+                        'ordi_type'        => 1,
+                        'course_id'        => $cid,
+                        'master_course_id' => $master_cid,
+                        'sess_id'          => !empty($cr['sess_id']) ? (int)$cr['sess_id'] : null,
+                        'merch_id'         => null,
+                        'ordi_title'       => $title,
+                        'ordi_unit_price'  => $unit_price,
+                        'ordi_qty'         => $qty,
+                        'ordi_subtotal'    => $item_sub
                     ];
                 } else {
                     if ((int)$cr['merch_type'] === 1) {
@@ -1922,14 +1973,15 @@ try {
                     $subtotal += $item_sub;
 
                     $order_snapshots[] = [
-                        'ordi_type'       => 2,
-                        'course_id'       => null,
-                        'sess_id'         => null,
-                        'merch_id'        => (int)$cr['merch_id'],
-                        'ordi_title'      => $cr['merch_title'],
-                        'ordi_unit_price' => $twd_p,
-                        'ordi_qty'        => $qty,
-                        'ordi_subtotal'   => $item_sub
+                        'ordi_type'        => 2,
+                        'course_id'        => null,
+                        'master_course_id' => null,
+                        'sess_id'          => null,
+                        'merch_id'         => (int)$cr['merch_id'],
+                        'ordi_title'       => $cr['merch_title'],
+                        'ordi_unit_price'  => $twd_p,
+                        'ordi_qty'         => $qty,
+                        'ordi_subtotal'    => $item_sub
                     ];
                 }
             }
@@ -1938,10 +1990,6 @@ try {
                 echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '訂單內含實體商品，請完整填寫收件人姓名、電話與配送地址']);
                 exit;
             }
-
-
-
-
 
             $DB->beginTransaction();
             try {
@@ -1968,10 +2016,6 @@ try {
                 $ord_no      = 'ORD-' . date('Ymd') . '-' . str_pad(mt_rand(1, 999), 3, '0', STR_PAD_LEFT);
                 $ord_status  = ($final_total <= 0) ? 2 : 1;
 
-
-
-
-
                 // 5. 寫入訂購訂單主表 (fsl_orders)
                 $sql_ord = "
                     INSERT INTO fsl_orders
@@ -1988,16 +2032,16 @@ try {
                 foreach ($order_snapshots as $snap) {
                     $DB->query(
                         "INSERT INTO fsl_order_items (ord_id, ordi_type, course_id, sess_id, merch_id, ordi_title, ordi_unit_price, ordi_qty, ordi_subtotal)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         [$ord_id, $snap['ordi_type'], $snap['course_id'], $snap['sess_id'], $snap['merch_id'], $snap['ordi_title'], $snap['ordi_unit_price'], $snap['ordi_qty'], $snap['ordi_subtotal']]
                     );
 
-                    // 若為課程或一對一顧問預約，自動寫入報名紀錄表
-                    if ($snap['ordi_type'] === 1 && !empty($snap['course_id']) && !empty($snap['sess_id'])) {
+                    // 若為課程或一對一顧問預約，自動寫入主課程報名紀錄表 (master_course_id)
+                    if ($snap['ordi_type'] === 1 && !empty($snap['master_course_id']) && !empty($snap['sess_id'])) {
                         $enr_pay = ($final_total <= 0) ? 2 : 0; // 2=免費或折抵完成, 0=待付款占名額
                         $DB->query(
                             "INSERT IGNORE INTO fsl_course_enrolls (mb_id, course_id, sess_id, ord_id, enr_pay_status, enr_status) VALUES (?, ?, ?, ?, ?, 1)",
-                            [$mb_id, $snap['course_id'], $snap['sess_id'], $ord_id, $enr_pay]
+                            [$mb_id, $snap['master_course_id'], $snap['sess_id'], $ord_id, $enr_pay]
                         );
                         if ($final_total <= 0) {
                             $DB->query("UPDATE fsl_course_sessions SET sess_enrollee = sess_enrollee + 1 WHERE sess_id = ?", [$snap['sess_id']]);
@@ -2007,26 +2051,31 @@ try {
                     }
                 }
 
-                // 7. 寫入發票收據與支付紀錄表 (fsl_invoices)
-                $carrier_type = ($inv_carrier !== '') ? 1 : 0;
-                $inv_stat     = ($final_total <= 0) ? 1 : 0;
-                $paid_at      = ($final_total <= 0) ? date('Y-m-d H:i:s') : null;
-                $gateway_use  = ($final_total <= 0) ? 'PTS全額折抵/免費' : $pay_gateway;
+                // 7. 寫入發票收據與支付紀錄表 (fsl_invoices，含完整載具類型與統編資訊)
+                $inv_stat    = ($final_total <= 0) ? 1 : 0;
+                $paid_at     = ($final_total <= 0) ? date('Y-m-d H:i:s') : null;
+                $gateway_use = ($final_total <= 0) ? 'PTS全額折抵/免費' : $pay_gateway;
 
                 $DB->query(
                     "INSERT INTO fsl_invoices (ord_id, mb_id, inv_pay_gateway, inv_pay_method, inv_paid_amount, inv_paid_at, inv_type, inv_tax_id, inv_company_title, inv_carrier_type, inv_carrier_code, inv_status)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     [$ord_id, $mb_id, $gateway_use, $pay_method, $final_total, $paid_at, $inv_type, ($inv_tax_id ?: null), ($inv_comp ?: null), $carrier_type, ($inv_carrier ?: null), $inv_stat]
                 );
 
-                // 8. 若使用了優惠券，標記為 3-已使用完畢
+                // 8. 若勾選記憶常用電子發票載具，同步更新 fsl_members
+                if ($save_def_inv === 1) {
+                    $DB->query(
+                        "UPDATE fsl_members SET mb_inv_type = ?, mb_carrier_type = ?, mb_carrier_code = ?, mb_tax_id = ?, mb_company_title = ? WHERE mb_id = ?",
+                        [$inv_type, $carrier_type, ($inv_carrier ?: null), ($inv_tax_id ?: null), ($inv_comp ?: null), $mb_id]
+                    );
+                }
+
+                // 9. 若使用了優惠券，標記為 3-已使用完畢
                 if ($valid_grec_id !== null) {
                     $DB->query("UPDATE fsl_gift_records SET grec_status = 3 WHERE grec_id = ?", [$valid_grec_id]);
                 }
 
-
-
-                // 9. 若折抵了 PTS 點數，扣除會員餘額並寫入 fsl_points 流水帳
+                // 10. 若折抵了 PTS 點數，扣除會員餘額並寫入 fsl_points 流水帳
                 if ($actual_pts_used > 0) {
                     $DB->query("UPDATE fsl_members SET mb_points = mb_points - ? WHERE mb_id = ? AND mb_points >= ?", [$actual_pts_used, $mb_id, $actual_pts_used]);
                     $new_pts = (int)$DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]);
@@ -2040,7 +2089,7 @@ try {
                     );
                 }
 
-                // 10. 清空該會員購物車
+                // 11. 清空該會員購物車
                 $DB->query("DELETE FROM fsl_cart_items WHERE mb_id = ?", [$mb_id]);
 
                 $DB->commit();
@@ -2048,9 +2097,6 @@ try {
                 $DB->rollBack();
                 throw $e;
             }
-
-
-
 
             echo json_encode([
                 'success'     => 1,
@@ -2112,7 +2158,6 @@ try {
             ]);
             exit;
         break;
-
         // =========================================================================
         // 動作 act_book_consult ：立即預約一對一顧問輔導 (支援免費次數扣除 或 付費加入購物車)
         // =========================================================================
@@ -2226,7 +2271,6 @@ try {
             ]);
             exit();
         break;
-
         // =========================================================================
         // 動作 act_access_resource ：驗證素材存取權限 + 記錄使用次數/計次扣減
         // =========================================================================
@@ -2359,7 +2403,6 @@ try {
             ]);
             exit();
         break;
-
         // =========================================================================
         // 動作 act_redeem_resource ：使用 PTS 點數一鍵兌換解鎖素材 (寫入 fsl_points)
         // =========================================================================
@@ -2445,7 +2488,6 @@ try {
                 throw $e;
             }
         break;
-
         // =========================================================================
         // 動作 act_rate_resource ：素材好評/負評評價 (更新 res_ratetop / res_ratebottom)
         // =========================================================================
@@ -2502,6 +2544,49 @@ try {
                 $DB->rollBack();
                 throw $e;
             }
+        break;
+        // =========================================================================
+        // 動作 act_save_default_invoice ：儲存會員預設電子發票載具與統編設定
+        // =========================================================================
+        case "act_save_default_invoice":
+            $inv_type      = (int)($_POST['inv_type'] ?? 1);       // 1=二聯式個人, 2=三聯式公司
+            $carrier_type  = (int)($_POST['carrier_type'] ?? 0);   // 0=會員載具, 1=手機條碼, 2=自然人憑證
+            $carrier_code  = strtoupper(trim((string)($_POST['carrier_code'] ?? '')));
+            $tax_id        = trim((string)($_POST['tax_id'] ?? ''));
+            $company_title = trim((string)($_POST['company_title'] ?? ''));
+
+            if ($inv_type === 1) {
+                if ($carrier_type === 1 && !preg_match('/^\/[0-9A-Z.\-+]{7}$/', $carrier_code)) {
+                    echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '手機條碼載具格式不符（應為 / 開頭加上 7 碼英數字或符號，如 /AB12345）']);
+                    exit();
+                }
+                if ($carrier_type === 2 && !preg_match('/^[A-Z]{2}[0-9]{14}$/', $carrier_code)) {
+                    echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '自然人憑證條碼格式不符（應為 2 碼大寫英文 + 14 碼數字）']);
+                    exit();
+                }
+                if ($carrier_type === 0) $carrier_code = '';
+                $tax_id = '';
+                $company_title = '';
+            } else {
+                if (!preg_match('/^\d{8}$/', $tax_id) || $company_title === '') {
+                    echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '開立三聯式公司發票請完整填寫 8 碼統一編號與公司抬頭！']);
+                    exit();
+                }
+                $carrier_type = 0;
+                $carrier_code = '';
+            }
+
+            $DB->query(
+                "UPDATE fsl_members SET mb_inv_type = ?, mb_carrier_type = ?, mb_carrier_code = ?, mb_tax_id = ?, mb_company_title = ? WHERE mb_id = ?",
+                [$inv_type, $carrier_type, ($carrier_code ?: null), ($tax_id ?: null), ($company_title ?: null), $mb_id]
+            );
+
+            echo json_encode([
+                'success' => 1,
+                'code'    => '[@-successcode-@]',
+                'message' => '預設電子發票載具與抬頭設定已成功儲存！下次結帳時將自動為您帶入。'
+            ]);
+            exit();
         break;
 
 

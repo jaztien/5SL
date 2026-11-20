@@ -91,11 +91,11 @@ include_once '5sl_include_header.php';
             <div class="col-lg-7 p-4 p-md-5 bg-white">
                 <div class="mb-4">
                     <h3 class="fw-bold text-dark mb-1">免費註冊</h3>
-                    <p class="text-muted small mb-0">填寫以下資訊，開啟您在 5SL 的全新智慧體驗</p>
+                    <p class="text-muted small mb-0">填寫以下資訊，開啟您在 Fifth Season Life 的全新智慧體驗</p>
                 </div>
                 
                 <!-- 註冊表單 -->
-                <form id="signupForm" novalidate>
+                <form id="signupForm" autocomplete="off" novalidate>
                     <!-- 電子信箱 -->
                     <div class="mb-3">
                         <label class="form-label fw-bold small text-muted">電子信箱 (Email) <span class="text-danger">*</span></label>
@@ -143,14 +143,14 @@ include_once '5sl_include_header.php';
                             <label class="form-label fw-bold small text-muted">設定登入密碼 <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                                <input type="password" class="form-control py-2.5" id="regPassword" placeholder="至少 8 碼英數字" minlength="8" required>
+                                <input type="password" class="form-control py-2.5" id="regPassword" placeholder="至少 8 碼英數字" minlength="8" autocomplete="new-password" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold small text-muted">再次確認密碼 <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
-                                <input type="password" class="form-control py-2.5" id="regConfirmPassword" placeholder="請再次輸入密碼" minlength="8" required>
+                                <input type="password" class="form-control py-2.5" id="regConfirmPassword" placeholder="請再次輸入密碼" minlength="8" autocomplete="new-password" required>
                             </div>
                         </div>
                     </div>

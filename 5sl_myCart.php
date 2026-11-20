@@ -93,6 +93,17 @@ $my_coupons = ($mb_id > 0) ? $DB->query("
     ORDER BY g.gift_discount_usd DESC
 ", [$mb_id]) : [];
 if (!is_array($my_coupons)) $my_coupons = [];
+
+// 4. 讀取會員預設發票偏好
+$mb_inv = ($mb_id > 0)
+    ? $DB->row("SELECT mb_inv_type, mb_carrier_type, mb_carrier_code, mb_tax_id, mb_company_title FROM fsl_members WHERE mb_id = ?", [$mb_id])
+    : array();
+$def_inv_type      = (int)($mb_inv['mb_inv_type'] ?? 1);
+$def_carrier_type  = (int)($mb_inv['mb_carrier_type'] ?? 0);
+$def_carrier_code  = $mb_inv['mb_carrier_code'] ?? '';
+$def_tax_id        = $mb_inv['mb_tax_id'] ?? '';
+$def_company_title = $mb_inv['mb_company_title'] ?? '';
+
 ?>
 
 <div class="container my-5 py-4">
@@ -230,7 +241,7 @@ if (!is_array($my_coupons)) $my_coupons = [];
                                         </div>
                                     <?php endif; ?>
 
-                                    <!-- 3. 付款方式與電子發票設定 -->
+                                    <!-- 3. 付款方式與電子發票設定（自動預填會員預設載具＋記憶設定） -->
                                     <div class="p-3 bg-light border rounded-3">
                                         <h6 class="fw-bold text-dark mb-3"><i class="bi bi-receipt me-2 text-success"></i>付款方式與電子發票</h6>
                                         <div class="row g-2 mb-2">
@@ -251,28 +262,52 @@ if (!is_array($my_coupons)) $my_coupons = [];
                                                 </select>
                                             </div>
                                         </div>
+
                                         <div class="row g-2 mb-2">
                                             <div class="col-5">
                                                 <label class="form-label small fw-bold text-muted">發票類型</label>
                                                 <select class="form-select form-select-sm" id="selectInvType" name="inv_type">
-                                                    <option value="1">二聯式個人電子發票</option>
-                                                    <option value="2">三聯式公司統一編號</option>
+                                                    <option value="1" <?php echo ($def_inv_type === 1) ? 'selected' : ''; ?>>二聯式個人電子發票</option>
+                                                    <option value="2" <?php echo ($def_inv_type === 2) ? 'selected' : ''; ?>>三聯式公司統一編號</option>
                                                 </select>
                                             </div>
-                                            <div class="col-7" id="carrierBox">
-                                                <label class="form-label small fw-bold text-muted">手機條碼載具 (選填)</label>
-                                                <input type="text" class="form-control form-control-sm text-uppercase" name="inv_carrier_code" placeholder="如 /AB12345，留空存會員載具">
+                                            <div class="col-7 <?php echo ($def_inv_type === 2) ? 'd-none' : ''; ?>" id="carrierBox">
+                                                <label class="form-label small fw-bold text-muted">載具方式</label>
+                                                <select class="form-select form-select-sm" id="selectCarrierType" name="carrier_type">
+                                                    <option value="0" <?php echo ($def_carrier_type === 0) ? 'selected' : ''; ?>>會員載具（自動歸戶）</option>
+                                                    <option value="1" <?php echo ($def_carrier_type === 1) ? 'selected' : ''; ?>>手機條碼載具</option>
+                                                    <option value="2" <?php echo ($def_carrier_type === 2) ? 'selected' : ''; ?>>自然人憑證條碼</option>
+                                                </select>
                                             </div>
                                         </div>
-                                        <div class="row g-2 d-none" id="companyTaxBox">
+
+                                        <!-- 載具條碼輸入框（選擇手機條碼或自然人憑證時顯示） -->
+                                        <div class="mb-2 <?php echo ($def_inv_type === 2 || $def_carrier_type === 0) ? 'd-none' : ''; ?>" id="carrierCodeBox">
+                                            <input type="text" class="form-control form-control-sm text-uppercase" id="inputCarrierCode" name="inv_carrier_code"
+                                                value="<?php echo htmlspecialchars($def_carrier_code); ?>"
+                                                placeholder="<?php echo ($def_carrier_type === 2) ? '請輸入自然人憑證（2碼英文+14碼數字）' : '請輸入手機條碼載具（例：/AB12345）'; ?>">
+                                        </div>
+
+                                        <!-- 三聯式公司統編輸入框 -->
+                                        <div class="row g-2 mb-2 <?php echo ($def_inv_type === 1) ? 'd-none' : ''; ?>" id="companyTaxBox">
                                             <div class="col-5">
-                                                <input type="text" class="form-control form-control-sm" name="inv_tax_id" maxlength="8" placeholder="8碼統一編號">
+                                                <input type="text" class="form-control form-control-sm" name="inv_tax_id" maxlength="8"
+                                                    value="<?php echo htmlspecialchars($def_tax_id); ?>" placeholder="8碼統一編號">
                                             </div>
                                             <div class="col-7">
-                                                <input type="text" class="form-control form-control-sm" name="inv_company_title" placeholder="公司發票抬頭">
+                                                <input type="text" class="form-control form-control-sm" name="inv_company_title"
+                                                    value="<?php echo htmlspecialchars($def_company_title); ?>" placeholder="公司發票抬頭">
                                             </div>
                                         </div>
-                                        <div class="mt-2">
+
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="chkSaveDefaultInv" name="save_default_inv" value="1" checked>
+                                            <label class="form-check-label small text-muted" for="chkSaveDefaultInv">
+                                                記憶為我的常用電子發票設定（下次結帳自動帶入）
+                                            </label>
+                                        </div>
+
+                                        <div>
                                             <input type="text" class="form-control form-control-sm" name="ord_note" placeholder="訂單備註或預約補充說明 (選填)">
                                         </div>
                                     </div>
@@ -307,6 +342,9 @@ if (!is_array($my_coupons)) $my_coupons = [];
                                         <div class="text-center text-white-50 mt-2" style="font-size: 0.72rem;">
                                             點擊送出即代表同意服務條款，課程與預約將自動保留名額
                                         </div>
+
+
+
                                     </div>
                                 </div>
 
@@ -413,13 +451,27 @@ $(function() {
         recalculateCart();
     });
 
-    $('#selectInvType').on('change', function() {
+    // 發票類型與載具方式切換（改用委派事件確保 100% 觸發並顯示輸入框）
+    $(document).on('change', '#selectInvType', function() {
         if ($(this).val() === '2') {
+            $('#carrierBox, #carrierCodeBox').addClass('d-none');
             $('#companyTaxBox').removeClass('d-none');
-            $('#carrierBox').addClass('d-none');
         } else {
             $('#companyTaxBox').addClass('d-none');
             $('#carrierBox').removeClass('d-none');
+            $('#selectCarrierType').trigger('change');
+        }
+    });
+
+    $(document).on('change', '#selectCarrierType', function() {
+        const cType = $(this).val();
+        if (cType === '0') {
+            $('#carrierCodeBox').addClass('d-none');
+        } else {
+            $('#carrierCodeBox').removeClass('d-none');
+            $('#inputCarrierCode')
+                .attr('placeholder', cType === '1' ? '請輸入手機條碼載具（例：/AB12345）' : '請輸入自然人憑證（2碼英文+14碼數字）')
+                .trigger('focus');
         }
     });
 
@@ -427,9 +479,26 @@ $(function() {
     $('#formExpressCheckout').on('submit', function(e) {
         e.preventDefault();
         if (window.fslLoader) window.fslLoader.show();
+        //const formData = $(this).serialize() + '&action=act_checkout';
+        $.post('./funcFiles/5sl_act_member.php', {
+            action: 'act_checkout',
+            use_pts: usePts,
+            grec_id: selectedGrecId,
+            pay_gateway: payGateway,
+            pay_method: payMethod,
+            receiver_name: recvName,
+            receiver_phone: recvPhone,
+            receiver_address: recvAddr,
+            ord_note: ordNote,
 
-        const formData = $(this).serialize() + '&action=act_checkout';
-        $.post('./funcFiles/5sl_act_member.php', formData, function(res) {
+            // ▼ 就是把這 6 個「電子發票與載具」欄位加進來傳給後端 ▼
+            inv_type: $('input[name="checkoutInvType"]:checked').val(),   // 1=二聯式個人, 2=三聯式公司
+            carrier_type: $('#checkoutCarrierType').val(),                // 0=會員載具, 1=手機條碼, 2=自然人憑證
+            inv_carrier_code: $('#checkoutCarrierCode').val().trim(),     // 載具條碼 (如 /AB12345)
+            inv_tax_id: $('#checkoutTaxId').val().trim(),                 // 公司 8 碼統一編號
+            inv_company_title: $('#checkoutCompanyTitle').val().trim(),   // 公司發票抬頭
+            save_default_inv: $('#chkSaveDefaultInv').is(':checked') ? 1 : 0 // 1=記憶為預設載具, 0=不記憶
+        }, function(res) {
             if (window.fslLoader) window.fslLoader.hide();
             if (res.success === 1) {
                 alert(`${res.message}\n即將為您跳轉至「我的訂購」檢視訂單與電子發票明細！`);
@@ -446,5 +515,6 @@ $(function() {
             alert('網路連線異常，請稍後再試。');
         });
     });
+
 });
 </script>
