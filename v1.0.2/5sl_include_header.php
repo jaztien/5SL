@@ -73,6 +73,25 @@ function _fn_getMemberAvatar($mbid, $is_thumb = false) {
     }
     return 'https://mockmind-api.uifaces.co/content/human/'.($id % 223).'.jpg';
 }
+function _fn_getResourceCover($res_id, $is_thumb = false, $res_type = 1, $media_url = '') {
+    $id     = (int)$res_id;
+    $suffix = $is_thumb ? '_thumb.jpg' : '_.jpg';
+    $path   = './5sladmin/uploadFiles/re/reimg_' . $id . $suffix;
+
+    if ($id > 0 && file_exists($path)) {
+        return $path . '?v=' . filemtime($path);
+    }
+    // 若為 YouTube 視訊且未另傳封面，自動抓取 YouTube 高畫質縮圖
+    if ((int)$res_type === 4 && !empty($media_url)) {
+        if (preg_match('/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $media_url, $m)) {
+            return 'https://youtube.com' . $m[1] . '/hqdefault.jpg';
+        }
+    }
+    // 預設本地風格圖
+    $fallback_idx = ($id % 18) + 1;
+    return 'imageFiles/test/' . $fallback_idx . '.jpg';
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="zh-TW">

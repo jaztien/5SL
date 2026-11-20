@@ -23,7 +23,7 @@ $sql_quests = "
 $all_quests = ($mb_id > 0) ? $DB->query($sql_quests, [$mb_id]) : [];
 if (!is_array($all_quests)) $all_quests = [];
 
-// 2. 預先批次撈出任務獎品內含的「數位下載檔」與「實體商品」設定 (merchandise)，避免迴圈內重複查詢
+// 2. 預先批次撈出任務獎品內含的「數位下載檔」與「實體商品」設定 (fsl_merchandise)，避免迴圈內重複查詢
 $merch_info_map = [];
 $all_mids = [];
 foreach ($all_quests as $q) {
@@ -37,7 +37,7 @@ foreach ($all_quests as $q) {
 if (!empty($all_mids)) {
     $placeholders = implode(',', array_fill(0, count($all_mids), '?'));
     $m_rows = $DB->query(
-        "SELECT merch_id, merch_type, merch_title, merch_download_url, merch_file_format FROM merchandise WHERE merch_id IN ($placeholders)",
+        "SELECT merch_id, merch_type, merch_title, merch_download_url, merch_file_format FROM fsl_merchandise WHERE merch_id IN ($placeholders)",
         array_values($all_mids)
     );
     if (is_array($m_rows)) {

@@ -200,7 +200,7 @@ $ord_status_map = [
                                                 <div class="small">
                                                     <span class="text-muted">訂單編號：</span>
                                                     <strong class="text-dark"><?php echo htmlspecialchars($ord['ord_no']); ?></strong>
-                                                    <span class="text-muted ms-3">訂購日期：<?php echo date('Y/m/d H:i', strtotime($ord['ord_created'])); ?></span>
+                                                    <span class="text-muted ms-3">訂購日期：<?php echo date('Y-m-d H:i', strtotime($ord['ord_created'])); ?></span>
                                                 </div>
                                                 <span class="badge <?php echo $st_info['badge']; ?> px-3 py-1">
                                                     <i class="bi <?php echo $st_info['icon']; ?> me-1"></i><?php echo $st_info['label']; ?>
@@ -333,7 +333,7 @@ $ord_status_map = [
                                         <div class="bg-light p-3 rounded border small">
                                             <div class="fw-bold text-dark mb-1"><i class="bi bi-chat-left-text me-1 text-primary"></i>最新處理進度與客服備註：</div>
                                             <div class="text-muted">
-                                                <?php echo !empty($rf['ref_admin_note']) ? htmlspecialchars($rf['ref_admin_note']) : '系統已於 ' . date('Y/m/d H:i', strtotime($rf['ref_created'])) . ' 收到您的申請，專員將於 3 個工作日內完成審核。'; ?>
+                                                <?php echo !empty($rf['ref_admin_note']) ? htmlspecialchars($rf['ref_admin_note']) : '系統已於 ' . date('Y-m-d H:i', strtotime($rf['ref_created'])) . ' 收到您的申請，專員將於 3 個工作日內完成審核。'; ?>
                                             </div>
                                         </div>
                                     </div>

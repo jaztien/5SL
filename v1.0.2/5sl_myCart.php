@@ -8,22 +8,22 @@ include_once '5sl_include_header.php';
 $mb_id = (int)($_SESSION['mbID'] ?? $_SESSION['user_id'] ?? 0);
 
 // 1. 查詢會員基本資料與可用 PTS 點數餘額（自動帶入預設收件人資訊）
-$member_info = ($mb_id > 0) ? $DB->row("SELECT mb_name, mb_title, mb_cellphone, mb_add, mb_points FROM members WHERE mb_id = ?", [$mb_id]) : [];
+$member_info = ($mb_id > 0) ? $DB->row("SELECT mb_name, mb_title, mb_cellphone, mb_add, mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]) : [];
 $member_pts  = (int)($member_info['mb_points'] ?? 0);
 $def_name    = !empty($member_info['mb_name']) ? _fn_secure_crypto($member_info['mb_name'], 'de') : ($member_info['mb_title'] ?? '');
 $def_phone   = !empty($member_info['mb_cellphone']) ? _fn_secure_crypto($member_info['mb_cellphone'], 'de') : '';
 $def_addr    = !empty($member_info['mb_add']) ? _fn_secure_crypto($member_info['mb_add'], 'de') : '';
 
-// 2. 查詢購物車內所有項目（關聯 courses、course_sessions 與 merchandise）
+// 2. 查詢購物車內所有項目（關聯 fsl_courses、fsl_course_sessions 與 fsl_merchandise）
 $sql_cart = "
     SELECT ci.cart_id, ci.cart_item_type, ci.course_id, ci.sess_id, ci.merch_id, ci.cart_qty,
            c.course_title, c.course_cost, c.course_type,
            s.sess_batch, s.sess_startdate, s.sess_starttime,
            m.merch_title, m.merch_type, m.merch_price_twd, m.merch_price_usd, m.merch_sale_usd
     FROM fsl_cart_items ci
-    LEFT JOIN courses c ON ci.cart_item_type = 1 AND ci.course_id = c.course_id
-    LEFT JOIN course_sessions s ON ci.cart_item_type = 1 AND ci.sess_id = s.sess_id
-    LEFT JOIN merchandise m ON ci.cart_item_type = 2 AND ci.merch_id = m.merch_id
+    LEFT JOIN fsl_courses c ON ci.cart_item_type = 1 AND ci.course_id = c.course_id
+    LEFT JOIN fsl_course_sessions s ON ci.cart_item_type = 1 AND ci.sess_id = s.sess_id
+    LEFT JOIN fsl_merchandise m ON ci.cart_item_type = 2 AND ci.merch_id = m.merch_id
     WHERE ci.mb_id = ?
     ORDER BY ci.cart_id ASC
 ";

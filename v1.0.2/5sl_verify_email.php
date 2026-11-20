@@ -12,7 +12,7 @@ if ($token !== '' && preg_match('/^[a-f0-9]{32}$/i', $token) && isset($DB)) {
     $vcRow = $DB->row(
         "SELECT vc.vc_id, vc.mb_id, vc.vc_expiretime, m.mb_title, m.mb_email_verified
          FROM data_verify_codes vc
-         INNER JOIN members m ON vc.mb_id = m.mb_id
+         INNER JOIN fsl_members m ON vc.mb_id = m.mb_id
          WHERE vc.vc_verifycode = ? AND vc.vc_mode = 1
          LIMIT 1",
         [$token]
@@ -37,7 +37,7 @@ if ($token !== '' && preg_match('/^[a-f0-9]{32}$/i', $token) && isset($DB)) {
             // 驗證通過：將 mb_email_verified 更新為 1，並刪除已使用的驗證碼
             $DB->beginTransaction();
             try {
-                $DB->query("UPDATE members SET mb_email_verified = 1, mb_updated = NOW() WHERE mb_id = ?", [$mId]);
+                $DB->query("UPDATE fsl_members SET mb_email_verified = 1, mb_updated = NOW() WHERE mb_id = ?", [$mId]);
                 $DB->query("DELETE FROM data_verify_codes WHERE mb_id = ? AND vc_mode = 1", [$mId]);
                 $DB->commit();
 

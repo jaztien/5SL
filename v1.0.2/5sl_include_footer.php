@@ -32,7 +32,7 @@
             <!-- 獨立 LOGO 圖層：精準向上再升高 20px (透過 CSS margin-top 達成極致破格) -->
             <div class="sticky-logo-box">
                 <a href="index.php" class="d-inline-block">
-                    <img src="imageFiles/5slLOGO_B&W_200x200.png" alt="5SL LOGO" class="img-fluid">
+                    <img src="imageFiles/5slLOGO_W_200x200.png" alt="5SL LOGO" class="img-fluid">
                 </a>
             </div>
         </div>

@@ -1,22 +1,22 @@
 <?php
-
 // 宣告當前頁面身分為 myProducts（課程與服務）
 $current_page = 'myProducts';
 
 // 引入共用頁首
 include_once '5sl_include_header.php';
 
-$mb_id = (int)($_SESSION['mbID'] ?? $_SESSION['user_id'] ?? 0);
+$mb_id  = (int)($_SESSION['mbID'] ?? $_SESSION['user_id'] ?? 0);
+$mb_lvl = (int)($_SESSION['mbLevel'] ?? 1);
 
-// 1. 查詢會員所有報名課程與梯次紀錄 (fsl_course_enrolls + courses + course_sessions)
+// 1. 查詢會員所有報名課程與梯次紀錄 (fsl_course_enrolls + fsl_courses + fsl_course_sessions)
 $sql_enrolls = "
     SELECT 
-        e.enr_id, e.enr_pay_status, e.enr_status, e.enr_done_lessons, e.enr_last_watched, e.enr_expire_at,
+        e.enr_id, e.enr_quota_type, e.enr_pay_status, e.enr_status, e.enr_done_lessons, e.enr_last_watched, e.enr_expire_at, e.enr_topic,
         c.course_id, c.course_title, c.course_type,
         s.sess_id, s.sess_batch, s.sess_altname, s.sess_startdate, s.sess_starttime, s.sess_duration, s.sess_lesson, s.sess_meetingid
     FROM fsl_course_enrolls e
-    INNER JOIN courses c ON e.course_id = c.course_id
-    INNER JOIN course_sessions s ON e.sess_id = s.sess_id
+    INNER JOIN fsl_courses c ON e.course_id = c.course_id
+    INNER JOIN fsl_course_sessions s ON e.sess_id = s.sess_id
     WHERE e.mb_id = ? AND e.enr_status != 0
     ORDER BY e.enr_pay_status DESC, s.sess_startdate DESC, s.sess_starttime DESC
 ";
@@ -24,11 +24,17 @@ $all_enrolls = ($mb_id > 0) ? $DB->query($sql_enrolls, [$mb_id]) : [];
 if (!is_array($all_enrolls)) $all_enrolls = [];
 
 // 拆分為「一般線上/實體課程 (course_type=1)」與「一對一顧問預約 (course_type=2)」
-$my_courses    = [];
-$my_consults   = [];
-$total_pct_sum = 0;
+// 同時收集已付款報名的課程 ID，供下方限定素材資源權限比對
+$my_courses          = [];
+$my_consults         = [];
+$enrolled_course_ids = [];
+$total_pct_sum       = 0;
 
 foreach ($all_enrolls as $row) {
+    if (in_array((int)$row['enr_pay_status'], array(1, 2), true)) {
+        $enrolled_course_ids[(int)$row['course_id']] = true;
+    }
+
     if ((int)$row['course_type'] === 2) {
         $my_consults[] = $row;
     } else {
@@ -41,12 +47,12 @@ foreach ($all_enrolls as $row) {
 }
 $avg_progress = !empty($my_courses) ? (int)round($total_pct_sum / count($my_courses)) : 0;
 
-// 2. 預撈一對一顧問服務「目前開放可改期的未來空檔時段」(course_sessions)
+// 2. 預撈一對一顧問服務「目前開放可改期的未來空檔時段」(fsl_course_sessions)
 $open_slots_by_course = [];
 $slot_rows = $DB->query("
     SELECT s.sess_id, s.course_id, s.sess_startdate, s.sess_starttime, s.sess_duration, s.sess_altname
-    FROM course_sessions s
-    INNER JOIN courses c ON s.course_id = c.course_id
+    FROM fsl_course_sessions s
+    INNER JOIN fsl_courses c ON s.course_id = c.course_id
     WHERE c.course_type = 2
       AND s.sess_status = 1
       AND s.sess_enrollee < c.course_max
@@ -58,7 +64,7 @@ if (is_array($slot_rows)) {
     foreach ($slot_rows as $sr) {
         $ts1 = strtotime($sr['sess_startdate'] . ' ' . $sr['sess_starttime']);
         $ts2 = $ts1 + ((int)$sr['sess_duration'] * 60);
-        $label = date('Y/m/d', $ts1) . ' (' . $week_chars[(int)date('w', $ts1)] . ') ' . date('H:i', $ts1) . ' - ' . date('H:i', $ts2);
+        $label = date('Y-m-d', $ts1) . ' (' . $week_chars[(int)date('w', $ts1)] . ') ' . date('H:i', $ts1) . ' - ' . date('H:i', $ts2);
         if (!empty($sr['sess_altname'])) {
             $label .= '｜' . $sr['sess_altname'];
         }
@@ -71,36 +77,75 @@ if (is_array($slot_rows)) {
 
 // 查詢會員剩餘免費一對一輔導次數
 $free_consult_quota = ($mb_id > 0)
-    ? (int)$DB->single("SELECT mb_free_consult_quota FROM members WHERE mb_id = ?", [$mb_id])
+    ? (int)$DB->single("SELECT mb_free_consult_quota FROM fsl_members WHERE mb_id = ?", [$mb_id])
     : 0;
 
 // 查詢所有開放預約的一對一顧問服務項目 (course_type = 2)
 $consult_services = $DB->query("
     SELECT course_id, course_title, course_brief, course_cost, course_max
-    FROM courses
+    FROM fsl_courses
     WHERE course_type = 2 AND course_status = 1
     ORDER BY course_id ASC
 ");
-
 if (!is_array($consult_services)) $consult_services = [];
-// 3. 查詢「限定內容專區」資源（整合 articles 專欄 + merchandise 數位影音/音訊/檔案）
-$exclusive_articles = $DB->query("
-    SELECT arti_id, arti_published, arti_title, arti_brief, arti_body
-    FROM articles
-    WHERE arti_status = 1
-    ORDER BY arti_published DESC
-    LIMIT 12
-");
-if (!is_array($exclusive_articles)) $exclusive_articles = [];
 
-$exclusive_merches = $DB->query("
-    SELECT merch_id, merch_title, merch_brief, merch_download_url, merch_file_format
-    FROM merchandise
-    WHERE merch_type = 2 AND merch_status = 1
-    ORDER BY merch_published DESC
-    LIMIT 12
-");
-if (!is_array($exclusive_merches)) $exclusive_merches = [];
+// 3. 查詢「限定內容專區」課程素材資源 (fsl_resources + fsl_resource_access，取代舊版 articles)
+$sql_resources = "
+    SELECT r.*,
+           c.course_title AS rel_course_title,
+           ra.racc_id, ra.racc_used_count, ra.racc_max_count, ra.racc_expire_at, ra.racc_rated, ra.racc_status
+    FROM fsl_resources r
+    LEFT JOIN fsl_courses c ON r.course_id = c.course_id
+    LEFT JOIN fsl_resource_access ra ON r.res_id = ra.res_id AND ra.mb_id = ?
+    WHERE r.res_status = 1
+    ORDER BY r.res_sort ASC, r.res_id DESC
+";
+$raw_resources = ($mb_id > 0) ? $DB->query($sql_resources, [$mb_id]) : [];
+if (!is_array($raw_resources)) $raw_resources = [];
+
+$resource_list = [];
+$cat_map_res   = [1 => 'article', 2 => 'image', 3 => 'file', 4 => 'video', 5 => 'audio'];
+
+foreach ($raw_resources as $rr) {
+    $rid       = (int)$rr['res_id'];
+    $rtype     = (int)$rr['res_type']; // 1文字, 2圖檔, 3文書, 4YouTube, 5音檔
+    $auth_rule = (int)$rr['res_auth_rule'];
+    $has_acc   = !empty($rr['racc_id']) && (int)$rr['racc_status'] === 1;
+
+    // 檢核是否符合免費開通資格
+    $can_free_unlock = $has_acc;
+    if (!$can_free_unlock) {
+        $allow_ids = array_filter(array_map('intval', explode(',', (string)($rr['res_allow_mbids'] ?? ''))));
+        if (!empty($allow_ids) && in_array($mb_id, $allow_ids, true)) {
+            $can_free_unlock = true;
+        } elseif ($auth_rule === 0) {
+            $can_free_unlock = true;
+        } elseif ($auth_rule === 2 && isset($enrolled_course_ids[(int)$rr['course_id']])) {
+            $can_free_unlock = true;
+        } elseif ($auth_rule === 3 && $mb_lvl >= (int)$rr['res_min_level']) {
+            $can_free_unlock = true;
+        }
+    }
+
+    // 封面縮圖路徑（優先讀取 ./5sladmin/uploadFiles/re/reimg_{id}_thumb.jpg）
+    $cover_url = './5sladmin/uploadFiles/re/reimg_' . $rid . '_thumb.jpg';
+    if (!file_exists($cover_url)) {
+        if ($rtype === 4 && preg_match('/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/', (string)$rr['res_media_url'], $ym)) {
+            $yt_id     = $ym[1];
+            $cover_url = 'https://i.ytimg.com/vi/' . $yt_id . '/hqdefault.jpg';
+        } else {
+            $cover_url = 'imageFiles/test/' . (($rid % 18) + 1) . '.jpg';
+        }
+    } else {
+        $cover_url .= '?v=' . filemtime($cover_url);
+    }
+
+    $rr['cat_code']        = $cat_map_res[$rtype] ?? 'file';
+    $rr['cover_url']       = $cover_url;
+    $rr['can_free_unlock'] = $can_free_unlock;
+    $rr['has_acc']         = $has_acc;
+    $resource_list[]       = $rr;
+}
 ?>
 
 <div class="container my-5 py-4">
@@ -201,7 +246,7 @@ if (!is_array($exclusive_merches)) $exclusive_merches = [];
                                     <?php foreach ($my_courses as $mc):
                                         $pct      = $mc['progress_pct'];
                                         $is_paid  = in_array((int)$mc['enr_pay_status'], [1, 2], true);
-                                        $exp_text = !empty($mc['enr_expire_at']) ? '到期日：' . date('Y/m/d', strtotime($mc['enr_expire_at'])) : '永久觀看權限';
+                                        $exp_text = !empty($mc['enr_expire_at']) ? '到期日：' . date('Y-m-d', strtotime($mc['enr_expire_at'])) : '永久觀看權限';
                                         $last_txt = !empty($mc['enr_last_watched']) ? '上次觀看：' . date('m/d H:i', strtotime($mc['enr_last_watched'])) : '尚未開始觀看';
                                         $next_unit = min((int)$mc['sess_lesson'], (int)$mc['enr_done_lessons'] + 1);
                                     ?>
@@ -297,7 +342,7 @@ if (!is_array($exclusive_merches)) $exclusive_merches = [];
                                                 $st_num   = (int)$cs['enr_status']; // 1待開課, 2進行中, 3已完課, 4改期中
                                                 $ts1      = strtotime($cs['sess_startdate'] . ' ' . $cs['sess_starttime']);
                                                 $ts2      = $ts1 + ((int)$cs['sess_duration'] * 60);
-                                                $time_str = date('Y/m/d', $ts1) . ' (' . $week_chars[(int)date('w', $ts1)] . ') ' . date('H:i', $ts1) . ' - ' . date('H:i', $ts2);
+                                                $time_str = date('Y-m-d', $ts1) . ' (' . $week_chars[(int)date('w', $ts1)] . ') ' . date('H:i', $ts1) . ' - ' . date('H:i', $ts2);
                                                 $is_future = ($ts1 > time()) && in_array($st_num, [1, 2, 4], true);
                                             ?>
                                                 <tr id="consultRow_<?php echo $enr_id; ?>">
@@ -347,87 +392,125 @@ if (!is_array($exclusive_merches)) $exclusive_merches = [];
                              區塊 2：限定內容專區 (文章、影片、音訊、檔案下載)
                              ============================================================ -->
                         <div class="tab-pane fade" id="exclusive-pane" role="tabpanel" tabindex="0">
-                            
                             <!-- 資源類型快速篩選列 -->
                             <div class="d-flex flex-wrap gap-2 mb-4" id="exclusiveFilterGroup">
-                                <button type="button" class="btn btn-sm btn-dark active" data-filter="all">全部資源</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="video"><i class="bi bi-camera-video me-1"></i>限定影片</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="audio"><i class="bi bi-headphones me-1"></i>私房音訊</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="article"><i class="bi bi-file-earmark-richtext me-1"></i>深度專欄</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="file"><i class="bi bi-file-earmark-zip me-1"></i>原始碼與模板</button>
+                                <button type="button" class="btn btn-sm btn-dark active" data-filter="all">全部素材 (<?php echo count($resource_list); ?>)</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="video"><i class="bi bi-camera-video me-1"></i>YouTube 視訊</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="audio"><i class="bi bi-headphones me-1"></i>私房音檔</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="file"><i class="bi bi-file-earmark-pdf me-1"></i>文書簡報檔案</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="article"><i class="bi bi-file-earmark-richtext me-1"></i>文字專文</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="image"><i class="bi bi-image me-1"></i>圖檔教材</button>
                             </div>
 
-                            <!-- 資源卡片網格 -->
+                            <!-- 素材卡片網格 -->
                             <div class="row g-3" id="exclusiveResourceGrid">
-                                <!-- 影片項目 -->
-                                <div class="col-md-6 exclusive-item" data-category="video">
-                                    <div class="p-3 border rounded-3 h-100 d-flex flex-column justify-content-between bg-light">
-                                        <div>
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <span class="badge bg-danger"><i class="bi bi-camera-video-fill me-1"></i>VIP 限定影片</span>
-                                                <small class="text-muted">片長 42:15</small>
-                                            </div>
-                                            <h6 class="fw-bold text-dark">2026 高併發電商資料庫分表與快取實戰解析</h6>
-                                            <p class="text-muted small mb-3">深入剖析百萬級流量下的 MySQL 索引優化與 Redis 讀寫分離架構。</p>
+                                <?php if (empty($resource_list)): ?>
+                                    <div class="col-12">
+                                        <div class="p-4 text-center bg-light rounded-3 border text-muted small">
+                                            目前尚無已上架的課程素材資源，敬請期待更新！
                                         </div>
-                                        <button type="button" class="btn btn-dark btn-sm w-100 fw-bold btn-open-media" data-title="2026 高併發電商資料庫實戰解析" data-type="video">
-                                            <i class="bi bi-play-fill text-warning me-1"></i>立即線上觀看
-                                        </button>
                                     </div>
-                                </div>
+                                <?php else: ?>
+                                    <?php foreach ($resource_list as $res):
+                                        $rid        = (int)$res['res_id'];
+                                        $rtype      = (int)$res['res_type'];
+                                        $can_unlock = $res['can_free_unlock'];
+                                        $cost_pts   = (int)$res['res_cost_pts'];
+                                        $usage_mode = (int)$res['res_usage_mode'];
 
-                                <!-- 音訊項目 -->
-                                <div class="col-md-6 exclusive-item" data-category="audio">
-                                    <div class="p-3 border rounded-3 h-100 d-flex flex-column justify-content-between bg-light">
-                                        <div>
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <span class="badge bg-info text-dark"><i class="bi bi-headphones me-1"></i>私房音訊 Podcast</span>
-                                                <small class="text-muted">音長 28:40</small>
-                                            </div>
-                                            <h6 class="fw-bold text-dark">創辦人夜話：獨立工作室如何定價與篩選高價值客戶</h6>
-                                            <p class="text-muted small mb-3">純音訊深度對談，適合通勤或休息時聆聽的商業思維心法。</p>
-                                        </div>
-                                        <button type="button" class="btn btn-outline-dark btn-sm w-100 fw-bold btn-open-media" data-title="創辦人夜話：高價值客戶定價策略" data-type="audio">
-                                            <i class="bi bi-volume-up-fill me-1"></i>開啟播放器聆聽
-                                        </button>
-                                    </div>
-                                </div>
+                                        $type_badges = [
+                                            1 => ['label' => '文字專文', 'cls' => 'bg-success',          'icon' => 'bi-file-earmark-text-fill'],
+                                            2 => ['label' => '圖檔教材', 'cls' => 'bg-primary',          'icon' => 'bi-image-fill'],
+                                            3 => ['label' => '文書簡報', 'cls' => 'bg-warning text-dark','icon' => 'bi-file-earmark-pdf-fill'],
+                                            4 => ['label' => 'YouTube 視訊', 'cls' => 'bg-danger',       'icon' => 'bi-youtube'],
+                                            5 => ['label' => '私房音檔', 'cls' => 'bg-info text-dark',   'icon' => 'bi-headphones'],
+                                        ];
+                                        $tb = $type_badges[$rtype] ?? $type_badges;
 
-                                <!-- 文章專欄項目 -->
-                                <div class="col-md-6 exclusive-item" data-category="article">
-                                    <div class="p-3 border rounded-3 h-100 d-flex flex-column justify-content-between bg-light">
-                                        <div>
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <span class="badge bg-success"><i class="bi bi-file-earmark-text-fill me-1"></i>會員深度專欄</span>
-                                                <small class="text-muted">閱讀約 8 分鐘</small>
-                                            </div>
-                                            <h6 class="fw-bold text-dark">前後端分離架構下的資安防禦白皮書 (2026 最新版)</h6>
-                                            <p class="text-muted small mb-3">完整收錄 CSRF、XSS 與 Session 劫持的 PHP 程式碼級別防禦範本。</p>
-                                        </div>
-                                        <button type="button" class="btn btn-outline-dark btn-sm w-100 fw-bold btn-open-media" data-title="前後端分離架構資安防禦白皮書" data-type="article">
-                                            <i class="bi bi-book-half me-1"></i>閱讀完整專文
-                                        </button>
-                                    </div>
-                                </div>
+                                        // 使用模式提示文字
+                                        if ($res['has_acc'] && (int)$res['racc_max_count'] > 0) {
+                                            $rem = max(0, (int)$res['racc_max_count'] - (int)$res['racc_used_count']);
+                                            $mode_txt = "剩餘 {$rem} / {$res['racc_max_count']} 次";
+                                        } elseif ($res['has_acc'] && !empty($res['racc_expire_at'])) {
+                                            $mode_txt = '效期至 ' . date('Y-m-d', strtotime($res['racc_expire_at']));
+                                        } elseif ($usage_mode === 2) {
+                                            $mode_txt = "計次制 (限 {$res['res_usage_limit']} 次)";
+                                        } elseif ($usage_mode === 3) {
+                                            $mode_txt = "計日制 ({$res['res_valid_days']} 天)";
+                                        } else {
+                                            $mode_txt = '永久無限次';
+                                        }
+                                    ?>
+                                        <div class="col-md-6 exclusive-item" data-category="<?php echo $res['cat_code']; ?>">
+                                            <div class="card border h-100 shadow-none overflow-hidden bg-light">
+                                                <div class="position-relative">
+                                                    <img src="<?php echo htmlspecialchars($res['cover_url']); ?>" class="card-img-top" style="height: 150px; object-fit: cover;" alt="<?php echo htmlspecialchars($res['res_title']); ?>">
+                                                    <span class="badge <?php echo $tb['cls']; ?> position-absolute top-0 start-0 m-2 shadow-sm">
+                                                        <i class="bi <?php echo $tb['icon']; ?> me-1"></i><?php echo $tb['label']; ?>
+                                                    </span>
+                                                    <span class="badge bg-dark text-warning position-absolute top-0 end-0 m-2">
+                                                        <?php echo $mode_txt; ?>
+                                                    </span>
+                                                </div>
 
-                                <!-- 檔案下載項目 -->
-                                <div class="col-md-6 exclusive-item" data-category="file">
-                                    <div class="p-3 border rounded-3 h-100 d-flex flex-column justify-content-between bg-light">
-                                        <div>
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <span class="badge bg-warning text-dark"><i class="bi bi-file-earmark-zip-fill me-1"></i>專屬檔案下載</span>
-                                                <small class="text-muted">ZIP • 18.4 MB</small>
+                                                <div class="card-body d-flex flex-column justify-content-between p-3">
+                                                    <div>
+                                                        <?php if (!empty($res['res_group_title'])): ?>
+                                                            <div class="text-primary fw-bold mb-1" style="font-size: 0.72rem;">
+                                                                <i class="bi bi-folder2-open me-1"></i><?php echo htmlspecialchars($res['res_group_title']); ?>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                        <h6 class="fw-bold text-dark mb-1"><?php echo htmlspecialchars($res['res_title']); ?></h6>
+                                                        <p class="text-muted small mb-2"><?php echo htmlspecialchars($res['res_brief'] ?? ''); ?></p>
+
+                                                        <!-- 統計列：瀏覽次數 + 好評讚數 -->
+                                                        <div class="d-flex align-items-center gap-3 text-muted mb-3" style="font-size: 0.75rem;">
+                                                            <span><i class="bi bi-eye me-1"></i><?php echo number_format((int)$res['res_count']); ?> 次使用</span>
+                                                            <span class="text-success"><i class="bi bi-hand-thumbs-up-fill me-1"></i><span id="resTopCount_<?php echo $rid; ?>"><?php echo number_format((int)$res['res_ratetop']); ?></span></span>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- 操作按鈕區（依權限自動顯示預覽、下載或 PTS 點數兌換） -->
+                                                    <div class="d-flex gap-2 mt-auto">
+                                                        <?php if ($can_unlock): ?>
+                                                            <?php if ((int)$res['res_can_preview'] === 1): ?>
+                                                                <button type="button"
+                                                                        class="btn btn-dark text-warning btn-sm flex-grow-1 fw-bold btn-use-resource"
+                                                                        data-res-id="<?php echo $rid; ?>"
+                                                                        data-mode="preview">
+                                                                    <i class="bi bi-play-circle me-1"></i>線上觀看 / 閱讀
+                                                                </button>
+                                                            <?php endif; ?>
+                                                            <?php if ((int)$res['res_can_download'] === 1): ?>
+                                                                <button type="button"
+                                                                        class="btn btn-warning text-dark btn-sm <?php echo ((int)$res['res_can_preview'] === 1) ? '' : 'flex-grow-1'; ?> fw-bold btn-use-resource"
+                                                                        data-res-id="<?php echo $rid; ?>"
+                                                                        data-mode="download">
+                                                                    <i class="bi bi-download me-1"></i>下載檔案
+                                                                </button>
+                                                            <?php endif; ?>
+                                                        <?php elseif ($cost_pts > 0): ?>
+                                                            <button type="button"
+                                                                    class="btn btn-warning text-dark btn-sm w-100 fw-bold btn-redeem-resource"
+                                                                    data-res-id="<?php echo $rid; ?>"
+                                                                    data-pts="<?php echo $cost_pts; ?>"
+                                                                    data-title="<?php echo htmlspecialchars($res['res_title'], ENT_QUOTES, 'UTF-8'); ?>">
+                                                                <i class="bi bi-coin me-1"></i>使用 <?php echo number_format($cost_pts); ?> PTS 兌換解鎖
+                                                            </button>
+                                                        <?php else: ?>
+                                                            <button type="button" class="btn btn-outline-secondary btn-sm w-100" disabled>
+                                                                <i class="bi bi-lock-fill me-1"></i>
+                                                                <?php echo ((int)$res['res_auth_rule'] === 2) ? '報名指定課程後自動解鎖' : '需升級更高 VIP 等級解鎖'; ?>
+                                                            </button>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <h6 class="fw-bold text-dark">5SL 黑金商務版 UI 元件庫與 PSD/Figma 設計原始檔</h6>
-                                            <p class="text-muted small mb-3">包含全套自適應按鈕、3D 卡片遮罩與標準資料庫 SQL 匯入結構。</p>
                                         </div>
-                                        <button type="button" class="btn btn-warning text-dark btn-sm w-100 fw-bold btn-download-file" data-filename="5SL_Premium_UI_Kit_2026.zip">
-                                            <i class="bi bi-download me-1"></i>安全驗證並下載檔案
-                                        </button>
-                                    </div>
-                                </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </div>
-                        </div> <!-- 結束區塊 2：exclusive-pane -->
+                        </div>
 
                         <!-- ============================================================
                              區塊 3：訂閱管理 (續費、變更方案、取消訂閱、更新信用卡)
@@ -797,57 +880,145 @@ $(function() {
         }
     });
 
-    // 3. 開啟限定媒體預覽彈窗 (影片 / 音訊 / 文章)
-    $(document).on('click', '.btn-open-media', function() {
-        const title = $(this).attr('data-title');
-        const type = $(this).attr('data-type');
-        $('#mediaModalTitle').text(title);
+    // 3. 課程素材線上預覽 / 檔案下載（串接 act_access_resource）
+    $(document).on('click', '.btn-use-resource', function() {
+        const resId   = $(this).attr('data-res-id');
+        const useMode = $(this).attr('data-mode') || 'preview';
 
-        let bodyHtml = '';
-        if (type === 'video') {
-            bodyHtml = `
-                <div class="ratio ratio-16x9 bg-black rounded overflow-hidden border border-secondary">
-                    <div class="d-flex flex-column align-items-center justify-content-center text-white-50">
-                        <i class="bi bi-play-btn-fill display-1 text-warning mb-2"></i>
-                        <p class="mb-0">VIP 專屬串流播放器已就緒 (權限驗證通過)</p>
-                        <small class="text-muted">實際串接後可載入加密 HLS 串流或專屬 Vimeo/YouTube 私有影片</small>
-                    </div>
-                </div>`;
-        } else if (type === 'audio') {
-            bodyHtml = `
-                <div class="p-4 bg-black rounded border border-secondary">
-                    <i class="bi bi-soundwave display-3 text-info mb-3 d-block"></i>
-                    <h6 class="text-white mb-3">${title}</h6>
-                    <audio controls class="w-100">
-                        <source src="" type="audio/mpeg">
-                        您的瀏覽器不支援音訊播放元件。
-                    </audio>
-                </div>`;
-        } else {
-            bodyHtml = `
-                <div class="text-start p-3 bg-white text-dark rounded" style="max-height: 400px; overflow-y: auto;">
-                    <h5 class="fw-bold mb-3">${title}</h5>
-                    <p class="text-muted small">發布日期：2026-11-01 • 限定 VIP 訂閱會員閱讀</p>
-                    <hr>
-                    <p class="lh-lg">在現代前後端分離架構中，Session 安全性與 API 權限控管是保護會員付費內容的核心防線。透過 PHP 後端驗證會員訂閱到期日（<code>expire_date >= NOW()</code>），可確保只有有效訂閱者能取得真實檔案下載憑證...</p>
-                </div>`;
-        }
-
-        $('#mediaModalBody').html(bodyHtml);
-        const mediaModal = new bootstrap.Modal(document.getElementById('exclusiveMediaModal'));
-        mediaModal.show();
-    });
-
-    // 4. 限定檔案安全驗證下載
-    $('.btn-download-file').on('click', function() {
-        const filename = $(this).attr('data-filename');
         if (window.fslLoader) window.fslLoader.show();
 
-        setTimeout(function() {
+        $.post('./funcFiles/5sl_act_member.php', {
+            action: 'act_access_resource',
+            res_id: resId,
+            use_mode: useMode
+        }, function(res) {
             if (window.fslLoader) window.fslLoader.hide();
-            showProductsAlert('success', `權限驗證通過！已開始下載專屬檔案：「${filename}」`);
-        }, 600);
+
+            if (res.success !== 1) {
+                showProductsAlert('danger', res.message || '無法存取此素材資源');
+                return;
+            }
+
+            // 若為直接下載檔案模式
+            if (useMode === 'download' && res.res_media_url) {
+                showProductsAlert('success', `權限驗證通過！正在為您開啟/下載「${res.res_title}」（剩餘額度：${res.remain_str}）`);
+                window.open(res.res_media_url, '_blank');
+                return;
+            }
+
+            // 線上預覽模式：依 res_type 渲染對應播放器或閱讀器
+            $('#mediaModalTitle').text(res.res_title);
+            let contentHtml = '';
+            const rType = parseInt(res.res_type, 10);
+            const mUrl  = res.res_media_url || '';
+
+            if (rType === 4) {
+                // YouTube 視訊自動轉換為 embed 播放器
+                //let ytId = '';
+                let finalEmbedUrl = '';
+                const m = mUrl.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+                if (m && m[1]) {
+                    //ytId = m[1];
+                    var embedPath = "em" + "bed";
+                    finalEmbedUrl = "https://youtube.com" + "/" + embedPath + "/" + m[1];
+                }
+                contentHtml = finalEmbedUrl
+                    ? `<div class="ratio ratio-16x9 bg-black rounded overflow-hidden">`
+                        + `<iframe src="`+ finalEmbedUrl +`" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; web-share; compute-pressure" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>`
+                        + `</iframe></div>`
+                    : `<div class="p-4 text-warning">無法解析 YouTube 影片網址</div>`;
+            } else if (rType === 5) {
+                // 私房音檔播放器
+                contentHtml = `
+                    <div class="p-4 bg-black rounded border border-secondary text-center">
+                        <i class="bi bi-soundwave display-3 text-info mb-3 d-block"></i>
+                        <h6 class="text-white mb-3">${$('<div>').text(res.res_title).html()}</h6>
+                        <audio controls autoplay class="w-100"><source src="${mUrl}"></audio>
+                    </div>`;
+            } else if (rType === 2) {
+                // 高解析圖檔預覽
+                contentHtml = `<div class="text-center"><img src="${mUrl}" class="img-fluid rounded shadow" style="max-height: 480px;" alt="素材圖檔"></div>`;
+            } else if (rType === 3) {
+                // 文書簡報檔案 (PDF 可內嵌預覽，PPT/DOC 提供安全下載鈕)
+                const isPdf = (res.res_file_ext || '').toUpperCase() === 'PDF' || mUrl.toLowerCase().endsWith('.pdf');
+                contentHtml = isPdf
+                    ? `<div class="ratio ratio-16x9 bg-white rounded overflow-hidden"><iframe src="${mUrl}"></iframe></div>`
+                    : `<div class="p-4 bg-black rounded border border-secondary text-center">
+                           <i class="bi bi-file-earmark-slides display-3 text-warning mb-2 d-block"></i>
+                           <p class="text-white mb-3">文書簡報檔案 (${res.res_file_ext}) 已準備就緒</p>
+                           ${res.can_download === 1 ? `<a href="${mUrl}" target="_blank" class="btn btn-warning text-dark fw-bold px-4"><i class="bi bi-download me-1"></i>立即下載檔案</a>` : ''}
+                       </div>`;
+            } else {
+                // 文字專文閱讀器
+                contentHtml = `<div class="text-start p-4 bg-white text-dark rounded lh-lg" style="max-height: 440px; overflow-y: auto;">${res.res_body}</div>`;
+            }
+
+            // 底部加入「好評按讚 / 負評」互動列
+            const rateBarHtml = `
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top border-secondary text-start small">
+                    <span class="text-white-50">使用額度狀態：<strong class="text-warning">${res.remain_str}</strong></span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-white-50">這份素材對您有幫助嗎？</span>
+                        <button type="button" class="btn btn-sm btn-outline-success btn-rate-res" data-res-id="${res.res_id}" data-vote="1">
+                            <i class="bi bi-hand-thumbs-up-fill me-1"></i>有幫助 (<span id="modalTopCount">${res.res_ratetop}</span>)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary btn-rate-res" data-res-id="${res.res_id}" data-vote="-1">
+                            <i class="bi bi-hand-thumbs-down"></i>
+                        </button>
+                    </div>
+                </div>`;
+
+            $('#mediaModalBody').html(contentHtml + rateBarHtml);
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('exclusiveMediaModal')).show();
+        }, 'json');
     });
+    // 確保會員關閉預覽彈窗時影片聲音也會立刻停止
+    $('#consoleInstantModal, #exclusiveMediaModal').on('hidden.bs.modal', function() {
+        $(this).find('.modal-body').empty();
+    });
+
+    // 4. PTS 點數兌換解鎖素材 (act_redeem_resource)
+    $(document).on('click', '.btn-redeem-resource', function() {
+        const resId = $(this).attr('data-res-id');
+        const pts   = $(this).attr('data-pts');
+        const title = $(this).attr('data-title');
+
+        if (!confirm(`確定要使用 ${pts} PTS 紅利點數兌換解鎖「${title}」嗎？`)) return;
+        if (window.fslLoader) window.fslLoader.show();
+
+        $.post('./funcFiles/5sl_act_member.php', {
+            action: 'act_redeem_resource',
+            res_id: resId
+        }, function(res) {
+            if (window.fslLoader) window.fslLoader.hide();
+            if (res.success === 1) {
+                alert(res.message);
+                window.location.reload();
+            } else {
+                showProductsAlert('danger', res.message || '兌換失敗，請稍後再試。');
+            }
+        }, 'json');
+    });
+
+    // 5. 素材按讚/負評評價 (act_rate_resource)
+    $(document).on('click', '.btn-rate-res', function() {
+        const resId = $(this).attr('data-res-id');
+        const vote  = $(this).attr('data-vote');
+
+        $.post('./funcFiles/5sl_act_member.php', {
+            action: 'act_rate_resource',
+            res_id: resId,
+            vote: vote
+        }, function(res) {
+            if (res.success === 1) {
+                $('#modalTopCount').text(res.res_ratetop);
+                $(`#resTopCount_${resId}`).text(res.res_ratetop);
+            } else {
+                alert(res.message);
+            }
+        }, 'json');
+    });
+
 
     // 5. 顧問服務自助改期互動（支援現有空檔直接換時段 + 無合適時段自動轉客服協調工單）
     const openSlotsByCourse = <?php echo json_encode((object)$open_slots_by_course, JSON_UNESCAPED_UNICODE); ?>;
@@ -1084,5 +1255,64 @@ $(function() {
             showProductsAlert('success', `扣款信用卡已成功更新為末四碼 ${last4} 之卡片！`);
         }, 700);
     });
+
+
+    // 補回「已購線上課程進度 -> 繼續上課」與「歷史顧問預約 -> 查看紀要」按鈕事件 (.btn-open-media)
+    $(document).on('click', '.btn-open-media', function() {
+        const title      = $(this).attr('data-title') || '課程單元學習視窗';
+        const meetingUrl = ($(this).attr('data-meeting') || '').trim();
+        const safeTitle  = $('<div>').text(title).html();
+
+        $('#mediaModalTitle').text(title);
+
+        let bodyHtml = '';
+        if (meetingUrl !== '') {
+            // 若該梯次有設定線上會議室連結（Zoom / Google Meet / 直播室）
+            const isFullUrl = /^https?:\/\//i.test(meetingUrl);
+            bodyHtml = `
+                <div class="p-4 bg-black rounded border border-warning text-center">
+                    <i class="bi bi-camera-video-fill display-3 text-warning mb-3 d-block"></i>
+                    <h5 class="fw-bold text-white mb-2">${safeTitle}</h5>
+                    <p class="text-white-50 small mb-3">專屬線上直播／互動教室已準備就緒</p>
+                    <div class="p-2 bg-dark rounded border border-secondary text-warning small mb-4">
+                        會議室代碼 / 連結：<code>${$('<div>').text(meetingUrl).html()}</code>
+                    </div>
+                    ${isFullUrl ? `<a href="${meetingUrl}" target="_blank" class="btn btn-warning text-dark fw-bold px-4 py-2"><i class="bi bi-box-arrow-up-right me-1"></i>立即前往線上教室</a>` : ''}
+                </div>`;
+        } else {
+            // 一般錄播課程單元播放器 + 引導前往限定內容專區下載講義
+            bodyHtml = `
+                <div class="ratio ratio-16x9 bg-black rounded overflow-hidden border border-secondary mb-3">
+                    <div class="d-flex flex-column align-items-center justify-content-center text-white-50 p-3">
+                        <i class="bi bi-play-btn-fill display-1 text-warning mb-2"></i>
+                        <h6 class="text-white fw-bold mb-1">${safeTitle}</h6>
+                        <p class="small text-white-50 mb-0">VIP 專屬課程串流播放器已就緒（權限驗證通過）</p>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-2">
+                    <span class="small text-white-50">需要搭配本課程的簡報講義、音檔或延伸資料嗎？</span>
+                    <button type="button" class="btn btn-warning text-dark btn-sm fw-bold px-3" id="btnJumpToCourseResources">
+                        <i class="bi bi-folder2-open me-1"></i>前往課程素材庫
+                    </button>
+                </div>`;
+        }
+
+        $('#mediaModalBody').html(bodyHtml);
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('exclusiveMediaModal')).show();
+    });
+
+    // 點擊彈窗內的「前往課程素材庫」自動關閉彈窗並切換至「限定內容專區」分頁
+    $(document).on('click', '#btnJumpToCourseResources', function() {
+        bootstrap.Modal.getInstance(document.getElementById('exclusiveMediaModal')).hide();
+        const tabTrigger = document.getElementById('exclusive-tab');
+        if (tabTrigger) {
+            bootstrap.Tab.getOrCreateInstance(tabTrigger).show();
+        }
+    });
+
+
+
+
+
 });
 </script>

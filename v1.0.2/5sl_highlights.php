@@ -2,25 +2,42 @@
 $current_page = 'highlights'; // 宣告身分為「更多花絮」子頁面
 include_once '5sl_include_header.php';
 
-// 💡 預留後台 MySQL 資料庫對接陣列結構（未來可直接替換為 SELECT * FROM fsl_highlights ORDER BY sort_order ASC）
-$all_highlights = array(
-    array('id' => 1, 'cat' => 'workshop', 'date' => '2026.10', 'img' => 'imageFiles/test/1.jpg', 'title' => '靜心覺察工作坊', 'desc' => '2026 秋季場・台北工作室', 'video' => ''),
-    array('id' => 2, 'cat' => 'salon',    'date' => '2026.10', 'img' => 'imageFiles/test/2.jpg', 'title' => '第五季生命對話沙龍', 'desc' => '精選活動紀錄影片・深度對談', 'video' => 'https://youtu.be'),
-    array('id' => 3, 'cat' => 'workshop', 'date' => '2026.09', 'img' => 'imageFiles/test/3.jpg', 'title' => '內在卡點探索課程', 'desc' => '小組深度共學與信念梳理', 'video' => ''),
-    array('id' => 4, 'cat' => 'salon',    'date' => '2026.09', 'img' => 'imageFiles/test/4.jpg', 'title' => '藝術療癒與自我重塑', 'desc' => '週末沉浸式色彩與自我對話體驗', 'video' => ''),
-    array('id' => 5, 'cat' => 'video',    'date' => '2026.08', 'img' => 'imageFiles/test/5.jpg', 'title' => '學員蛻變真實分享', 'desc' => '訪談實錄・聽見重新發光的故事', 'video' => 'https://youtu.be'),
-    array('id' => 6, 'cat' => 'retreat',  'date' => '2026.08', 'img' => 'imageFiles/test/6.jpg', 'title' => '山林靜謐能量營', 'desc' => '兩天一夜自然對話與身心歸零', 'video' => ''),
-    array('id' => 7, 'cat' => 'workshop', 'date' => '2026.07', 'img' => 'imageFiles/test/7.jpg', 'title' => '價值觀重整實戰班', 'desc' => '第 12 期結業花絮與生命藍圖繪製', 'video' => ''),
-    array('id' => 8, 'cat' => 'workshop', 'date' => '2026.07', 'img' => 'imageFiles/test/8.jpg', 'title' => '呼吸與身體覺察課', 'desc' => '釋放日常緊繃與情緒印記練習', 'video' => ''),
-    array('id' => 9, 'cat' => 'salon',    'date' => '2026.06', 'img' => 'imageFiles/test/9.jpg', 'title' => '年度生命藝術展覽', 'desc' => '開幕式精華片段與創作導覽', 'video' => 'https://youtu.be'),
-    array('id' => 10,'cat' => 'workshop', 'date' => '2026.06', 'img' => 'imageFiles/test/10.jpg','title' => '一對一教練引導實況', 'desc' => '專注傾聽與陪伴的微光時刻', 'video' => ''),
-    array('id' => 11,'cat' => 'salon',    'date' => '2026.05', 'img' => 'imageFiles/test/11.jpg','title' => '女性力量覺醒茶會', 'desc' => '午後溫暖交流與生命故事分享', 'video' => ''),
-    array('id' => 12,'cat' => 'salon',    'date' => '2026.05', 'img' => 'imageFiles/test/12.jpg','title' => '跨界心靈美學講座', 'desc' => '特邀講師對談紀錄・美學與自癒', 'video' => ''),
-    array('id' => 13,'cat' => 'retreat',  'date' => '2026.04', 'img' => 'imageFiles/test/13.jpg','title' => '海岸晨光靜心步行', 'desc' => '在海風與浪聲中重新校準內在節奏', 'video' => ''),
-    array('id' => 14,'cat' => 'workshop', 'date' => '2026.04', 'img' => 'imageFiles/test/14.jpg','title' => '面對恐懼・鬆開自己專場', 'desc' => '高安全感團體支持與情緒釋放', 'video' => ''),
-    array('id' => 15,'cat' => 'retreat',  'date' => '2026.03', 'img' => 'imageFiles/test/15.jpg','title' => '春季茶席與靜觀練習', 'desc' => '一茶一念・回到當下的純粹感知', 'video' => ''),
-    array('id' => 16,'cat' => 'salon',    'date' => '2026.03', 'img' => 'imageFiles/test/16.jpg','title' => '第五季創始回顧之夜', 'desc' => '歷屆學員重聚與生命藝術展演', 'video' => 'https://youtu.be')
-);
+// 1. 從公開多媒體資料表 fsl_media 撈取所有公開上架紀錄（依事件發生日期與排序權重）
+$sql_media = "
+    SELECT med_id, med_event_date, med_category, med_type, med_title, med_brief, med_url, med_duration
+    FROM fsl_media
+    WHERE med_status = 1
+    ORDER BY med_event_date DESC, med_sort ASC, med_id DESC
+";
+$raw_media = isset($DB) ? $DB->query($sql_media) : array();
+if (!is_array($raw_media)) $raw_media = array();
+
+$all_highlights = array();
+foreach ($raw_media as $row) {
+    $mid   = (int)$row['med_id'];
+    $mtype = (int)$row['med_type']; // 1=圖檔, 2=YouTube視訊, 3=聲音檔
+
+    // 優先讀取後台上傳的主圖與縮圖 (./5sladmin/uploadFiles/md/mdimg_{id}_.jpg)
+    $thumb_disk = './5sladmin/uploadFiles/md/mdimg_' . $mid . '_thumb.jpg';
+    $main_disk  = './5sladmin/uploadFiles/md/mdimg_' . $mid . '_.jpg';
+    $fallback   = 'imageFiles/test/' . ((($mid - 1) % 18) + 1) . '.jpg';
+
+    $thumb_url = file_exists($thumb_disk) ? ($thumb_disk . '?v=' . filemtime($thumb_disk)) : (file_exists($main_disk) ? ($main_disk . '?v=' . filemtime($main_disk)) : $fallback);
+    $main_url  = file_exists($main_disk)  ? ($main_disk . '?v=' . filemtime($main_disk))   : $thumb_url;
+
+    $all_highlights[] = array(
+        'id'        => $mid,
+        'cat'       => $row['med_category'] ?: 'workshop',
+        'type'      => $mtype,
+        'date'      => !empty($row['med_event_date']) ? date('Y.m.d', strtotime($row['med_event_date'])) : '',
+        'thumb_img' => $thumb_url,
+        'main_img'  => $main_url,
+        'title'     => $row['med_title'],
+        'desc'      => $row['med_brief'] ?? '',
+        'media_url' => trim((string)($row['med_url'] ?? '')),
+        'duration'  => trim((string)($row['med_duration'] ?? ''))
+    );
+}
 ?>
 
         <!-- 頁面頂部視覺 Banner 區 -->
@@ -31,13 +48,13 @@ $all_highlights = array(
                     <p class="fs-5 text-white-50 mb-0">生命中的「改變」往往只是過程中的那一微秒</p>
                 </div>
                 <p class="text-white-50 mx-auto mb-0" style="max-width: 640px; letter-spacing: 1px;">
-                    紀錄每一次真誠相遇、靜心覺察與重新發光的片刻。點擊任意照片可放大檢視完整畫面與活動紀實，點擊播放鍵即可觀看現場影音實錄。
+                    紀錄每一次真誠相遇、靜心覺察與重新發光的片刻。點擊照片可放大檢視完整紀實，點擊播放鍵即可觀看現場影音或聆聽聲頻實錄。
                 </p>
             </div>
         </section>
 
         <!-- 花絮網格總覽與分類篩選區 -->
-        <section class="py-5 bg-dark text-white border-top border-secondary border-opacity-25">
+        <section class="py-5 bg-transparent border-top border-secondary border-opacity-25">
             <div class="container py-4">
                 
                 <!-- 分類篩選按鈕列 -->
@@ -47,49 +64,85 @@ $all_highlights = array(
                     <button type="button" class="btn btn-sm fsl-faq-filter-btn" data-gallery-filter="salon">生命藝術沙龍</button>
                     <button type="button" class="btn btn-sm fsl-faq-filter-btn" data-gallery-filter="retreat">自然能量營</button>
                     <button type="button" class="btn btn-sm fsl-faq-filter-btn" data-gallery-filter="video"><i class="bi bi-play-circle me-1"></i>影音實錄</button>
+                    <button type="button" class="btn btn-sm fsl-faq-filter-btn" data-gallery-filter="audio"><i class="bi bi-headphones me-1"></i>聲音紀實</button>
                 </div>
 
                 <!-- 響應式四欄花絮作品網格 -->
                 <div class="row g-4" id="fslHighlightsGrid">
-                    <?php foreach ($all_highlights as $idx => $item): 
-                        $has_video = !empty($item['video']);
-                        $is_initially_hidden = ($idx >= 8); // 預設先顯示前 8 筆，其餘點擊「載入更多」展開
-                    ?>
-                    <div class="col-sm-6 col-md-4 col-lg-3 fsl-grid-card-col <?php echo $is_initially_hidden ? 'd-none fsl-extra-card' : ''; ?>" 
-                         data-cat="<?php echo htmlspecialchars($item['cat']); ?>" 
-                         data-has-video="<?php echo $has_video ? '1' : '0'; ?>">
-                        
-                        <div class="portfolio-card-wrap h-100">
-                            <div class="card border-0 shadow-sm overflow-hidden portfolio-card fsl-grid-highlight-card">
-                                <!-- 右上角時間標籤 -->
-                                <span class="badge bg-dark bg-opacity-75 text-warning border border-warning border-opacity-50 position-absolute top-0 end-0 m-3 px-2 py-1" style="z-index: 4; font-size: 0.72rem; letter-spacing: 1px;">
-                                    <?php echo htmlspecialchars($item['date']); ?>
-                                </span>
+                    <?php if (empty($all_highlights)): ?>
+                        <div class="col-12 text-center py-5 text-white-50">
+                            目前尚無公開上架的活動花絮紀錄，敬請期待近期活動更新！
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($all_highlights as $idx => $item): 
+                            $mtype     = (int)$item['type']; // 1=圖檔, 2=YouTube視訊, 3=聲音檔
+                            $has_video = ($mtype === 2 && !empty($item['media_url']));
+                            $has_audio = ($mtype === 3 && !empty($item['media_url']));
+                            $is_initially_hidden = ($idx >= 8);
+                        ?>
+                        <div class="col-sm-6 col-md-4 col-lg-3 fsl-grid-card-col <?php echo $is_initially_hidden ? 'd-none fsl-extra-card' : ''; ?>" 
+                             data-cat="<?php echo htmlspecialchars($item['cat']); ?>" 
+                             data-has-video="<?php echo $has_video ? '1' : '0'; ?>"
+                             data-has-audio="<?php echo $has_audio ? '1' : '0'; ?>">
+                            
+                            <div class="portfolio-card-wrap h-100">
+                                <div class="card border-0 shadow-sm overflow-hidden portfolio-card fsl-grid-highlight-card"
+                                     style="cursor: pointer;"
+                                     data-media-type="<?php echo $mtype; ?>"
+                                     data-main-img="<?php echo htmlspecialchars($item['main_img']); ?>"
+                                     data-media-url="<?php echo htmlspecialchars($item['media_url']); ?>"
+                                     data-title="<?php echo htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8'); ?>"
+                                     data-desc="<?php echo htmlspecialchars($item['desc'], ENT_QUOTES, 'UTF-8'); ?>"
+                                     data-date="<?php echo htmlspecialchars($item['date']); ?>">
+                                    
+                                    <!-- 左上角媒體類型小標籤（僅視訊與音檔顯示，保持純照片簡潔美感） -->
+                                    <?php if ($has_video): ?>
+                                        <span class="badge bg-danger position-absolute top-0 start-0 m-3 px-2 py-1 shadow-sm" style="z-index: 4; font-size: 0.7rem;">
+                                            <i class="bi bi-youtube me-1"></i>影音<?php echo $item['duration'] ? ' • ' . htmlspecialchars($item['duration']) : ''; ?>
+                                        </span>
+                                    <?php elseif ($has_audio): ?>
+                                        <span class="badge bg-info text-dark position-absolute top-0 start-0 m-3 px-2 py-1 shadow-sm" style="z-index: 4; font-size: 0.7rem;">
+                                            <i class="bi bi-soundwave me-1"></i>音頻<?php echo $item['duration'] ? ' • ' . htmlspecialchars($item['duration']) : ''; ?>
+                                        </span>
+                                    <?php endif; ?>
 
-                                <img src="<?php echo htmlspecialchars($item['img']); ?>" 
-                                     class="card-img-top" 
-                                     alt="<?php echo htmlspecialchars($item['title']); ?>" 
-                                     loading="lazy"
-                                     onerror="this.src='imageFiles/test/1.jpg'">
+                                    <!-- 右上角事件發生日期標籤 -->
+                                    <span class="badge bg-dark bg-opacity-75 text-warning border border-warning border-opacity-50 position-absolute top-0 end-0 m-3 px-2 py-1" style="z-index: 4; font-size: 0.72rem; letter-spacing: 1px;">
+                                        <?php echo htmlspecialchars($item['date']); ?>
+                                    </span>
 
-                                <?php if ($has_video): ?>
-                                    <!-- 影片卡片：共用全站白色波紋播放鈕與 Lightbox 彈窗 -->
-                                    <button type="button" class="video-play-btn fsl-card-play-btn" data-bs-toggle="modal" data-bs-target="#videoLightboxModal" data-video-url="<?php echo htmlspecialchars($item['video']); ?>" aria-label="播放影片">
-                                        <div class="play-icon-triangle"></div>
-                                        <div class="play-btn-ripple"></div>
-                                    </button>
-                                <?php endif; ?>
+                                    <img src="<?php echo htmlspecialchars($item['thumb_img']); ?>" 
+                                         class="card-img-top" 
+                                         alt="<?php echo htmlspecialchars($item['title']); ?>" 
+                                         loading="lazy"
+                                         onerror="this.src='imageFiles/test/1.jpg'">
 
-                                <div class="card-body portfolio-overlay text-white">
-                                    <h6 class="fw-bold mb-1"><?php echo htmlspecialchars($item['title']); ?></h6>
-                                    <p class="text-white-50 small mb-0"><?php echo htmlspecialchars($item['desc']); ?></p>
+                                    <?php if ($has_video): ?>
+                                        <!-- YouTube 視訊播放鈕 -->
+                                        <button type="button" class="video-play-btn fsl-card-play-btn" aria-label="播放影片">
+                                            <div class="play-icon-triangle"></div>
+                                            <div class="play-btn-ripple"></div>
+                                        </button>
+                                    <?php elseif ($has_audio): ?>
+                                        <!-- 聲音檔耳機聲波播放鈕（保留 fsl-card-play-btn 確保正中央定位） -->
+                                        <button type="button" class="video-play-btn fsl-card-play-btn fsl-card-audio-btn" style="background: rgba(13, 202, 240, 0.92); border-color: #fff;" aria-label="聆聽音頻">
+                                            <i class="bi bi-headphones text-dark fs-3" style="line-height: 1;"></i>
+                                            <div class="play-btn-ripple"></div>
+                                        </button>
+                                    <?php endif; ?>
+
+                                    <div class="card-body portfolio-overlay text-white">
+                                        <h6 class="fw-bold mb-1"><?php echo htmlspecialchars($item['title']); ?></h6>
+                                        <p class="text-white-50 small mb-0"><?php echo htmlspecialchars($item['desc']); ?></p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                    </div>
-                    <?php endforeach; ?>
+                        </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
+
                 <!-- 底部控制區：載入更多 & 返回首頁 -->
                 <div class="text-center mt-5 pt-3 d-flex flex-wrap justify-content-center gap-3">
                     <?php if (count($all_highlights) > 8): ?>
@@ -97,7 +150,7 @@ $all_highlights = array(
                             載入更多花絮 <i class="bi bi-plus-lg ms-1"></i>
                         </button>
                     <?php endif; ?>
-                    <a href="index.php" class="btn btn-outline-light rounded-3 px-4 py-2 fw-semibold">
+                    <a href="index.php#portfolio" class="btn btn-outline-light rounded-3 px-4 py-2 fw-semibold">
                         <i class="bi bi-arrow-left me-1"></i> 返回首頁
                     </a>
                 </div>
@@ -106,17 +159,18 @@ $all_highlights = array(
         </section>
 
         <!-- ==========================================================================
-            共用 Lightbox 1：與螢幕大小完美自適應的影音彈出視窗
+            共用 Lightbox 1：與螢幕大小完美自適應的影音彈出視窗 (YouTube 視訊)
             ========================================================================== -->
-        <div class="modal fade" id="videoLightboxModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal fade" id="hlVideoLightboxModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
             <div class="modal-dialog modal-dialog-centered modal-xl">
                 <div class="modal-content bg-transparent border-0">
-                    <div class="text-end mb-2">
-                        <button type="button" class="btn-close btn-close-white fs-4 shadow-none" data-bs-dismiss="modal" aria-label="Close" id="btnOverlayVideoClose"></button>
+                    <div class="d-flex justify-content-between align-items-center mb-2 text-white">
+                        <span class="fw-bold text-warning small" id="hlVideoLightboxTitle"></span>
+                        <button type="button" class="btn-close btn-close-white fs-4 shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-0">
                         <div class="ratio ratio-16x9 shadow-2xl rounded-3 overflow-hidden bg-black">
-                            <iframe src="" id="lightboxIframe" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                            <iframe src="" id="hlLightboxIframe" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; web-share; compute-pressure" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
                     </div>
                 </div>
@@ -136,7 +190,10 @@ $all_highlights = array(
                         <div class="d-inline-block position-relative rounded-3 overflow-hidden shadow-lg bg-dark border border-secondary border-opacity-25">
                             <img src="" id="previewLightboxImg" alt="花絮大圖預覽" class="img-fluid d-block" style="max-height: 80vh; width: auto; object-fit: contain;">
                             <div class="p-3 bg-dark bg-opacity-95 text-start border-top border-secondary border-opacity-25">
-                                <h5 class="fw-bold text-white mb-1" id="previewLightboxTitle"></h5>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <h5 class="fw-bold text-white mb-0" id="previewLightboxTitle"></h5>
+                                    <span class="badge bg-warning text-dark" id="previewLightboxDate"></span>
+                                </div>
                                 <p class="text-white-50 small mb-0" id="previewLightboxDesc"></p>
                             </div>
                         </div>
@@ -145,7 +202,46 @@ $all_highlights = array(
             </div>
         </div>
 
-<?php
-// 引入完整頁尾與地端腳本載入區
-include_once '5sl_include_footer.php';
-?>
+        <!-- ==========================================================================
+            共用 Lightbox 3：聲音檔音頻播放燈箱
+            ========================================================================== -->
+        <div class="modal fade" id="audioLightboxModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark text-white border border-warning shadow-lg rounded-4 overflow-hidden">
+                    <div class="modal-header border-secondary">
+                        <span class="badge bg-info text-dark fw-bold me-2"><i class="bi bi-soundwave me-1"></i>AUDIO STORY</span>
+                        <span class="small text-warning fw-bold" id="audioLightboxDate"></span>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4 text-center">
+                        <img src="" id="audioLightboxCover" class="rounded-3 shadow mb-3 border border-secondary" style="width: 160px; height: 160px; object-fit: cover;" alt="音頻封面">
+                        <h5 class="fw-bold text-white mb-1" id="audioLightboxTitle"></h5>
+                        <p class="text-white-50 small mb-4" id="audioLightboxDesc"></p>
+                        <audio controls id="audioLightboxPlayer" class="w-100">
+                            <source src="" type="audio/mpeg">
+                            您的瀏覽器不支援音訊播放元件。
+                        </audio>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+<?php include_once '5sl_include_footer.php'; ?>
+
+<script>
+$(function() {
+    // 關閉視訊或音檔 Lightbox 時立即停止播放
+    $('#hlVideoLightboxModal').on('hidden.bs.modal', function() {
+        $('#hlLightboxIframe').attr('src', '');
+    });
+    $('#audioLightboxModal').on('hidden.bs.modal', function() {
+        const player = document.getElementById('audioLightboxPlayer');
+        if (player) {
+            player.pause();
+            player.currentTime = 0;
+            player.src = '';
+        }
+    });
+});
+</script>

@@ -18,6 +18,58 @@ if (!empty($mb_id) && $mb_id > 0 && isset($DB)) {
         }
     }
 }
+
+// 預載所有上架課程詳細資訊與開放梯次（供首頁點擊「立即預約報名 / 我要預約」先跳出確認彈窗）
+$home_courses_map = array();
+if (isset($DB)) {
+    $cs_rows = $DB->query("SELECT course_id, course_title, course_brief, course_cost, course_type, course_max FROM fsl_courses WHERE course_status = 1");
+    if (is_array($cs_rows)) {
+        foreach ($cs_rows as $cr) {
+            $cid = (int)$cr['course_id'];
+            $cover_path = './5sladmin/uploadFiles/cs/cimg_' . $cid . '_.jpg';
+            $cover_url  = file_exists($cover_path)
+                ? ($cover_path . '?v=' . filemtime($cover_path))
+                : ('imageFiles/test/' . ((($cid - 1) % 18) + 1) . '.jpg');
+
+            $home_courses_map[$cid] = array(
+                'course_id'    => $cid,
+                'course_title' => $cr['course_title'],
+                'course_brief' => strip_tags($cr['course_brief'] ?? '人生第五季精選陪跑與生命美學課程，陪伴您一步一步找回方向與力量。'),
+                'course_cost'  => (int)round((float)$cr['course_cost']),
+                'course_type'  => (int)$cr['course_type'],
+                'cover_url'    => $cover_url,
+                'sessions'     => array()
+            );
+        }
+    }
+
+    $sess_rows = $DB->query("
+        SELECT s.sess_id, s.course_id, s.sess_batch, s.sess_altname, s.sess_startdate, s.sess_starttime, s.sess_duration, s.sess_enrollee, c.course_max
+        FROM fsl_course_sessions s
+        INNER JOIN fsl_courses c ON s.course_id = c.course_id
+        WHERE s.sess_status = 1 AND c.course_status = 1 AND s.sess_enrollee < c.course_max
+        ORDER BY s.sess_startdate ASC, s.sess_starttime ASC
+    ");
+    $wk_chars = array('日', '一', '二', '三', '四', '五', '六');
+    if (is_array($sess_rows)) {
+        foreach ($sess_rows as $sr) {
+            $cid = (int)$sr['course_id'];
+            if (!isset($home_courses_map[$cid])) continue;
+            $ts1 = strtotime($sr['sess_startdate'] . ' ' . $sr['sess_starttime']);
+            $ts2 = $ts1 + ((int)$sr['sess_duration'] * 60);
+            $rem = max(1, (int)$sr['course_max'] - (int)$sr['sess_enrollee']);
+            $lbl = '第 ' . (int)$sr['sess_batch'] . ' 梯 • ' . date('Y/m/d', $ts1) . ' (' . $wk_chars[(int)date('w', $ts1)] . ') ' . date('H:i', $ts1) . '-' . date('H:i', $ts2);
+            if (!empty($sr['sess_altname'])) $lbl .= '｜' . $sr['sess_altname'];
+            $lbl .= " (剩餘 {$rem} 名額)";
+
+            $home_courses_map[$cid]['sessions'][] = array(
+                'sess_id' => (int)$sr['sess_id'],
+                'label'   => $lbl
+            );
+        }
+    }
+}
+
 ?>
 
         <!-- 為何需要人生第五季 -->
@@ -231,7 +283,6 @@ if (!empty($mb_id) && $mb_id > 0 && isset($DB)) {
                         <div class="ratio ratio-16x9 shadow-2xl rounded-3 overflow-hidden bg-black">
                             <!-- iframe 預設留空，由 JS 智慧管理注入與關閉拔除 -->
                             <iframe src="" id="lightboxIframe" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; web-share; compute-pressure" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                            <!-- <iframe src="" id="lightboxIframe" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
                         </div>
                     </div>
                 </div>
@@ -341,7 +392,7 @@ if (!empty($mb_id) && $mb_id > 0 && isset($DB)) {
                                     <p class="mb-0 text-warning fw-medium">一天一天看見自己開始發光</p>
                                 </div>
                                 <?php
-                                $cid        = 10; // 對應 courses.course_id（例如：10=步步向光陪跑, 11=身心之美孵化, 12=一對一深度陪談）
+                                $cid        = 10; // 對應 fsl_courses.course_id（例如：10=步步向光陪跑, 11=身心之美孵化, 12=一對一深度陪談）
                                 $is_wished  = !empty($user_wished_courses[$cid]);
                                 $heart_icon = $is_wished ? 'bi-heart-fill text-danger' : 'bi-heart';
                                 ?>
@@ -472,7 +523,7 @@ if (!empty($mb_id) && $mb_id > 0 && isset($DB)) {
 
 
                                 <?php
-                                $cid        = 11; // 對應 courses.course_id（例如：10=步步向光陪跑, 11=身心之美孵化, 12=一對一深度陪談）
+                                $cid        = 11; // 對應 fsl_courses.course_id（例如：10=步步向光陪跑, 11=身心之美孵化, 12=一對一深度陪談）
                                 $is_wished  = !empty($user_wished_courses[$cid]);
                                 $heart_icon = $is_wished ? 'bi-heart-fill text-danger' : 'bi-heart';
                                 ?>
@@ -553,48 +604,82 @@ if (!empty($mb_id) && $mb_id > 0 && isset($DB)) {
                     <!-- 可滑動軌道視窗（支援滑鼠拖曳與觸控滑動） -->
                     <div class="fsl-highlights-viewport" id="fslHighlightsViewport">
                         <div class="fsl-highlights-track" id="fslHighlightsTrack">
-
                             <?php
-                            // 💡 預留後台資料庫對接陣列結構（未來可直接替換為 MySQL SELECT 查詢結果，支援 10~20+ 筆資料）
-                            $highlights_items = array(
-                                array('img' => 'imageFiles/test/' . rand(1, 18) . '.jpg', 'title' => '靜心覺察工作坊', 'desc' => '2026 春季場・台北', 'video' => ''),
-                                array('img' => 'imageFiles/test/' . rand(1, 18) . '.jpg', 'title' => '第五季生命對話沙龍', 'desc' => '精選活動紀錄影片', 'video' => 'https://youtu.be'),
-                                array('img' => 'imageFiles/test/' . rand(1, 18) . '.jpg', 'title' => '內在卡點探索課程', 'desc' => '小組深度共學時刻', 'video' => ''),
-                                array('img' => 'imageFiles/test/' . rand(1, 18) . '.jpg', 'title' => '藝術療癒與自我重塑', 'desc' => '週末沉浸式體驗', 'video' => ''),
-                                array('img' => 'imageFiles/test/' . rand(1, 18) . '.jpg', 'title' => '學員蛻變真實分享', 'desc' => '訪談實錄・影音版', 'video' => 'https://youtu.be'),
-                                array('img' => 'imageFiles/test/' . rand(1, 18) . '.jpg', 'title' => '山林靜謐能量營', 'desc' => '兩天一夜自然對話', 'video' => ''),
-                                array('img' => 'imageFiles/test/' . rand(1, 18) . '.jpg', 'title' => '價值觀重整實戰班', 'desc' => '第 12 期結業花絮', 'video' => ''),
-                                array('img' => 'imageFiles/test/' . rand(1, 18) . '.jpg', 'title' => '呼吸與身體覺察課', 'desc' => '釋放緊繃情緒練習', 'video' => ''),
-                                array('img' => 'imageFiles/test/' . rand(1, 18) . '.jpg', 'title' => '年度生命藝術展覽', 'desc' => '開幕式精華片段', 'video' => 'https://youtu.be'),
-                                array('img' => 'imageFiles/test/' . rand(1, 18) . '.jpg', 'title' => '一對一教練引導實況', 'desc' => '專注傾聽的微光時刻', 'video' => ''),
-                                array('img' => 'imageFiles/test/' . rand(1, 18) . '.jpg', 'title' => '女性力量覺醒茶會', 'desc' => '午後溫暖交流聚會', 'video' => ''),
-                                array('img' => 'imageFiles/test/' . rand(1, 18) . '.jpg', 'title' => '跨界心靈美學講座', 'desc' => '特邀講師對談紀錄', 'video' => '')
-                            );
+                            $sql_home_media = "
+                                SELECT med_id, med_event_date, med_category, med_type, med_title, med_brief, med_url, med_duration
+                                FROM fsl_media
+                                WHERE med_status = 1
+                                ORDER BY med_is_featured DESC, med_event_date DESC, med_sort ASC, med_id DESC
+                                LIMIT 12
+                            ";
+                            $home_media_rows = isset($DB) ? $DB->query($sql_home_media) : array();
+                            if (!is_array($home_media_rows)) $home_media_rows = array();
 
-                            foreach ($highlights_items as $item):
-                                $has_video = !empty($item['video']);
+                            foreach ($home_media_rows as $row):
+                                $mid       = (int)$row['med_id'];
+                                $mtype     = (int)$row['med_type']; // 1=圖檔, 2=YouTube視訊, 3=聲音檔
+                                $media_url = trim((string)($row['med_url'] ?? ''));
+                                $has_video = ($mtype === 2 && $media_url !== '');
+                                $has_audio = ($mtype === 3 && $media_url !== '');
+                                $date_fmt  = !empty($row['med_event_date']) ? date('Y.m.d', strtotime($row['med_event_date'])) : '';
+
+                                // 優先讀取後台上傳縮圖與主圖 (./5sladmin/uploadFiles/md/mdimg_{id}_thumb.jpg)
+                                $thumb_disk = './5sladmin/uploadFiles/md/mdimg_' . $mid . '_thumb.jpg';
+                                $main_disk  = './5sladmin/uploadFiles/md/mdimg_' . $mid . '_.jpg';
+                                $fallback   = 'imageFiles/test/' . ((($mid - 1) % 18) + 1) . '.jpg';
+
+                                $thumb_url = file_exists($thumb_disk) ? ($thumb_disk . '?v=' . filemtime($thumb_disk)) : (file_exists($main_disk) ? ($main_disk . '?v=' . filemtime($main_disk)) : $fallback);
+                                $main_url  = file_exists($main_disk)  ? ($main_disk . '?v=' . filemtime($main_disk))   : $thumb_url;
                             ?>
-                            <div class="fsl-highlight-item portfolio-card-wrap">
-                                <div class="card border-0 shadow-sm overflow-hidden portfolio-card fsl-highlight-card">
-                                    <img src="<?php echo htmlspecialchars($item['img']); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($item['title']); ?>" draggable="false" onerror="this.src='imageFiles/test/1.jpg'">
-                                    
-                                    <?php if ($has_video): ?>
-                                        <!-- 若該筆花絮包含 YouTube 連結，中央置入與影音展示區完全相同的播放鈕並共用 Lightbox 彈窗 -->
-                                        <button type="button" class="video-play-btn fsl-card-play-btn" data-bs-toggle="modal" data-bs-target="#videoLightboxModal" data-video-url="<?php echo htmlspecialchars($item['video']); ?>" aria-label="播放影片">
-                                            <div class="play-icon-triangle"></div>
-                                            <div class="play-btn-ripple"></div>
-                                        </button>
-                                    <?php endif; ?>
+                                <div class="fsl-highlight-item portfolio-card-wrap">
+                                    <div class="card border-0 shadow-sm overflow-hidden portfolio-card fsl-highlight-card"
+                                        style="cursor: pointer;"
+                                        data-media-type="<?php echo $mtype; ?>"
+                                        data-main-img="<?php echo htmlspecialchars($main_url); ?>"
+                                        data-media-url="<?php echo htmlspecialchars($media_url); ?>"
+                                        data-title="<?php echo htmlspecialchars($row['med_title'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-desc="<?php echo htmlspecialchars($row['med_brief'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-date="<?php echo htmlspecialchars($date_fmt); ?>">
 
-                                    <div class="card-body portfolio-overlay text-white">
-                                        <h6 class="fw-bold mb-1"><?php echo htmlspecialchars($item['title']); ?></h6>
-                                        <p class="text-white-50 small mb-0"><?php echo htmlspecialchars($item['desc']); ?></p>
+                                        <?php if ($date_fmt !== ''): ?>
+                                            <span class="badge bg-dark bg-opacity-75 text-warning border border-warning border-opacity-50 position-absolute top-0 end-0 m-3 px-2 py-1" style="z-index: 4; font-size: 0.72rem; letter-spacing: 1px;">
+                                                <?php echo $date_fmt; ?>
+                                            </span>
+                                        <?php endif; ?>
+
+                                        <img src="<?php echo htmlspecialchars($thumb_url); ?>"
+                                            class="card-img-top"
+                                            alt="<?php echo htmlspecialchars($row['med_title']); ?>"
+                                            draggable="false"
+                                            onerror="this.src='imageFiles/test/1.jpg'">
+
+                                        <?php if ($has_video): ?>
+                                            <button type="button"
+                                                    class="video-play-btn fsl-card-play-btn"
+                                                    style="position: absolute !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 5;"
+                                                    aria-label="播放影片">
+                                                <div class="play-icon-triangle"></div>
+                                                <div class="play-btn-ripple"></div>
+                                            </button>
+                                        <?php elseif ($has_audio): ?>
+                                            <button type="button"
+                                                    class="video-play-btn fsl-card-play-btn"
+                                                    style="position: absolute !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; display: flex !important; align-items: center !important; justify-content: center !important; background: rgba(13, 202, 240, 0.92) !important; border-color: #ffffff !important; z-index: 5;"
+                                                    aria-label="聆聽音頻">
+                                                <i class="bi bi-headphones text-dark fs-3" style="line-height: 1; margin: 0;"></i>
+                                                <div class="play-btn-ripple"></div>
+                                            </button>
+                                        <?php endif; ?>
+
+                                        <div class="card-body portfolio-overlay text-white">
+                                            <h6 class="fw-bold mb-1"><?php echo htmlspecialchars($row['med_title']); ?></h6>
+                                            <p class="text-white-50 small mb-0"><?php echo htmlspecialchars($row['med_brief'] ?? ''); ?></p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
                             <?php endforeach; ?>
-
                         </div>
+
                     </div>
 
                     <!-- 右側換圖按鈕 > -->
@@ -635,151 +720,85 @@ if (!empty($mb_id) && $mb_id > 0 && isset($DB)) {
                     <!-- 視窗裁切與滑動感應區 -->
                     <div class="fsl-pricing-viewport" id="fslPricingViewport">
                         <div class="fsl-pricing-stage" id="fslPricingStage">
+                            <?php
+                            $sql_pricing = "
+                                SELECT course_id, parent_id, course_badge_text, course_subtitle, course_title, course_subscript,
+                                    course_brief, course_cost, course_price_unit, course_tier_class, course_is_hot
+                                FROM fsl_courses
+                                WHERE course_status = 1 AND course_show_pricing = 1
+                                ORDER BY course_sort ASC, course_id ASC
+                            ";
+                            $pricing_cards = isset($DB) ? $DB->query($sql_pricing) : array();
+                            if (!is_array($pricing_cards)) $pricing_cards = array();
 
-                            <!-- 方案 1：普通收費項目 (plan-tier-basic) -->
-                            <div class="fsl-plan-slide">
-                                <div class="card h-100 fsl-plan-card plan-tier-basic text-center p-4">
-                                    <div class="card-body d-flex flex-column">
-                                        <div class="fsl-plan-header mb-3">
-                                            <span class="fsl-plan-badge">基礎入門</span>
-                                            <h4 class="fsl-plan-title fw-bold mt-2 mb-1">初探覺察體驗</h4>
-                                            <p class="fsl-plan-subtitle small mb-0">適合剛開始接觸自我對話的您</p>
-                                        </div>
-                                        <div class="fsl-plan-price-wrap my-3">
-                                            <span class="fsl-plan-currency">NT$</span>
-                                            <span class="fsl-plan-price">1,200</span>
-                                            <span class="fsl-plan-unit">/ 單次</span>
-                                        </div>
-                                        <p class="fsl-plan-desc small my-3 flex-grow-1">
-                                            透過一對一基礎引導問卷與 45 分鐘線上對談，協助您初步梳理當前卡點與生活狀態。
-                                        </p>
+                            foreach ($pricing_cards as $pc):
+                                $card_id    = (int)$pc['course_id'];
+                                $parent_id  = (int)$pc['parent_id'];
+                                // 主課程 ID：供愛心收藏、梯次與封面圖繼承使用
+                                $master_id  = ($parent_id > 0) ? $parent_id : $card_id;
 
+                                $tier_class = trim((string)($pc['course_tier_class'] ?? 'plan-tier-standard'));
+                                $is_hottest = ((int)($pc['course_is_hot'] ?? 0) === 1 || $tier_class === 'plan-tier-premium');
+                                $badge_txt  = trim((string)($pc['course_badge_text'] ?? ''));
+                                $sub_top    = trim((string)($pc['course_subtitle'] ?? ''));
+                                $sub_bot    = trim((string)($pc['course_subscript'] ?? ''));
+                                $unit_txt   = trim((string)($pc['course_price_unit'] ?? ''));
+                                $price_num  = (int)round((float)$pc['course_cost']);
 
-                                        <!-- 每張價格卡片都可以置入的預約以及最愛按鈕 -->
-                                        <?php
-                                        $plan_course_id = 12; // 對應各方案綁定的課程或一對一顧問服務 ID（例如：12=一對一陪談, 10=16週陪跑系統）
-                                        $is_plan_wished = !empty($user_wished_courses[$plan_course_id]);
-                                        ?>
-                                        <div class="mt-auto pt-3 d-flex align-items-center gap-2">
-                                            <button type="button"
-                                                    class="btn fsl-plan-btn flex-grow-1 py-2 fw-bold btn-fsl-add-cart"
-                                                    data-type="1"
-                                                    data-course-id="<?php echo $plan_course_id; ?>"
-                                                    data-redirect="1">
-                                                <i class="bi bi-bag-check me-1"></i>立即預約方案
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-outline-light py-2 px-3 btn-fsl-wishlist"
-                                                    data-type="1"
-                                                    data-id="<?php echo $plan_course_id; ?>"
-                                                    title="加入收藏追蹤">
-                                                <i class="bi <?php echo $is_plan_wished ? 'bi-heart-fill text-danger' : 'bi-heart'; ?>"></i>
-                                            </button>
-                                        </div>
-                                        <!-- //預約以及最愛按鈕佈置完畢 -->
+                                $is_plan_wished = !empty($user_wished_courses[$master_id]);
+                            ?>
+                                <div class="fsl-plan-slide <?php echo $is_hottest ? 'hottest' : ''; ?>">
+                                    <div class="card h-100 fsl-plan-card <?php echo htmlspecialchars($tier_class, ENT_QUOTES, 'UTF-8'); ?> text-center p-4">
+                                        <div class="card-body d-flex flex-column">
+                                            <div class="fsl-plan-header mb-3">
+                                                <?php if ($badge_txt !== ''): ?>
+                                                    <span class="fsl-plan-badge"><?php echo htmlspecialchars($badge_txt, ENT_QUOTES, 'UTF-8'); ?></span>
+                                                <?php endif; ?>
 
+                                                <?php if ($sub_top !== ''): ?>
+                                                    <p class="fsl-plan-subtitle small mt-2 mb-0"><?php echo htmlspecialchars($sub_top, ENT_QUOTES, 'UTF-8'); ?></p>
+                                                <?php endif; ?>
 
-                                    </div>
-                                </div>
-                            </div>
+                                                <h4 class="fsl-plan-title fw-bold mt-2 mb-1"><?php echo htmlspecialchars($pc['course_title'], ENT_QUOTES, 'UTF-8'); ?></h4>
 
-                            <!-- 方案 2：次要收費項目 (plan-tier-standard) -->
-                            <div class="fsl-plan-slide">
-                                <div class="card h-100 fsl-plan-card plan-tier-standard text-center p-4">
-                                    <div class="card-body d-flex flex-column">
-                                        <div class="fsl-plan-header mb-3">
-                                            <span class="fsl-plan-badge">進階探索</span>
-                                            <h4 class="fsl-plan-title fw-bold mt-2 mb-1">卡點釐清工作坊</h4>
-                                            <p class="fsl-plan-subtitle small mb-0">深入看見限制性信念與情緒根源</p>
-                                        </div>
-                                        <div class="fsl-plan-price-wrap my-3">
-                                            <span class="fsl-plan-currency">NT$</span>
-                                            <span class="fsl-plan-price">3,600</span>
-                                            <span class="fsl-plan-unit">/ 兩週</span>
-                                        </div>
-                                        <p class="fsl-plan-desc small my-3 flex-grow-1">
-                                            包含兩次深度對談與專屬心智圖分析報告，陪伴您逐步鬆開內在緊繃與猶豫。
-                                        </p>
-                                        <div class="mt-auto pt-3">
-                                            <a href="#contact" class="btn fsl-plan-btn w-100 py-2 fw-bold">我要預約</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                                <?php if ($sub_bot !== ''): ?>
+                                                    <p class="fsl-plan-subtitle small mb-0"><?php echo htmlspecialchars($sub_bot, ENT_QUOTES, 'UTF-8'); ?></p>
+                                                <?php endif; ?>
+                                            </div>
 
-                            <!-- 方案 3（加上 hottest 類別即自動置中）：重要收費項目 (plan-tier-premium) -->
-                            <div class="fsl-plan-slide hottest">
-                                <div class="card h-100 fsl-plan-card plan-tier-premium text-center p-4">
-                                    <div class="card-body d-flex flex-column">
-                                        <div class="fsl-plan-header mb-3">
-                                            <span class="fsl-plan-badge">★ 熱門首選推薦</span>
-                                            <h4 class="fsl-plan-title fw-bold mt-2 mb-1">第五季重整蛻變計畫</h4>
-                                            <p class="fsl-plan-subtitle small mb-0">全方位重塑人生價值與核心選擇</p>
-                                        </div>
-                                        <div class="fsl-plan-price-wrap my-3">
-                                            <span class="fsl-plan-currency">NT$</span>
-                                            <span class="fsl-plan-price">8,800</span>
-                                            <span class="fsl-plan-unit">/ 完整療程</span>
-                                        </div>
-                                        <p class="fsl-plan-desc small my-3 flex-grow-1">
-                                            四週完整一對一深度陪伴、生命藍圖重整與行動落地追蹤，開啟屬於您的全新生命篇章。
-                                        </p>
-                                        <div class="mt-auto pt-3">
-                                            <a href="#contact" class="btn fsl-plan-btn w-100 py-2 fw-bold">我要預約</a>
+                                            <div class="fsl-plan-price-wrap my-3">
+                                                <span class="fsl-plan-currency">NT$</span>
+                                                <span class="fsl-plan-price"><?php echo number_format($price_num); ?></span>
+                                                <?php if ($unit_txt !== ''): ?>
+                                                    <span class="fsl-plan-unit">/ <?php echo htmlspecialchars($unit_txt, ENT_QUOTES, 'UTF-8'); ?></span>
+                                                <?php endif; ?>
+                                            </div>
+
+                                            <p class="fsl-plan-desc small my-3 flex-grow-1">
+                                                <?php echo nl2br(htmlspecialchars(strip_tags($pc['course_brief'] ?? ''), ENT_QUOTES, 'UTF-8')); ?>
+                                            </p>
+
+                                            <!-- 預約按鈕傳入本卡片 ID ($card_id)；愛心收藏傳入主課程 ID ($master_id) -->
+                                            <div class="mt-auto pt-3 d-flex align-items-center gap-2">
+                                                <button type="button"
+                                                        class="btn fsl-plan-btn flex-grow-1 py-2 fw-bold btn-home-book-course"
+                                                        data-course-id="<?php echo $card_id; ?>">
+                                                    <i class="bi bi-calendar-check me-1"></i>我要預約
+                                                </button>
+                                                <button type="button"
+                                                        class="btn btn-outline-light py-2 px-3 btn-fsl-wishlist"
+                                                        data-type="1"
+                                                        data-id="<?php echo $master_id; ?>"
+                                                        title="加入收藏追蹤">
+                                                    <i class="bi <?php echo $is_plan_wished ? 'bi-heart-fill text-danger' : 'bi-heart'; ?>"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            <!-- 方案 4：次要收費項目 (plan-tier-standard) -->
-                            <div class="fsl-plan-slide">
-                                <div class="card h-100 fsl-plan-card plan-tier-standard text-center p-4">
-                                    <div class="card-body d-flex flex-column">
-                                        <div class="fsl-plan-header mb-3">
-                                            <span class="fsl-plan-badge">持續陪伴</span>
-                                            <h4 class="fsl-plan-title fw-bold mt-2 mb-1">季度生命教練陪跑</h4>
-                                            <p class="fsl-plan-subtitle small mb-0">穩定推進目標與日常狀態校準</p>
-                                        </div>
-                                        <div class="fsl-plan-price-wrap my-3">
-                                            <span class="fsl-plan-currency">NT$</span>
-                                            <span class="fsl-plan-price">15,800</span>
-                                            <span class="fsl-plan-unit">/ 三個月</span>
-                                        </div>
-                                        <p class="fsl-plan-desc small my-3 flex-grow-1">
-                                            每月兩次深度校準會議與專屬線上即時回饋，確保您在轉變過程中擁有穩固支持力量。
-                                        </p>
-                                        <div class="mt-auto pt-3">
-                                            <a href="#contact" class="btn fsl-plan-btn w-100 py-2 fw-bold">我要預約</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 方案 5：普通收費項目 (plan-tier-basic) -->
-                            <div class="fsl-plan-slide">
-                                <div class="card h-100 fsl-plan-card plan-tier-basic text-center p-4">
-                                    <div class="card-body d-flex flex-column">
-                                        <div class="fsl-plan-header mb-3">
-                                            <span class="fsl-plan-badge">企業／團體</span>
-                                            <h4 class="fsl-plan-title fw-bold mt-2 mb-1">專屬團隊生命藝術沙龍</h4>
-                                            <p class="fsl-plan-subtitle small mb-0">客製化小型團體共學與能量重整</p>
-                                        </div>
-                                        <div class="fsl-plan-price-wrap my-3">
-                                            <span class="fsl-plan-currency">NT$</span>
-                                            <span class="fsl-plan-price">24,000</span>
-                                            <span class="fsl-plan-unit">/ 專場</span>
-                                        </div>
-                                        <p class="fsl-plan-desc small my-3 flex-grow-1">
-                                            為 4 至 8 人小型團隊量身設計的半日沉浸式工作坊，凝聚共識並喚醒團隊內在創造力。
-                                        </p>
-                                        <div class="mt-auto pt-3">
-                                            <a href="#contact" class="btn fsl-plan-btn w-100 py-2 fw-bold">我要預約</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
+                            <?php endforeach; ?>
                         </div>
+
                     </div>
 
                     <!-- 右側翻頁按鈕 -->
@@ -962,11 +981,215 @@ if (!empty($mb_id) && $mb_id > 0 && isset($DB)) {
             </div>
         </section>
 
-        <!-- Footer 之前留白區 -->
+        <!-- Footer 之前留白區 
         <section class="py-5">
             <p>&nbsp;</p>
         </section>
+        -->
+        <!-- 首頁聲音檔播放 Lightbox -->
+        <div class="modal fade" id="homeAudioLightboxModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark text-white border border-warning shadow-lg rounded-4 overflow-hidden">
+                    <div class="modal-header border-secondary">
+                        <span class="badge bg-info text-dark fw-bold me-2"><i class="bi bi-soundwave me-1"></i>AUDIO STORY</span>
+                        <span class="small text-warning fw-bold" id="homeAudioDate"></span>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4 text-center">
+                        <img src="" id="homeAudioCover" class="rounded-3 shadow mb-3 border border-secondary" style="width: 160px; height: 160px; object-fit: cover;" alt="音頻封面">
+                        <h5 class="fw-bold text-white mb-1" id="homeAudioTitle"></h5>
+                        <p class="text-white-50 small mb-4" id="homeAudioDesc"></p>
+                        <audio controls id="homeAudioPlayer" class="w-100">
+                            <source src="" type="audio/mpeg">
+                        </audio>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 首頁課程與價格方案預約確認彈窗（含主圖、簡介、價格、梯次選擇與同意/放棄） -->
+        <div class="modal fade" id="homeCourseConfirmModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg overflow-hidden">
+                    <div class="position-relative">
+                        <img id="hcModalCover" src="" class="w-100" style="height: 200px; object-fit: cover;" alt="課程主圖">
+                        <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 bg-dark p-2 rounded-circle" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <span class="badge bg-warning text-dark fw-bold position-absolute bottom-0 start-0 m-3 px-3 py-1 shadow-sm" id="hcModalTypeBadge">課程方案</span>
+                    </div>
+                    <div class="modal-body p-4 text-dark">
+                        <h5 class="fw-bold text-dark mb-2" id="hcModalTitle">-</h5>
+                        <p class="text-muted small lh-lg mb-3" id="hcModalBrief">-</p>
+
+                        <div class="p-3 bg-light rounded-3 border mb-3 d-flex justify-content-between align-items-center">
+                            <span class="small fw-bold text-muted">課程／服務費用</span>
+                            <span class="fs-4 fw-bold text-danger" id="hcModalPrice">NT$ 0</span>
+                        </div>
+
+                        <div class="mb-2" id="hcModalSessionWrap">
+                            <label for="hcModalSessionSelect" class="form-label small fw-bold text-dark">
+                                選擇報名梯次 / 預約時段 <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select form-select-sm" id="hcModalSessionSelect"></select>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary btn-sm px-4" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i>放棄返回
+                        </button>
+                        <button type="button" class="btn btn-dark text-warning fw-bold btn-sm px-4" id="btnHomeConfirmAddCart">
+                            <i class="bi bi-check2-circle me-1"></i>同意並前往購物車結帳
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+<style>
+    body {
+        background-image: url("imageFiles/mainBG2.jpg");
+        background-attachment: fixed;
+        background-size: cover;
+        background-position: center left;
+        background-repeat: no-repeat;
+    }
+</style>
+
+
 <?php 
 // 引入完整頁尾與地端腳本載入區
 include_once '5sl_include_footer.php'; 
 ?>
+
+<script>
+$(function() {
+
+    const homeCoursesMap = <?php echo json_encode((object)$home_courses_map, JSON_UNESCAPED_UNICODE); ?>;
+    const isMemberLoggedIn = <?php echo ($mb_id > 0) ? 'true' : 'false'; ?>;
+    let selectedHomeCourseId = 0;
+
+    // 1. 點擊首頁任何「我要預約 / 立即預約報名」按鈕 -> 開啟確認彈窗
+    $(document).on('click', '.btn-home-book-course', function(e) {
+        e.preventDefault();
+        const cid  = parseInt($(this).attr('data-course-id'), 10) || 0;
+        const info = homeCoursesMap[cid];
+
+        if (!info) {
+            alert('此方案目前尚未開放線上預約或已下架，請聯繫客服人員！');
+            return;
+        }
+
+        selectedHomeCourseId = cid;
+        const isConsult = (info.course_type === 2);
+
+        $('#hcModalCover').attr('src', info.cover_url);
+        $('#hcModalTypeBadge').text(isConsult ? '一對一顧問預約' : '陪跑與線上課程');
+        $('#hcModalTitle').text(info.course_title);
+        $('#hcModalBrief').text(info.course_brief);
+        $('#hcModalPrice').text('NT$ ' + info.course_cost.toLocaleString());
+        $('#btnHomeConfirmAddCart').html(`<i class="bi bi-check2-circle me-1"></i>${isConsult ? '同意預約並前往結帳' : '同意報名並前往結帳'}`);
+
+        const $sel = $('#hcModalSessionSelect');
+        $sel.empty();
+        if (Array.isArray(info.sessions) && info.sessions.length > 0) {
+            $('#hcModalSessionWrap').removeClass('d-none');
+            info.sessions.forEach(function(s) {
+                $sel.append(`<option value="${s.sess_id}">${s.label}</option>`);
+            });
+        } else {
+            $('#hcModalSessionWrap').addClass('d-none');
+        }
+
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('homeCourseConfirmModal')).show();
+    });
+
+    // 2. 點擊彈窗內的「同意並前往購物車結帳」
+    $('#btnHomeConfirmAddCart').on('click', function() {
+        if (!isMemberLoggedIn) {
+            alert('請先登入 Fifth Season Life 會員帳號，即可完成課程與服務預約！');
+            window.location.href = '5sl_login.php';
+            return;
+        }
+        if (!selectedHomeCourseId) return;
+
+        const sessId = $('#hcModalSessionSelect').val() || 0;
+        bootstrap.Modal.getInstance(document.getElementById('homeCourseConfirmModal')).hide();
+        if (window.fslLoader) window.fslLoader.show();
+
+        $.post('./funcFiles/5sl_act_member.php', {
+            action: 'act_cart_add',
+            item_type: 1,
+            course_id: selectedHomeCourseId,
+            sess_id: sessId,
+            qty: 1
+        }, function(res) {
+            if (window.fslLoader) window.fslLoader.hide();
+            if (res.success === 1) {
+                window.location.href = '5sl_myCart.php';
+            } else if (res.need_login === 1) {
+                window.location.href = '5sl_login.php';
+            } else {
+                alert(res.message || '加入購物車失敗，請稍後再試。');
+            }
+        }, 'json').fail(function() {
+            if (window.fslLoader) window.fslLoader.hide();
+            alert('網路連線異常，請稍後再試。');
+        });
+    });
+
+
+    /////////////////////////////////////////////////////////////
+
+    $(document).off('click', '.fsl-highlight-card');
+    $(document).on('click', '.fsl-highlight-card', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        const $card    = $(this);
+        const mType    = parseInt($card.attr('data-media-type'), 10) || 1;
+        const mainImg  = $card.attr('data-main-img') || '';
+        const mediaUrl = ($card.attr('data-media-url') || '').trim();
+        const title    = $card.attr('data-title') || '';
+        const desc     = $card.attr('data-desc') || '';
+        const dateStr  = $card.attr('data-date') || '';
+
+        if (mType === 2 && mediaUrl !== '') {
+            /*
+            let ytId = '';
+            if (mediaUrl.indexOf('v=') !== -1) ytId = mediaUrl.split('v=').pop().split('&').shift();
+            else if (mediaUrl.indexOf('youtu.be/') !== -1) ytId = mediaUrl.split('youtu.be/').pop().split('?').shift();
+            else if (mediaUrl.indexOf('/embed/') !== -1) ytId = mediaUrl.split('/embed/').pop().split('?').shift();
+            */
+            let embedSrc = '';
+            const m = mediaUrl.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            if (m && m[1]) {
+                embedSrc = 'https://' + 'youtube.com' + '/em' + 'bed/' + m[1] + '?autoplay=1&rel=0&playsinline=1';
+                $('#lightboxIframe').attr('src', embedSrc);
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('videoLightboxModal')).show();
+            }
+        } else if (mType === 3 && mediaUrl !== '') {
+            $('#homeAudioCover').attr('src', mainImg);
+            $('#homeAudioDate').text(dateStr);
+            $('#homeAudioTitle').text(title);
+            $('#homeAudioDesc').text(desc);
+            const player = document.getElementById('homeAudioPlayer');
+            player.src = mediaUrl;
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('homeAudioLightboxModal')).show();
+            player.play().catch(function() {});
+        } else {
+            $('#previewLightboxImg').attr('src', mainImg);
+            $('#previewLightboxTitle').text(title);
+            $('#previewLightboxDesc').text(desc);
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('imagePreviewModal')).show();
+        }
+    });
+
+    $('#homeAudioLightboxModal').on('hidden.bs.modal', function() {
+        const player = document.getElementById('homeAudioPlayer');
+        if (player) { player.pause(); player.currentTime = 0; player.src = ''; }
+    });
+
+
+    
+});
+</script>
+

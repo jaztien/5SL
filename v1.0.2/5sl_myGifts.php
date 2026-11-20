@@ -9,7 +9,7 @@ $mb_id = (int)($_SESSION['mbID'] ?? $_SESSION['user_id'] ?? 0);
 $mb_lvl = isset($_SESSION['mbLevel']) ? (int)$_SESSION['mbLevel'] : 3;
 
 // 1. 查詢會員目前真實 PTS 點數餘額（若無資料庫則預設 0
-$db_pts = ($mb_id > 0) ? $DB->single("SELECT mb_points FROM members WHERE mb_id = ?", [$mb_id]) : false;
+$db_pts = ($mb_id > 0) ? $DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]) : false;
 $member_pts = ($db_pts !== false && $db_pts !== null) ? (int)$db_pts : 0;
 
 // 在頂部 PHP 查詢區補上真實累計消費金額
@@ -31,7 +31,7 @@ $sql_gifts = "
 $gift_records = ($mb_id > 0) ? $DB->query($sql_gifts, [$mb_id]) : [];
 if (!is_array($gift_records)) $gift_records = [];
 
-// 3. 預先批次撈出這些禮品關聯的數位下載檔案 (merchandise)，避免迴圈內重複查詢
+// 3. 預先批次撈出這些禮品關聯的數位下載檔案 (fsl_merchandise)，避免迴圈內重複查詢
 $merch_map = [];
 $all_merch_ids = [];
 foreach ($gift_records as $gr) {
@@ -45,7 +45,7 @@ foreach ($gift_records as $gr) {
 if (!empty($all_merch_ids)) {
     $placeholders = implode(',', array_fill(0, count($all_merch_ids), '?'));
     $merch_rows = $DB->query(
-        "SELECT merch_id, merch_type, merch_title, merch_download_url, merch_file_format FROM merchandise WHERE merch_id IN ($placeholders)",
+        "SELECT merch_id, merch_type, merch_title, merch_download_url, merch_file_format FROM fsl_merchandise WHERE merch_id IN ($placeholders)",
         array_values($all_merch_ids)
     );
     if (is_array($merch_rows)) {
@@ -313,7 +313,7 @@ $lvl_names = [
                                                     <!-- 底部操作按鈕區 -->
                                                     <div class="pt-2 border-top d-flex flex-wrap justify-content-between align-items-center gap-2 gift-action-zone">
                                                         <small class="text-muted">
-                                                            <?php echo !empty($gr['grec_expired_at']) ? '期限：' . date('Y/m/d', strtotime($gr['grec_expired_at'])) : '永久有效'; ?>
+                                                            <?php echo !empty($gr['grec_expired_at']) ? '期限：' . date('Y-m-d', strtotime($gr['grec_expired_at'])) : '永久有效'; ?>
                                                         </small>
 
                                                         <?php if ($status === 0): ?>
@@ -463,7 +463,7 @@ $lvl_names = [
                                         : ($is_plus ? '點數獲得入帳' : '點數折抵扣除');
                                 ?>
                                     <tr>
-                                        <td class="ps-4 text-muted text-nowrap"><?php echo date('Y/m/d H:i', strtotime($log['pt_date'])); ?></td>
+                                        <td class="ps-4 text-muted text-nowrap"><?php echo date('Y-m-d H:i', strtotime($log['pt_date'])); ?></td>
                                         <td class="fw-bold text-dark"><?php echo htmlspecialchars($memo_text); ?></td>
                                         <td class="<?php echo $trade_cls; ?> fw-bold text-nowrap"><?php echo $trade_str; ?></td>
                                         <td class="pe-4 text-end fw-bold text-nowrap"><?php echo number_format((int)$log['pt_available']); ?></td>
