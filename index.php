@@ -1045,7 +1045,6 @@ if (isset($DB)) {
     </div>
 </div>
 
-
 <?php
 // 引入完整頁尾與地端腳本載入區
 include_once '5sl_include_footer.php';
