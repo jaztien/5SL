@@ -1,3 +1,0 @@
-Time : 00:56:43
-SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect datetime value: '1675529803' for column 'ad_onboard' at row 1
-Raw SQL : UPDATE fh.administrator SET ad_onboard=? WHERE 1=1 AND ad_id=?
