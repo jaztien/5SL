@@ -1,7 +1,0 @@
-Time : 10:40:04
-SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect datetime value: '1675305604' for column 'ad_onboard' at row 1
-Raw SQL : UPDATE fh.administrator SET ad_onboard=? WHERE 1=1 AND ad_id=?
-
-Time : 10:39:42
-SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect datetime value: '1675305582' for column 'ad_onboard' at row 1
-Raw SQL : UPDATE fh.administrator SET ad_onboard=? WHERE 1=1 AND ad_id=?
