@@ -84,7 +84,7 @@ try {
                     exit();
                 }
 
-                $res = $DB->row("SELECT * FROM members WHERE {$toTable} = ? AND mb_status <= ?", [$toSUB, 6]);
+                $res = $DB->row("SELECT * FROM fsl_members WHERE {$toTable} = ? AND mb_status <= ?", [$toSUB, 6]);
             } else {
                 if (empty($loginAccount) || empty($loginPass)) {
                     echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '帳號密碼不得為空值！請重新登入！！']);
@@ -95,7 +95,7 @@ try {
                 $toSUB   = !empty($lineSUB) ? $lineSUB : $googleSUB;
 
                 $hashAccount = _fn_hash_hmac(strtolower($loginAccount));
-                $res = $DB->row("SELECT * FROM members WHERE mb_account_hash = ? AND mb_status <= ?", [$hashAccount, 6]);
+                $res = $DB->row("SELECT * FROM fsl_members WHERE mb_account_hash = ? AND mb_status <= ?", [$hashAccount, 6]);
             }
 
             // 3. 驗證搜尋結果與權限狀態
@@ -132,10 +132,10 @@ try {
                 unset($_SESSION['pendingVerifyMbID']);
 
                 if (!empty($toTable) && !empty($toSUB) && in_array($toTable, $allowed_3rd_cols, true)) {
-                    $subUp = $DB->update('members', ['mb_updated' => '[EXPR]NOW()', $toTable => $toSUB], ['mb_id' => $res['mb_id']]);
+                    $subUp = $DB->update('fsl_members', ['mb_updated' => '[EXPR]NOW()', $toTable => $toSUB], ['mb_id' => $res['mb_id']]);
                 }
 
-                // 步驟 D：讀取最新可用點數餘額（對齊 fsl_points + members.mb_points 新架構）
+                // 步驟 D：讀取最新可用點數餘額（對齊 fsl_points + fsl_members.mb_points 新架構）
                 $nowPoints  = (int)($res['mb_points'] ?? 0);
                 $expireTime = time() + 86400;
 
@@ -248,7 +248,7 @@ try {
             // 3. 檢查帳號是否重複註冊（比對 HMAC 雜湊值）
             $enAccount     = _fn_secure_crypto($deAccount, 'en');
             $enAccountHash = _fn_hash_hmac($deAccount);
-            $chkDup = $DB->single("SELECT mb_id FROM members WHERE mb_account_hash = ? AND mb_status <= ?", [$enAccountHash, 6]);
+            $chkDup = $DB->single("SELECT mb_id FROM fsl_members WHERE mb_account_hash = ? AND mb_status <= ?", [$enAccountHash, 6]);
             if ($chkDup && (int)$chkDup > 0) {
                 echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '此電子信箱已被註冊，請直接前往登入或使用忘記密碼！']);
                 exit();
@@ -276,7 +276,7 @@ try {
                     'mb_email_verified' => 0  // 0 = 電子信箱尚未驗證（驗證通過後方可登入）
                 ];
 
-                $mbID = (int)$DB->insert('members', $insertData);
+                $mbID = (int)$DB->insert('fsl_members', $insertData);
                 if ($mbID <= 0) {
                     throw new Exception('建立會員基本資料失敗');
                 }
@@ -339,12 +339,12 @@ try {
                 }
                 $hashAcc = _fn_hash_hmac($emailInput);
                 $member  = $DB->row(
-                    "SELECT mb_id, mb_email, mb_title, mb_status, mb_email_verified FROM members WHERE mb_account_hash = ? AND mb_status <= 6",
+                    "SELECT mb_id, mb_email, mb_title, mb_status, mb_email_verified FROM fsl_members WHERE mb_account_hash = ? AND mb_status <= 6",
                     [$hashAcc]
                 );
             } elseif ($targetMbId > 0) {
                 $member  = $DB->row(
-                    "SELECT mb_id, mb_email, mb_title, mb_status, mb_email_verified FROM members WHERE mb_id = ? AND mb_status <= 6",
+                    "SELECT mb_id, mb_email, mb_title, mb_status, mb_email_verified FROM fsl_members WHERE mb_id = ? AND mb_status <= 6",
                     [$targetMbId]
                 );
             } else {
@@ -561,17 +561,17 @@ try {
 
 
             // 查詢會員目前資料庫狀態，僅當原本 mb_status === 2 且全欄位皆已填妥時，執行首次升級與點數獎勵
-            $curr_member   = $DB->row("SELECT mb_status, mb_points FROM members WHERE mb_id = ?", [$mb_id]);
+            $curr_member   = $DB->row("SELECT mb_status, mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]);
             $orig_status   = (int)($curr_member['mb_status'] ?? 1);
             $profile_bonus = 100; // 首次完善個人資料獎勵點數（可依需求調整）
             $grant_reward  = ($orig_status === 2 && $is_all_filled);
 
             $DB->beginTransaction();
             try {
-                // 5. 更新 members 資料表（若符合首次完善條件，同步將 mb_status 升級為 1 並加上獎勵點數）
+                // 5. 更新 fsl_members 資料表（若符合首次完善條件，同步將 mb_status 升級為 1 並加上獎勵點數）
                 if ($grant_reward) {
                     $sql_upd = "
-                        UPDATE members 
+                        UPDATE fsl_members 
                         SET mb_name = ?, mb_gender = ?, mb_title = ?, mb_cellphone = ?, mb_birth = ?, mb_city = ?, mb_district = ?, mb_add = ?,
                             mb_status = 1, mb_points = mb_points + ?, mb_updated = NOW()
                         WHERE mb_id = ?
@@ -580,7 +580,7 @@ try {
                         $enc_name, $mb_gender, $mb_title, $enc_cellphone, $birth_db, $mb_city, $mb_district, $enc_add, $profile_bonus, $mb_id
                     ]);
 
-                    $new_pts = (int)$DB->single("SELECT mb_points FROM members WHERE mb_id = ?", [$mb_id]);
+                    $new_pts = (int)$DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]);
                     $_SESSION['mbStatus'] = 1;
                     $_SESSION['mbPoints'] = $new_pts;
 
@@ -592,7 +592,7 @@ try {
                     );
                 } else {
                     $sql_upd = "
-                        UPDATE members 
+                        UPDATE fsl_members 
                         SET mb_name = ?, mb_gender = ?, mb_title = ?, mb_cellphone = ?, mb_birth = ?, mb_city = ?, mb_district = ?, mb_add = ?, mb_updated = NOW()
                         WHERE mb_id = ?
                     ";
@@ -655,7 +655,7 @@ try {
             }
 
             // 1. 查詢會員目前資料庫密碼（請確認密碼欄位名稱為 mb_password 或 mb_password）
-            $member = $DB->row("SELECT mb_id, mb_password FROM members WHERE mb_id = ?", [$mb_id]);
+            $member = $DB->row("SELECT mb_id, mb_password FROM fsl_members WHERE mb_id = ?", [$mb_id]);
             if (!$member) {
                 echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '找不到會員帳號資料']);
                 exit;
@@ -674,7 +674,7 @@ try {
 
             // 2. 使用安全雜湊加密新密碼並寫入資料庫
             $new_hash = password_hash($new_pwd, PASSWORD_DEFAULT);
-            $DB->query("UPDATE members SET mb_password = ? WHERE mb_id = ?", [$new_hash, $mb_id]);
+            $DB->query("UPDATE fsl_members SET mb_password = ? WHERE mb_id = ?", [$new_hash, $mb_id]);
 
             echo json_encode([
                 'success' => 1,
@@ -696,9 +696,9 @@ try {
                     exit;
                 }
                 $hashAcc = _fn_hash_hmac($emailInput);
-                $member  = $DB->row("SELECT mb_id, mb_email, mb_title, mb_status FROM members WHERE mb_account_hash = ? AND mb_status <= 6", [$hashAcc]);
+                $member  = $DB->row("SELECT mb_id, mb_email, mb_title, mb_status FROM fsl_members WHERE mb_account_hash = ? AND mb_status <= 6", [$hashAcc]);
             } elseif ($mb_id > 0) {
-                $member  = $DB->row("SELECT mb_id, mb_email, mb_title, mb_status FROM members WHERE mb_id = ? AND mb_status <= 6", [$mb_id]);
+                $member  = $DB->row("SELECT mb_id, mb_email, mb_title, mb_status FROM fsl_members WHERE mb_id = ? AND mb_status <= 6", [$mb_id]);
             } else {
                 echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '請輸入您註冊時填寫的電子信箱']);
                 exit;
@@ -787,7 +787,7 @@ try {
 
             $DB->beginTransaction();
             try {
-                $DB->query("UPDATE members SET mb_password = ?, mb_updated = NOW() WHERE mb_id = ?", [$newHash, $targetMbId]);
+                $DB->query("UPDATE fsl_members SET mb_password = ?, mb_updated = NOW() WHERE mb_id = ?", [$newHash, $targetMbId]);
                 $DB->query("DELETE FROM data_verify_codes WHERE mb_id = ? AND vc_mode = 2", [$targetMbId]);
                 $DB->commit();
 
@@ -937,14 +937,14 @@ try {
                 // 4. 若活動需消耗 PTS 點數，使用 FOR UPDATE 鎖定會員點數列防連點透支
                 $cost_pts = (int)$lottery['lot_cost_pts'];
                 if ($cost_pts > 0) {
-                    $curr_pts = (int)$DB->single("SELECT mb_points FROM members WHERE mb_id = ? FOR UPDATE", [$mb_id]);
+                    $curr_pts = (int)$DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ? FOR UPDATE", [$mb_id]);
                     if ($curr_pts < $cost_pts) {
                         $DB->rollBack();
                         echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => "您的紅利點數不足（需消耗 {$cost_pts} PTS）"]);
                         exit;
                     }
-                    $DB->query("UPDATE members SET mb_points = mb_points - ? WHERE mb_id = ? AND mb_points >= ?", [$cost_pts, $mb_id, $cost_pts]);
-                    $new_pts = (int)$DB->single("SELECT mb_points FROM members WHERE mb_id = ?", [$mb_id]);
+                    $DB->query("UPDATE fsl_members SET mb_points = mb_points - ? WHERE mb_id = ? AND mb_points >= ?", [$cost_pts, $mb_id, $cost_pts]);
+                    $new_pts = (int)$DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]);
                     $_SESSION['mbPoints'] = $new_pts;
 
                     $memo = '參與抽獎消耗：' . $lottery['lot_title'];
@@ -1014,8 +1014,8 @@ try {
 
                     $gift_pts = (int)($won_item['gift_pts'] ?? 0);
                     if ($auto_claim === 1 && $gift_pts > 0) {
-                        $DB->query("UPDATE members SET mb_points = mb_points + ? WHERE mb_id = ?", [$gift_pts, $mb_id]);
-                        $new_pts = (int)$DB->single("SELECT mb_points FROM members WHERE mb_id = ?", [$mb_id]);
+                        $DB->query("UPDATE fsl_members SET mb_points = mb_points + ? WHERE mb_id = ?", [$gift_pts, $mb_id]);
+                        $new_pts = (int)$DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]);
                         $_SESSION['mbPoints'] = $new_pts;
 
                         $memo = '活動獲得：' . ($won_item['gift_title'] ?? $won_item['loti_label']);
@@ -1090,7 +1090,7 @@ try {
                 if (!empty($id_arr)) {
                     $placeholders = implode(',', array_fill(0, count($id_arr), '?'));
                     $merches = $DB->query(
-                        "SELECT merch_id, merch_type, merch_title, merch_download_url, merch_file_format FROM merchandise WHERE merch_id IN ($placeholders)",
+                        "SELECT merch_id, merch_type, merch_title, merch_download_url, merch_file_format FROM fsl_merchandise WHERE merch_id IN ($placeholders)",
                         $id_arr
                     );
                     if (is_array($merches)) {
@@ -1115,13 +1115,13 @@ try {
                 [$next_status, $grec_id]
             );
 
-            // 4. 若禮品內含紅利點數，同步更新 members 總餘額並寫入 mb_points 流水帳子表
+            // 4. 若禮品內含紅利點數，同步更新 fsl_members 總餘額並寫入 mb_points 流水帳子表
             $add_pts = (int)$rec['gift_pts'];
             if ($add_pts > 0) {
-                $DB->query("UPDATE members SET mb_points = mb_points + ? WHERE mb_id = ?", [$add_pts, $mb_id]);
+                $DB->query("UPDATE fsl_members SET mb_points = mb_points + ? WHERE mb_id = ?", [$add_pts, $mb_id]);
                 
                 // 查詢更新後的最新可用總點數，確保 pt_available 帳務精準
-                $new_pts = (int)$DB->single("SELECT mb_points FROM members WHERE mb_id = ?", [$mb_id]);
+                $new_pts = (int)$DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]);
                 $_SESSION['mbPoints'] = $new_pts;
 
                 // 寫入點數明細子表 (pt_income=1收入, pt_type=2活動贈點, pt_for=4禮品領取, pt_forid=$grec_id)
@@ -1215,8 +1215,8 @@ try {
             $add_pts = (int)$gift['gift_pts'];
             $new_pts = null;
             if ($add_pts > 0) {
-                $DB->query("UPDATE members SET mb_points = mb_points + ? WHERE mb_id = ?", [$add_pts, $mb_id]);
-                $new_pts = (int)$DB->single("SELECT mb_points FROM members WHERE mb_id = ?", [$mb_id]);
+                $DB->query("UPDATE fsl_members SET mb_points = mb_points + ? WHERE mb_id = ?", [$add_pts, $mb_id]);
+                $new_pts = (int)$DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]);
                 if (isset($_SESSION['mbPoints'])) {
                     $_SESSION['mbPoints'] = $new_pts;
                 }
@@ -1291,7 +1291,7 @@ try {
                 $id_arr = array_filter(array_map('intval', explode(',', $merch_ids_str)));
                 if (!empty($id_arr)) {
                     $placeholders = implode(',', array_fill(0, count($id_arr), '?'));
-                    $merches = $DB->query("SELECT merch_type FROM merchandise WHERE merch_id IN ($placeholders)", $id_arr);
+                    $merches = $DB->query("SELECT merch_type FROM fsl_merchandise WHERE merch_id IN ($placeholders)", $id_arr);
                     if (is_array($merches)) {
                         foreach ($merches as $m) {
                             if ((int)$m['merch_type'] === 1) {
@@ -1316,12 +1316,12 @@ try {
             // 累計禮品總發放數
             $DB->query("UPDATE fsl_gifts SET gift_issued_count = gift_issued_count + 1 WHERE gift_id = ?", [$gift_id]);
 
-            // 7. 若內含紅利點數，同步更新 members.mb_points 並寫入 fsl_points 流水帳子表
+            // 7. 若內含紅利點數，同步更新 fsl_members.mb_points 並寫入 fsl_points 流水帳子表
             $add_pts = (int)$gift['gift_pts'];
             $new_pts = null;
             if ($add_pts > 0) {
-                $DB->query("UPDATE members SET mb_points = mb_points + ? WHERE mb_id = ?", [$add_pts, $mb_id]);
-                $new_pts = (int)$DB->single("SELECT mb_points FROM members WHERE mb_id = ?", [$mb_id]);
+                $DB->query("UPDATE fsl_members SET mb_points = mb_points + ? WHERE mb_id = ?", [$add_pts, $mb_id]);
+                $new_pts = (int)$DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]);
                 if (isset($_SESSION['mbPoints'])) {
                     $_SESSION['mbPoints'] = $new_pts;
                 }
@@ -1432,8 +1432,8 @@ try {
             $sql_enr = "
                 SELECT e.enr_id, e.course_id, e.sess_id, e.enr_status, c.course_title, s.sess_startdate, s.sess_starttime
                 FROM fsl_course_enrolls e
-                INNER JOIN courses c ON e.course_id = c.course_id
-                INNER JOIN course_sessions s ON e.sess_id = s.sess_id
+                INNER JOIN fsl_courses c ON e.course_id = c.course_id
+                INNER JOIN fsl_course_sessions s ON e.sess_id = s.sess_id
                 WHERE e.enr_id = ? AND e.mb_id = ?
             ";
             $enr = $DB->row($sql_enr, [$enr_id, $mb_id]);
@@ -1498,8 +1498,8 @@ try {
 
             $new_sess = $DB->row(
                 "SELECT s.sess_id, s.sess_startdate, s.sess_starttime, s.sess_duration, s.sess_enrollee, c.course_max
-                 FROM course_sessions s
-                 INNER JOIN courses c ON s.course_id = c.course_id
+                 FROM fsl_course_sessions s
+                 INNER JOIN fsl_courses c ON s.course_id = c.course_id
                  WHERE s.sess_id = ? AND s.course_id = ? AND s.sess_status = 1",
                 [$new_sess_id, (int)$enr['course_id']]
             );
@@ -1509,8 +1509,8 @@ try {
             }
 
             // 釋放舊時段名額、佔用新時段名額，並更新報名紀錄
-            $DB->query("UPDATE course_sessions SET sess_enrollee = GREATEST(0, sess_enrollee - 1) WHERE sess_id = ?", [$old_sess_id]);
-            $DB->query("UPDATE course_sessions SET sess_enrollee = sess_enrollee + 1 WHERE sess_id = ?", [$new_sess_id]);
+            $DB->query("UPDATE fsl_course_sessions SET sess_enrollee = GREATEST(0, sess_enrollee - 1) WHERE sess_id = ?", [$old_sess_id]);
+            $DB->query("UPDATE fsl_course_sessions SET sess_enrollee = sess_enrollee + 1 WHERE sess_id = ?", [$new_sess_id]);
             $DB->query(
                 "UPDATE fsl_course_enrolls SET sess_id = ?, enr_status = 1, enr_note = CONCAT(IFNULL(enr_note,''), ' [會員自助改期]') WHERE enr_id = ?",
                 [$new_sess_id, $enr_id]
@@ -1519,7 +1519,7 @@ try {
             $week_chars = ['日', '一', '二', '三', '四', '五', '六'];
             $ts_start   = strtotime($new_sess['sess_startdate'] . ' ' . $new_sess['sess_starttime']);
             $ts_end     = $ts_start + ((int)$new_sess['sess_duration'] * 60);
-            $new_time_str = date('Y/m/d', $ts_start) . ' (' . $week_chars[(int)date('w', $ts_start)] . ') ' . date('H:i', $ts_start) . ' - ' . date('H:i', $ts_end);
+            $new_time_str = date('Y-m-d', $ts_start) . ' (' . $week_chars[(int)date('w', $ts_start)] . ') ' . date('H:i', $ts_start) . ' - ' . date('H:i', $ts_end);
 
             echo json_encode([
                 'success'      => 1,
@@ -1608,7 +1608,7 @@ try {
                     if (!empty($id_arr)) {
                         $placeholders = implode(',', array_fill(0, count($id_arr), '?'));
                         $merches = $DB->query(
-                            "SELECT merch_id, merch_type, merch_title, merch_download_url, merch_file_format FROM merchandise WHERE merch_id IN ($placeholders)",
+                            "SELECT merch_id, merch_type, merch_title, merch_download_url, merch_file_format FROM fsl_merchandise WHERE merch_id IN ($placeholders)",
                             $id_arr
                         );
                         if (is_array($merches)) {
@@ -1666,12 +1666,12 @@ try {
                     );
                 }
 
-                // 6. 若獎品內含紅利點數，同步更新 members.mb_points 並寫入 fsl_points 流水帳子表
+                // 6. 若獎品內含紅利點數，同步更新 fsl_members.mb_points 並寫入 fsl_points 流水帳子表
                 $add_pts = (int)$quest['gift_pts'];
                 $new_pts = null;
                 if ($add_pts > 0) {
-                    $DB->query("UPDATE members SET mb_points = mb_points + ? WHERE mb_id = ?", [$add_pts, $mb_id]);
-                    $new_pts = (int)$DB->single("SELECT mb_points FROM members WHERE mb_id = ?", [$mb_id]);
+                    $DB->query("UPDATE fsl_members SET mb_points = mb_points + ? WHERE mb_id = ?", [$add_pts, $mb_id]);
+                    $new_pts = (int)$DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]);
                     if (isset($_SESSION['mbPoints'])) {
                         $_SESSION['mbPoints'] = $new_pts;
                     }
@@ -1744,7 +1744,7 @@ try {
                     echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '缺少課程項目參數']);
                     exit;
                 }
-                $course = $DB->row("SELECT course_id, course_title, course_type, course_max FROM courses WHERE course_id = ? AND course_status = 1", [$course_id]);
+                $course = $DB->row("SELECT course_id, course_title, course_type, course_max FROM fsl_courses WHERE course_id = ? AND course_status = 1", [$course_id]);
                 if (!$course) {
                     echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '找不到該課程或目前已下架']);
                     exit;
@@ -1754,7 +1754,7 @@ try {
                 // 若前端未指定梯次 sess_id，自動抓取該課程最新開放的梯次/空檔時段
                 if ($sess_id <= 0) {
                     $auto_sess = $DB->row(
-                        "SELECT sess_id FROM course_sessions WHERE course_id = ? AND sess_status = 1 AND sess_enrollee < ? ORDER BY sess_startdate ASC, sess_starttime ASC LIMIT 1",
+                        "SELECT sess_id FROM fsl_course_sessions WHERE course_id = ? AND sess_status = 1 AND sess_enrollee < ? ORDER BY sess_startdate ASC, sess_starttime ASC LIMIT 1",
                         [$course_id, (int)$course['course_max']]
                     );
                     if ($auto_sess) {
@@ -1778,7 +1778,7 @@ try {
                     echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '缺少商品項目參數']);
                     exit;
                 }
-                $merch = $DB->row("SELECT merch_id, merch_title, merch_type, merch_stock FROM merchandise WHERE merch_id = ? AND merch_status = 1", [$merch_id]);
+                $merch = $DB->row("SELECT merch_id, merch_title, merch_type, merch_stock FROM fsl_merchandise WHERE merch_id = ? AND merch_status = 1", [$merch_id]);
                 if (!$merch) {
                     echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '找不到該商品或目前已停售']);
                     exit;
@@ -1871,9 +1871,9 @@ try {
                        s.sess_batch, s.sess_startdate, s.sess_starttime,
                        m.merch_title, m.merch_type, m.merch_price_twd, m.merch_price_usd, m.merch_sale_usd
                 FROM fsl_cart_items ci
-                LEFT JOIN courses c ON ci.cart_item_type = 1 AND ci.course_id = c.course_id
-                LEFT JOIN course_sessions s ON ci.cart_item_type = 1 AND ci.sess_id = s.sess_id
-                LEFT JOIN merchandise m ON ci.cart_item_type = 2 AND ci.merch_id = m.merch_id
+                LEFT JOIN fsl_courses c ON ci.cart_item_type = 1 AND ci.course_id = c.course_id
+                LEFT JOIN fsl_course_sessions s ON ci.cart_item_type = 1 AND ci.sess_id = s.sess_id
+                LEFT JOIN fsl_merchandise m ON ci.cart_item_type = 2 AND ci.merch_id = m.merch_id
                 WHERE ci.mb_id = ?
                 ORDER BY ci.cart_id ASC
             ";
@@ -1960,7 +1960,7 @@ try {
                 }
 
                 // 4. 鎖定並驗證會員可用 PTS 紅利點數餘額
-                $curr_pts        = (int)$DB->single("SELECT mb_points FROM members WHERE mb_id = ? FOR UPDATE", [$mb_id]);
+                $curr_pts        = (int)$DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ? FOR UPDATE", [$mb_id]);
                 $max_deduct_pts  = max(0, (int)floor($subtotal - $coupon_discount));
                 $actual_pts_used = min($use_pts, $curr_pts, $max_deduct_pts);
 
@@ -2000,10 +2000,10 @@ try {
                             [$mb_id, $snap['course_id'], $snap['sess_id'], $ord_id, $enr_pay]
                         );
                         if ($final_total <= 0) {
-                            $DB->query("UPDATE course_sessions SET sess_enrollee = sess_enrollee + 1 WHERE sess_id = ?", [$snap['sess_id']]);
+                            $DB->query("UPDATE fsl_course_sessions SET sess_enrollee = sess_enrollee + 1 WHERE sess_id = ?", [$snap['sess_id']]);
                         }
                     } elseif ($snap['ordi_type'] === 2 && !empty($snap['merch_id'])) {
-                        $DB->query("UPDATE merchandise SET merch_sold = merch_sold + ? WHERE merch_id = ?", [$snap['ordi_qty'], $snap['merch_id']]);
+                        $DB->query("UPDATE fsl_merchandise SET merch_sold = merch_sold + ? WHERE merch_id = ?", [$snap['ordi_qty'], $snap['merch_id']]);
                     }
                 }
 
@@ -2028,8 +2028,8 @@ try {
 
                 // 9. 若折抵了 PTS 點數，扣除會員餘額並寫入 fsl_points 流水帳
                 if ($actual_pts_used > 0) {
-                    $DB->query("UPDATE members SET mb_points = mb_points - ? WHERE mb_id = ? AND mb_points >= ?", [$actual_pts_used, $mb_id, $actual_pts_used]);
-                    $new_pts = (int)$DB->single("SELECT mb_points FROM members WHERE mb_id = ?", [$mb_id]);
+                    $DB->query("UPDATE fsl_members SET mb_points = mb_points - ? WHERE mb_id = ? AND mb_points >= ?", [$actual_pts_used, $mb_id, $actual_pts_used]);
+                    $new_pts = (int)$DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]);
                     $_SESSION['mbPoints'] = $new_pts;
 
                     $memo = "訂單結帳點數折抵：{$ord_no}";
@@ -2130,8 +2130,8 @@ try {
             // 1. 驗證服務與時段有效性
             $sess = $DB->row(
                 "SELECT s.sess_id, s.course_id, s.sess_enrollee, s.sess_startdate, s.sess_starttime, c.course_title, c.course_max
-                 FROM course_sessions s
-                 INNER JOIN courses c ON s.course_id = c.course_id
+                 FROM fsl_course_sessions s
+                 INNER JOIN fsl_courses c ON s.course_id = c.course_id
                  WHERE s.sess_id = ? AND s.course_id = ? AND c.course_type = 2 AND c.course_status = 1 AND s.sess_status = 1",
                 [$sess_id, $course_id]
             );
@@ -2157,14 +2157,14 @@ try {
                 $DB->beginTransaction();
                 try {
                     // 鎖定會員額度與時段名額，防止併發超扣
-                    $curr_quota = (int)$DB->single("SELECT mb_free_consult_quota FROM members WHERE mb_id = ? FOR UPDATE", [$mb_id]);
+                    $curr_quota = (int)$DB->single("SELECT mb_free_consult_quota FROM fsl_members WHERE mb_id = ? FOR UPDATE", [$mb_id]);
                     if ($curr_quota <= 0) {
                         $DB->rollBack();
                         echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '您的免費一對一輔導額度已用畢，請改選「單次付費加購預約」！']);
                         exit();
                     }
 
-                    $curr_enrollee = (int)$DB->single("SELECT sess_enrollee FROM course_sessions WHERE sess_id = ? FOR UPDATE", [$sess_id]);
+                    $curr_enrollee = (int)$DB->single("SELECT sess_enrollee FROM fsl_course_sessions WHERE sess_id = ? FOR UPDATE", [$sess_id]);
                     if ($curr_enrollee >= (int)$sess['course_max']) {
                         $DB->rollBack();
                         echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '很抱歉，該時段剛剛已被其他會員預約額滿，請選擇其他時段！']);
@@ -2172,10 +2172,10 @@ try {
                     }
 
                     // 1) 扣除 1 次免費額度
-                    $DB->query("UPDATE members SET mb_free_consult_quota = mb_free_consult_quota - 1 WHERE mb_id = ? AND mb_free_consult_quota > 0", [$mb_id]);
+                    $DB->query("UPDATE fsl_members SET mb_free_consult_quota = mb_free_consult_quota - 1 WHERE mb_id = ? AND mb_free_consult_quota > 0", [$mb_id]);
 
                     // 2) 佔用該時段名額 +1
-                    $DB->query("UPDATE course_sessions SET sess_enrollee = sess_enrollee + 1 WHERE sess_id = ?", [$sess_id]);
+                    $DB->query("UPDATE fsl_course_sessions SET sess_enrollee = sess_enrollee + 1 WHERE sess_id = ?", [$sess_id]);
 
                     // 3) 寫入 fsl_course_enrolls（enr_pay_status=2 免費折抵完成, enr_quota_type=2 免費額度扣除）
                     $DB->query(
@@ -2227,8 +2227,282 @@ try {
             exit();
         break;
 
+        // =========================================================================
+        // 動作 act_access_resource ：驗證素材存取權限 + 記錄使用次數/計次扣減
+        // =========================================================================
+        case "act_access_resource":
+            $res_id   = (int)($_POST['res_id'] ?? 0);
+            $use_mode = trim((string)($_POST['use_mode'] ?? 'preview')); // preview | download
 
+            if ($res_id <= 0) {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '無效的素材資源編號']);
+                exit();
+            }
 
+            $resRow = $DB->row("SELECT * FROM fsl_resources WHERE res_id = ? AND res_status = 1", [$res_id]);
+            if (!$resRow) {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '找不到該素材資源或目前已下架']);
+                exit();
+            }
+
+            // 1. 檢核預覽/下載開關權限
+            if ($use_mode === 'preview' && (int)$resRow['res_can_preview'] !== 1) {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '此素材未開放線上預覽']);
+                exit();
+            }
+            if ($use_mode === 'download' && (int)$resRow['res_can_download'] !== 1) {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '此素材僅限線上瀏覽，未開放檔案下載']);
+                exit();
+            }
+
+            // 2. 查詢會員是否已有授權紀錄 (fsl_resource_access)
+            $accRow = $DB->row("SELECT * FROM fsl_resource_access WHERE mb_id = ? AND res_id = ?", [$mb_id, $res_id]);
+
+            // 3. 若尚無授權紀錄，依據 res_auth_rule 檢核是否符合自動免費開通資格
+            if (!$accRow) {
+                $auth_rule   = (int)$resRow['res_auth_rule'];
+                $auto_unlock = false;
+
+                // 優先檢查：是否在指定允許會員 ID 清單內 (res_allow_mbids)
+                $allow_ids = array_filter(array_map('intval', explode(',', (string)($resRow['res_allow_mbids'] ?? ''))));
+                if (!empty($allow_ids) && in_array($mb_id, $allow_ids, true)) {
+                    $auto_unlock = true;
+                }
+
+                if (!$auto_unlock) {
+                    if ($auth_rule === 0) {
+                        $auto_unlock = true; // 全站會員免費公開
+                    } elseif ($auth_rule === 2 && (int)$resRow['course_id'] > 0) {
+                        // 需已報名關聯課程且已付款 (enr_pay_status IN (1, 2))
+                        $enrolled = $DB->single(
+                            "SELECT enr_id FROM fsl_course_enrolls WHERE mb_id = ? AND course_id = ? AND enr_pay_status IN (1, 2) AND enr_status != 0 LIMIT 1",
+                            [$mb_id, (int)$resRow['course_id']]
+                        );
+                        if ($enrolled) $auto_unlock = true;
+                    } elseif ($auth_rule === 3) {
+                        // 依會員等級門檻
+                        if ($mb_lvl >= (int)$resRow['res_min_level']) {
+                            $auto_unlock = true;
+                        }
+                    }
+                }
+
+                if (!$auto_unlock) {
+                    echo json_encode([
+                        'success'     => 0,
+                        'need_unlock' => 1,
+                        'code'        => '[@-errorcode-@]',
+                        'message'     => '您尚未取得此專屬素材的存取權限，請確認符合等級/修課條件，或使用點數兌換解鎖！'
+                    ]);
+                    exit();
+                }
+
+                // 自動建立授權子表紀錄
+                $usage_mode = (int)$resRow['res_usage_mode'];
+                $max_cnt    = ($usage_mode === 2) ? (int)$resRow['res_usage_limit'] : 0;
+                $exp_at     = ($usage_mode === 3 && (int)$resRow['res_valid_days'] > 0)
+                            ? date('Y-m-d H:i:s', strtotime('+' . (int)$resRow['res_valid_days'] . ' days'))
+                            : null;
+
+                $DB->query(
+                    "INSERT INTO fsl_resource_access (res_id, mb_id, racc_grant_type, racc_used_count, racc_max_count, racc_expire_at, racc_status)
+                     VALUES (?, ?, 1, 0, ?, ?, 1)",
+                    [$res_id, $mb_id, $max_cnt, $exp_at]
+                );
+                $accRow = $DB->row("SELECT * FROM fsl_resource_access WHERE mb_id = ? AND res_id = ?", [$mb_id, $res_id]);
+            }
+
+            // 4. 檢核授權狀態、計日效期與計次上限
+            if ((int)$accRow['racc_status'] !== 1) {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '您的素材授權次數已用盡或已過期失效']);
+                exit();
+            }
+            if (!empty($accRow['racc_expire_at']) && strtotime($accRow['racc_expire_at']) < time()) {
+                $DB->query("UPDATE fsl_resource_access SET racc_status = 3 WHERE racc_id = ?", [(int)$accRow['racc_id']]);
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '此素材的計日觀看/下載效期已屆滿']);
+                exit();
+            }
+            $max_allowed = (int)$accRow['racc_max_count'];
+            $used_now    = (int)$accRow['racc_used_count'];
+            if ($max_allowed > 0 && $used_now >= $max_allowed) {
+                $DB->query("UPDATE fsl_resource_access SET racc_status = 2 WHERE racc_id = ?", [(int)$accRow['racc_id']]);
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '此素材的計次額度已全數使用完畢']);
+                exit();
+            }
+
+            // 5. 更新會員已使用次數與全站總使用次數 (res_count + 1)
+            $next_used   = $used_now + 1;
+            $next_status = ($max_allowed > 0 && $next_used >= $max_allowed) ? 2 : 1;
+
+            $DB->query(
+                "UPDATE fsl_resource_access SET racc_used_count = ?, racc_last_used = NOW(), racc_status = ? WHERE racc_id = ?",
+                [$next_used, $next_status, (int)$accRow['racc_id']]
+            );
+            $DB->query("UPDATE fsl_resources SET res_count = res_count + 1 WHERE res_id = ?", [$res_id]);
+
+            $remain_str = ($max_allowed > 0) ? max(0, $max_allowed - $next_used) . ' 次' : '不限次數';
+
+            echo json_encode([
+                'success'       => 1,
+                'code'          => '[@-successcode-@]',
+                'res_id'        => $res_id,
+                'res_type'      => (int)$resRow['res_type'],
+                'res_title'     => $resRow['res_title'],
+                'res_body'      => $resRow['res_body'] ?? '',
+                'res_media_url' => $resRow['res_media_url'] ?? '',
+                'res_file_ext'  => $resRow['res_file_ext'] ?? '',
+                'can_download'  => (int)$resRow['res_can_download'],
+                'remain_str'    => $remain_str,
+                'racc_rated'    => (int)$accRow['racc_rated'],
+                'res_ratetop'   => (int)$resRow['res_ratetop'],
+                'res_count'     => (int)$resRow['res_count'] + 1
+            ]);
+            exit();
+        break;
+
+        // =========================================================================
+        // 動作 act_redeem_resource ：使用 PTS 點數一鍵兌換解鎖素材 (寫入 fsl_points)
+        // =========================================================================
+        case "act_redeem_resource":
+            $res_id = (int)($_POST['res_id'] ?? 0);
+            if ($res_id <= 0) {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '無效的素材編號']);
+                exit();
+            }
+
+            $resRow = $DB->row("SELECT * FROM fsl_resources WHERE res_id = ? AND res_status = 1", [$res_id]);
+            if (!$resRow || (int)$resRow['res_cost_pts'] <= 0) {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '此素材不支援點數兌換或已下架']);
+                exit();
+            }
+
+            $cost_pts = (int)$resRow['res_cost_pts'];
+
+            $DB->beginTransaction();
+            try {
+                // 檢查是否已擁有有效授權
+                $existAcc = $DB->row("SELECT racc_id, racc_status FROM fsl_resource_access WHERE mb_id = ? AND res_id = ? FOR UPDATE", [$mb_id, $res_id]);
+                if ($existAcc && (int)$existAcc['racc_status'] === 1) {
+                    $DB->rollBack();
+                    echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '您已經擁有此素材的有效使用權限，可直接開啟！']);
+                    exit();
+                }
+
+                // 鎖定會員點數餘額防超扣
+                $curr_pts = (int)$DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ? FOR UPDATE", [$mb_id]);
+                if ($curr_pts < $cost_pts) {
+                    $DB->rollBack();
+                    echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => "您的紅利點數不足（需 {$cost_pts} PTS，目前餘額 {$curr_pts} PTS）"]);
+                    exit();
+                }
+
+                // 1. 扣除會員點數
+                $DB->query("UPDATE fsl_members SET mb_points = mb_points - ? WHERE mb_id = ? AND mb_points >= ?", [$cost_pts, $mb_id, $cost_pts]);
+                $new_pts = (int)$DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]);
+                $_SESSION['mbPoints'] = $new_pts;
+
+                // 2. 寫入或重設 fsl_resource_access 授權紀錄
+                $usage_mode = (int)$resRow['res_usage_mode'];
+                $max_cnt    = ($usage_mode === 2) ? (int)$resRow['res_usage_limit'] : 0;
+                $exp_at     = ($usage_mode === 3 && (int)$resRow['res_valid_days'] > 0)
+                            ? date('Y-m-d H:i:s', strtotime('+' . (int)$resRow['res_valid_days'] . ' days'))
+                            : null;
+
+                if ($existAcc) {
+                    $DB->query(
+                        "UPDATE fsl_resource_access SET racc_grant_type = 2, racc_pts_spent = racc_pts_spent + ?, racc_used_count = 0, racc_max_count = ?, racc_expire_at = ?, racc_status = 1 WHERE racc_id = ?",
+                        [$cost_pts, $max_cnt, $exp_at, (int)$existAcc['racc_id']]
+                    );
+                    $racc_id = (int)$existAcc['racc_id'];
+                } else {
+                    $DB->query(
+                        "INSERT INTO fsl_resource_access (res_id, mb_id, racc_grant_type, racc_pts_spent, racc_used_count, racc_max_count, racc_expire_at, racc_status)
+                         VALUES (?, ?, 2, ?, 0, ?, ?, 1)",
+                        [$res_id, $mb_id, $cost_pts, $max_cnt, $exp_at]
+                    );
+                    $racc_id = (int)$DB->single("SELECT racc_id FROM fsl_resource_access WHERE mb_id = ? AND res_id = ?", [$mb_id, $res_id]);
+                }
+
+                // 3. 寫入 fsl_points 紅利明細子表
+                $memo = '兌換限定素材：' . $resRow['res_title'];
+                $DB->query(
+                    "INSERT INTO fsl_points (mb_id, pt_income, pt_type, pt_for, pt_forid, pt_trade, pt_redeem, pt_freepoints, pt_available, pt_memo, pt_status)
+                     VALUES (?, 0, 3, 6, ?, ?, 0, 0, ?, ?, 1)",
+                    [$mb_id, $racc_id, -$cost_pts, $new_pts, $memo]
+                );
+
+                $DB->commit();
+
+                echo json_encode([
+                    'success' => 1,
+                    'code'    => '[@-successcode-@]',
+                    'message' => "已成功扣除 {$cost_pts} PTS 解鎖「{$resRow['res_title']}」！",
+                    'new_pts' => $new_pts
+                ]);
+                exit();
+            } catch (Exception $e) {
+                $DB->rollBack();
+                throw $e;
+            }
+        break;
+
+        // =========================================================================
+        // 動作 act_rate_resource ：素材好評/負評評價 (更新 res_ratetop / res_ratebottom)
+        // =========================================================================
+        case "act_rate_resource":
+            $res_id = (int)($_POST['res_id'] ?? 0);
+            $vote   = (int)($_POST['vote'] ?? 0); // 1=好評(讚), -1=負評(踩)
+
+            if ($res_id <= 0 || !in_array($vote, [1, -1], true)) {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '無效的評價參數']);
+                exit();
+            }
+
+            $accRow = $DB->row("SELECT racc_id, racc_rated FROM fsl_resource_access WHERE mb_id = ? AND res_id = ?", [$mb_id, $res_id]);
+            if (!$accRow) {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '請先開啟或兌換此素材後再進行評價']);
+                exit();
+            }
+
+            $old_vote = (int)$accRow['racc_rated'];
+            if ($old_vote === $vote) {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '您已經送出過相同評價囉！']);
+                exit();
+            }
+
+            $DB->beginTransaction();
+            try {
+                // 若先前投過相反票，先扣回舊票數
+                if ($old_vote === 1) {
+                    $DB->query("UPDATE fsl_resources SET res_ratetop = GREATEST(0, res_ratetop - 1) WHERE res_id = ?", [$res_id]);
+                } elseif ($old_vote === -1) {
+                    $DB->query("UPDATE fsl_resources SET res_ratebottom = GREATEST(0, res_ratebottom - 1) WHERE res_id = ?", [$res_id]);
+                }
+
+                // 加上新票數
+                if ($vote === 1) {
+                    $DB->query("UPDATE fsl_resources SET res_ratetop = res_ratetop + 1 WHERE res_id = ?", [$res_id]);
+                } else {
+                    $DB->query("UPDATE fsl_resources SET res_ratebottom = res_ratebottom + 1 WHERE res_id = ?", [$res_id]);
+                }
+
+                $DB->query("UPDATE fsl_resource_access SET racc_rated = ? WHERE racc_id = ?", [$vote, (int)$accRow['racc_id']]);
+                $DB->commit();
+
+                $stats = $DB->row("SELECT res_ratetop, res_ratebottom FROM fsl_resources WHERE res_id = ?", [$res_id]);
+                echo json_encode([
+                    'success'        => 1,
+                    'code'           => '[@-successcode-@]',
+                    'message'        => '感謝您的寶貴評價！',
+                    'res_ratetop'    => (int)$stats['res_ratetop'],
+                    'res_ratebottom' => (int)$stats['res_ratebottom']
+                ]);
+                exit();
+            } catch (Exception $e) {
+                $DB->rollBack();
+                throw $e;
+            }
+        break;
 
 
 
