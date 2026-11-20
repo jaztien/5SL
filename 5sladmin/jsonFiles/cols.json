@@ -1,0 +1,43 @@
+{
+    "buildcase" : {
+        "table" : "fn.data_buildcase",
+        "title" : "社區建案資料表",
+        "des" : "社區、大樓等建築課程商品案件，包含建案名稱以及其他必要資訊",
+        "cols" : "bc_id,bc_published,bc_updated,bc_city,bc_district,bc_title,bc_subtitle,bc_subtitle2,bc_puretitle,bc_purephase,bc_pureext,bc_mode,bc_type,bc_usefor,bc_addr,bc_lat,bc_lng,bc_area,bc_totalnum,bc_pratio,bc_coverage,bc_far,bc_completion,bc_state,bc_plan,bc_layernum,bc_des,bc_unitprice,bc_totalprice,bc_pprice,bc_sprice,bc_selling,bc_loan,bc_meetadd,bc_parkratio,bc_parkplan,bc_parknum,bc_building,bc_abovemin,bc_abovemax,bc_undermin,bc_undermax,bc_direction,bc_pmc,bc_rmc,bc_mfee,bc_structure,bc_zoning,bc_blicense,bc_ulicense,bc_materials,bc_inpublic,bc_pile,bc_trash,bc_investor,bc_constructer,bc_saleteam,bc_cdesign,bc_vdesign,bc_pdesign,bc_ldesign,bc_mrt,bc_hiway,bc_speedway,bc_thsr,bc_tra,bc_othertraffic,bc_edu,bc_market,bc_omarket,bc_outpublic,bc_circle,bc_medical,bc_gov,bc_pack,bc_image64,bc_check,bc_status,bc_similar,bc_similaradd,bc_similarid,bc_infomark,bc_imagemark,bc_updateinfo,bc_distance"
+    },
+    "aprret" : {
+        "table" : "fn.data_aprret",
+        "title" : "實價登錄資料表",
+        "des" : "內政部實價登錄紀錄",
+        "cols" : "mb_id"
+    },
+    "socialcircle" : {
+        "table" : "fn.data_socialcircle",
+        "title" : "社區建案資料表",
+        "des" : "社區、大樓等建築課程商品案件，包含建案名稱以及其他必要資訊",
+        "cols" : "merch_id"
+    },
+    "data_comms" : {
+        "table" : "fn.data_comms",
+        "title" : "測試用資料表",
+        "des" : "這是匯入功能測試用檔案，總共不過10筆資料，省著點用",
+        "cols" : "comm_id,comm_city,comm_district,comm_title,comm_mode,comm_type,comm_usefor,comm_addr,comm_status"
+    },
+    "sys_logstrings" : {
+        "table" : "fn.data_comms",
+        "title" : "人生第五季系統操作訊息代碼表",
+        "des" : "人生第五季系統操作訊息代碼表",
+        "cols" : "lg_id,lg_code,lg_string"
+    },
+    "csvtest" : {
+        "table" : "fn.csvtest",
+        "title" : "測試用資料表",
+        "des" : "這是匯入功能測試用檔案",
+        "cols" : "csvt_id,csvt_title,csvt_des,csvt_status"
+    },
+    "mode" : {
+        "0" : "不明",
+        "1" : "匯入",
+        "2" : "匯出"
+    }
+}

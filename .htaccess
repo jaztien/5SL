@@ -1,0 +1,7 @@
+      
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^HOME([0-9]*)/$ ad_home.php?msg=$1
+</IfModule>
+

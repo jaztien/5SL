@@ -1,0 +1,31 @@
+Time : 20:27:17
+SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'mb_openhouse' at row 1
+Raw SQL : UPDATE fh.members SET mb_cate=?,mb_title=?,mb_org=?,mb_merchjoint=?,mb_speccity=?,mb_specarea=?,mb_speccomm=?,mb_cotype=?,mb_coexpert=?,mb_dialog=?,mb_consult=?,mb_live=?,mb_subscribe=?,mb_status=?,mb_openhouse=? WHERE 1=1 AND mb_id=?
+
+Time : 20:26:54
+SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'mb_merchjoint' at row 1
+Raw SQL : UPDATE fh.members SET mb_cate=?,mb_title=?,mb_org=?,mb_speccity=?,mb_specarea=?,mb_speccomm=?,mb_cotype=?,mb_coexpert=?,mb_dialog=?,mb_consult=?,mb_openhouse=?,mb_live=?,mb_subscribe=?,mb_status=?,mb_merchjoint=? WHERE 1=1 AND mb_id=?
+
+Time : 20:26:01
+SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'mb_merchjoint' at row 1
+Raw SQL : UPDATE fh.members SET mb_cate=?,mb_title=?,mb_org=?,mb_speccity=?,mb_specarea=?,mb_speccomm=?,mb_cotype=?,mb_coexpert=?,mb_dialog=?,mb_consult=?,mb_openhouse=?,mb_live=?,mb_subscribe=?,mb_status=?,mb_merchjoint=? WHERE 1=1 AND mb_id=?
+
+Time : 20:05:11
+SQLSTATE[HY000]: General error: 2031 No data supplied for 1 parameter in prepared statement
+Raw SQL : UPDATE fh.members SET mb_cate=?,mb_title=?,mb_org=?,mb_speccity=?,mb_speccomm=?,mb_dialog=?,mb_consult=?,mb_openhouse=?,mb_live=?,mb_subscribe=?,mb_status=?,mb_merchjoint=? WHERE 1=1 AND mb_id=?
+
+Time : 19:52:05
+SQLSTATE[HY000]: General error: 2031 No data supplied for 1 parameter in prepared statement
+Raw SQL : UPDATE fh.members SET mb_cate=?,mb_title=?,mb_org=?,mb_speccity=?,mb_speccomm=?,mb_dialog=?,mb_consult=?,mb_openhouse=?,mb_live=?,mb_subscribe=?,mb_status=?,mb_merchjoint=? WHERE 1=1 AND mb_id=?
+
+Time : 19:47:03
+SQLSTATE[HY000]: General error: 2031 No data supplied for 4 parameters in prepared statement
+Raw SQL : UPDATE fh.members SET mb_cate=?,mb_title=?,mb_org=?,mb_merchjoint=?,mb_speccity=?,mb_specarea=?,mb_speccomm=?,mb_cotype=?,mb_coexpert=?,mb_dialog=?,mb_consult=?,mb_openhouse=?,mb_live=?,mb_subscribe=?,mb_status=? WHERE 1=1 AND mb_id=?
+
+Time : 19:39:36
+SQLSTATE[HY000]: General error: 2031 No data supplied for 4 parameters in prepared statement
+Raw SQL : UPDATE fh.members SET mb_cate=?,mb_title=?,mb_org=?,mb_merchjoint=?,mb_speccity=?,mb_specarea=?,mb_speccomm=?,mb_cotype=?,mb_coexpert=?,mb_dialog=?,mb_consult=?,mb_openhouse=?,mb_live=?,mb_subscribe=?,mb_status=? WHERE 1=1 AND mb_id=?
+
+Time : 19:39:19
+SQLSTATE[HY000]: General error: 2031 No data supplied for 4 parameters in prepared statement
+Raw SQL : UPDATE fh.members SET mb_cate=?,mb_title=?,mb_org=?,mb_merchjoint=?,mb_speccity=?,mb_specarea=?,mb_speccomm=?,mb_cotype=?,mb_coexpert=?,mb_dialog=?,mb_consult=?,mb_openhouse=?,mb_live=?,mb_subscribe=?,mb_status=? WHERE 1=1 AND mb_id=?

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="OpenStreetMap server" copyright="OpenStreetMap and contributors" attribution="http://www.openstreetmap.org/copyright" license="http://opendatacommons.org/licenses/odbl/1-0/">
+<way id="353678885" visible="true" version="3" changeset="92569378" timestamp="2020-10-16T11:35:29Z" user="cmi3j89d9o" uid="151425">
+  <nd ref="3594968051"/>
+  <nd ref="5688170120"/>
+  <nd ref="5688170119"/>
+  <nd ref="5688170113"/>
+  <nd ref="5688170114"/>
+  <nd ref="5688170118"/>
+  <nd ref="5688170115"/>
+  <nd ref="5688170117"/>
+  <nd ref="5688170116"/>
+  <nd ref="5688170221"/>
+  <nd ref="5688170222"/>
+  <nd ref="5688170223"/>
+  <nd ref="5688170043"/>
+  <nd ref="3594968049"/>
+  <nd ref="5688170095"/>
+  <nd ref="5688170093"/>
+  <nd ref="5688170091"/>
+  <nd ref="5688170090"/>
+  <nd ref="5688170092"/>
+  <nd ref="5688170094"/>
+  <nd ref="3594968048"/>
+  <nd ref="3594968051"/>
+  <tag k="building" v="apartments"/>
+  <tag k="building:levels" v="12"/>
+</way>
+</osm>
