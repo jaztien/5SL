@@ -6,6 +6,7 @@
 !.gitignore
 !.htaccess
 5sladmin/includeFiles/
+5sladmin/_test/
 _nearest/
 _skipFiles/
 _oldVersion/
