@@ -497,38 +497,36 @@ $(document).ready(function () {
       }
     }
 
-    // 依據當前螢幕寬度回傳多階景深參數（支援 5 階至 7 階動態延展）
+    // 依據當前螢幕寬度回傳多階景深參數（提高最兩側透明度，讓邊界空白卡片與側翼方案清晰可見）
     function getDepthConfig() {
       const w = $(window).width();
       if (w >= 1400) {
-        // 超寬螢幕可同時呈現最多 7 階景深層次（中 + 左右各 3 階）
         return {
           maxVisibleTier: 3,
           offsets: new Array(0, 300, 520, 680),
-          scales: [1, 0.84, 0.56, 0.34],
-          opacities: [1, 0.75, 0.3, 0.1],
+          scales: [1, 0.85, 0.66, 0.48],
+          opacities: [1, 0.82, 0.58, 0.36],
         };
       } else if (w >= 992) {
-        // 標準桌機呈現 5 階景深層次（中 + 左右各 2 階）
         return {
           maxVisibleTier: 2,
           offsets: new Array(0, 295, 510),
-          scales: [1, 0.83, 0.5],
-          opacities: [1, 0.72, 0.25],
+          scales: [1, 0.84, 0.65],
+          opacities: [1, 0.8, 0.56],
         };
       } else if (w >= 576) {
         return {
           maxVisibleTier: 2,
           offsets: new Array(0, 220, 360),
-          scales: [1, 0.8, 0.45],
-          opacities: [1, 0.68, 0.2],
+          scales: [1, 0.8, 0.52],
+          opacities: [1, 0.72, 0.42],
         };
       } else {
         return {
           maxVisibleTier: 1,
           offsets: new Array(0, 155),
           scales: [1, 0.76],
-          opacities: [1, 0.45],
+          opacities: [1, 0.5],
         };
       }
     }
@@ -542,8 +540,8 @@ $(document).ready(function () {
         const absDiff = Math.abs(diff);
         const dir = diff === 0 ? 0 : diff > 0 ? 1 : -1;
         const $slide = $(this);
+        const isSpacer = $slide.hasClass("fsl-plan-spacer");
 
-        // 清除舊狀態並記錄相對偏移量（供點擊側邊卡片時直接跳轉）
         $slide
           .removeClass("is-center is-side-clickable is-far-blur")
           .attr("data-diff", diff);
@@ -559,17 +557,15 @@ $(document).ready(function () {
           const tx = dir * cfg.offsets[absDiff];
           const sc = cfg.scales[absDiff];
           const op = cfg.opacities[absDiff];
-          const isFar = absDiff >= 2; // 第 2 階以上遠景自動隱藏文字細節
 
-          $slide.addClass(isFar ? "is-far-blur" : "is-side-clickable").css({
+          // 所有可見範圍內的真實方案卡片皆可點擊置中；空白卡片則作為清晰邊界提示
+          $slide.addClass(isSpacer ? "is-far-blur" : "is-side-clickable").css({
             transform: "translate3d(" + tx + "px, 0, 0) scale(" + sc + ")",
             opacity: op,
             zIndex: 50 - absDiff * 10,
-            pointerEvents:
-              !isFar && !$slide.hasClass("fsl-plan-spacer") ? "auto" : "none",
+            pointerEvents: !isSpacer ? "auto" : "none",
           });
         } else {
-          // 超出當前視窗階數的卡片平滑收合至兩側邊緣外
           const maxOffset = cfg.offsets[cfg.offsets.length - 1] + 140;
           $slide.addClass("is-far-blur").css({
             transform:
@@ -589,6 +585,7 @@ $(document).ready(function () {
         .find('.fsl-pricing-dot[data-target-idx="' + activeRealIndex + '"]')
         .addClass("active");
     }
+
 
     function goToPlan(newIdx) {
       if (newIdx < 0) newIdx = 0;
@@ -942,48 +939,68 @@ $(document).ready(function () {
   }
 
   /* ==========================================================================
-       14. 更多花絮頁面 (5sl_highlights.php)：分類篩選、載入更多與點擊大圖預覽
+       14. 更多花絮頁面 (5sl_highlights.php)：支援圖檔 / YouTube視訊 / 聲音檔三種 Lightbox
        ========================================================================== */
   const $highlightsGrid = $("#fslHighlightsGrid");
 
   if ($highlightsGrid.length > 0) {
-    // 1. 點擊純圖片網格卡片開啟大圖 Preview 燈箱（影片卡片自動觸發播放鈕）
     $highlightsGrid.on("click", ".fsl-grid-highlight-card", function (e) {
-      if ($(e.target).closest(".video-play-btn").length > 0) return;
+      e.preventDefault();
+      e.stopPropagation();
 
-      const $playBtn = $(this).find(".video-play-btn");
-      if ($playBtn.length > 0) {
-        $playBtn.trigger("click");
-        return;
-      }
+      const $card    = $(this);
+      const mType    = parseInt($card.attr("data-media-type"), 10) || 1;
+      const mainImg  = $card.attr("data-main-img") || $card.find("img").attr("src") || "";
+      const mediaUrl = ($card.attr("data-media-url") || "").trim();
+      const title    = $card.attr("data-title") || $card.find(".portfolio-overlay h6").text() || "";
+      const desc     = $card.attr("data-desc") || $card.find(".portfolio-overlay p").text() || "";
+      const dateStr  = $card.attr("data-date") || "";
 
-      const imgSrc = $(this).find("img").attr("src") || "";
-      const titleText = $(this).find(".portfolio-overlay h6").text() || "";
-      const descText = $(this).find(".portfolio-overlay p").text() || "";
-
-      if (imgSrc !== "") {
-        $("#previewLightboxImg").attr("src", imgSrc);
-        $("#previewLightboxTitle").text(titleText);
-        $("#previewLightboxDesc").text(descText);
-
-        const previewModalEl = document.getElementById("imagePreviewModal");
-        if (previewModalEl && window.bootstrap) {
-          bootstrap.Modal.getOrCreateInstance(previewModalEl).show();
+      if (mType === 2 && mediaUrl !== "") {
+        let ytId = "";
+        if (mediaUrl.indexOf("v=") !== -1) {
+          ytId = mediaUrl.split("v=").pop().split("&").shift();
+        } else if (mediaUrl.indexOf("youtu.be/") !== -1) {
+          ytId = mediaUrl.split("youtu.be/").pop().split("?").shift();
+        } else if (mediaUrl.indexOf("/embed/") !== -1) {
+          ytId = mediaUrl.split("/embed/").pop().split("?").shift();
         }
+
+        if (ytId !== "") {
+          const embedSrc = "https://" + "youtube.com" + "/em" + "bed/" + ytId + "?autoplay=1&rel=0&playsinline=1";
+          $("#hlVideoLightboxTitle").text((dateStr ? "[" + dateStr + "] " : "") + title);
+          $("#hlLightboxIframe").attr("src", embedSrc);
+          const vModalEl = document.getElementById("hlVideoLightboxModal") || document.getElementById("videoLightboxModal");
+          if (vModalEl) bootstrap.Modal.getOrCreateInstance(vModalEl).show();
+        }
+      } else if (mType === 3 && mediaUrl !== "") {
+        $("#audioLightboxCover").attr("src", mainImg);
+        $("#audioLightboxDate").text(dateStr);
+        $("#audioLightboxTitle").text(title);
+        $("#audioLightboxDesc").text(desc);
+        const player = document.getElementById("audioLightboxPlayer");
+        if (player) {
+          player.src = mediaUrl;
+          bootstrap.Modal.getOrCreateInstance(document.getElementById("audioLightboxModal")).show();
+          player.play().catch(function () {});
+        }
+      } else if (mainImg !== "") {
+        $("#previewLightboxImg").attr("src", mainImg);
+        $("#previewLightboxTitle").text(title);
+        $("#previewLightboxDesc").text(desc);
+        const pModalEl = document.getElementById("imagePreviewModal");
+        if (pModalEl) bootstrap.Modal.getOrCreateInstance(pModalEl).show();
       }
     });
 
-    // 2. 「載入更多花絮」按鈕展開隱藏卡片
     $("#fslLoadMoreHighlightsBtn").on("click", function () {
       const $hiddenCards = $highlightsGrid.find(".fsl-extra-card.d-none");
       $hiddenCards.slice(0, 8).removeClass("d-none").hide().fadeIn(350);
-
       if ($highlightsGrid.find(".fsl-extra-card.d-none").length === 0) {
         $(this).fadeOut(250);
       }
     });
 
-    // 3. 分類標籤篩選（支援依類別或「影音實錄」篩選）
     $("#fslGalleryFilterBar").on("click", ".fsl-faq-filter-btn", function () {
       const $btn = $(this);
       const filter = $btn.attr("data-gallery-filter");
@@ -1009,10 +1026,10 @@ $(document).ready(function () {
         $("#fslLoadMoreHighlightsBtn").hide();
         $allCols.each(function () {
           const $col = $(this);
-          const isMatch =
-            filter === "video"
-              ? $col.attr("data-has-video") === "1"
-              : $col.attr("data-cat") === filter;
+          let isMatch = false;
+          if (filter === "video") isMatch = $col.attr("data-has-video") === "1";
+          else if (filter === "audio") isMatch = $col.attr("data-has-audio") === "1";
+          else isMatch = $col.attr("data-cat") === filter;
 
           if (isMatch) {
             $col.removeClass("d-none").stop(true, true).fadeIn(250);
@@ -1023,6 +1040,7 @@ $(document).ready(function () {
       }
     });
   }
+
   /* ==========================================================================
     全站通用：一鍵加入購物車 / 立即預約觸發器 (.btn-fsl-add-cart)
     ========================================================================== */
