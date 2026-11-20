@@ -1590,7 +1590,7 @@ footer.footer-overflow-master h6 {
 }
 
 /* ==========================================================================
-   23. 首頁價格方案：無限多階可擴充景深輪播、左右滑動按鈕與三種等級樣式
+   23. 首頁價格方案：無限多階可擴充景深輪播、左右滑動按鈕與四種等級樣式 (精簡整合最終版)
    ========================================================================== */
 
 .fsl-pricing-carousel {
@@ -1602,10 +1602,10 @@ footer.footer-overflow-master h6 {
 .fsl-pricing-viewport {
     position: relative;
     width: 100%;
-    height: 490px;
+    height: 510px;
     overflow: hidden;
     cursor: grab;
-    touch-action: pan-y; /* 允許頁面垂直滾動，同時攔截水平滑動手勢 */
+    touch-action: pan-y;
 }
 
 .fsl-pricing-viewport:active {
@@ -1618,48 +1618,55 @@ footer.footer-overflow-master h6 {
     height: 100%;
 }
 
-/* 單張方案卡片外層定位與平滑翻頁過渡（座標與縮放由 JS 多階引擎動態驅動） */
+/* 單張方案卡片外層定位（統一等高 470px，絕不被長文案撐破） */
 .fsl-plan-slide {
     position: absolute;
     top: 50%;
     left: 50%;
     width: 330px;
-    height: 450px;
+    height: 470px !important;
     margin-left: -165px;
-    margin-top: -225px;
+    margin-top: -235px;
     transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
                 opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
     will-change: transform, opacity;
 }
 
-/* 可點擊的側翼卡片互動提示 */
 .fsl-plan-slide.is-side-clickable {
     cursor: pointer;
 }
 
 .fsl-plan-slide.is-side-clickable:hover {
-    opacity: 0.92 !important;
+    opacity: 0.95 !important;
 }
 
-/* 第 2 階以上的遠景極小化卡片：隱藏內部文字細節，達到「小到看不到內容」的純視覺遠景效果 */
 .fsl-plan-slide.is-far-blur .card-body > * {
     opacity: 0 !important;
     visibility: hidden !important;
     transition: opacity 0.25s ease;
 }
 
-/* 自動補齊左右平衡的空白卡片樣式 */
-.fsl-plan-spacer .fsl-plan-card {
-    background: rgba(255, 255, 255, 0.02) !important;
-    border: 1px dashed rgba(255, 255, 255, 0.14) !important;
-    box-shadow: none !important;
-}
-
-/* 卡片內部通用排版與大字級價格 */
+/* 卡片內部彈性排版：簡介自動限高，底部預約按鈕永遠水平齊平貼底 */
 .fsl-plan-card {
+    height: 100% !important;
     border-radius: 18px;
     overflow: hidden;
+    display: flex !important;
+    flex-direction: column !important;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.fsl-plan-card .card-body {
+    height: 100% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+
+.fsl-plan-header,
+.fsl-plan-price-wrap {
+    flex-shrink: 0 !important;
 }
 
 .fsl-plan-badge {
@@ -1676,13 +1683,20 @@ footer.footer-overflow-master h6 {
 }
 
 .fsl-plan-price-wrap {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: 4px;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: baseline !important;
+    justify-content: center !important;
+    gap: 0.15rem 0.35rem !important;
     padding: 0.5rem 0;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fsl-plan-currency,
+.fsl-plan-price,
+.fsl-plan-unit {
+    white-space: nowrap !important;
 }
 
 .fsl-plan-currency {
@@ -1691,7 +1705,7 @@ footer.footer-overflow-master h6 {
 }
 
 .fsl-plan-price {
-    font-size: 2.75rem; /* 放大明顯的價格數字 */
+    font-size: 2.75rem;
     font-weight: 800;
     line-height: 1.1;
     letter-spacing: -0.5px;
@@ -1702,7 +1716,22 @@ footer.footer-overflow-master h6 {
 }
 
 .fsl-plan-desc {
-    line-height: 1.65;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    line-clamp: 4 !important;
+    -webkit-line-clamp: 4 !important;
+    line-height: 1.65 !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.fsl-plan-card .mt-auto {
+    margin-top: auto !important;
+    flex-shrink: 0 !important;
+    padding-top: 0.75rem !important;
 }
 
 .fsl-plan-btn {
@@ -1711,8 +1740,28 @@ footer.footer-overflow-master h6 {
     transition: all 0.3s ease;
 }
 
+/* 空白邊界佔位卡片 (.fsl-plan-spacer) */
+#fslPricingStage .fsl-plan-spacer .fsl-plan-card {
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 193, 7, 0.08) 100%) !important;
+    border: 2px dashed rgba(255, 193, 7, 0.55) !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 0 24px rgba(255, 193, 7, 0.08) !important;
+}
+
+#fslPricingStage .fsl-plan-spacer .card-body::after {
+    content: "FIFTH SEASON LIFE";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: rgba(255, 193, 7, 0.42);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
 /* --------------------------------------------------------------------------
-   樣式一：基本收費項目 (plan-tier-basic) —— 樣式平淡、沉穩內斂
+   樣式一：基本收費項目 (plan-tier-basic)
    -------------------------------------------------------------------------- */
 .plan-tier-basic {
     background: linear-gradient(180deg, #1c1f23 0%, #16181b 100%) !important;
@@ -1720,41 +1769,18 @@ footer.footer-overflow-master h6 {
     color: #ced4da !important;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
 }
-
-.plan-tier-basic .fsl-plan-badge {
-    background-color: rgba(255, 255, 255, 0.06);
-    color: #adb5bd;
-}
-
-.plan-tier-basic .fsl-plan-title {
-    color: #e9ecef;
-}
-
+.plan-tier-basic .fsl-plan-badge { background-color: rgba(255, 255, 255, 0.06); color: #adb5bd; }
+.plan-tier-basic .fsl-plan-title { color: #e9ecef; }
 .plan-tier-basic .fsl-plan-subtitle,
 .plan-tier-basic .fsl-plan-unit,
-.plan-tier-basic .fsl-plan-desc {
-    color: #868e96;
-}
-
+.plan-tier-basic .fsl-plan-desc { color: #868e96; }
 .plan-tier-basic .fsl-plan-price,
-.plan-tier-basic .fsl-plan-currency {
-    color: #dee2e6;
-}
-
-.plan-tier-basic .fsl-plan-btn {
-    background-color: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: #ced4da;
-}
-
-.plan-tier-basic .fsl-plan-btn:hover {
-    background-color: rgba(255, 255, 255, 0.12);
-    border-color: #ffffff;
-    color: #ffffff;
-}
+.plan-tier-basic .fsl-plan-currency { color: #dee2e6; }
+.plan-tier-basic .fsl-plan-btn { background-color: transparent; border: 1px solid rgba(255, 255, 255, 0.3); color: #ced4da; }
+.plan-tier-basic .fsl-plan-btn:hover { background-color: rgba(255, 255, 255, 0.12); border-color: #ffffff; color: #ffffff; }
 
 /* --------------------------------------------------------------------------
-   樣式二：一般收費項目 (plan-tier-standard) —— 樣式一般顯眼、銀白高光質感
+   樣式二：一般收費項目 (plan-tier-standard)
    -------------------------------------------------------------------------- */
 .plan-tier-standard {
     background: linear-gradient(165deg, #282d34 0%, #1b1e23 100%) !important;
@@ -1762,107 +1788,39 @@ footer.footer-overflow-master h6 {
     color: #f8f9fa !important;
     box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
-
-.plan-tier-standard .fsl-plan-badge {
-    background-color: rgba(255, 255, 255, 0.14);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-}
-
-.plan-tier-standard .fsl-plan-title {
-    color: #ffffff;
-}
-
+.plan-tier-standard .fsl-plan-badge { background-color: rgba(255, 255, 255, 0.14); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); }
+.plan-tier-standard .fsl-plan-title { color: #ffffff; }
 .plan-tier-standard .fsl-plan-subtitle,
-.plan-tier-standard .fsl-plan-unit {
-    color: #adb5bd;
-}
-
-.plan-tier-standard .fsl-plan-desc {
-    color: #ced4da;
-}
-
+.plan-tier-standard .fsl-plan-unit { color: #adb5bd; }
+.plan-tier-standard .fsl-plan-desc { color: #ced4da; }
 .plan-tier-standard .fsl-plan-price,
-.plan-tier-standard .fsl-plan-currency {
-    color: #ffffff;
-}
-
-.plan-tier-standard .fsl-plan-btn {
-    background-color: #f8f9fa;
-    border: 1px solid #f8f9fa;
-    color: #16181b;
-}
-
-.plan-tier-standard .fsl-plan-btn:hover {
-    background-color: #ffffff;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(255, 255, 255, 0.25);
-}
+.plan-tier-standard .fsl-plan-currency { color: #ffffff; }
+.plan-tier-standard .fsl-plan-btn { background-color: #f8f9fa; border: 1px solid #f8f9fa; color: #16181b; }
+.plan-tier-standard .fsl-plan-btn:hover { background-color: #ffffff; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(255, 255, 255, 0.25); }
 
 /* --------------------------------------------------------------------------
-   樣式三：重要收費項目 (plan-tier-premium) —— 黑金尊榮發光、非常顯眼
+   樣式三：重要收費項目 (plan-tier-premium)
    -------------------------------------------------------------------------- */
 .plan-tier-premium {
     background: linear-gradient(155deg, #2b2416 0%, #191714 55%, #241d11 100%) !important;
     border: 2px solid #ffc107 !important;
     color: #ffffff !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65),
-                0 0 32px rgba(255, 193, 7, 0.28),
-                inset 0 0 20px rgba(255, 193, 7, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 32px rgba(255, 193, 7, 0.28), inset 0 0 20px rgba(255, 193, 7, 0.1);
 }
+.plan-tier-premium .fsl-plan-badge { background: linear-gradient(90deg, #ffc107, #ffda6a); color: #16181b; font-weight: 700; box-shadow: 0 4px 12px rgba(255, 193, 7, 0.35); }
+.plan-tier-premium .fsl-plan-title { color: #ffda6a; }
+.plan-tier-premium .fsl-plan-subtitle { color: rgba(255, 255, 255, 0.78); }
+.plan-tier-premium .fsl-plan-price-wrap { border-top-color: rgba(255, 193, 7, 0.28); border-bottom-color: rgba(255, 193, 7, 0.28); }
+.plan-tier-premium .fsl-plan-currency,
+.plan-tier-premium .fsl-plan-price { color: #ffc107; text-shadow: 0 2px 16px rgba(255, 193, 7, 0.35); }
+.plan-tier-premium .fsl-plan-unit { color: rgba(255, 255, 255, 0.7); }
+.plan-tier-premium .fsl-plan-desc { color: rgba(255, 255, 255, 0.88); }
+.plan-tier-premium .fsl-plan-btn { background: linear-gradient(90deg, #ffc107 0%, #ffca2c 100%); border: none; color: #16181b; box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4); }
+.plan-tier-premium .fsl-plan-btn:hover { background: linear-gradient(90deg, #ffca2c 0%, #ffe082 100%); transform: translateY(-2px); box-shadow: 0 10px 26px rgba(255, 193, 7, 0.55); }
 
-.plan-tier-premium .fsl-plan-badge {
-    background: linear-gradient(90deg, #ffc107, #ffda6a);
-    color: #16181b;
-    font-weight: 700;
-    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.35);
-}
-
-.plan-tier-premium .fsl-plan-title {
-    color: #ffda6a;
-}
-
-.plan-tier-premium .fsl-plan-subtitle {
-    color: rgba(255, 255, 255, 0.78);
-}
-
-.plan-tier-premium .fsl-plan-price-wrap {
-    border-top-color: rgba(255, 193, 7, 0.28);
-    border-bottom-color: rgba(255, 193, 7, 0.28);
-}
-
-.plan-tier-premium .fsl-plan-currency {
-    color: #ffc107;
-}
-
-.plan-tier-premium .fsl-plan-price {
-    color: #ffc107;
-    text-shadow: 0 2px 16px rgba(255, 193, 7, 0.35);
-}
-
-.plan-tier-premium .fsl-plan-unit {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.plan-tier-premium .fsl-plan-desc {
-    color: rgba(255, 255, 255, 0.88);
-}
-
-.plan-tier-premium .fsl-plan-btn {
-    background: linear-gradient(90deg, #ffc107 0%, #ffca2c 100%);
-    border: none;
-    color: #16181b;
-    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
-}
-
-.plan-tier-premium .fsl-plan-btn:hover {
-    background: linear-gradient(90deg, #ffca2c 0%, #ffe082 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 26px rgba(255, 193, 7, 0.55);
-}
-/* ==========================================================================
-   價格方案第四階級：特殊價格專用樣式 (plan-tier-special - 嫩青檸綠 + 深墨綠黑邊 + 斜光與內光暈整合版)
-   ========================================================================== */
+/* --------------------------------------------------------------------------
+   樣式四：特殊價格專用樣式 (plan-tier-special - 嫩青檸綠 + 深墨綠黑邊 + 斜光與內光暈整合版)
+   -------------------------------------------------------------------------- */
 .fsl-plan-card.plan-tier-special {
     position: relative;
     overflow: hidden;
@@ -1870,24 +1828,15 @@ footer.footer-overflow-master h6 {
     background-image: none !important;
     border: 2px solid #1a2e05 !important;
     color: #1a2e05 !important;
-    box-shadow:
-        0 14px 32px rgba(26, 46, 5, 0.35),
-        inset 0 0 28px rgba(255, 255, 255, 0.72),
-        inset 0 0 60px rgba(236, 252, 203, 0.55) !important;
+    box-shadow: 0 14px 32px rgba(26, 46, 5, 0.35), inset 0 0 28px rgba(255, 255, 255, 0.72), inset 0 0 60px rgba(236, 252, 203, 0.55) !important;
     transition: transform 0.35s ease, box-shadow 0.35s ease, background-color 0.35s ease, border-color 0.35s ease;
     animation: fslSpecialInnerGlow 3.2s ease-in-out infinite alternate;
 }
-
 .fsl-plan-card.plan-tier-special:hover {
     background-color: #d9f99d !important;
     border: 2px solid #0d1902 !important;
-    box-shadow:
-        0 18px 40px rgba(26, 46, 5, 0.5),
-        inset 0 0 36px rgba(255, 255, 255, 0.9),
-        inset 0 0 72px rgba(236, 252, 203, 0.75) !important;
+    box-shadow: 0 18px 40px rgba(26, 46, 5, 0.5), inset 0 0 36px rgba(255, 255, 255, 0.9), inset 0 0 72px rgba(236, 252, 203, 0.75) !important;
 }
-
-/* 斜向流光掃過層 */
 .fsl-plan-card.plan-tier-special::after {
     content: "";
     position: absolute;
@@ -1895,229 +1844,37 @@ footer.footer-overflow-master h6 {
     left: -120%;
     width: 55%;
     height: 120%;
-    background: linear-gradient(
-        115deg,
-        rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.15) 35%,
-        rgba(255, 255, 255, 0.65) 50%,
-        rgba(255, 255, 255, 0.15) 65%,
-        rgba(255, 255, 255, 0) 100%
-    );
+    background: linear-gradient(115deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 35%, rgba(255,255,255,0.65) 50%, rgba(255,255,255,0.15) 65%, rgba(255,255,255,0) 100%);
     transform: skewX(-22deg);
     pointer-events: none;
     z-index: 3;
     animation: fslSpecialCardSheen 4.2s ease-in-out infinite;
 }
-
-/* 頂部特殊活動標籤徽章 */
-.fsl-plan-card.plan-tier-special .fsl-plan-badge {
-    display: inline-block;
-    background-color: #365314 !important;
-    background-image: none !important;
-    color: #ffffff !important;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    padding: 0.35em 1em;
-    border-radius: 50rem;
-}
-
-.fsl-plan-card.plan-tier-special .fsl-plan-title {
-    color: #1a2e05 !important;
-    letter-spacing: 1.5px;
-}
-
-.fsl-plan-card.plan-tier-special .fsl-plan-subtitle {
-    color: #3f6212 !important;
-    font-weight: 600;
-}
-
-/* 重點價格數字區域 */
+.fsl-plan-card.plan-tier-special .fsl-plan-badge { background-color: #365314 !important; background-image: none !important; color: #ffffff !important; font-weight: 800; letter-spacing: 1.5px; padding: 0.35em 1em; border-radius: 50rem; }
+.fsl-plan-card.plan-tier-special .fsl-plan-title { color: #1a2e05 !important; letter-spacing: 1.5px; }
+.fsl-plan-card.plan-tier-special .fsl-plan-subtitle { color: #3f6212 !important; font-weight: 600; }
 .fsl-plan-card.plan-tier-special .fsl-plan-currency,
-.fsl-plan-card.plan-tier-special .fsl-plan-price {
-    color: #365314 !important;
-    text-shadow: none !important;
-}
-
-.fsl-plan-card.plan-tier-special .fsl-plan-unit {
-    color: #4d7c0f !important;
-    font-weight: 600;
-}
-
-.fsl-plan-card.plan-tier-special .fsl-plan-desc {
-    color: #1a2e05 !important;
-}
-
-/* 專屬預約按鈕 */
-.fsl-plan-card.plan-tier-special .fsl-plan-btn {
-    background-color: #365314 !important;
-    background-image: none !important;
-    border: none !important;
-    color: #ffffff !important;
-    letter-spacing: 1.5px;
-    box-shadow: 0 6px 16px rgba(54, 83, 20, 0.28) !important;
-    transition: all 0.25s ease;
-}
-
-.fsl-plan-card.plan-tier-special .fsl-plan-btn:hover {
-    background-color: #1a2e05 !important;
-    color: #ffffff !important;
-    transform: translateY(-2px);
-}
-
-/* 愛心收藏鈕 */
-.fsl-plan-card.plan-tier-special .btn-fsl-wishlist {
-    border-color: #365314 !important;
-    color: #365314 !important;
-}
-
-.fsl-plan-card.plan-tier-special .btn-fsl-wishlist:hover {
-    background-color: #365314 !important;
-    color: #ffffff !important;
-}
+.fsl-plan-card.plan-tier-special .fsl-plan-price { color: #365314 !important; text-shadow: none !important; }
+.fsl-plan-card.plan-tier-special .fsl-plan-unit { color: #4d7c0f !important; font-weight: 600; }
+.fsl-plan-card.plan-tier-special .fsl-plan-desc { color: #1a2e05 !important; }
+.fsl-plan-card.plan-tier-special .fsl-plan-btn { background-color: #365314 !important; background-image: none !important; border: none !important; color: #ffffff !important; letter-spacing: 1.5px; box-shadow: 0 6px 16px rgba(54, 83, 20, 0.28) !important; transition: all 0.25s ease; }
+.fsl-plan-card.plan-tier-special .fsl-plan-btn:hover { background-color: #1a2e05 !important; color: #ffffff !important; transform: translateY(-2px); }
+.fsl-plan-card.plan-tier-special .btn-fsl-wishlist { border-color: #365314 !important; color: #365314 !important; }
+.fsl-plan-card.plan-tier-special .btn-fsl-wishlist:hover { background-color: #365314 !important; color: #ffffff !important; }
 
 @keyframes fslSpecialInnerGlow {
-    0% {
-        box-shadow:
-            0 14px 32px rgba(26, 46, 5, 0.35),
-            inset 0 0 20px rgba(255, 255, 255, 0.5),
-            inset 0 0 42px rgba(236, 252, 203, 0.35);
-    }
-    100% {
-        box-shadow:
-            0 16px 36px rgba(26, 46, 5, 0.42),
-            inset 0 0 34px rgba(255, 255, 255, 0.85),
-            inset 0 0 68px rgba(236, 252, 203, 0.7);
-    }
+    0% { box-shadow: 0 14px 32px rgba(26, 46, 5, 0.35), inset 0 0 20px rgba(255, 255, 255, 0.5), inset 0 0 42px rgba(236, 252, 203, 0.35); }
+    100% { box-shadow: 0 16px 36px rgba(26, 46, 5, 0.42), inset 0 0 34px rgba(255, 255, 255, 0.85), inset 0 0 68px rgba(236, 252, 203, 0.7); }
 }
-
 @keyframes fslSpecialCardSheen {
     0% { left: -120%; }
     38% { left: 165%; }
     100% { left: 165%; }
 }
 
-/* ==========================================================================
-   價格方案卡片：統一等高、簡介區智慧限高、底部按鈕永遠齊平不溢出
-   ========================================================================== */
-#fslPricingStage .fsl-plan-slide {
-    height: 470px !important; /* 給予足夠且統一的黃金卡片高度，容納雙副標、價格與按鈕 */
-}
-
-#fslPricingStage .fsl-plan-card {
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-}
-
-#fslPricingStage .fsl-plan-card .card-body {
-    height: 100% !important;
-    min-height: 0 !important; /* 核心：允許 Flex 子項在高度不足時收縮，不把底部按鈕推出外框 */
-    display: flex !important;
-    flex-direction: column !important;
-    overflow: hidden !important;
-}
-
-/* 標題與價格區不壓縮 */
-#fslPricingStage .fsl-plan-card .fsl-plan-header,
-#fslPricingStage .fsl-plan-card .fsl-plan-price-wrap {
-    flex-shrink: 0 !important;
-}
-
-/* 簡介描述區：自動填滿中間剩餘空間，超過 4 行時優雅省略（...），絕不撐爆卡片 */
-#fslPricingStage .fsl-plan-card .fsl-plan-desc {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-    display: -webkit-box !important;
-    -webkit-box-orient: vertical !important;
-    -webkit-line-clamp: 4 !important; /* 最多顯示 4 行，超過自動顯示省略號；點擊「我要預約」彈窗仍可看完整全文 */
-    line-height: 1.65 !important;
-    margin-top: 0.5rem !important;
-    margin-bottom: 0.75rem !important;
-}
-
-/* 底部預約與愛心按鈕列：永遠鎖死在卡片最底部並保持水平齊平 */
-#fslPricingStage .fsl-plan-card .mt-auto {
-    margin-top: auto !important;
-    flex-shrink: 0 !important;
-    padding-top: 0.75rem !important;
-}
-/* ==========================================================================
-   價格與計費單位 RWD 優化：禁止單字直排折行，窄螢幕自動優雅換至價格下一行
-   ========================================================================== */
-#fslPricingStage .fsl-plan-price-wrap {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    justify-content: center !important;
-    align-items: baseline !important;
-    gap: 0.15rem 0.35rem !important;
-}
-
-#fslPricingStage .fsl-plan-currency,
-#fslPricingStage .fsl-plan-price,
-#fslPricingStage .fsl-plan-unit {
-    white-space: nowrap !important; /* 徹底禁止任何文字被擠成「一字一行」 */
-}
-
-/* 平板與手機版 (< 992px)：讓計費單位直接跳到價格正下方置中顯示 */
-@media (max-width: 991.98px) {
-    #fslPricingStage .fsl-plan-unit {
-        display: block !important;
-        width: 100% !important;
-        text-align: center !important;
-        margin-top: 0.15rem !important;
-        font-size: 0.85rem !important;
-    }
-
-    /* 窄螢幕下簡介微調為 3 行，確保單位換行後底部按鈕依然完美留在卡片內 */
-    #fslPricingStage .fsl-plan-card .fsl-plan-desc {
-        -webkit-line-clamp: 3 !important;
-    }
-}
-/* ==========================================================================
-   價格方案輪播舞台與卡片：僅針對手機與平板模式 (< 992px) 補足底部高度，電腦版維持原比例
-   ========================================================================== */
-#fslPricingStage .fsl-plan-slide {
-    height: 470px !important;
-}
-
-/* ==========================================================================
-   手機與平板模式 (< 992px)：徹底解除外層容器固定高度與垂直裁切，完整露出整張卡片
-   ========================================================================== */
-@media (max-width: 991.98px) {
-    .fsl-pricing-carousel,
-    #fslPricingCarousel,
-    .fsl-pricing-viewport,
-    #fslPricingViewport,
-    .fsl-pricing-stage,
-    #fslPricingStage {
-        height: 560px !important;
-        min-height: 560px !important;
-        max-height: none !important;
-    }
-
-    /* 允許垂直方向完整顯示邊框與陰影，僅水平方向裁切左右超出視窗的遠景卡片 */
-    .fsl-pricing-viewport,
-    #fslPricingViewport {
-        overflow-x: clip !important;
-        overflow-y: visible !important;
-        padding-top: 15px !important;
-        padding-bottom: 25px !important;
-    }
-
-    /* 讓卡片從舞台頂部安全位置往下展開，不被負 top 或 translateY(-50%) 擠出上下邊界 */
-    #fslPricingStage .fsl-plan-slide {
-        top: 10px !important;
-        transform-origin: center top !important;
-        height: 510px !important;
-        max-height: 510px !important;
-    }
-}
-
-
-
-/*/////////////////////////////////////////////////////////////*/
-/* 左右翻頁圓形按鈕 */
+/* --------------------------------------------------------------------------
+   左右翻頁圓形按鈕 & 底部頁碼指示點
+   -------------------------------------------------------------------------- */
 .fsl-carousel-nav-btn {
     position: absolute;
     top: 50%;
@@ -2133,34 +1890,25 @@ footer.footer-overflow-master h6 {
     justify-content: center;
     font-size: 1.25rem;
     cursor: pointer;
-    z-index: 60;
+    z-index: 65;
     backdrop-filter: blur(4px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
     transition: all 0.25s ease;
 }
-
 .fsl-carousel-nav-btn:hover:not(:disabled) {
     background-color: #ffc107;
     border-color: #ffc107;
     color: #16181b;
     transform: translateY(-50%) scale(1.1);
 }
-
 .fsl-carousel-nav-btn:disabled {
     opacity: 0.25;
     cursor: not-allowed;
     border-color: rgba(255, 255, 255, 0.2);
 }
+.fsl-nav-prev { left: 12px; }
+.fsl-nav-next { right: 12px; }
 
-.fsl-nav-prev {
-    left: 12px;
-}
-
-.fsl-nav-next {
-    right: 12px;
-}
-
-/* 底部頁碼指示點 */
 .fsl-pricing-dot {
     width: 10px;
     height: 10px;
@@ -2171,80 +1919,191 @@ footer.footer-overflow-master h6 {
     cursor: pointer;
     transition: all 0.3s ease;
 }
-
 .fsl-pricing-dot.active {
     width: 28px;
     border-radius: 10px;
     background-color: #ffc107;
 }
 
-/* 讓空白邊界卡片 (.fsl-plan-spacer) 在深色背景上清晰可見 */
-#fslPricingStage .fsl-plan-spacer .fsl-plan-card {
-    background: linear-gradient(155deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 193, 7, 0.08) 100%) !important;
-    border: 2px dashed rgba(255, 193, 7, 0.55) !important;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 0 24px rgba(255, 193, 7, 0.08) !important;
-}
-#fslPricingStage .fsl-plan-spacer .card-body::after {
-    content: "FIFTH SEASON LIFE";
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: rgba(255, 193, 7, 0.42);
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 700;
-    letter-spacing: 3px;
-}
-
-/* ==========================================================================
-   價格方案景深輪播：電腦版最兩側卡片保留內容可見度（提示左右尚有其他方案）
-   ========================================================================== */
+/* --------------------------------------------------------------------------
+   響應式分階：桌面版最兩側卡片保持文字清晰可見
+   -------------------------------------------------------------------------- */
 @media (min-width: 992px) {
-    /* 確保最兩側卡片（±2 位置）不被隱藏或透明度歸零，維持清晰可辨識的內容輪廓 */
     #fslPricingStage .fsl-plan-slide {
         visibility: visible !important;
     }
-
-    #fslPricingStage .fsl-plan-slide .fsl-plan-card,
-    #fslPricingStage .fsl-plan-slide .card-body,
-    #fslPricingStage .fsl-plan-slide .fsl-plan-header,
-    #fslPricingStage .fsl-plan-slide .fsl-plan-price-wrap,
-    #fslPricingStage .fsl-plan-slide .fsl-plan-desc {
+    #fslPricingStage .fsl-plan-slide:not(.fsl-plan-spacer) .fsl-plan-card,
+    #fslPricingStage .fsl-plan-slide:not(.fsl-plan-spacer) .card-body,
+    #fslPricingStage .fsl-plan-slide:not(.fsl-plan-spacer) .fsl-plan-header,
+    #fslPricingStage .fsl-plan-slide:not(.fsl-plan-spacer) .fsl-plan-price-wrap,
+    #fslPricingStage .fsl-plan-slide:not(.fsl-plan-spacer) .fsl-plan-desc {
         opacity: 1 !important;
         visibility: visible !important;
     }
-
-    /* 針對非中心（左右兩側）的卡片給予柔和的景深層次，既不搶走中間焦點又清楚看得到文字 */
     #fslPricingStage .fsl-plan-slide:not(.is-center):not(.active) {
         opacity: 0.72 !important;
         transition: transform 0.45s ease, opacity 0.45s ease;
     }
-
     #fslPricingStage .fsl-plan-slide:not(.is-center):not(.active):hover {
         opacity: 0.95 !important;
-        cursor: pointer;
     }
 }
-/* 手機版卡片尺寸微調 */
+
+/* --------------------------------------------------------------------------
+   響應式分階：平板與手機模式 (< 992px) 完整高度 + 計費單位換行 + 翻頁鈕精準置中
+   -------------------------------------------------------------------------- */
+@media (max-width: 991.98px) {
+    #fslPricingCarousel,
+    #fslPricingViewport,
+    #fslPricingStage {
+        height: 550px !important;
+        min-height: 550px !important;
+        max-height: none !important;
+    }
+
+    #fslPricingViewport {
+        overflow-x: clip !important;
+        overflow-y: visible !important;
+        padding-top: 10px !important;
+        padding-bottom: 20px !important;
+    }
+
+    #fslPricingStage .fsl-plan-slide {
+        top: 10px !important;
+        margin-top: 0 !important;
+        height: 510px !important;
+        max-height: 510px !important;
+    }
+
+    /* 計費單位跳到價格正下方 */
+    #fslPricingStage .fsl-plan-unit {
+        display: block !important;
+        width: 100% !important;
+        text-align: center !important;
+        margin-top: 0.15rem !important;
+        font-size: 0.85rem !important;
+    }
+
+
+    
+    #fslPricingStage .fsl-plan-card .fsl-plan-desc {
+        line-clamp: 3 !important;
+        -webkit-line-clamp: 3 !important;
+    }
+
+    /* 左右翻頁鈕鎖定在卡片垂直正中央 (卡片 top:10px + 高度一半 255px = 265px) */
+    #fslPricingCarousel #fslPricingPrev,
+    #fslPricingCarousel #fslPricingNext {
+        position: absolute !important;
+        top: 265px !important;
+        bottom: auto !important;
+        transform: translateY(-50%) !important;
+        z-index: 65 !important;
+    }
+}
+
+/* 手機窄螢幕 (< 576px) 卡片寬度與翻頁鈕微調 */
 @media (max-width: 575.98px) {
-    .fsl-pricing-viewport {
-        height: 460px;
+    #fslPricingStage .fsl-plan-slide {
+        width: 280px !important;
+        margin-left: -140px !important;
     }
-    .fsl-plan-slide {
-        width: 280px;
-        height: 430px;
-        margin-left: -140px;
-        margin-top: -215px;
+
+    #fslPricingCarousel .fsl-carousel-nav-btn {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 1.05rem !important;
     }
-    .fsl-carousel-nav-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 1.05rem;
-    }
-    .fsl-nav-prev { left: 4px; }
-    .fsl-nav-next { right: 4px; }
+
+    #fslPricingCarousel #fslPricingPrev { left: 4px !important; right: auto !important; }
+    #fslPricingCarousel #fslPricingNext { right: 4px !important; left: auto !important; }
 }
+   
+
+/* ==========================================================================
+   價格卡片標題與價格分隔線精煉調校（移除上下橫線 -> 改用圓角微光銘牌色塊）
+   ========================================================================== */
+#fslPricingStage .fsl-plan-card {
+    padding: 1.2rem 1.15rem !important;
+}
+
+#fslPricingStage .fsl-plan-card .card-body {
+    padding: 0 !important;
+}
+
+#fslPricingStage .fsl-plan-header {
+    margin-bottom: 0.35rem !important;
+}
+
+/* 1. 標題 (title)：移除上下橫線，改為圓角微光銘牌色塊（獨立且高雅醒目） */
+#fslPricingStage .fsl-plan-title {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background-color: rgba(0, 0, 0, 0.26);
+    border-radius: 10px;
+    padding: 0.42rem 0.75rem !important;
+    margin-top: 0.42rem !important;
+    margin-bottom: 0.32rem !important;
+}
+
+/* 2. 價格區 (price-wrap)：保留上下精緻橫線並維持舒適呼吸距離 */
+#fslPricingStage .fsl-plan-price-wrap {
+    margin-top: 0.55rem !important;
+    margin-bottom: 0.65rem !important;
+    padding-top: 0.52rem !important;
+    padding-bottom: 0.52rem !important;
+}
+
+/* 3. 四種階級的標題銘牌與價格分隔線專屬配色 */
+.plan-tier-basic .fsl-plan-title {
+    background-color: rgba(0, 0, 0, 0.32) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.plan-tier-standard .fsl-plan-title {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.24) !important;
+}
+
+.plan-tier-premium .fsl-plan-title {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.16) 0%, rgba(0, 0, 0, 0.35) 100%) !important;
+    border-color: rgba(255, 193, 7, 0.45) !important;
+}
+
+.plan-tier-premium .fsl-plan-price-wrap {
+    border-top-color: rgba(255, 193, 7, 0.32) !important;
+    border-bottom-color: rgba(255, 193, 7, 0.32) !important;
+}
+
+.fsl-plan-card.plan-tier-special .fsl-plan-title {
+    background-color: rgba(26, 46, 5, 0.12) !important;
+    border-color: rgba(26, 46, 5, 0.32) !important;
+}
+
+.fsl-plan-card.plan-tier-special .fsl-plan-price-wrap {
+    border-top: 1px solid rgba(26, 46, 5, 0.24) !important;
+    border-bottom: 1px solid rgba(26, 46, 5, 0.24) !important;
+}
+
+/* 4. 描述區維持充足行數與行距，不擠壓底部按鈕 */
+#fslPricingStage .fsl-plan-desc {
+    line-clamp: 5 !important;
+    -webkit-line-clamp: 5 !important;
+    line-height: 1.55 !important;
+    margin-top: 0.2rem !important;
+    margin-bottom: 0.45rem !important;
+}
+
+#fslPricingStage .fsl-plan-card .mt-auto {
+    padding-top: 0.45rem !important;
+}
+
+@media (max-width: 991.98px) {
+    #fslPricingStage .fsl-plan-card .fsl-plan-desc {
+        line-clamp: 4 !important;
+        -webkit-line-clamp: 4 !important;
+    }
+}
+
 
 /* ==========================================================================
    24. 首頁課程&活動花絮：GPU 硬體加速水平滑動藝廊 (10~20+ 張滿幀絲滑版)
