@@ -7,7 +7,11 @@ include_once '5sl_include_header.php';
 <!-- 💡 客製化美化樣式區塊，可移至 5seasonlife.css 中或保留在此 -->
 <style>
     body {
-        background: #f4f7f6; /* 與登入頁一致的清爽柔和背景底色 */
+        background-image: url("imageFiles/mainBG-3.jpg");
+        background-attachment: fixed;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
     }
     .signup-wrapper {
         min-height: calc(100vh - 80px);
@@ -26,7 +30,7 @@ include_once '5sl_include_header.php';
     /* 左側電影感品牌側欄 */
     .signup-brand-sidebar {
         background: linear-gradient(rgba(13, 110, 253, 0.75), rgba(33, 37, 41, 0.85)), 
-                    url('https://picsum.photos') no-repeat center center;
+                    url('imageFiles/test/<?php echo rand(1,18); ?>.jpg') no-repeat center center;
         background-size: cover;
         color: #ffffff;
         display: flex;

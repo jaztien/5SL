@@ -643,7 +643,7 @@ $(function() {
                     window.fslEpicEngine.trigger({
                         contentType: 'html',
                         contentSource: window.fslEpicEngine.createCouponTemplate({
-                            bgUrl: 'https://picsum.photos' + Math.floor(Math.random() * 1000),
+                            bgUrl: '',
                             points: pts.toString(),
                             unit: res.has_physical ? 'PTS + 實體禮盒' : 'PTS',
                             title: 'ALL QUESTS CLEARED!',
