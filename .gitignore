@@ -3,5 +3,7 @@
 
 # 例外：保留 .gitignore 本身，讓設定規則能同步到 GitHub
 !.gitignore
-
+!.htaccess
 5sladmin/includeFiles/
+_nearest/
+_skipFiles/
