@@ -1,0 +1,25 @@
+Time : 22:33:29
+SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'x=loc_code, '[1211,1212,1213]') AS resin FROM data_locations WHERE loc_depth=? A' at line 1
+Raw SQL : SELECT loc_title,loc_code,ANY_MATCH(x -> x=loc_code, '[1211,1212,1213]') AS resin FROM data_locations WHERE loc_depth=? AND loc_pcode=?
+
+Time : 22:30:49
+SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'x=loc_code, [1211,1212,1213]) AS resin FROM data_locations WHERE loc_depth=? AND' at line 1
+Raw SQL : SELECT loc_title,loc_code,ANY_MATCH(x -> x=loc_code, [1211,1212,1213]) AS resin FROM data_locations WHERE loc_depth=? AND loc_pcode=?
+
+Time : 22:27:16
+SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'x=loc_code, [1211,1212,1213]) AS resin FROM data_locations WHERE loc_depth=? AND' at line 1
+Raw SQL : SELECT loc_title,loc_code,ANY_MATCH(x -> x=loc_code, [1211,1212,1213]) AS resin FROM data_locations WHERE loc_depth=? AND loc_pcode=?
+
+Time : 22:27:11
+SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'x=loc_code, [1211,1212,1213]) AS resin FROM data_locations WHERE loc_depth=? AND' at line 1
+Raw SQL : SELECT loc_title,loc_code,ANY_MATCH(x -> x=loc_code, [1211,1212,1213]) AS resin FROM data_locations WHERE loc_depth=? AND loc_pcode=?
+
+Time : 22:24:05
+SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'x=1211, mb_specarea) AS resin FROM data_locations WHERE loc_depth=? AND loc_pcod' at line 1
+Raw SQL : SELECT loc_title,loc_code,ANY_MATCH(x -> x=1211, mb_specarea) AS resin FROM data_locations WHERE loc_depth=? AND loc_pcode=?
+
+Time : 22:23:28
+SQLSTATE[42000]: Syntax error or access violation: 1065 Query was empty
+
+Time : 22:23:10
+SQLSTATE[42000]: Syntax error or access violation: 1065 Query was empty

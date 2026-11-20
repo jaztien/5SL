@@ -1,0 +1,493 @@
+.col-form-label{
+text-align: right;
+} 
+/* --------------- */
+.imgEDicon,.overlay div{
+  /*right: 50%;*/
+  margin-left: 0px;
+  /*border-radius: 0.5em;*/
+}
+.imgEDiconLi{
+  vertical-align: top;
+  position: relative;
+  margin-left: -50px;
+  color:#5F6E86;
+}
+.imgEDiconLi:hover{
+  color: #444F61;
+  cursor: pointer;
+}
+.torightSide{ 
+  text-align: right; 
+  padding-right: 8px; 
+}
+
+/* ----- Image Crop Style ----- */
+.image_area { position: relative; }
+#avatarImage,#csvImage {
+  display: block;
+  max-width: 100%;
+}
+.preview {
+  overflow: hidden;
+  width: 160px; 
+  height: 160px;
+  margin: 10px;
+  border: 1px solid red;
+}
+.modal-lg{ max-width: 1000px !important; }
+.overlay {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  height: 0;
+  transition: .5s ease;
+  width: 100%;
+}
+.image_area:hover .overlay {
+  height: 50%;
+  cursor: pointer;
+}
+.overtext {
+  color: #333;
+  font-size: 16px;
+  position: absolute;
+  z-index: 1000;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+.fa-trash-can:hover{
+  color:#C35050;
+}
+/* --------------- */
+.hr-more {
+  height: 24px;
+  width: 140px;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  top: -30px;
+  margin-left:-70px;
+  color: #FFF;
+  font: normal 1em/14px;
+  vertical-align: middle;
+  text-align: center;
+  border-radius: 4px;
+  background-color: #5F6E86;
+}
+/* -------------------- */
+.grouphr{
+  border-color:#8895AA;
+  margin-top:24px;
+  margin-bottom:24px;
+}
+.grouphr.top{
+  margin-top:-40px;
+}
+.groupfield{
+  padding-left: 24px;
+  margin-top:-24px;
+  margin-bottom:24px;
+  font-size:0.8em;
+  color:#8895AA;
+  font-style:italic;
+  /*color:#17a2b8;*/    
+}
+.groupfield.top{
+  margin-top:-24px;
+}
+/* --------------- */
+.prevLink{
+  color:#236FB7;
+  cursor:pointer;
+}
+.prevLink:hover{
+  color:#17a2b8;
+}
+/* --------------- */
+.fromWhere:hover{
+  cursor:pointer;
+  background-color:#E2EEF9;
+}
+/* --------------- */
+input.valierror, select.valierror, textarea.valierror {
+  border: 1px solid #C35050;
+  background-color: #fff6f6;
+}
+
+.vali-error::after {
+  font-family: "Font Awesome 5 Free";
+  content: "\f06a";
+  display: inline-block;
+  /*padding-right: 3px;*/
+  vertical-align: middle;
+  font-size: 1.2em;
+  font-style: normal;
+  font-weight: 900;
+  position:absolute;
+  right:28px;
+  top:6px;
+  color:#C35050;
+}
+
+/* -------------------------------------- */
+#addpark:hover{
+  cursor: pointer;
+  /*background-color:#44a273;*/
+  color:#44a273;
+}
+#itemOption span.delparking:hover{
+  cursor: pointer;
+  background-color:#C35050;
+  color:#FFFFFF;
+}
+#itemOption span.addparking:hover{
+  cursor: pointer;
+  background-color:#44a273;
+  color:#FFFFFF;
+} 
+
+/* --------------- LIST Pages----------------------- */
+
+#collSearch {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #EEE;
+}
+#collSearch:hover {
+    color: #17a2b8;
+    -webkit-transition: color 0.4s;
+    transition: color 0.4s;
+}
+
+.advSearchBut{
+  margin-right: 4px;
+}
+/*    */
+
+[class^='advAddBut-']{
+  font-weight: border; 
+  margin-right: 4px;
+}
+.advAddBut-blue{
+  background-color: #236FB7;
+  color: #E2EEF9;
+}
+.advAddBut-blue:hover{ background-color: #1A5388; }
+.advAddBut-green{
+  background-color: #44a273;
+  color: #EEF7F2;
+}
+.advAddBut-green:hover{ background-color: #37845E; }
+.advAddBut-cyan{
+  background-color: #17a2b8;
+  color: #E4F8FB;
+}
+.advAddBut-cyan:hover{ background-color: #107281; }
+.advAddBut-gray{
+  background-color: #5F6E86;
+  color: #EAECF0;
+}
+.advAddBut-gray:hover{ background-color: #444F61; }
+.advAddBut-lightgray{
+  background-color: #B8BFCB;
+  color: #444F61;
+}
+.advAddBut-lightgray:hover{ background-color: #8895AA; }
+
+.advAddBut-yellow{
+  background-color: #ECC244;
+  color: #69510A;
+}
+.advAddBut-yellow:hover{ background-color: #C49814; }
+.advAddBut-purple{
+  background-color: #6f42c1;
+  color: #DBD0EF;
+}
+.advAddBut-purple:hover{ background-color: #5B34A1; }
+.advAddBut-orange{
+  background-color: #DF8233;
+  color: #F9E9DC;
+}
+.advAddBut-orange:hover{ background-color: #BE671D; }
+.advAddBut-red{
+  background-color: #C35050;
+  color: #F7E8E8;
+}
+.advAddBut-red:hover{ background-color: #A63939; }
+
+
+/*  Poopup Button  */
+[class^='popupBut-']{
+  font-weight: border; 
+  margin-right: 4px;
+}
+.popupBut-blue{
+  background-color: #236FB7;
+  color: #E2EEF9;
+}
+.popupBut-blue:hover{ background-color: #1A5388; }
+.popupBut-green{
+  background-color: #44a273;
+  color: #EEF7F2;
+}
+.popupBut-green:hover{ background-color: #37845E; }
+.popupBut-cyan{
+  background-color: #17a2b8;
+  color: #E4F8FB;
+}
+.popupBut-cyan:hover{ background-color: #107281; }
+.popupBut-gray{
+  background-color: #5F6E86;
+  color: #EAECF0;
+}
+.popupBut-gray:hover{ background-color: #444F61; }
+.popupBut-lightgray{
+  background-color: #B8BFCB;
+  color: #444F61;
+}
+.popupBut-lightgray:hover{ background-color: #8895AA; }
+
+.popupBut-yellow{
+  background-color: #ECC244;
+  color: #69510A;
+}
+.popupBut-yellow:hover{ background-color: #C49814; }
+.popupBut-purple{
+  background-color: #6f42c1;
+  color: #DBD0EF;
+}
+.popupBut-purple:hover{ background-color: #5B34A1; }
+.popupBut-orange{
+  background-color: #DF8233;
+  color: #F9E9DC;
+}
+.popupBut-orange:hover{ background-color: #BE671D; }
+.popupBut-red{
+  background-color: #C35050;
+  color: #F7E8E8;
+}
+.popupBut-red:hover{ background-color: #A63939; }
+
+
+/*
+.advAddBut-red{
+  background-color: #CF7575;
+  color: #F7E8E8;
+}
+.advAddBut-red:hover{ background-color: #C35050; }
+*/
+
+
+
+
+
+
+
+
+/* ==========================================================================
+   DataTables 3.x + Bootstrap 5 【外層主題 - 僅頭尾兩橫列 & 分頁變色】CSS
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. 左下角控制項完美平行、粗細與字級統一
+   -------------------------------------------------------------------------- */
+.dt-layout-start {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 15px;
+}
+.dt-layout-start .dt-info,
+.dt-layout-start .dt-length,
+.dt-layout-start .dt-length label {
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 1.2 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+}
+.dt-layout-start .dt-length select.form-select {
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    height: 31px !important;
+    padding: 0 1.75rem 0 0.5rem !important;
+    margin: 0 6px !important;
+    display: inline-block !important;
+    width: auto !important;
+}
+/* --------------------------------------------------------------------------
+   2. 分頁按鈕通用基礎樣式設定
+   -------------------------------------------------------------------------- */
+.dataTables_wrapper .pagination .page-item .page-link {
+    background-color: #ffffff !important;   
+    border: 1px solid #dee2e6 !important;   
+    box-shadow: none !important;            
+}
+.dataTables_wrapper .pagination .page-item.disabled .page-link {
+    background-color: #f8f9fa !important;   
+    color: #6c757d !important;              
+    border-color: #dee2e6 !important;
+    cursor: not-allowed !important;         
+}
+
+
+
+/* 核心根治範例：強制恢復 Bootstrap 5 的邊框折疊模式並強化底線 */
+table.dataTable {
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+}
+.dataTables_wrapper table,
+table.dataTable.table {
+    border-bottom: 1px solid var(--bs-border-color) !important;
+}
+
+
+/* 🛠️ 精準隱藏 DataTables 3.x 原廠生成的按鈕區塊，讓使用者只看到您精美的自訂按鈕 */
+    .dt-buttons {
+        display: none !important;
+    }
+
+    .dataTables_filter {
+      display: none !important;
+    }
+    #dataSearch {
+      background-color: #dbf0e6;
+      color: #000000;
+      height: 54px;
+    }
+
+
+
+/* --------------------------------------------------------------------------
+   3. 9 種顏色主題連動控制（精準控制 table 的 thead 列與 tfoot 列，以及分頁按鈕）
+   -------------------------------------------------------------------------- */
+
+/* 🔷 1. 藍色主題 (.theme-blue) */
+.theme-blue table thead tr th, .theme-blue table tfoot tr td, .theme-blue table tfoot tr th { --bs-table-bg: #236FB7 !important; color: #E2EEF9 !important; }
+.theme-blue .pagination .page-item .page-link { color: #236FB7 !important; }
+.theme-blue .pagination .page-item.active .page-link, .theme-blue .pagination .page-item .page-link:hover {
+    background-color: #236FB7 !important; border-color: #236FB7 !important; color: #ffffff !important;
+}
+
+/* 🟢 2. 綠色主題 (.theme-green) */
+.theme-green table thead tr th, .theme-green table tfoot tr td, .theme-green table tfoot tr th { --bs-table-bg: #44a273 !important; color: #EEF7F2 !important; }
+.theme-green .pagination .page-item .page-link { color: #44a273 !important; }
+.theme-green .pagination .page-item.active .page-link, .theme-green .pagination .page-item .page-link:hover {
+    background-color: #44a273 !important; border-color: #44a273 !important; color: #ffffff !important;
+}
+
+/* 🌐 3. 青綠色主題 (.theme-cyan) */
+.theme-cyan table thead tr th, .theme-cyan table tfoot tr td, .theme-cyan table tfoot tr th { --bs-table-bg: #17a2b8 !important; color: #E4F8FB !important; }
+.theme-cyan .pagination .page-item .page-link { color: #17a2b8 !important; }
+.theme-cyan .pagination .page-item.active .page-link, .theme-cyan .pagination .page-item .page-link:hover {
+    background-color: #17a2b8 !important; border-color: #17a2b8 !important; color: #ffffff !important;
+}
+
+/* 🔘 4. 深灰色主題 (.theme-gray) */
+.theme-gray table thead tr th, .theme-gray table tfoot tr td, .theme-gray table tfoot tr th { --bs-table-bg: #5F6E86 !important; color: #EAECF0 !important; }
+.theme-gray .pagination .page-item .page-link { color: #5F6E86 !important; }
+.theme-gray .pagination .page-item.active .page-link, .theme-gray .pagination .page-item .page-link:hover {
+    background-color: #5F6E86 !important; border-color: #5F6E86 !important; color: #ffffff !important;
+}
+
+/* ⚪ 5. 淺灰色主題 (.theme-lightgray) */
+.theme-lightgray table thead tr th, .theme-lightgray table tfoot tr td, .theme-lightgray table tfoot tr th { --bs-table-bg: #B8BFCB !important; color: #444F61 !important; }
+.theme-lightgray .pagination .page-item .page-link { color: #444F61 !important; }
+.theme-lightgray .pagination .page-item.active .page-link, .theme-lightgray .pagination .page-item .page-link:hover {
+    background-color: #B8BFCB !important; border-color: #B8BFCB !important; color: #ffffff !important;
+}
+
+/* 🟡 6. 黃色主題 (.theme-yellow) */
+.theme-yellow table thead tr th, .theme-yellow table tfoot tr td, .theme-yellow table tfoot tr th { --bs-table-bg: #ECC244 !important; color: #69510A !important; }
+.theme-yellow .pagination .page-item .page-link { color: #69510A !important; }
+.theme-yellow .pagination .page-item.active .page-link, .theme-yellow .pagination .page-item .page-link:hover {
+    background-color: #ECC244 !important; border-color: #ECC244 !important; color: #ffffff !important;
+}
+
+/* 🟣 7. 紫色主題 (.theme-purple) */
+.theme-purple table thead tr th, .theme-purple table tfoot tr td, .theme-purple table tfoot tr th { --bs-table-bg: #6f42c1 !important; color: #DBD0EF !important; }
+.theme-purple .pagination .page-item .page-link { color: #6f42c1 !important; }
+.theme-purple .pagination .page-item.active .page-link, .theme-purple .pagination .page-item .page-link:hover {
+    background-color: #6f42c1 !important; border-color: #6f42c1 !important; color: #ffffff !important;
+}
+
+/* 🟠 8. 橘色主題 (.theme-orange) */
+.theme-orange table thead tr th, .theme-orange table tfoot tr td, .theme-orange table tfoot tr th { --bs-table-bg: #DF8233 !important; color: #F9E9DC !important; }
+.theme-orange .pagination .page-item .page-link { color: #DF8233 !important; }
+.theme-orange .pagination .page-item.active .page-link, .theme-orange .pagination .page-item .page-link:hover {
+    background-color: #DF8233 !important; border-color: #DF8233 !important; color: #ffffff !important;
+}
+
+/* 🔴 9. 紅色主題 (.theme-red) */
+.theme-red table thead tr th, .theme-red table tfoot tr td, .theme-red table tfoot tr th { --bs-table-bg: #C35050 !important; color: #F7E8E8 !important; }
+.theme-red .pagination .page-item .page-link { color: #C35050 !important; }
+.theme-red .pagination .page-item.active .page-link, .theme-red .pagination .page-item .page-link:hover {
+    background-color: #C35050 !important; border-color: #C35050 !important; color: #ffffff !important;
+}
+
+
+
+/*
+.advAddBut{
+    font-weight: border; 
+    background-color: #17a2b8;
+    color: #E4F8FB;
+    margin-right: 4px;
+}
+.advAddBut:hover{
+    background-color: #107281;
+}
+*/
+/*     
+table.table-hover tr.blue{
+  background-color:#236FB7;
+  color:#E2EEF9;
+}
+table.table-hover tr.green{
+  background-color:#44a273;
+  color:#EEF7F2;
+}
+table.table-hover tr.cyan{
+  background-color:#17a2b8;
+  color:#E4F8FB;
+}
+table.table-hover tr.gray{
+  background-color:#5F6E86;
+  color:#EAECF0;
+}
+table.table-hover tr.lightgray{
+  background-color:#B8BFCB;
+  color:#444F61;
+}
+table.table-hover tr.yellow{
+  background-color:#ECC244;
+  color:#69510A;
+}
+table.table-hover tr.purple{
+  background-color:#6f42c1;
+  color:#DBD0EF;
+}
+table.table-hover tr.orange{
+  background-color:#DF8233;
+  color:#F9E9DC;
+}
+table.table-hover tr.red{
+  background-color:#C35050;
+  color:#F7E8E8;
+}
+*/
+
+#form_search >div div{
+  margin-bottom: 4px;
+}

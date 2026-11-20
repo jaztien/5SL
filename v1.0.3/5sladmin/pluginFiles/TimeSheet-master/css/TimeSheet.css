@@ -1,0 +1,128 @@
+tbody.TimeSheet{
+    -webkit-user-select:none;
+    -moz-user-select : none;
+    user-select : none;
+    border : #cccccc 1px solid;
+    color : #757a7d;
+    font-size: 12px;
+    cursor:default;
+    display: block;
+    border-collapse: collapse;
+}
+.TimeSheet td{
+    /*border : #e3e3e3 1px solid;*/
+    border-top : #d4d4d4 1px solid;/* Jaz Fixed td:not(.main)*/
+    border-bottom : #d4d4d4 1px solid;/* Jaz Fixed */
+    border-left : #d4d4d4 1px solid;/* Jaz Fixed */
+}
+
+.TimeSheet td.half{
+    /*border : #e3e3e3 1px solid;*/
+    border-left : #e3e3e3 1px dashed;/* 30分鐘虛線 Jaz Fixed */
+}
+
+.TimeSheet-cell-selected{
+    /*background-color: #b4def9;*/
+    background-color: #598fe6;  /* Jaz Fixed */
+}
+
+.TimeSheet-cell-selecting{
+    background-color: rgb(166, 188, 243) !important;
+    transition: background 0.2s ease; /* Jaz Fixed */
+}
+/* Jaz Fixed */
+
+.TimeSheet-row.currDate{
+    border:#598fe6 2px solid;
+}
+
+/* Jaz Fixed */
+.TimeSheet-rowHead{
+    background-color: #EAECF0;/* 日期 #f5f5f5 */
+    width:100px;
+    text-align: right;
+    padding:3px 10px;
+    border-left:none !important;
+}
+/* Jaz Fixed */
+.TimeSheet-rowHead.sun{
+    background-color: #E2ACAC;/* 日期 #f5f5f5 */
+}
+.TimeSheet-rowHead.sat{
+    background-color: #B8BFCB;/* 日期 #f5f5f5 */
+}
+
+.TimeSheet-colHead{
+    background-color: #D6DAE1;/* 分鐘段 #f5f5f5 */
+    width:16px;
+    font-size:0.75em;
+    text-align: left;
+    vertical-align: top;
+    /*padding: 6px 3px 6px 3px;*/
+    border-top:none !important;
+}
+
+/*
+.TimeSheet-rowHead, .TimeSheet-colHead{
+    background-color: #f5f5f5;
+    width:42px;
+    text-align: right;
+}
+
+.TimeSheet-rowHead{
+    padding:3px 10px;
+    border-left:none !important;
+}
+
+.TimeSheet-colHead{
+    padding: 6px 3px 6px 3px;
+    border-top:none !important;
+}
+*/
+
+/* Jaz Fixed */
+.TimeSheet-colTop{
+    font-weight: bold;
+    text-align: left;
+    padding-left: 2px;
+    border-top:none !important;
+    /*border-left:none !important;*/
+    border-left : #d4d4d4 1px solid;/* Jaz Fixed */
+    /*width:90px;*/
+}
+
+
+.TimeSheet-head{
+    text-align: left; 
+    border-top:none !important;
+    border-left:none !important;
+    width:100px;/* Jaz Fixed 90px */
+}
+
+.TimeSheet .rightMost{
+    border-right:none !important;
+}
+
+.TimeSheet .bottomMost{
+    border-bottom:none !important;
+}
+
+.TimeSheet-remarkHead{
+    text-align: center;
+    border-top:none !important;
+    border-right:none !important;
+}
+
+.TimeSheet-remark{
+    padding : 0 5px;
+    border-right:none !important;
+}
+
+.TimeSheet-remarkHead, .TimeSheet-remark{
+    max-width: 120px;
+    background-color: #fbf0ed;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    border-left-color : #cccccc !important;
+}

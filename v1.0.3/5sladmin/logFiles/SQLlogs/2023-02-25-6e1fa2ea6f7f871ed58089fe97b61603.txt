@@ -1,0 +1,97 @@
+Time : 08:59:53
+SQLSTATE[42000]: Syntax error or access violation: 1305 FUNCTION fullhouse.JSON_VALUE does not exist
+Raw SQL : SELECT config_code, JSON_VALUE(config_value,'$.A') AS 'test' FROM configurations WHERE JSON_VALUE(config_value,'$.A') = 'aa'
+
+Time : 01:40:14
+SQLSTATE[42000]: Syntax error or access violation: 1305 FUNCTION fullhouse.JSON_VALUE does not exist
+Raw SQL : SELECT config_code, JSON_VALUE(config_value,'$.A') AS 'test' FROM configurations WHERE JSON_VALUE(config_value,'$.A') = ?
+
+Time : 01:40:12
+SQLSTATE[42000]: Syntax error or access violation: 1305 FUNCTION fullhouse.JSON_VALUE does not exist
+Raw SQL : SELECT config_code, JSON_VALUE(config_value,'$.A') AS 'test' FROM configurations WHERE JSON_VALUE(config_value,'$.A') = ?
+
+Time : 01:38:02
+SQLSTATE[42S22]: Column not found: 1054 Unknown column 'test' in 'where clause'
+Raw SQL : SELECT config_code, config_value->'$.A' AS test FROM configurations WHERE test = ?
+
+Time : 01:38:01
+SQLSTATE[42S22]: Column not found: 1054 Unknown column 'test' in 'where clause'
+Raw SQL : SELECT config_code, config_value->'$.A' AS test FROM configurations WHERE test = ?
+
+Time : 01:37:55
+SQLSTATE[42S22]: Column not found: 1054 Unknown column 'test' in 'where clause'
+Raw SQL : SELECT config_code, config_value->'$.A' AS test FROM configurations WHERE test = ?
+
+Time : 01:37:54
+SQLSTATE[42S22]: Column not found: 1054 Unknown column 'test' in 'where clause'
+Raw SQL : SELECT config_code, config_value->'$.A' AS test FROM configurations WHERE test = ?
+
+Time : 01:37:38
+SQLSTATE[42S22]: Column not found: 1054 Unknown column 'test' in 'where clause'
+Raw SQL : SELECT config_code, config_value->'$.A' AS 'test' FROM configurations WHERE test = ?
+
+Time : 01:37:23
+SQLSTATE[22032]: <<Unknown error>>: 3141 Invalid JSON text in argument 1 to function json_extract: "Invalid value." at position 0.
+Raw SQL : SELECT config_code, config_value->'$.A' AS 'test' FROM configurations WHERE config_value -> '$.A' = ?
+
+Time : 01:37:21
+SQLSTATE[22032]: <<Unknown error>>: 3141 Invalid JSON text in argument 1 to function json_extract: "Invalid value." at position 0.
+Raw SQL : SELECT config_code, config_value->'$.A' AS 'test' FROM configurations WHERE config_value -> '$.A' = ?
+
+Time : 01:37:03
+SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ') = ?' at line 1
+Raw SQL : SELECT config_code, config_value->'$.A' AS 'test' FROM configurations WHERE config_value -> '$.A') = ?
+
+Time : 01:32:58
+SQLSTATE[42000]: Syntax error or access violation: 1305 FUNCTION fullhouse.JSON_VALUE does not exist
+Raw SQL : SELECT config_code FROM configurations WHERE JSON_VALUE(config_value,'$.A') = 'aa'
+
+Time : 01:32:41
+SQLSTATE[42000]: Syntax error or access violation: 1305 FUNCTION fullhouse.JSON_VALUE does not exist
+Raw SQL : SELECT config_code FROM configurations WHERE JSON_VALUE(config_value,'$.A') = ?
+
+Time : 01:28:40
+SQLSTATE[22032]: <<Unknown error>>: 3141 Invalid JSON text in argument 1 to function json_extract: "Invalid value." at position 0.
+Raw SQL : SELECT config_code FROM configurations WHERE config_value -> '$.A' = ?
+
+Time : 01:28:40
+SQLSTATE[22032]: <<Unknown error>>: 3141 Invalid JSON text in argument 1 to function json_extract: "Invalid value." at position 0.
+Raw SQL : SELECT config_code FROM configurations WHERE config_value -> '$.A' = ?
+
+Time : 01:28:39
+SQLSTATE[22032]: <<Unknown error>>: 3141 Invalid JSON text in argument 1 to function json_extract: "Invalid value." at position 0.
+Raw SQL : SELECT config_code FROM configurations WHERE config_value -> '$.A' = ?
+
+Time : 01:27:06
+SQLSTATE[22032]: <<Unknown error>>: 3141 Invalid JSON text in argument 1 to function json_extract: "Invalid value." at position 0.
+Raw SQL : SELECT config_code FROM configurations WHERE json_extract(config_value, '$.A') = ?
+
+Time : 01:27:04
+SQLSTATE[22032]: <<Unknown error>>: 3141 Invalid JSON text in argument 1 to function json_extract: "Invalid value." at position 0.
+Raw SQL : SELECT config_code FROM configurations WHERE json_extract(config_value, '$.A') = ?
+
+Time : 01:24:42
+SQLSTATE[42000]: Syntax error or access violation: 1305 FUNCTION fullhouse.JSON_VALUE does not exist
+Raw SQL : SELECT config_code FROM configurations WHERE JSON_VALUE(config_value, '$.A') = ?
+
+Time : 01:24:41
+SQLSTATE[42000]: Syntax error or access violation: 1305 FUNCTION fullhouse.JSON_VALUE does not exist
+Raw SQL : SELECT config_code FROM configurations WHERE JSON_VALUE(config_value, '$.A') = ?
+
+Time : 01:17:05
+SQLSTATE[42000]: Syntax error or access violation: 1305 FUNCTION fullhouse.JSON_QUERY does not exist
+Raw SQL : SELECT config_code FROM configurations WHERE JSON_QUERY(config_value, '$.A') = ?
+
+Time : 01:11:41
+SQLSTATE[22032]: <<Unknown error>>: 3141 Invalid JSON text in argument 1 to function json_contains: "Invalid value." at position 0.
+Raw SQL : SELECT config_code FROM configurations WHERE JSON_CONTAINS(config_value, ?)
+
+Time : 01:11:20
+SQLSTATE[22032]: <<Unknown error>>: 3141 Invalid JSON text in argument 1 to function json_contains: "Invalid value." at position 0.
+Raw SQL : SELECT config_code FROM configurations WHERE JSON_CONTAINS(config_value, ?)
+
+Time : 00:56:19
+SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'APPLY OPENJSON(Data, '$.config_value') 
+where value = ？' at line 1
+Raw SQL : SELECT config_code FROM configurations CROSS APPLY OPENJSON(Data, '$.config_value') 
+where value = ？

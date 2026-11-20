@@ -1,0 +1,152 @@
+#fileUpSession {
+    text-align: center;
+      font-size: 16px;
+      margin: 180px auto;
+  }
+  #fileUpSession h1 {
+    margin-bottom: 4rem;
+    font-family: 'Lemonada', cursive;
+    text-transform: uppercase;
+    font-weight: normal;
+    color: #fff;
+    font-size: 2rem;
+  }
+
+  .area-upload {
+    display: inline-block;
+    width: 180px;
+    height: 236px;
+    margin: 0 0.5rem 1rem;
+    text-align: center;
+  }
+  .area-upload textarea {
+    border-radius: 5px;
+  }
+  .wrap-custom-file {
+    position: relative;
+    width: 180px;
+    height: 180px;
+  }
+  .wrap-custom-file input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2px;
+    height: 2px;
+    overflow: hidden;
+    opacity: 0;
+  }
+  .wrap-custom-file label {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    z-index: 1;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    overflow: hidden;
+    padding: 0 0.5rem;
+    cursor: pointer;
+    background-color: #EEE;
+    border-radius: 4px;
+    -webkit-transition: -webkit-transform 0.4s;
+    transition: -webkit-transform 0.4s;
+    transition: transform 0.4s;
+    transition: transform 0.4s, -webkit-transform 0.4s;
+  }
+  .wrap-custom-file label span {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    display: block;
+    margin-top: 2rem;
+    font-size: 1.4rem;
+    line-height: 1.5rem;
+    color: #777;
+    -webkit-transition: color 0.4s;
+    transition: color 0.4s;
+  }
+  .wrap-custom-file label .funcAdd {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    -webkit-transform: translatex(-50%);
+    transform: translatex(-50%);
+    font-size: 5.5rem;
+    color: rgb(68, 162, 115);
+    -webkit-transition: color 0.4s;
+    transition: color 0.4s;
+  }
+  .wrap-custom-file label i.fa-circle, .wrap-custom-file label i.fa-check-circle {
+    display: none;
+    position: absolute;
+    font-size: 2rem;
+    z-index: 1001;
+    right: -5px;
+    top: -5px;
+  }
+  .wrap-custom-file label i.fa-circle {
+    color:#CCC;
+  }
+  .wrap-custom-file label i.fa-check-circle {
+    color:#37845E;
+  }
+  .wrap-custom-file label i.fa-circle:hover {
+    color: #37845E;
+    -webkit-transition: color 0.4s;
+    transition: color 0.4s;
+  }
+  .wrap-custom-file label.file-ok i.fa-circle, .wrap-custom-file label.file-ok i.fa-check-circle {
+    display: block;
+  }
+  .wrap-custom-file label:hover {
+    -webkit-transform: translateY(-1rem);
+    transform: translateY(-1rem);
+  }
+  .wrap-custom-file label:hover span, .wrap-custom-file label:hover .funcAdd {
+    color: #888;
+  }
+  .wrap-custom-file label.file-ok {
+    background-size: cover;
+    background-position: center;
+  }
+  .wrap-custom-file label.file-ok span {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height:28px;
+    padding: 0.3rem;
+    font-size: 0.8rem;
+    color: #000;
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+  .wrap-custom-file label.file-ok .funcAdd {
+    display: none;
+  }
+  .wrap-custom-file label .fas {
+    position: absolute;
+    -webkit-transform: translatex(-50%);
+    transform: translatex(-50%);
+    font-size: 1.5rem;
+    bottom:2px;
+    color: rgba(0, 0, 0, 0.5);
+    -webkit-transition: color 0.4s;
+    transition: color 0.4s;
+  }
+  .wrap-custom-file label .funcClose {
+    left:16px;
+  }
+  .wrap-custom-file label .funcView {
+    right:-6px;
+  }
+  .wrap-custom-file label .funcClose:hover {
+    color: #dc3545;
+  }
+  .wrap-custom-file label .funcView:hover {
+    color: rgba(0, 0, 0, 0.8);
+  }
+  .clear-inline {
+      display: block;
+  }

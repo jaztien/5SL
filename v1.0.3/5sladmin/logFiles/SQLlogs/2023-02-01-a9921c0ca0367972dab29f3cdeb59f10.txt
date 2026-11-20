@@ -1,0 +1,3 @@
+Time : 19:57:17
+SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '2-1' for key 'ad_ap_index'
+Raw SQL : INSERT INTO admin_auth(ad_id,ap_id,auth_browse,auth_addnew,auth_edit,auth_delete) VALUES('2','1',:auth_browse,:auth_addnew,:auth_edit,:auth_delete)

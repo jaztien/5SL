@@ -1,0 +1,47 @@
+Time : 22:21:35
+SQLSTATE[42000]: Syntax error or access violation: 1140 In aggregated query without GROUP BY, expression #1 of SELECT list contains nonaggregated column 'fullhouse.mb_rating.mbr_date'; this is incompatible with sql_mode=only_full_group_by
+Raw SQL : SELECT mbr_date,mb_id,mbr_table,mbr_s1,mbr_s2,mbr_s3,mbr_s4,mbr_s5,mbr_review,SUM(mbr_s1) AS S1 FROM mb_rating WHERE to_id=?
+
+Time : 21:44:26
+SQLSTATE[42000]: Syntax error or access violation: 1140 In aggregated query without GROUP BY, expression #1 of SELECT list contains nonaggregated column 'fullhouse.mb_rating.mbr_date'; this is incompatible with sql_mode=only_full_group_by
+Raw SQL : SELECT mbr_date,mb_id,mbr_table,mbr_s1,mbr_s2,mbr_s3,mbr_s4,mbr_s5,mbr_review,SUM(mbr_s1) AS S1 FROM mb_rating WHERE to_id=?
+
+Time : 21:43:41
+SQLSTATE[42000]: Syntax error or access violation: 1140 In aggregated query without GROUP BY, expression #1 of SELECT list contains nonaggregated column 'fullhouse.mb_rating.mbr_date'; this is incompatible with sql_mode=only_full_group_by
+Raw SQL : SELECT mbr_date,mb_id,mbr_table,mbr_s1,mbr_s2,mbr_s3,mbr_s4,mbr_s5,SUM(mbr_s1) AS S1 FROM mb_rating WHERE to_id=?
+
+Time : 21:39:30
+SQLSTATE[42000]: Syntax error or access violation: 1140 In aggregated query without GROUP BY, expression #1 of SELECT list contains nonaggregated column 'fullhouse.mb_rating.mbr_date'; this is incompatible with sql_mode=only_full_group_by
+Raw SQL : SELECT mbr_date,mb_id,mbr_table,mbr_s1,mbr_s2,mbr_s3,mbr_s4,mbr_s5,SUM(mbr_s1) AS S1 FROM mb_rating WHERE to_id=?
+
+Time : 21:39:26
+SQLSTATE[42000]: Syntax error or access violation: 1140 In aggregated query without GROUP BY, expression #1 of SELECT list contains nonaggregated column 'fullhouse.mb_rating.mbr_date'; this is incompatible with sql_mode=only_full_group_by
+Raw SQL : SELECT mbr_date,mb_id,mbr_table,mbr_s1,mbr_s2,mbr_s3,mbr_s4,mbr_s5,SUM(mbr_s1) AS S1 FROM mb_rating WHERE to_id=?
+
+Time : 21:35:32
+SQLSTATE[42000]: Syntax error or access violation: 1140 In aggregated query without GROUP BY, expression #1 of SELECT list contains nonaggregated column 'fullhouse.mb_rating.mbr_id'; this is incompatible with sql_mode=only_full_group_by
+Raw SQL : SELECT *,SUM(mbr_s1) AS S1 FROM mb_rating WHERE to_id=?
+
+Time : 21:31:37
+SQLSTATE[42000]: Syntax error or access violation: 1140 In aggregated query without GROUP BY, expression #1 of SELECT list contains nonaggregated column 'fullhouse.mb_rating.mbr_id'; this is incompatible with sql_mode=only_full_group_by
+Raw SQL : SELECT *,SUM('mbr_s1') AS S1 FROM mb_rating WHERE to_id=?
+
+Time : 21:30:50
+SQLSTATE[42000]: Syntax error or access violation: 1140 In aggregated query without GROUP BY, expression #1 of SELECT list contains nonaggregated column 'fullhouse.mb_rating.mbr_id'; this is incompatible with sql_mode=only_full_group_by
+Raw SQL : SELECT *,SUM(mbr_s1) AS S1 FROM mb_rating WHERE to_id=?
+
+Time : 00:06:09
+SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '網際網路開發' for column 'mbinfo_occ' at row 1
+Raw SQL : UPDATE fh.mb_info SET mbinfo_name=?,mbinfo_gender=?,mbinfo_birth=?,mbinfo_nat=?,mbinfo_occ=?,mbinfo_city=?,mbinfo_district=?,mbinfo_add=?,mbinfo_phone=?,mbinfo_ext=?,mbinfo_cellphone=?,mbinfo_email=?,mbinfo_line=?,mbinfo_url=?,mbinfo_fb=?,mbinfo_des=?,mbinfo_remark=? WHERE 1=1 AND mb_id=?
+
+Time : 00:04:24
+SQLSTATE[22001]: String data, right truncated: 1406 Data too long for column 'mbinfo_nat' at row 1
+Raw SQL : UPDATE fh.mb_info SET mbinfo_name=?,mbinfo_gender=?,mbinfo_birth=?,mbinfo_nat=?,mbinfo_occ=?,mbinfo_city=?,mbinfo_district=?,mbinfo_add=?,mbinfo_phone=?,mbinfo_ext=?,mbinfo_cellphone=?,mbinfo_email=?,mbinfo_line=?,mbinfo_url=?,mbinfo_fb=?,mbinfo_des=?,mbinfo_remark=? WHERE 1=1 AND mb_id=?
+
+Time : 00:04:18
+SQLSTATE[22001]: String data, right truncated: 1406 Data too long for column 'mbinfo_nat' at row 1
+Raw SQL : UPDATE fh.mb_info SET mbinfo_name=?,mbinfo_gender=?,mbinfo_birth=?,mbinfo_nat=?,mbinfo_occ=?,mbinfo_city=?,mbinfo_district=?,mbinfo_add=?,mbinfo_phone=?,mbinfo_ext=?,mbinfo_cellphone=?,mbinfo_email=?,mbinfo_line=?,mbinfo_url=?,mbinfo_fb=?,mbinfo_des=?,mbinfo_remark=? WHERE 1=1 AND mb_id=?
+
+Time : 00:02:18
+SQLSTATE[22001]: String data, right truncated: 1406 Data too long for column 'mbinfo_nat' at row 1
+Raw SQL : UPDATE fh.mb_info SET mbinfo_name=?,mbinfo_gender=?,mbinfo_birth=?,mbinfo_nat=?,mbinfo_occ=?,mbinfo_city=?,mbinfo_district=?,mbinfo_add=?,mbinfo_phone=?,mbinfo_ext=?,mbinfo_cellphone=?,mbinfo_email=?,mbinfo_line=?,mbinfo_url=?,mbinfo_fb=?,mbinfo_des=?,mbinfo_remark=? WHERE 1=1 AND mb_id=?

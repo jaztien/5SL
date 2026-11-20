@@ -1,0 +1,7 @@
+Time : 17:36:43
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'admin.page' doesn't exist
+Raw SQL : SELECT * FROM admin.page WHERE ap_status=? ORDER BY ap_sort ASC
+
+Time : 00:41:39
+SQLSTATE[42000]: Syntax error or access violation: 1140 In aggregated query without GROUP BY, expression #1 of SELECT list contains nonaggregated column 'fullhouse.administrator.ad_id'; this is incompatible with sql_mode=only_full_group_by
+Raw SQL : SELECT *,COUNT(*) AS NUM FROM administrator WHERE ad_account=? and ad_password=?

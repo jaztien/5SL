@@ -1,0 +1,29 @@
+{
+    "lgtype":{
+        "":"--操作種類--",
+        "0":"其他",
+        "1":"管理者操作",
+        "2":"使用者操作",
+        "3":"系統操作"
+    },
+    "lgidfrom":{
+        "1" : {
+            "table" : "fn.administrator",
+            "id" : "ad_id",
+            "select" : "ad_name"
+        },
+        "2" : {
+            "table" : "fn.mb_info",
+            "id" : "mb_id",
+            "select" : "mbinfo_name"
+        },
+        "3" : {
+            "table" : "fn.merchandise",
+            "id" : "merch_id",
+            "select" : "merch_title"
+        }
+    }
+
+
+
+}

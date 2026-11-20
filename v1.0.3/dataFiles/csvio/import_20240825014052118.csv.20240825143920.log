@@ -1,0 +1,28 @@
+
+-------------------------------
+csv filename: import_20240825014052118.csv
+operation date: 2024-08-25 14:39:20
+data table: fh.csvtest
+operation mode: insert mode after truncate
+administrator: Huan【 ID: 3 】
+-------------------------------
+
+error at rows:
+
+id Col: '1'
+error insert row: 4
+id Col: '2'
+error insert row: 5
+id Col: '10'
+error insert row: 6
+id Col: '27'
+error insert row: 7
+id Col: '44'
+error insert row: 11
+id Col: '48'
+error insert row: 12
+id Col: '49'
+error insert row: 13
+
+
+-------------------------------

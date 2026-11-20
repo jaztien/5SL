@@ -1,0 +1,375 @@
+{
+  "monthly": [
+    {
+      "id": 0,
+      "name": "下午14-19",
+      "startdate": "2025-9-10",
+      "enddate": "",
+      "starttime": "14:00",
+      "endtime": "19:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "晚間19-23",
+      "startdate": "2025-9-10",
+      "enddate": "",
+      "starttime": "19:00",
+      "endtime": "23:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "CD1-01_藏水沫13-18",
+      "startdate": "2025-09-11",
+      "enddate": "",
+      "starttime": "13:00",
+      "endtime": "18:00",
+      "color": "#cc0000",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "CD1-08_鬧狗18-24",
+      "startdate": "2025-09-11",
+      "enddate": "",
+      "starttime": "18:00",
+      "endtime": "24:00",
+      "color": "#cc0000",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "下午13-18",
+      "startdate": "2025-9-12",
+      "enddate": "",
+      "starttime": "13:00",
+      "endtime": "18:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "晚間18-23",
+      "startdate": "2025-9-12",
+      "enddate": "",
+      "starttime": "18:00",
+      "endtime": "23:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "CD1-02_暗夜恬恬仔落來13-17",
+      "startdate": "2025-9-13",
+      "enddate": "",
+      "starttime": "13:00",
+      "endtime": "17:00",
+      "color": "#cc0000",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "CD1-03_櫻花17-24",
+      "startdate": "2025-9-13",
+      "enddate": "",
+      "starttime": "17:00",
+      "endtime": "24:00",
+      "color": "#cc0000",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "上午11-14",
+      "startdate": "2025-9-14",
+      "enddate": "",
+      "starttime": "11:00",
+      "endtime": "14:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "下午14-19",
+      "startdate": "2025-9-14",
+      "enddate": "",
+      "starttime": "14:00",
+      "endtime": "19:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "晚間19-24",
+      "startdate": "2025-9-14",
+      "enddate": "",
+      "starttime": "19:00",
+      "endtime": "24:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "CD1-07_春天的花14-22",
+      "startdate": "2025-9-15",
+      "enddate": "",
+      "starttime": "14:00",
+      "endtime": "22:00",
+      "color": "#cc0000",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "CD2-06_拍我屁屁14-19",
+      "startdate": "2025-9-17",
+      "enddate": "",
+      "starttime": "14:00",
+      "endtime": "19:00",
+      "color": "#cc0000",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "晚間19-23",
+      "startdate": "2025-9-17",
+      "enddate": "",
+      "starttime": "19:00",
+      "endtime": "23:00",
+      "color": "#cca300",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "晚間18-23",
+      "startdate": "2025-9-18",
+      "enddate": "",
+      "starttime": "18:00",
+      "endtime": "23:00",
+      "color": "#cca300",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "晚間18-23",
+      "startdate": "2025-9-19",
+      "enddate": "",
+      "starttime": "18:00",
+      "endtime": "23:00",
+      "color": "#cca300",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "上午11-14",
+      "startdate": "2025-9-21",
+      "enddate": "",
+      "starttime": "11:00",
+      "endtime": "14:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "CD1-02_暗夜恬恬仔落來12-16",
+      "startdate": "2025-9-20",
+      "enddate": "",
+      "starttime": "12:00",
+      "endtime": "16:00",
+      "color": "#cc0000",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "下午16-19",
+      "startdate": "2025-9-20",
+      "enddate": "",
+      "starttime": "16:00",
+      "endtime": "19:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "下午14-19",
+      "startdate": "2025-9-21",
+      "enddate": "",
+      "starttime": "14:00",
+      "endtime": "19:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "晚間19-24",
+      "startdate": "2025-9-21",
+      "enddate": "",
+      "starttime": "19:00",
+      "endtime": "24:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "CD2-02_遷徙14-22",
+      "startdate": "2025-9-22",
+      "enddate": "",
+      "starttime": "14:00",
+      "endtime": "22:00",
+      "color": "#cc0000",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "CD2-09 卡那岸14-19",
+      "startdate": "2025-9-24",
+      "enddate": "",
+      "starttime": "14:00",
+      "endtime": "18:00",
+      "color": "#cc0000",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "晚間19-23",
+      "startdate": "2025-9-24",
+      "enddate": "",
+      "starttime": "19:00",
+      "endtime": "23:00",
+      "color": "#cca300",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "下午13-18",
+      "startdate": "2025-9-26",
+      "enddate": "",
+      "starttime": "13:00",
+      "endtime": "18:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "晚間18-23",
+      "startdate": "2025-9-26",
+      "enddate": "",
+      "starttime": "18:00",
+      "endtime": "23:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "下午14-19",
+      "startdate": "2025-9-27",
+      "enddate": "",
+      "starttime": "14:00",
+      "endtime": "19:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "CD2-08_醃瓜炒豬肉19-23",
+      "startdate": "2025-9-27",
+      "enddate": "",
+      "starttime": "19:00",
+      "endtime": "23:00",
+      "color": "#cc0000",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "CD1-09_Not yet14-18",
+      "startdate": "2025-9-29",
+      "enddate": "",
+      "starttime": "14:00",
+      "endtime": "18:00",
+      "color": "#cc0000",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "上午11-14",
+      "startdate": "2025-10-04",
+      "enddate": "",
+      "starttime": "11:00",
+      "endtime": "14:00",
+      "color": "#cca300",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "下午14-19",
+      "startdate": "2025-10-04",
+      "enddate": "",
+      "starttime": "14:00",
+      "endtime": "19:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "晚間19-24",
+      "startdate": "2025-10-04",
+      "enddate": "",
+      "starttime": "19:00",
+      "endtime": "24:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "上午11-14",
+      "startdate": "2025-10-05",
+      "enddate": "",
+      "starttime": "11:00",
+      "endtime": "14:00",
+      "color": "#cca300",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "下午14-19",
+      "startdate": "2025-10-05",
+      "enddate": "",
+      "starttime": "14:00",
+      "endtime": "19:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "晚間19-24",
+      "startdate": "2025-10-05",
+      "enddate": "",
+      "starttime": "19:00",
+      "endtime": "24:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "上午11-14",
+      "startdate": "2025-10-06",
+      "enddate": "",
+      "starttime": "11:00",
+      "endtime": "14:00",
+      "color": "#009933",
+      "url": ""
+    },
+    {
+      "id": 0,
+      "name": "CD2-07_為愛出山15-18",
+      "startdate": "2025-10-06",
+      "enddate": "",
+      "starttime": "15:00",
+      "endtime": "18:00",
+      "color": "#cc0000",
+      "url": ""
+    }
+
+  ]
+}

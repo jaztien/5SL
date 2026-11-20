@@ -1,0 +1,24 @@
+
+-------------------------------
+csv filename: import_20240905031405506.csv
+operation date: 2024-09-05 15:17:42
+data table: fh.csvtest
+operation mode: insert mode
+administrator: Jaz【 ID: 1 】
+-------------------------------
+
+error at rows:
+
+error insert row: 4
+error insert row: 5
+error insert row: 6
+error insert row: 7
+error insert row: 8
+error insert row: 9
+error insert row: 10
+error insert row: 11
+error insert row: 12
+error insert row: 13
+
+
+-------------------------------
