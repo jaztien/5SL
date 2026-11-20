@@ -2702,7 +2702,7 @@ $(function() {
             else if (rawUrl.indexOf("youtu.be/") !== -1) videoId = rawUrl.split("youtu.be/").pop().split("?").shift();
 
             if (videoId !== "") {
-                const embedSrc = "https://" + "://youtube.com" + "/em" + "bed/" + videoId + "?autoplay=1&rel=0&playsinline=1";
+                const embedSrc = "https://" + "youtube.com" + "/em" + "bed/" + videoId + "?autoplay=1&rel=0&playsinline=1";
                 $videoIframe.attr("src", embedSrc);
             }
         });
@@ -2918,7 +2918,7 @@ $(function() {
                 else if (mediaUrl.indexOf("youtu.be/") !== -1) ytId = mediaUrl.split("youtu.be/").pop().split("?").shift();
                 else if (mediaUrl.indexOf("/embed/") !== -1) ytId = mediaUrl.split("/embed/").pop().split("?").shift();
                 if (ytId !== "") {
-                    $("#lightboxIframe").attr("src", "https://" + "://youtube.com" + "/em" + "bed/" + ytId + "?autoplay=1&rel=0&playsinline=1");
+                    $("#lightboxIframe").attr("src", "https://" + "youtube.com" + "/em" + "bed/" + ytId + "?autoplay=1&rel=0&playsinline=1");
                     bootstrap.Modal.getOrCreateInstance(document.getElementById("videoLightboxModal")).show();
                 }
             } else if (mType === 3 && mediaUrl !== "") {

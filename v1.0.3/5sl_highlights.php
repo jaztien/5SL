@@ -284,7 +284,7 @@ $(function() {
                 }
 
                 if (ytId !== "") {
-                    const embedSrc = "https://" + "://youtube.com" + "/em" + "bed/" + ytId + "?autoplay=1&rel=0&playsinline=1";
+                    const embedSrc = "https://" + "youtube.com" + "/em" + "bed/" + ytId + "?autoplay=1&rel=0&playsinline=1";
                     $("#hlVideoLightboxTitle").text((dateStr ? "[" + dateStr + "] " : "") + title);
                     $("#hlLightboxIframe").attr("src", embedSrc);
                     const vModalEl = document.getElementById("hlVideoLightboxModal") || document.getElementById("videoLightboxModal");

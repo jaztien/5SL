@@ -84,7 +84,7 @@ function _fn_getResourceCover($res_id, $is_thumb = false, $res_type = 1, $media_
     // 若為 YouTube 視訊且未另傳封面，自動抓取 YouTube 高畫質縮圖
     if ((int)$res_type === 4 && !empty($media_url)) {
         if (preg_match('/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $media_url, $m)) {
-            return 'https://youtube.com' . $m[1] . '/hqdefault.jpg';
+            return 'https://i.ytimg.com/vi/' . $m[1] . '/hqdefault.jpg';
         }
     }
     // 預設本地風格圖
