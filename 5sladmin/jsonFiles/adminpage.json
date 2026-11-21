@@ -104,7 +104,7 @@
         {
           "title": "會員資料紀錄",
           "pagecode": "PG_MEM",
-          "url": "mem_mblist.php",
+          "url": "mb_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"

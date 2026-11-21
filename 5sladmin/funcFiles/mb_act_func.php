@@ -1,272 +1,278 @@
 <?php
-//////////////////////////// ad.act.func.php //////////////////////////////////////
-//////////////////////////// 管理者資料處理功能執行檔案 ///////////////////////////////
-//////////////////////////// 2023-01-30 By Jaz Tien ///////////////////////////////
-//////////////////////////// jaztien@gmail.com ////////////////////////////////////
-//-------------------------------------------------------------------------------//
 require_once('../includeFiles/init.inc.php');
 require_once('../includeFiles/db.inc.php');
 require_once('../includeFiles/common.lib.php');
-//error_reporting(0);
-//-------------------------------------------------------------------------------//
-if(!isset($_POST['token']) || $_POST['token']=='' || empty($_SESSION['token'])){
-    echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'遺失TOKEN驗證值，表單傳送失敗！請聯絡相關管理人員！！'));
-    exit();
-} else {
-    if($_POST['token'] != $_SESSION['token']){
-        //if(PAGEURL_BACK != PAGEURL_NOW){//避免前後頁都是同一頁時，造成的無限迴圈
-          echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'TOKEN驗證值比對不符，表單傳送失敗！請聯絡相關管理人員！！'));
-          exit();
-        //}
+
+header('Content-Type: application/json; charset=utf-8');
+
+// 1. 驗證管理者登入 Session 與 CSRF Token
+if (empty($_SESSION['SESS_AD_ID'])) {
+  echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '登入已逾時，請重新登入後台系統！']);
+  exit();
+}
+
+$token    = $_POST['token'] ?? '';
+$formAcce = trim((string)($_POST['formAcce'] ?? ''));
+$mbID     = (int)($_POST['mbID'] ?? 0);
+$imgUp    = trim((string)($_POST['imgUp'] ?? ''));
+
+if (function_exists('_fn_chkToken') && !_fn_chkToken($token)) {
+  echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '安全驗證失敗（Token 無效），請重新整理頁面後再試！']);
+  exit();
+}
+
+// 將前端 serializeArray() 轉為關聯陣列
+$formData = array();
+if (!empty($_POST['arrDatA']) && is_array($_POST['arrDatA'])) {
+  foreach ($_POST['arrDatA'] as $item) {
+    if (isset($item['name'])) {
+      $formData[$item['name']] = trim((string)($item['value'] ?? ''));
     }
-}
-$datapass = true;
-if( empty($_POST['formAcce'])){ 
-    echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'遺失必要傳遞值，表單傳送失敗！請聯絡相關管理人員！！'));
-    exit();
-}
-$formAcce = $_POST['formAcce'];
-if($formAcce=='form_photoupdate') {
-    if(!isset($_POST["image"])){ $datapass = false; }
-} else if($formAcce=='func_mb_infoUpdate') {
-    if(empty($_POST['mbID']) || empty($_POST['arrDatA']) ||  empty($_POST['arrDatB'])){ $datapass = false; }
-} else if($formAcce=='func_mb_addnew') {
-    if(empty($_POST['arrDatA']) || empty($_POST['arrDatB'])){ $datapass = false; }
-} else if($formAcce=='func_mb_needUpdate') {
-    if(empty($_POST['arrNeed']) || empty($_POST['mbID'])){ $datapass = false; }
-} else if($formAcce=='func_mb_delete') {
-    if(empty($_POST['mbID'])){ $datapass = false; }
-}
-if($datapass == false){
-    echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'遺失必要傳遞值，表單傳送失敗！請聯絡相關管理人員！！'));
-    exit();
+  }
 }
 
-//-------------------------------------------------------------------------------//
-$mbID = isset($_POST['mbID']) ? intval($_POST['mbID']) : 0; 
-$arrDatA = isset($_POST['arrDatA']) ? $_POST['arrDatA'] : null;
-$arrDatB = isset($_POST['arrDatB']) ? $_POST['arrDatB'] : null;
-$arrNeed = isset($_POST['arrNeed']) ? $_POST['arrNeed'] : null;
-$cDateTime = date('Y-m-d H:i:s');
+// 輔助函式：儲存裁切後的 Base64 會員頭像至 ../uploadFiles/mb/
+function _saveMemberBase64Photo($mbId, $base64Str) {
+  if ($mbId <= 0 || $base64Str === '' || strpos($base64Str, 'base64,') === false) {
+    return false;
+  }
+  $parts = explode('base64,', $base64Str, 2);
+  $bin   = base64_decode($parts[1]);
+  if ($bin === false) return false;
 
-//-------------------------------------------------------------------------------//
+  $uploadDir = '../uploadFiles/mb/';
+  if (!is_dir($uploadDir)) {
+    @mkdir($uploadDir, 0755, true);
+  }
+  $mainFile  = $uploadDir . 'mbphoto_' . $mbId . '_.jpg';
+  $thumbFile = $uploadDir . 'mbphoto_' . $mbId . '_thumb.jpg';
+
+  file_put_contents($mainFile, $bin);
+  file_put_contents($thumbFile, $bin);
+  return true;
+}
+
 switch ($formAcce) {
-    case "func_mb_infoUpdate":////////////////////////////////////////// 更新管理者資料
-        $imgUp = $_POST['imgUp'] ?? '';
-        $mainPhotoPath = '';
-        $thumbPhotoPath = '';         
-        if (!empty($arrDatA) || !empty($arrDatB)) {
-            DB->beginTransaction();
-            try {
-                if (!empty($arrDatA)) {
-                    $arrDatA['mb_updated'] = '[EXPR]NOW()';
-                    $arrDatA['mb_name'] = !empty($arrDatA['mb_name']) ? _fn_secure_crypto($arrDatA['mb_name']) : '';
-                    $arrDatA['mb_birth'] = !empty($arrDatA['mb_birth']) ? $arrDatA['mb_birth'] : null;
-                    $arrDatA['mb_add'] = !empty($arrDatA['mb_add']) ? _fn_secure_crypto($arrDatA['mb_add']) : '';
-                    $arrDatA['mb_cellphone'] = !empty($arrDatA['mb_cellphone']) ? _fn_secure_crypto($arrDatA['mb_cellphone']) : '';
-                    $arrDatA['mb_email'] = !empty($arrDatA['mb_email']) ? _fn_secure_crypto($arrDatA['mb_email']) : '';
-                    $arrDatA['mb_line'] = !empty($arrDatA['mb_line']) ? _fn_secure_crypto($arrDatA['mb_line']) : '';
-                    $arrDatA['mb_google'] = !empty($arrDatA['mb_google']) ? _fn_secure_crypto($arrDatA['mb_google']) : '';
-                    $upA = DB->update('fsl_members', $arrDatA, array('mb_id'=>$mbID));
-                }
-                if(!empty($arrDatB)){
-                    $upB = DB->update('mb_info', $arrDatB, array('mb_id'=>$mbID));
-                }
 
-                if ($upA === 0 || $upB === 0 || $upA === false || $upB === false) {
-                    // 主動大喊救命！強制中斷並空降到 catch 區塊執行全面撤銷
-                    throw new Exception("雙表同步失敗：會員主要資料表影響 {$upA} 筆，進階資料表影響 {$upB} 筆，其中一方查無資料！");
-                    $ilog = DB->insSysLogs(51, CF_AD_ID, 2220, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
-                    $returnArr = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'編輯會員資料失敗！請聯絡相關管理人員！！');
-                }
+  // =========================================================================
+  // 1. 新增會員資料 (func_mb_addnew)
+  // =========================================================================
+  case 'func_mb_addnew':
+    $email = strtolower($formData['mb_email'] ?? '');
+    $pass  = $formData['mb_password'] ?? '';
+    $name  = $formData['mb_name'] ?? '';
 
-                if(!empty($imgUp)){
-                    $imgUpRtn = false;
-                    if($imgUp=="@DELETE@"){
-                        if(
-                            @unlink('../uploadFiles/mb/mbphoto_' . $mbID . '_.jpg') &&
-                            @unlink('../uploadFiles/mb/mbphoto_' . $mbID . '_thumb.jpg')
-                        ){
-                            $imgUpRtn = true;
-                        }
-                    } else {
-                        $image_array_1 = explode(";", $imgUp);
-                        $image_array_2 = explode(",", $image_array_1[1]);
-                        $imgUp = base64_decode($image_array_2[1]);
-                        $mainPhotoPath = '../uploadFiles/mb/mbphoto_' . $mbID . '_.jpg';
-                        if (file_put_contents($mainPhotoPath, $imgUp)!==false){
-                            chmod($mainPhotoPath, 0755);
-                        }
-                        //---------------- 製作縮圖 ----------------//
-                        $thumbPhotoPath = '../uploadFiles/mb/mbphoto_' . $mbID . '_thumb.jpg';
-                        $toThumb = _fn_resize_crop($mainPhotoPath, $thumbPhotoPath, 100, 100);
-                        if($toThumb){
-                            chmod($thumbPhotoPath, 0755);
-                            $imgUpRtn = true;
-                        } else {
-                            @unlink($mainPhotoPath);
-                        }
-                    }
-                }
-                DB->commit();
-                $ilog = DB->insSysLogs(51, CF_AD_ID, 2221, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
-                $returnArr = array('RTN'=>1, 'msgType'=>(isset($imgUpRtn) ? ($imgUpRtn ? 'success' : 'warning') : 'success'), 'msgStr'=>'成功編輯會員資料'.(isset($imgUpRtn) ? ($imgUpRtn ? '，以及代表圖像' : '，但圖像編輯失敗') : '').'！！', 'upTime'=> $cDateTime);
-            } catch (Exception $e) {
-                DB->rollBack();
-                // 如果圖像已經生成，就刪除它
-                if (!empty($mainPhotoPath) && is_file($mainPhotoPath)) {
-                    @unlink($mainPhotoPath);
-                }
-                if (!empty($thumbPhotoPath) && is_file($thumbPhotoPath)) {
-                    @unlink($thumbPhotoPath);
-                }
-                error_log("[雙表 update 交易攔截] 更新已安全撤銷。成因: " . $e->getMessage());
-                $ilog = DB->insSysLogs(51, CF_AD_ID, 2220, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
-                $returnArr = array('RTN'=>0, 'msgType'=>'warning', 'msgStr'=>'編輯會員資料失敗！請聯絡相關管理人員！！【ERROR】:'.$e->getMessage(), 'upTime'=> $cDateTime);
-            }
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'warning', 'msgStr' => '請輸入正確的登入電子信箱格式！']);
+      exit();
+    }
+    if (strlen($pass) < 6) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'warning', 'msgStr' => '初始登入密碼至少需 6 個字元！']);
+      exit();
+    }
+    if ($name === '') {
+      echo json_encode(['RTN' => 0, 'msgType' => 'warning', 'msgStr' => '請填寫會員真實姓名！']);
+      exit();
+    }
 
-        } else {
-            $ilog = DB->insSysLogs(51, CF_AD_ID, 2220, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
-            $returnArr = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'傳入的會員資料為空，編輯會員資料失敗！請聯絡相關管理人員！！');
-        }
-        echo json_encode($returnArr);
+    // 檢查信箱是否已被註冊
+    $existId = (int)DB->single("SELECT mb_id FROM fsl_members WHERE mb_email = ? AND mb_status != 9", array($email));
+    if ($existId > 0) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '此電子信箱已存在於會員資料庫中，無法重複建立！']);
+      exit();
+    }
+
+    $hashPass = password_hash($pass, PASSWORD_DEFAULT);
+    $nick     = $formData['mb_title'] ?? '';
+    $gender   = in_array($formData['mb_gender'] ?? 'N', ['F', 'M', 'N'], true) ? $formData['mb_gender'] : 'N';
+    $birth    = !empty($formData['mb_birth']) ? $formData['mb_birth'] : null;
+    $city     = $formData['mb_city'] ?? null;
+
+    // 敏感欄位加密
+    $encPhone = !empty($formData['mb_phone']) ? _fn_secure_crypto($formData['mb_phone'], 'en') : null;
+    $encIdno  = !empty($formData['mb_idno'])  ? _fn_secure_crypto(strtoupper($formData['mb_idno']), 'en') : null;
+    $encAddr  = !empty($formData['mb_addr'])  ? _fn_secure_crypto($formData['mb_addr'], 'en') : null;
+
+    $level    = (int)($formData['mb_level'] ?? 1);
+    $status   = (int)($formData['mb_status'] ?? 1);
+    $verified = (int)($formData['mb_email_verified'] ?? 1);
+
+    $invType     = (int)($formData['mb_inv_type'] ?? 1);
+    $carrierType = (int)($formData['mb_carrier_type'] ?? 0);
+    $carrierCode = strtoupper($formData['mb_carrier_code'] ?? '') ?: null;
+    $taxId       = ($formData['mb_tax_id'] ?? '') ?: null;
+    $compTitle   = ($formData['mb_company_title'] ?? '') ?: null;
+
+    $sqlIns = "
+      INSERT INTO fsl_members
+      (mb_email, mb_password, mb_name, mb_title, mb_gender, mb_birth, mb_phone, mb_idno, mb_city, mb_addr,
+       mb_level, mb_status, mb_email_verified, mb_inv_type, mb_carrier_type, mb_carrier_code, mb_tax_id, mb_company_title)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ";
+    DB->query($sqlIns, array(
+      $email, $hashPass, $name, ($nick ?: null), $gender, $birth, $encPhone, $encIdno, ($city ?: null), $encAddr,
+      $level, $status, $verified, $invType, $carrierType, $carrierCode, $taxId, $compTitle
+    ));
+
+    $newID = (int)DB->single("SELECT mb_id FROM fsl_members WHERE mb_email = ? ORDER BY mb_id DESC LIMIT 1", array($email));
+    if ($newID > 0 && $imgUp !== '') {
+      _saveMemberBase64Photo($newID, $imgUp);
+    }
+
+    echo json_encode([
+      'RTN'     => 1,
+      'msgType' => 'success',
+      'msgStr'  => "新會員「{$name}」已成功建立！",
+      'newID'   => $newID
+    ]);
+    exit();
+  break;
+
+  // =========================================================================
+  // 2. 更新會員基本資料與發票載具 (func_mb_infoUpdate)
+  // =========================================================================
+  case 'func_mb_infoUpdate':
+    if ($mbID <= 0) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的會員 ID！']);
+      exit();
+    }
+
+    $name = $formData['mb_name'] ?? '';
+    if ($name === '') {
+      echo json_encode(['RTN' => 0, 'msgType' => 'warning', 'msgStr' => '會員真實姓名不可為空！']);
+      exit();
+    }
+
+    $pass     = $formData['mb_password'] ?? '';
+    $nick     = $formData['mb_nick'] ?? '';
+    $gender   = in_array($formData['mb_gender'] ?? 'N', ['F', 'M', 'N'], true) ? $formData['mb_gender'] : 'N';
+    $birth    = !empty($formData['mb_birth']) ? $formData['mb_birth'] : null;
+    $city     = $formData['mb_city'] ?? null;
+
+    $encPhone = !empty($formData['mb_phone']) ? _fn_secure_crypto($formData['mb_phone'], 'en') : null;
+    $encIdno  = !empty($formData['mb_idno'])  ? _fn_secure_crypto(strtoupper($formData['mb_idno']), 'en') : null;
+    $encAddr  = !empty($formData['mb_addr'])  ? _fn_secure_crypto($formData['mb_addr'], 'en') : null;
+
+    $level    = (int)($formData['mb_level'] ?? 1);
+    $status   = (int)($formData['mb_status'] ?? 1);
+    $verified = (int)($formData['mb_email_verified'] ?? 0);
+
+    $invType     = (int)($formData['mb_inv_type'] ?? 1);
+    $carrierType = (int)($formData['mb_carrier_type'] ?? 0);
+    $carrierCode = strtoupper($formData['mb_carrier_code'] ?? '') ?: null;
+    $taxId       = ($formData['mb_tax_id'] ?? '') ?: null;
+    $compTitle   = ($formData['mb_company_title'] ?? '') ?: null;
+
+    if ($pass !== '') {
+      if (strlen($pass) < 6) {
+        echo json_encode(['RTN' => 0, 'msgType' => 'warning', 'msgStr' => '重設新密碼至少需 6 個字元！']);
         exit();
+      }
+      $hashPass = password_hash($pass, PASSWORD_DEFAULT);
+      DB->query("UPDATE fsl_members SET mb_password = ? WHERE mb_id = ?", array($hashPass, $mbID));
+    }
 
-    break;
-    //----------- form_addnew 新增管理者資料
-    case "func_mb_addnew"://----------- form_addnew 新增管理者資料
-        $insID=1;
-        $ilog = DB->insSysLogs(51, CF_AD_ID, 2211, '["'.CF_AD_ID.'","'.$insID.'"]');//寫入操作記錄//
-        $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功新增會員資料！！', 'upTime'=> $cDateTime, 'insID'=> $insID);
-        echo json_encode($rtn);
-        exit();
-        $ilog = DB->insSysLogs(51, CF_AD_ID, 2210, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
-        $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'新增會員資料失敗，請重新操作或聯絡管理人員！！');
-        echo json_encode($rtn);
-       
-    break;
-    case "func_mb_delete":////////////////////////////////////////// func_mb_delete 刪除會員資料，這個刪除功能僅僅是將會員狀態改成8，也就是丟進垃圾桶，仍然可以取回。
-        //$del = DB->query("DELETE FROM fsl_members WHERE mb_id = ?", array($mbID)); 
-        $up = DB->query("UPDATE fsl_members SET mb_updated=getdate(), mb_status = ? WHERE mb_id = ?", array(8,$mbID));
-        if($up){
-            $ilog = DB->insSysLogs(51, CF_AD_ID, 2251, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
-            $rtn = array('RTN'=>1); 
-        } else {
-            $ilog = DB->insSysLogs(51, CF_AD_ID, 2250, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
-            $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'刪除會員資料失敗！請聯絡相關管理人員！！'); 
-        }
-        echo json_encode($rtn);
-    break;
-    case "func_mb_needUpdate":////////////////////////////////////////// func_mb_needUpdate 更新課程商品需求範圍
-        $cid = DB->single("SELECT mbn_id FROM mb_needs WHERE mb_id=?", array($mbID));
-        if($cid && $cid>0){
-            $up = DB->update('mb_needs',array('mbn_array'=>json_encode($arrNeed)),array('mbn_id'=>$cid));
-            if($up==1){
-                $ilog = DB->insSysLogs(51, CF_AD_ID, 2231, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
-                $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功編輯課程商品需求範圍！！', 'upTime'=> $cDateTime);
-            } else {
-                $ilog = DB->insSysLogs(51, CF_AD_ID, 2230, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
-                $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'編輯課程商品需求範圍失敗！請聯絡相關管理人員！！');
-            }
-        } else {
-                $ins = DB->insert('mb_needs', array('mb_id'=>$mbID,'mbn_array'=>json_encode($arrNeed)));
-                if($ins){
-                    $ilog = DB->insSysLogs(51, CF_AD_ID, 2241, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
-                    $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功新增課程商品需求範圍！！', 'upTime'=> $cDateTime);
-                } else {
-                    $ilog = DB->insSysLogs(51, CF_AD_ID, 2240, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
-                    $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'新增課程商品需求範圍失敗！請聯絡相關管理人員！！'.$ins);
-                }
-        }
-        echo json_encode($rtn);
-    break;
-    case "func_mb_selector":////////////////////////////////////////// func_mb_selector 
-        $ifCate = $_POST['ifCate'] ?? "";//單字元 int 會員種類
-        $ifCotype = $_POST['ifCotype'] ?? "";//數字組以逗號分隔 string 合作方種類 
-        $ifExpert = $_POST['ifExpert'] ?? "";//數字組以逗號分隔 string 專業服務項目
-        $search = $_POST['search'] ?? "";
-        $mbJS = _fn_getCachedJsonData("../jsonFiles/member.json");
-        foreach($mbJS['cotype'] as $key=>$Val){
-        $coTypeJS[$key]=$Val['type'];
-        foreach($Val['expert'] as $keyT=>$ValT){
-            $expertJS[$keyT]=$ValT;
-        }
-        }
-        $arr = '[]';
-        if($search == ''){
-            exit();
-        }
-        $sql="SELECT a.mb_id, a.mb_title, b.mb_cate, b.mb_cotype, b.mb_coexpert FROM fsl_members AS a INNER JOIN mb_info AS b ON b.mb_id=a.mb_id WHERE";
-        if (is_numeric($search)) {
-            $sql .= " a.mb_id=?";//主鍵欄不得鍵入非數值，否則 WHERE 不起作用【bug】
-        } else {
-            $sql .= " a.mb_title LIKE '%".$search."%'";
-        }
+    $sqlUpd = "
+      UPDATE fsl_members SET
+        mb_name = ?, mb_nick = ?, mb_gender = ?, mb_birth = ?,
+        mb_phone = ?, mb_idno = ?, mb_city = ?, mb_addr = ?,
+        mb_level = ?, mb_status = ?, mb_email_verified = ?,
+        mb_inv_type = ?, mb_carrier_type = ?, mb_carrier_code = ?, mb_tax_id = ?, mb_company_title = ?
+      WHERE mb_id = ?
+    ";
+    DB->query($sqlUpd, array(
+      $name, ($nick ?: null), $gender, $birth,
+      $encPhone, $encIdno, ($city ?: null), $encAddr,
+      $level, $status, $verified,
+      $invType, $carrierType, $carrierCode, $taxId, $compTitle,
+      $mbID
+    ));
 
-        if($ifCate) $sql.=" AND b.mb_cate='".$ifCate."'";//當 $ifCate 賦值時，「會員種類」欄位為其一的搜尋條件
+    if ($imgUp !== '') {
+      _saveMemberBase64Photo($mbID, $imgUp);
+    }
 
-        if (!empty($ifCotype)) {
-            $coTypeArr = explode(',', $ifCotype);
-            $sql .= " AND EXISTS(SELECT 1 FROM OPENJSON(b.mb_cotype) WHERE";
-            if(count($coTypeArr) == 1) $sql .= " value = '".$ifCotype."'";
-            else $sql .= " value IN (".$ifCotype.")";
-            $sql .= ")";
-        }//當 $ifCotype 賦值時，「合作方種類」欄位為其一的搜尋條件
+    $upTime = DB->single("SELECT mb_updated FROM fsl_members WHERE mb_id = ?", array($mbID));
 
-        if (!empty($ifExpert)) {
-            $coExpertArr = explode(',', $ifExpert);
-            $sql .= " AND EXISTS(SELECT 1 FROM OPENJSON(b.mb_coexpert) WHERE";
-            if(count($coExpertArr) == 1) $sql .= " value = '".$ifExpert."'";
-            else $sql .= " value IN (".$ifExpert.")";
-            $sql .= ")";
-        }//當 $ifCotype 賦值時，「合作方種類」欄位為其一的搜尋條件
-        $res = DB->query($sql,array($search));
-        $totalMB = count($res);
-        if($totalMB>0){
-            $arr = '[';
-            $i = 0; //以$i為$nameList這個陣列的索引值
-            while($i < $totalMB){ 
-                //$arr .= '{"id":"'.$res[$i]['mb_id'].'","text":"【ID:'.$res[$i]['mb_id'].'】'.$res[$i]['mbinfo_name'].'(帳戶:'.$res[$i]['mb_account'].')"}';//使用Select2插件無論是key或Val，都必須加「"」。
-                $arr .= '{';
-                $arr .= '"id":"'.$res[$i]['mb_id'].'",';
-                $arr .= '"text":"';
-                $arr .= '【'.$res[$i]['mb_id'].'】';//會員ID
-                $arr .= $res[$i]['mb_title'];//會員暱稱
-                $coTypeStr = '';
-                $coExpertStr = '';
-                if(!empty($res[$i]['mb_cotype']) && $res[$i]['mb_cotype'] != '[]'){
-                    $ti=0;
-                    $ctJS = json_decode($res[$i]['mb_cotype']);
-                    $cnt = count($ctJS)-1;
-                    foreach($ctJS as $val){
-                        //$coTypeStr .= $mbJS['cotype'][$val]['type'];
-                        $coTypeStr .= $coTypeJS[$val];
-                        if($ti<$cnt) $coTypeStr .= ',';
-                        $ti++;
-                    } 
-                    $arr .= ' ['.$coTypeStr.']';//會員合作方種類
-                }
-                if(!empty($res[$i]['mb_coexpert']) && $res[$i]['mb_coexpert'] != '[]'){
-                    $ei=0;
-                    $ceJS = json_decode($res[$i]['mb_coexpert']);
-                    $cnt = count($ceJS)-1;
-                    foreach($ceJS as $val){
-                        $coExpertStr .= $expertJS[$val];
-                        if($ei<$cnt) $coExpertStr .= ',';
-                        $ei++;
-                    } 
-                    $arr .= ' ['.$coExpertStr.']';//會員專業服務項目
-                }
+    echo json_encode([
+      'RTN'     => 1,
+      'msgType' => 'success',
+      'msgStr'  => '會員資料與載具設定已成功更新！',
+      'upTime'  => $upTime ?: date('Y-m-d H:i:s')
+    ]);
+    exit();
+  break;
 
-                $arr .= '"';
-                $arr .= '}';//使用Select2插件無論是key或Val，都必須加「"」。
-                if($i!=$totalMB-1){ $arr .= ','; }
-                $i++;
-            }
-            $arr .= ']';
-        }
-        echo $arr;    
-    break;
+  // =========================================================================
+  // 3. 手動調帳會員 PTS 紅利點數 (func_mb_adjustPts)
+  // =========================================================================
+  case 'func_mb_adjustPts':
+    $adjDir  = trim((string)($_POST['adjDir'] ?? 'add'));
+    $adjVal  = max(0, (int)($_POST['adjVal'] ?? 0));
+    $adjMemo = trim((string)($_POST['adjMemo'] ?? ''));
 
-}  
-?>
+    if ($mbID <= 0 || $adjVal <= 0 || $adjMemo === '') {
+      echo json_encode(['RTN' => 0, 'msgType' => 'warning', 'msgStr' => '請輸入正確的調帳點數與原因備註！']);
+      exit();
+    }
+
+    $currPts = (int)DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ? AND mb_status != 9", array($mbID));
+    if ($adjDir === 'sub' && $currPts < $adjVal) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => "該會員目前僅有 {$currPts} PTS，不足扣除 {$adjVal} PTS！"]);
+      exit();
+    }
+
+    $delta     = ($adjDir === 'sub') ? -$adjVal : $adjVal;
+    $newPoints = $currPts + $delta;
+    $ptIncome  = ($delta > 0) ? 1 : 0;
+    $adminNick = $_SESSION['SESS_AD_NICK'] ?? '系統管理員';
+    $fullMemo  = "[後台調帳:{$adminNick}] " . $adjMemo;
+
+    DB->query("UPDATE fsl_members SET mb_points = ? WHERE mb_id = ?", array($newPoints, $mbID));
+    DB->query(
+      "INSERT INTO fsl_points (mb_id, pt_income, pt_type, pt_for, pt_forid, pt_trade, pt_redeem, pt_freepoints, pt_available, pt_memo, pt_status)
+       VALUES (?, ?, 4, 9, ?, ?, 0, 0, ?, ?, 1)",
+      array($mbID, $ptIncome, (int)$_SESSION['SESS_AD_ID'], $delta, $newPoints, $fullMemo)
+    );
+
+    $ptId      = (int)DB->single("SELECT pt_id FROM fsl_points WHERE mb_id = ? ORDER BY pt_id DESC LIMIT 1", array($mbID));
+    $createdAt = DB->single("SELECT pt_created FROM fsl_points WHERE pt_id = ?", array($ptId));
+
+    // 同步發送通知至會員訊息中心
+    $signTxt = ($delta > 0) ? "+{$delta}" : "{$delta}";
+    DB->query(
+      "INSERT INTO fsl_messages (mb_id, msg_category, msg_title, msg_content, msg_is_read, msg_status)
+       VALUES (?, 1, ?, ?, 0, 1)",
+      array($mbID, "【PTS 點數異動通知】{$signTxt} PTS", "親愛的會員您好，管理團隊已為您的帳戶執行點數異動（{$signTxt} PTS），原因：{$adjMemo}，目前最新可用餘額為 " . number_format($newPoints) . " PTS。")
+    );
+
+    echo json_encode([
+      'RTN'       => 1,
+      'msgType'   => 'success',
+      'msgStr'    => "PTS 點數調帳完成（{$signTxt} PTS），最新餘額：{$newPoints} PTS",
+      'delta'     => $delta,
+      'newPoints' => $newPoints,
+      'ptId'      => $ptId,
+      'createdAt' => $createdAt ?: date('Y-m-d H:i:s')
+    ]);
+    exit();
+  break;
+
+  // =========================================================================
+  // 4. 軟刪除 / 封存會員帳號 (func_mb_delete)
+  // =========================================================================
+  case 'func_mb_delete':
+    if ($mbID <= 0) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的會員 ID！']);
+      exit();
+    }
+    DB->query("UPDATE fsl_members SET mb_status = 9 WHERE mb_id = ?", array($mbID));
+    echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '會員帳號已成功刪除封存！']);
+    exit();
+  break;
+
+  default:
+    echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '未知的操作指令！']);
+    exit();
+  break;
+}
