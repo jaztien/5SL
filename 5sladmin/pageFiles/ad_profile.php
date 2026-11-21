@@ -13,8 +13,8 @@ require_once('../includeFiles/common.lib.php');
 //
 $adID=currID;
 //
-$res = $DB->row("SELECT * FROM fsl_administrator WHERE ad_id=?",array($adID));
-//$DB->closeConnection();
+$res = DB->row("SELECT * FROM fsl_administrator WHERE ad_id=?",array($adID));
+//DB->closeConnection();
 //代表圖像設定
 if(!empty($adID)&&file_exists("../uploadFiles/ad/adphoto_".$adID."_thumb.jpg")){
   $cropImgDisplay = 'show';
@@ -43,30 +43,24 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
   <title> Fifth Season Life 人生第五季 | 管理人員資料 </title>
 <!-- -------------------------- CSS Link -------------------------- -->
   <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-  <!-- Bootstrap 5 -->
+  <link rel="stylesheet" href="../pluginFiles/googleapis/fonts.googleapis.css">
+  <!-- Bootstrap 5 & Bootstrap Icons -->
   <link rel="stylesheet" href="../pluginFiles/bootstrap5/bootstrap.min.css">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="../pluginFiles/fontawesome-free/css/all.css">
-  <!-- iCheck for checkboxes and radio inputs -->
-  <link rel="stylesheet" href="../pluginFiles/icheck-bootstrap/icheck-bootstrap.min.css">
-  <!-- DataTables -->
+  <link rel="stylesheet" href="../pluginFiles/bootstrap-icons/bootstrap-icons.min.css">
+  <!-- DataTables 3 -->
   <link rel="stylesheet" href="../pluginFiles/datatables3/datatables.min.css">
-  <!--
-  <link rel="stylesheet" href="../pluginFiles/datatables/datatables-bs4/css/dataTables.bootstrap4.css">
-  <link rel="stylesheet" href="../pluginFiles/datatables/datatables-responsive/css/responsive.bootstrap4.css">
-  <link rel="stylesheet" href="../pluginFiles/datatables/datatables-buttons/css/buttons.bootstrap4.css">
-  -->
-  <!-- Theme style -->
-  <link rel="stylesheet" href="../cssFiles/5sladmin.light.css">
+  <!-- Theme style (AdminLTE 4) -->
+  <link rel="stylesheet" href="../cssFiles/adminlte.css">
+  <!-- Custom JS style -->
+  <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <!-- Dropzone JS style -->
   <link rel="stylesheet" href="../pluginFiles/dropzone/dropzone.css" />
   <!-- Cropper JS style -->
   <link rel="stylesheet" href="../pluginFiles/cropper/cropper.css"/>
   <!-- Custom JS style -->
-  <link rel="stylesheet" href="../cssFiles/5sl.fileupload.css">
+  <link rel="stylesheet" href="../cssFiles/5sl.fileupload.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl.lightbox.css">
-  <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css">
+  <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
 <!-- -------------------------- /CSS Link -------------------------- -->
 </head>
 <body class="layout-navbar-fixed hold-transition sidebar-mini">
@@ -297,7 +291,7 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
                               $apnum = count($authpage);
                               $i=0;
                               while($i < $apnum){
-                                //$rs1 = $DB->row("SELECT * FROM fsl_admin_auth WHERE ap_pagecode=? AND ad_id=?", array($authpage[$i]['pagecode'],$adID));
+                                //$rs1 = DB->row("SELECT * FROM fsl_admin_auth WHERE ap_pagecode=? AND ad_id=?", array($authpage[$i]['pagecode'],$adID));
                                 $authpage2 = isset($authpage[$i]['subgroup']) ? $authpage[$i]['subgroup'] : array();
                                 $apnum2 = count($authpage2);
                               ?>
@@ -318,7 +312,7 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
                                 if($apnum2 > 0){
                                   $si=0;
                                   while($si < $apnum2){
-                                    $rs2 = $DB->row("SELECT * FROM fsl_admin_auth WHERE ap_pagecode=? AND ad_id=?", array($authpage2[$si]['pagecode'],$adID));
+                                    $rs2 = DB->row("SELECT * FROM fsl_admin_auth WHERE ap_pagecode=? AND ad_id=?", array($authpage2[$si]['pagecode'],$adID));
                                     $authpage3 = isset($authpage2[$si]['subgroup']) ? $authpage2[$si]['subgroup'] : array();
                                     $apnum3 = count($authpage3);
                                     $viewTag = "view_".$authpage2[$si]['pagecode'];
@@ -365,7 +359,7 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
                                     if($apnum3 > 0){
                                       $ti=0;
                                       while($ti < $apnum3){
-                                        $rs3 = $DB->row("SELECT * FROM fsl_admin_auth WHERE ap_pagecode=? AND ad_id=?", array($authpage3[$ti]['pagecode'],$adID));
+                                        $rs3 = DB->row("SELECT * FROM fsl_admin_auth WHERE ap_pagecode=? AND ad_id=?", array($authpage3[$ti]['pagecode'],$adID));
                                         $iCHKclass = $rs3 ? "icheck-success " : "icheck-warning ";
                                         $viewTag = "view_".$authpage3[$ti]['pagecode'];
                                         $addTag = "add_".$authpage3[$ti]['pagecode'];
@@ -498,9 +492,9 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
                                 LEFT JOIN fsl_administrator c ON a.lg_forid = c.ad_id
                                 WHERE lg_forid=? AND lg_for=? ORDER BY a.lg_id DESC LIMIT 200
                               ";
-                              $sr = $DB->query($sql,array($adID,50));
+                              $sr = DB->query($sql,array($adID,50));
                               //$sql="SELECT * FROM data_logs WHERE lg_forid=? AND lg_for=?";
-                              //$srr = $DB->query($sql,array($adID,1));
+                              //$srr = DB->query($sql,array($adID,1));
                               //$i = 0; //以$i為$nameList這個陣列的索引值
                               //while($i<count($srr)){ 
 
@@ -510,7 +504,7 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
                                   <td><?php echo $log['lg_code']; ?></td>
                                   <td><?php echo $log['lg_created']; ?></td>
                                   <td><?php
-                                  //$oStr = $DB->single("SELECT lg_string FROM sys_logstrings WHERE lg_code=?",array($log['lg_code']));
+                                  //$oStr = DB->single("SELECT lg_string FROM sys_logstrings WHERE lg_code=?",array($log['lg_code']));
                                   echo _fn_getLogString($log['lg_params'],$log['lg_string']);
                                   //echo _fn_getLogString($log['lg_params'],$oStr);
                                   //echo json_decode($srr[$i]['lg_params']);
@@ -556,7 +550,7 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
     <!-- /頁內全頁內容 -->
 
     <!-- jQuery -->
-    <script src="../pluginFiles/jquery/jquery.min.js"></script>
+    <script src="../pluginFiles/jquery/jquery-4.0.0.min.js"></script>
 
     <!-- 右側功能控制區 -->
       <aside class="control-sidebar control-sidebar-dark">
@@ -568,23 +562,10 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
   </div>
   <!-- /全頁框 -->
 <!-- ------------------------ Scripts Link ------------------------ -->
-<!-- jQuery is in front of footer file. -->
-<!-- Bootstrap 4 -->
-<!-- <script src="../pluginFiles/bootstrap/js/bootstrap.bundle.min.js"></script> -->
 <!-- Bootstrap 5 -->
 <script src="../pluginFiles/bootstrap5/bootstrap.bundle.min.js"></script>
-<!-- DataTables2 & Plugins -->
-<!--
-<script src="../pluginFiles/datatables/datatables/jquery.dataTables.min.js"></script>
-<script src="../pluginFiles/datatables/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-<script src="../pluginFiles/datatables/datatables-responsive/js/dataTables.responsive.min.js"></script>
-<script src="../pluginFiles/datatables/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-<script src="../pluginFiles/datatables/datatables-buttons/js/dataTables.buttons.min.js"></script>
-<script src="../pluginFiles/datatables/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
--->
 <!-- DataTables3 & Plugins -->
 <script src="../pluginFiles/datatables3/datatables.min.js"></script>
-
 <!-- ezValidation -->
 <script src="../pluginFiles/validator/validator.js<?php echo '?t='.time(); ?>"></script>
 <!-- Dropzone JS -->
@@ -592,22 +573,23 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
 <!-- Cropper JS -->
 <script src="../pluginFiles/cropper/cropper.js"></script>
 <!-- 5SeasonLife App -->
-<script src="../scriptFiles/5sladmin.js"></script>
+<script src="../scriptFiles/adminlte.js"></script>
 <script src="../scriptFiles/page.basic.js"></script>
 <script src="../scriptFiles/iframe-state-keeper.js"></script>
 <script src="../scriptFiles/fileupload.js<?php echo '?t='.time(); ?>"></script>
 <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
 <!-- ------------------------ /Scripts Link ------------------------ -->
 <script type="text/javascript">
-////////////////////////////////////////////////////////////////
-// ---------------- JAVASCRIPTS 全域調用參數設置 --------------- //
-////////////////////////////////////////////////////////////////
+  //*************************** *********************************//
+  //***************** JAVASCRIPTS 全域調用參數設置 *****************//
+  //*************************** *********************************//
 
   var adobj = <?php echo json_encode($adJS, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
-////////////////////////////////////////////////////////////////
-// -------------- JAVASCRIPTS FUNCTIONs 全域調用 -------------- //
-// -------------- 可接收include檔案要求後自定義動作 -------------- //
-////////////////////////////////////////////////////////////////
+  //*************************** *********************************//
+  //*************** JAVASCRIPTS FUNCTIONs 全域調用 ***************//
+  //*************** 可接收include檔案要求後自定義動作 ***************//
+  //*************************** *********************************//
+
   // 當「返回」按鈕按下時的動作
   function doReDirect(){
     window.history.back();
@@ -740,13 +722,11 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
       });
   }
 
-  ////////////////////////////////////////////////////////////////
-// ---------------- jQuery FUNCTIONs 區域調用 ---------------- //
-// ---------------------------------------------------------- //
-////////////////////////////////////////////////////////////////
+  //*************************** *********************************//
+  //***************** jQuery FUNCTIONs 區域調用 ******************//
+  //*************************** *********************************//
   $(document).ready(function() {
-
-    //* iFrame 頁面中安全滯留倒數功能 scripts
+    // iFrame 頁面中安全滯留倒數功能 scripts
     $('body').on('keypress click', function(){
       let timerElm = window.parent.$('#timer_on_exhausted');
       if( timerElm.length ){
