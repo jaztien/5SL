@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="../imageFiles/favicon.ico" type="image/ico" />
+    <title>Fifth Season Life 人生第五季 | Start Page</title>
+    <!-- Theme style -->
+    <link rel="stylesheet" href="../cssFiles/5sladmin.light.css">
+</head>
+
+<body class="hold-transition login-page">
+    <div class="login-box">
+        <div class="login-logo">
+            <img src="../imageFiles/preloaderLOGO.png" alt="Fifth Season Life Logo" class="brand-image animation__wobble" style="vertical-align:baseline;margin-bottom:-26px;" height="80" width="80">
+            <div><img src="../imageFiles/5slADMINlogo_text1G.png" style="width:100%;"></div>
+        </div>
+    </div>
+    <!-- jQuery -->
+    <script src="../pluginFiles/jquery/jquery.min.js"></script>
+    <script>
+        //var $ = window.parent.jQuery;
+        $('.nav-item.nav-authpanel').hide();
+        $('.nav-item.nav-toppanel').hide();
+        $('.nav-item.nav-topbkredir').hide();
+      ////////////////////////////////////////////////////////////////
+// ---------------- jQuery FUNCTIONs 區域調用 ---------------- //
+// ---------------------------------------------------------- //
+////////////////////////////////////////////////////////////////
+  $(document).ready(function() {
+            //* iFrame 頁面中安全滯留倒數功能 scripts
+            $('body').on('keypress click', function(){
+                let timerElm = $('#timer_on_exhausted');
+                if( timerElm.length ){
+                    timerElm.backward_timer('reset');
+                }
+            });
+
+
+        });
+        //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+        $(document).ready(function() {
+            if (window.parent && typeof window.parent.treeviewReset === 'function') {
+                window.parent.treeviewReset();
+            }
+        });
+    </script>
+</body>
+</html>

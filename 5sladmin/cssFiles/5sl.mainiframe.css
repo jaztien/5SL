@@ -1,179 +1,210 @@
 @charset "UTF-8";
-  .timer-block{
-    width:100%;
-    text-align: center;
-  }
-  .fliptimer {  
-    font: 13px/1.4 'Helvetica Neue', 'Helvetica','Arial', sans-serif;
-    color:#77C69E;
-    font-size: 30px;
-    font-weight: 100;
-    line-height: 1;
-    text-align: center;
-  }
-  /* -------------------------------------------- */
-  #topBut_save{
-    color: #D6DAE1;
-  }
-  #topBut_add.active,#topBut_save.active,#topBut_upload.active,#topBut_reset.active,#topBut_delete.active,#topBut_bkurl.active,#topBut_search.active,#topBut_excel.active,#topBut_pdf.active,#topBut_print.active {
-    color: #2C333E;
-    cursor:pointer;
-  }
-  #topBut_bkurl.active:hover {
-    color: #5F6E86;
-  }
-  #topBut_search.active:hover {
-    color: #5F6E86;
-  }
-  #topBut_excel.active:hover {
-    color: #5F6E86;
-  }
-  #topBut_pdf.active:hover {
-    color: #5F6E86;
-  }
-  #topBut_print.active:hover {
-    color: #5F6E86;
-  }
-  #topBut_save.active:hover {
-    color: #44a273;
-  }
-  #topBut_upload.active:hover, #topBut_add.active:hover {
-    color: #236FB7;
-  }
-  #topBut_reset.active:hover {
-    color: #ECC244;
-  }
-  #topBut_delete.active:hover {
-    color: #C35050;
-  }
-  /* -------------------------- */
-  /*
-  .nav-item.nav-authpanel,.nav-item.nav-toppanel,.nav-item.nav-topbkredir{
-    display: none;
-  }
-  */
-  .nav-item.nav-authpanel{
-    display: none;
-    padding-left:2px;
-    padding-right:2px;
-    border:1px solid #BAC3CD;
-    border-radius: 0.35rem;
-  }
-  .nav-item.nav-authpanel i{
-    margin:8px 4px 0px 4px;
-    color: #DADFE4;
-  }
-  .nav-item.nav-authpanel i.active{
-    color: #2C333E;
-  }
-  .nav-item.nav-toppanel{
-    display: none;
-    padding-top:4px;
-    padding-left:2px;
-    padding-right:2px;
-    border:1px solid #BAC3CD;
-    border-radius: 0.35rem;
-    color:#DADFE4;
-  }
-  .nav-item.nav-toppanel i{
-    display: none;
-    margin:8px 4px 0px 4px;
-    font-size:1.6em;
-  }
-  .nav-item.nav-topbkredir{
-    display: none;
-    border:1px solid #BAC3CD;
-    border-radius: 0.35rem;
-    padding-top:4px;
-    padding-left:2px;
-    padding-right:2px;
-    color:#DADFE4;
-  }
-  .nav-item.nav-topbkredir i{
-    display: none;
-    margin:8px 4px 0px 4px;
-    font-size:1.6em;
-  }
-  .nav-item.nav-topsearch{
-    display: none;
-    border:1px solid #BAC3CD;
-    border-radius: 0.35rem;
-    padding-top:4px;
-    padding-left:2px;
-    padding-right:2px;
-    color:#DADFE4;
-  }
-  .nav-item.nav-topsearch i{
-    display: none;
-    margin:0px 4px 0px 4px;
-    font-size:1.6em;
-  }
-  .nav-item.nav-topexport{
-    display: none;
-    border:1px solid #BAC3CD;
-    border-radius: 0.35rem;
-    padding-top:4px;
-    padding-left:2px;
-    padding-right:2px;
-    color:#DADFE4;
-  }
-  .nav-item.nav-topexport i{
-    display: none;
-    margin:0px 4px 0px 4px;
-    font-size:1.6em;
-  }
 
-  /* -------------------------------------------- */
-  /*li:has(> a.active) {  }*/
-  #sidebarL > ul > li.menu-open > a {
-    background-color: #44a273;
-  }
-  #sidebarL > ul > li > ul > li.menu-open > a {
-    background-color: #BAC3CD;
-    color: #2C333E; 
-  }
-  #sidebarL > ul > li > ul > li a.active {
-    background-color: #BAC3CD;
-    color: #2C333E; 
-  }
-  #sidebarL p{
-    pointer-events: none; 
-  }
-  .nav-treeview > .nav-item > .nav-link.active i.activeicon:before { content: "\f0da"; }
-  /* 樹狀子層加強透明度 */
-  .nav-layer2 { opacity: 0.8; }
-  /* 新增被選欄右側箭頭 */
-  /*.nav-item > .nav-link.active .activeicon:before { content: "\f0da"; }*/
-  /* 數值提示方塊顯示/隱藏 */
-  .badgeShow {
-    visibility: visible;
-  }
-  .badgeHide {
-    visibility: hidden;
-  }
+/* ==================== 1. 閒置倒數計時器 ==================== */
+.timer-block {
+  width: 100%;
+  text-align: center;
+}
+.fliptimer {  
+  font: 13px/1.4 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  color: #77C69E;
+  font-size: 30px;
+  font-weight: 100;
+  line-height: 1;
+  text-align: center;
+}
 
-  #ind_websocket{
-    height:12px;
-    width:12px;
-    border:none;
-    border-radius:50%;
-    margin-top:10px;
-    background-color: #91bd09;
-    /*position: absolute;*/
-    /*z-index: 99;*/
+/* ==================== 2. 頂部功能操作按鈕列 ==================== */
+#topBut_save {
+  color: #D6DAE1;
+}
+#topBut_add.active,
+#topBut_save.active,
+#topBut_upload.active,
+#topBut_reset.active,
+#topBut_delete.active,
+#topBut_bkurl.active,
+#topBut_search.active,
+#topBut_excel.active,
+#topBut_pdf.active,
+#topBut_print.active {
+  color: #2C333E;
+  cursor: pointer;
+}
+#topBut_bkurl.active:hover,
+#topBut_search.active:hover,
+#topBut_excel.active:hover,
+#topBut_pdf.active:hover,
+#topBut_print.active:hover {
+  color: #5F6E86;
+}
+#topBut_save.active:hover {
+  color: #44a273;
+}
+#topBut_upload.active:hover,
+#topBut_add.active:hover {
+  color: #236FB7;
+}
+#topBut_reset.active:hover {
+  color: #ECC244;
+}
+#topBut_delete.active:hover {
+  color: #C35050;
+}
+
+/* 頂部功能面板外框 */
+.nav-item.nav-authpanel {
+  display: none;
+  padding-left: 2px;
+  padding-right: 2px;
+  border: 1px solid #BAC3CD;
+  border-radius: 0.35rem;
+}
+.nav-item.nav-authpanel i {
+  margin: 8px 4px 0px 4px;
+  color: #DADFE4;
+}
+.nav-item.nav-authpanel i.active {
+  color: #2C333E;
+}
+
+.nav-item.nav-toppanel,
+.nav-item.nav-topbkredir,
+.nav-item.nav-topsearch,
+.nav-item.nav-topexport {
+  display: none;
+  padding-top: 4px;
+  padding-left: 2px;
+  padding-right: 2px;
+  border: 1px solid #BAC3CD;
+  border-radius: 0.35rem;
+  color: #DADFE4;
+}
+.nav-item.nav-toppanel i,
+.nav-item.nav-topbkredir i {
+  display: none;
+  margin: 8px 4px 0px 4px;
+  font-size: 1.6em;
+}
+.nav-item.nav-topsearch i,
+.nav-item.nav-topexport i {
+  display: none;
+  margin: 0px 4px 0px 4px;
+  font-size: 1.6em;
+}
+
+/* ==================== 3. AdminLTE 4 側邊欄選單樣式覆寫 ==================== */
+/* 第一層展開時的主分類高亮 (綠色) */
+#sidebarL > ul > li.menu-open > a.nav-link {
+  background-color: #44a273 !important;
+  color: #ffffff !important;
+}
+
+/* 第二層展開時、以及第二/三層選中項目高亮 (淺灰底深字) */
+#sidebarL > ul > li > ul > li.menu-open > a.nav-link,
+#sidebarL > ul > li > ul > li a.nav-link.active {
+  background-color: #BAC3CD !important;
+  color: #2C333E !important;
+  font-weight: 600;
+}
+
+/* 防止點擊 <p> 標籤干擾事件冒泡 (AdminLTE 4 建議保留) */
+#sidebarL .nav-link p {
+  pointer-events: none; 
+}
+
+/* [關鍵修正] 改用 Bootstrap Icons (bootstrap-icons) 的右三角形 Unicode (\f231 = bi-caret-right-fill) */
+.nav-treeview > .nav-item > .nav-link.active i.activeicon::before {
+  font-family: "bootstrap-icons" !important;
+  content: "\f231";
+  display: inline-block;
+  font-style: normal;
+  font-weight: normal !important;
+  vertical-align: -0.125em;
+}
+
+/* 樹狀子層加強透明度 */
+.nav-layer2 {
+  opacity: 0.8;
+}
+
+/* 徽章顯示控制 */
+.badgeShow {
+  visibility: visible;
+}
+.badgeHide {
+  visibility: hidden;
+}
+
+/* ==================== 4. WebSocket 連線狀態指示燈 ==================== */
+#ind_websocket {
+  height: 12px;
+  width: 12px;
+  border: none;
+  border-radius: 50%;
+  margin-top: 10px;
+  background-color: #91bd09;
+}
+#ind_websocket.socketalert {
+  height: 12px;
+  width: 12px;
+  border: none;
+  border-radius: 50%;
+  margin-top: 10px;
+  background-color: #e33100;
+  animation: indFlash 1s ease-in infinite;
+}
+@keyframes indFlash {
+  0% {
+    background-color: #ccc;
+    box-shadow: 0 0 4px #333;
   }
-  #ind_websocket.socketalert{
-    height:12px;
-    width:12px;
-    border:none;
-    border-radius:50%;
-    margin-top:10px;
+  30% {
     background-color: #e33100;
-    animation: indFlash 1s ease-in infinite;
+    box-shadow: 0 0 8px #e33100;
   }
-  @keyframes indFlash {
-    0% { background-color: #ccc; -webkit-box-shadow: 0 0 4px #333; }
-    30% { background-color: #e33100; -webkit-box-shadow: 0 0 8px #e33100; }
-    100% { background-color: #ccc; -webkit-box-shadow: 0 0 4px #333; }
- }
+  100% {
+    background-color: #ccc;
+    box-shadow: 0 0 4px #333;
+  }
+}
+/* ==================== 樹狀選單層級縮排與視覺引導 ==================== */
+/* 第一層（主分類）預設左內距 */
+#sidebarL > ul > li > a.nav-link {
+  padding-left: 0.85rem;
+}
 
+/* 第二層（子分類 / 子資料夾）向右縮排 */
+#sidebarL > ul > li > ul.nav-treeview > li > a.nav-link {
+  padding-left: 1.75rem !important;
+}
+
+/* 第三層（子資料夾內的項目）再向右縮排 */
+#sidebarL > ul > li > ul.nav-treeview > li > ul.nav-treeview > li > a.nav-link {
+  padding-left: 2.65rem !important;
+}
+
+/* [選用增強] 為子層選單加上細微的左側垂直樹狀連接線，層級更明確 */
+#sidebarL ul.nav-treeview {
+  position: relative;
+}
+#sidebarL > ul > li > ul.nav-treeview::before {
+  content: "";
+  position: absolute;
+  left: 1.35rem;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+}
+#sidebarL > ul > li > ul.nav-treeview > li > ul.nav-treeview::before {
+  content: "";
+  position: absolute;
+  left: 2.25rem;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+}
