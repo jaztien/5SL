@@ -12,8 +12,8 @@ require_once('../classFiles/eRanking.class.php');
 //
 $sessID=currID;
 //
-$res = $DB->row("SELECT * FROM course_sessions WHERE sess_id=?",array($sessID));
-$courseres = $DB->row("SELECT * FROM courses WHERE course_id=?",array($res['course_id'] ?? 0));
+$res = $DB->row("SELECT * FROM fsl_course_sessions WHERE sess_id=?",array($sessID));
+$courseres = $DB->row("SELECT * FROM fsl_courses WHERE course_id=?",array($res['course_id'] ?? 0));
 $courseID = $courseres['course_id'] ?? 0;
 //功能陣列建立
 // Get the contents of the JSON file
@@ -26,7 +26,7 @@ $idForRateMode = $idForJS['ratemode'] ?? 5;
 
 //--------------------- 評分計算 -----------------------
 /*
-$counT="SELECT AVG((rat_s1 + rat_s2 + rat_s3 + rat_s4 + rat_s5)/5) AS totAVE, AVG(rat_s1) AS S1, AVG(rat_s2) AS S2, AVG(rat_s3) AS S3, AVG(rat_s4) AS S4, AVG(rat_s5) AS S5 FROM data_rating WHERE rat_forid=? AND rat_for=?";
+$counT="SELECT AVG((rat_s1 + rat_s2 + rat_s3 + rat_s4 + rat_s5)/5) AS totAVE, AVG(rat_s1) AS S1, AVG(rat_s2) AS S2, AVG(rat_s3) AS S3, AVG(rat_s4) AS S4, AVG(rat_s5) AS S5 FROM fsl_rating WHERE rat_forid=? AND rat_for=?";
 $cnt = $DB->query($counT,array($courseID,5));
 $S1 = !empty($cnt[0]['S1']) ? floatval($cnt[0]['S1']) : 0;
 $S2 = !empty($cnt[0]['S2']) ? floatval($cnt[0]['S2']) : 0;
@@ -336,7 +336,7 @@ $lessonCount = $res['sess_lesson'] ?? 0;
                                 <div class="col-sm-9">
                                   <select class="form-control notSubmit" id="selectBatch" name="selectBatch"<?php echo NdisAble; ?>>
                                     <?php
-                                      $sessList = $DB->query("SELECT sess_id,sess_batch,sess_altname FROM course_sessions WHERE course_id = ? ORDER BY sess_batch DESC",array($courseID));
+                                      $sessList = $DB->query("SELECT sess_id,sess_batch,sess_altname FROM fsl_course_sessions WHERE course_id = ? ORDER BY sess_batch DESC",array($courseID));
                                       foreach($sessList as $key => $value){
                                         echo '<option value="'.$value['sess_id'].'"';
                                         echo (($value['sess_id'] ?? '') === $sessID) ? ' selected' : '';
@@ -485,7 +485,7 @@ $lessonCount = $res['sess_lesson'] ?? 0;
                               <select id="sess_ta1" name="sess_ta1" class="form-control js-data-example-ajax"<?php echo NdisAble; ?>>
                               <?php
                                 if(!empty($res['sess_ta1'])){
-                                  $msql = "SELECT mb_id, mb_name, mb_title, mb_cate, mb_cotype, mb_coexpert FROM members WHERE mb_id=?";
+                                  $msql = "SELECT mb_id, mb_name, mb_title, mb_cate, mb_cotype, mb_coexpert FROM fsl_members WHERE mb_id=?";
                                   $mres = $DB->row($msql,array($res['sess_ta1']));
                                   if($mres){
                                     echo "<option value='".$mres['mb_id']."'>";
@@ -531,7 +531,7 @@ $lessonCount = $res['sess_lesson'] ?? 0;
                               <select id="sess_ta2" name="sess_ta2" class="form-control js-data-example-ajax"<?php echo NdisAble; ?>>
                               <?php
                                 if(!empty($res['sess_ta2'])){
-                                  $msql = "SELECT mb_id, mb_name, mb_title, mb_cate, mb_cotype, mb_coexpert FROM members WHERE mb_id=?";
+                                  $msql = "SELECT mb_id, mb_name, mb_title, mb_cate, mb_cotype, mb_coexpert FROM fsl_members WHERE mb_id=?";
                                   $mres = $DB->row($msql,array($res['sess_ta2']));
                                   if($mres){
                                     echo "<option value='".$mres['mb_id']."'>";
@@ -727,7 +727,7 @@ $lessonCount = $res['sess_lesson'] ?? 0;
                                 //$getPayURI="currID={$censrr[$i]['pay_id']}&".$backUrl;
                                 $getMBURI="currID={$censrr[$i]['cen_id']}";
                                 $getPayURI="currID={$censrr[$i]['pay_id']}";
-                                $mbName = $DB->single("SELECT mb_name FROM members WHERE mb_id=?",array($censrr[$i]['mb_id']));
+                                $mbName = $DB->single("SELECT mb_name FROM fsl_members WHERE mb_id=?",array($censrr[$i]['mb_id']));
                                 if(!empty($mbName)){
                                   $mbName = _fn_secure_crypto($mbName, 'de');
                                 }
@@ -783,7 +783,7 @@ $lessonCount = $res['sess_lesson'] ?? 0;
                                     c.ad_name
                                 FROM data_logs a
                                 LEFT JOIN sys_logstrings b ON a.lg_code = b.lg_code
-                                LEFT JOIN administrator c ON a.lg_forid = c.ad_id
+                                LEFT JOIN fsl_administrator c ON a.lg_forid = c.ad_id
                                 WHERE lg_forid=? AND lg_for=? ORDER BY a.lg_id DESC LIMIT 200
                               ";
                               $sr = $DB->query($sql,array($courseID,1));
@@ -835,7 +835,7 @@ $lessonCount = $res['sess_lesson'] ?? 0;
                             </thead>
                             <tbody>
                               <?php
-                                $sql="SELECT * FROM data_rating WHERE rat_forid=? AND rat_for=?";
+                                $sql="SELECT * FROM fsl_rating WHERE rat_forid=? AND rat_for=?";
                                 $sr = $DB->query($sql,array($courseID,5));
                                 $i = 0; //以$i為$nameList這個陣列的索引值
                                 while($i<count($sr)){ 

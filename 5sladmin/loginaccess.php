@@ -11,9 +11,10 @@ if(isset($_POST['token'])){
         $_SESSION['token'] = _fn_FHMD5_encrypt(strtolower($_SERVER['HTTP_USER_AGENT']).'PHPSESSID='.session_id());
         if(($_POST['loginUser']&&$_POST['loginUser']!='')&&($_POST['loginPass']&&$_POST['loginPass']!='')){
             //---------------- get session data here ---------------//
+            define('DOC_PATH_LAYER', './');
             require_once('./includeFiles/db.inc.php');
             //require('funcFiles/mssql.func.php');
-            $r = $DB->row("SELECT * FROM administrator WHERE ad_account=?",array($_POST['loginUser']));
+            $r = $DB->row("SELECT * FROM fsl_administrator WHERE ad_account=?",array($_POST['loginUser']));
             if($r && password_verify($_POST['loginPass'], $r['ad_password'])){//** 通過登入條件，取出資料寫入 SESSION **//
                 $getData=$r;
                 if(intval($getData['ad_status'])==1){
@@ -40,7 +41,7 @@ if(isset($_POST['token'])){
                     $getAuthArray = $DB->getAuthArray($_SESSION['SESS_AD_ID']);
                     $_SESSION['SESS_PAGE_AUTH']     = $getAuthArray;
                     //** 寫入最近登入時間 **//
-                    $doOnboard = $DB->update('administrator',array('ad_onboard'=>'[EXPR]NOW()'),array('ad_id'=>$_SESSION['SESS_AD_ID']));
+                    $doOnboard = $DB->update('fsl_administrator',array('ad_onboard'=>'[EXPR]NOW()'),array('ad_id'=>$_SESSION['SESS_AD_ID']));
                     //** 寫入操作記錄 **//
                     $ilog = $DB->insSysLogs(51, $_SESSION['SESS_AD_ID'], 2001, '["'.$_SESSION['SESS_AD_ID'].'","'.$_SESSION['SESS_AD_NICK'].'"]');//寫入操作記錄
                     //** 中斷資料庫連接 **//

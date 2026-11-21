@@ -1,12 +1,13 @@
 <?php
 session_start();
-//////////////////////////// ad_sesspass_func.php /////////////////////////////////
-//////////////////////////// 管理者資料處理功能執行檔案 ///////////////////////////////
-//////////////////////////// 2024-07-22 By Jaz Tien //////////////////////////////
-//////////////////////////// jaztien@gmail.com ///////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////
+//************************* ad_sesspass_func.php ********************************//
+//************************* 管理者資料處理功能執行檔案 ******************************//
+//************************* 2024-07-22 By Jaz Tien ******************************//
+//*************************** jaztien@gmail.com *********************************//
+//*********************************** *******************************************//
 //--------------------------------- 外部關聯文件 ---------------------------------//
 //////////////////////////////////////////////////////////////////////////////////
+define('DOC_PATH_LAYER', '../');
 require_once('../includeFiles/db.inc.php');
 require_once('../includeFiles/common.lib.php');
 //-------------------------------------------------------------------------------//
@@ -28,7 +29,6 @@ if(empty($_POST['formAcce'])){
 }
 $formAcce = trim($_POST['formAcce']);
 //-------------------------------------------------------------------------------//
-//$adID = isset($_POST['adID']) ? intval($_POST['adID']) : 0; 
 $arrDatA = isset($_POST['arrDatA']) ? $_POST['arrDatA'] : null;
 $cDateTime = date('Y-m-d H:i:s');
 //////////////////////////////////////////////////////////////////////////////////
@@ -37,7 +37,7 @@ $cDateTime = date('Y-m-d H:i:s');
 switch ($formAcce) {
 //////-------------------- form_reenterPass 鎖定頁面時再登入 ---------------------//
     case "form_reenterPass":
-        $r = $DB->single("SELECT ad_password FROM administrator WHERE ad_id=?",array($arrDatA['adID']));
+        $r = $DB->single("SELECT ad_password FROM fsl_administrator WHERE ad_id=?",array($arrDatA['adID']));
         if($r && password_verify($arrDatA['reenterPass'], $r)){//,_fn_FHMD5_encrypt($arrDatA['reenterPass'])
             $_SESSION["SESS_AD_ID"] = $arrDatA['adID'];
             $ilog = $DB->insSysLogs(51, $_SESSION['SESS_AD_ID'], 2051, '["'.$_SESSION['SESS_AD_ID'].'"]');//寫入操作記錄

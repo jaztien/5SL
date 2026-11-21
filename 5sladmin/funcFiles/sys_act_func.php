@@ -39,10 +39,10 @@ switch ($formAcce) {
         $i=0;
         while($i<count($ar)){
             $name=$ar[$i]['name'];
-            $cy = $DB->single("SELECT config_crypt FROM configurations WHERE config_code=? ",array($name));
+            $cy = $DB->single("SELECT config_crypt FROM fsl_configurations WHERE config_code=? ",array($name));
             $val = (intval($cy)==1) ? $ar[$i]['value'] : $ar[$i]['value'] ;
             $setArr = array('config_value' => $val);
-            $up = $DB->update('configurations',$setArr ,array('config_code'=>$name));
+            $up = $DB->update('fsl_configurations',$setArr ,array('config_code'=>$name));
             if($up){ $succeCount++; }
             $i++;
         }
@@ -139,7 +139,7 @@ switch ($formAcce) {
                 $rateSql .= ", SUM(rat_s2) AS totalUnlike";
                 $rateSql .= ", SUM(rat_s1 +rat_s2) AS totalSum";
             }
-            $rateSql .= " FROM data_rating WHERE rat_for = :rat_for AND rat_forid = :rat_forid";
+            $rateSql .= " FROM fsl_rating WHERE rat_for = :rat_for AND rat_forid = :rat_forid";
 
             try {
                 $rateRes = false; 

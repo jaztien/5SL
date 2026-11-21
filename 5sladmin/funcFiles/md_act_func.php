@@ -59,7 +59,7 @@ switch ($formAcce) {
         $arrDatA['merch_enddate'] = $arrDatA['merch_enddate'] !== '' ? $arrDatA['merch_enddate'] : null;
         //$arrDatA['merch_statusdate'] = $arrDatA['merch_enddate'] !== '' ? $arrDatA['merch_enddate'] : null;
         
-        $upA = $DB->update('merchandise', $arrDatA, array('merch_id'=>$mdID));
+        $upA = $DB->update('fsl_merchandise', $arrDatA, array('merch_id'=>$mdID));
         $upB = $DB->update('merch_info', $arrDatB, array('merch_id'=>$mdID));
         if($upA==1 && $upB==1){
             if(count($arrDatC) > 0 ){
@@ -85,7 +85,7 @@ switch ($formAcce) {
     case "func_md_linkUpdate":////////////////////////////////////////// func_md_linkUpdate 編輯視訊鏈結
         if(!empty($arrDatA)){
             $arrDatA = stripslashes($arrDatA);
-            $up = $DB->update('merchandise', array('merch_updated'=>'[EXPR]GETDATE()', 'merch_vdolink'=>$arrDatA), array('merch_id'=>$mdID));
+            $up = $DB->update('fsl_merchandise', array('merch_updated'=>'[EXPR]GETDATE()', 'merch_vdolink'=>$arrDatA), array('merch_id'=>$mdID));
             if($up){
                 $ilog = $DB->insSysLogs(51, CF_AD_ID, 2381, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄
                 $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功編輯視訊鏈結資料！！', 'upTime'=> $cDateTime);
@@ -113,8 +113,8 @@ switch ($formAcce) {
     break;
 
     case "func_md_delete"://////////// func_md_delete 刪除課程商品資料（使用狀態更新代替刪除，保留原始資料）
-        //$del = $DB->query("DELETE FROM members WHERE mb_id = ?", array($mbID)); 
-        $up = $DB->query("UPDATE merchandise SET merch_status = ? WHERE merch_id = ?", array(8,$mdID));
+        //$del = $DB->query("DELETE FROM fsl_members WHERE mb_id = ?", array($mbID)); 
+        $up = $DB->query("UPDATE fsl_merchandise SET merch_status = ? WHERE merch_id = ?", array(8,$mdID));
         if($up){
             /*
             $del = $DB->query("DELETE FROM merch_info WHERE merch_id = ?", array($mdID)); 

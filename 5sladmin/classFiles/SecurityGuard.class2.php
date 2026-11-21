@@ -49,7 +49,7 @@ class SecurityGuard
         $config = isset($this->eventConfigs[$eventType]) ? $this->eventConfigs[$eventType] : $this->eventConfigs['default'];
 
         if ($eventType === 'submit_review') {
-            $targetTable   = 'fh.data_rating';
+            $targetTable   = 'fsl_rating';
             $timeColumn    = 'rat_datetime';
             $tmColumn      = 'rat_thumbmark';
         } else {

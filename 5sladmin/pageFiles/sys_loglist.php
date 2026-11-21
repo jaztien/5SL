@@ -158,10 +158,10 @@ $logJS=_fn_getCachedJsonData("../jsonFiles/logs.json");
                             <td><?php echo $logJS['lgtype'][$sr[$i]['lg_for']]??'&nbsp;'; ?></td>
                             <td><?php
                               if($sr[$i]['lg_for']==1){
-                                  $adnick = $DB->single("SELECT ad_title FROM administrator WHERE ad_id=?",array($sr[$i]['lg_forid']));
+                                  $adnick = $DB->single("SELECT ad_title FROM fsl_administrator WHERE ad_id=?",array($sr[$i]['lg_forid']));
                                   echo $adnick ?: '&nbsp;';
                               }elseif($sr[$i]['lg_for']==2){
-                                  $mbnick = $DB->single("SELECT mb_nickname FROM members WHERE mb_id=?",array($sr[$i]['lg_forid']));
+                                  $mbnick = $DB->single("SELECT mb_nickname FROM fsl_members WHERE mb_id=?",array($sr[$i]['lg_forid']));
                                   echo $mbnick ?: '&nbsp;';
                               }else{
                                   echo '系統';

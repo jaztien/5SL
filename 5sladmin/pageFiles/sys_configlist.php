@@ -9,7 +9,7 @@ define('bkRedir',1);
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
 
-$sr = $DB->query("SELECT * FROM configurations WHERE config_autoload=?",array('1'));
+$sr = $DB->query("SELECT * FROM fsl_configurations WHERE config_autoload=?",array('1'));
 //$DB->closeConnection();
 $i = 0; 
 $cr = array();

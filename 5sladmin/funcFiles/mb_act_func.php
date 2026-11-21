@@ -67,7 +67,7 @@ switch ($formAcce) {
                     $arrDatA['mb_email'] = !empty($arrDatA['mb_email']) ? _fn_secure_crypto($arrDatA['mb_email']) : '';
                     $arrDatA['mb_line'] = !empty($arrDatA['mb_line']) ? _fn_secure_crypto($arrDatA['mb_line']) : '';
                     $arrDatA['mb_google'] = !empty($arrDatA['mb_google']) ? _fn_secure_crypto($arrDatA['mb_google']) : '';
-                    $upA = $DB->update('members', $arrDatA, array('mb_id'=>$mbID));
+                    $upA = $DB->update('fsl_members', $arrDatA, array('mb_id'=>$mbID));
                 }
                 if(!empty($arrDatB)){
                     $upB = $DB->update('mb_info', $arrDatB, array('mb_id'=>$mbID));
@@ -146,8 +146,8 @@ switch ($formAcce) {
        
     break;
     case "func_mb_delete":////////////////////////////////////////// func_mb_delete 刪除會員資料，這個刪除功能僅僅是將會員狀態改成8，也就是丟進垃圾桶，仍然可以取回。
-        //$del = $DB->query("DELETE FROM members WHERE mb_id = ?", array($mbID)); 
-        $up = $DB->query("UPDATE members SET mb_updated=getdate(), mb_status = ? WHERE mb_id = ?", array(8,$mbID));
+        //$del = $DB->query("DELETE FROM fsl_members WHERE mb_id = ?", array($mbID)); 
+        $up = $DB->query("UPDATE fsl_members SET mb_updated=getdate(), mb_status = ? WHERE mb_id = ?", array(8,$mbID));
         if($up){
             $ilog = $DB->insSysLogs(51, CF_AD_ID, 2251, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
             $rtn = array('RTN'=>1); 
@@ -196,7 +196,7 @@ switch ($formAcce) {
         if($search == ''){
             exit();
         }
-        $sql="SELECT a.mb_id, a.mb_title, b.mb_cate, b.mb_cotype, b.mb_coexpert FROM members AS a INNER JOIN mb_info AS b ON b.mb_id=a.mb_id WHERE";
+        $sql="SELECT a.mb_id, a.mb_title, b.mb_cate, b.mb_cotype, b.mb_coexpert FROM fsl_members AS a INNER JOIN mb_info AS b ON b.mb_id=a.mb_id WHERE";
         if (is_numeric($search)) {
             $sql .= " a.mb_id=?";//主鍵欄不得鍵入非數值，否則 WHERE 不起作用【bug】
         } else {

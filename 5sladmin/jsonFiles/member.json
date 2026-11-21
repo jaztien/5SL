@@ -433,14 +433,14 @@
         "1":{
             "type":"會員資格",
             "otype":"提升等級",
-            "table":"members",
+            "table":"fsl_members",
             "column":"mb_id",
             "title":"mb_title"
         },
         "2":{
             "type":"課程商品上架",
             "otype":"登載課程商品",
-            "table":"merchandise",
+            "table":"fsl_merchandise",
             "column":"merch_id",
             "title":"merch_sn"
         },
@@ -489,7 +489,7 @@
     "wishlist":{
         "1":{
             "type":"課程商品",
-            "table":"merchandise",
+            "table":"fsl_merchandise",
             "column":"merch_title",
             "keycol":"merch_id"
         },

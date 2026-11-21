@@ -13,7 +13,7 @@ require_once('../includeFiles/common.lib.php');
 //
 $adID=currID;
 //
-$res = $DB->row("SELECT * FROM administrator WHERE ad_id=?",array($adID));
+$res = $DB->row("SELECT * FROM fsl_administrator WHERE ad_id=?",array($adID));
 //$DB->closeConnection();
 //代表圖像設定
 if(!empty($adID)&&file_exists("../uploadFiles/ad/adphoto_".$adID."_thumb.jpg")){
@@ -297,7 +297,7 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
                               $apnum = count($authpage);
                               $i=0;
                               while($i < $apnum){
-                                //$rs1 = $DB->row("SELECT * FROM admin_auth WHERE ap_pagecode=? AND ad_id=?", array($authpage[$i]['pagecode'],$adID));
+                                //$rs1 = $DB->row("SELECT * FROM fsl_admin_auth WHERE ap_pagecode=? AND ad_id=?", array($authpage[$i]['pagecode'],$adID));
                                 $authpage2 = isset($authpage[$i]['subgroup']) ? $authpage[$i]['subgroup'] : array();
                                 $apnum2 = count($authpage2);
                               ?>
@@ -318,7 +318,7 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
                                 if($apnum2 > 0){
                                   $si=0;
                                   while($si < $apnum2){
-                                    $rs2 = $DB->row("SELECT * FROM admin_auth WHERE ap_pagecode=? AND ad_id=?", array($authpage2[$si]['pagecode'],$adID));
+                                    $rs2 = $DB->row("SELECT * FROM fsl_admin_auth WHERE ap_pagecode=? AND ad_id=?", array($authpage2[$si]['pagecode'],$adID));
                                     $authpage3 = isset($authpage2[$si]['subgroup']) ? $authpage2[$si]['subgroup'] : array();
                                     $apnum3 = count($authpage3);
                                     $viewTag = "view_".$authpage2[$si]['pagecode'];
@@ -365,7 +365,7 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
                                     if($apnum3 > 0){
                                       $ti=0;
                                       while($ti < $apnum3){
-                                        $rs3 = $DB->row("SELECT * FROM admin_auth WHERE ap_pagecode=? AND ad_id=?", array($authpage3[$ti]['pagecode'],$adID));
+                                        $rs3 = $DB->row("SELECT * FROM fsl_admin_auth WHERE ap_pagecode=? AND ad_id=?", array($authpage3[$ti]['pagecode'],$adID));
                                         $iCHKclass = $rs3 ? "icheck-success " : "icheck-warning ";
                                         $viewTag = "view_".$authpage3[$ti]['pagecode'];
                                         $addTag = "add_".$authpage3[$ti]['pagecode'];
@@ -495,7 +495,7 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
                                     c.ad_name
                                 FROM data_logs a
                                 LEFT JOIN sys_logstrings b ON a.lg_code = b.lg_code
-                                LEFT JOIN administrator c ON a.lg_forid = c.ad_id
+                                LEFT JOIN fsl_administrator c ON a.lg_forid = c.ad_id
                                 WHERE lg_forid=? AND lg_for=? ORDER BY a.lg_id DESC LIMIT 200
                               ";
                               $sr = $DB->query($sql,array($adID,50));

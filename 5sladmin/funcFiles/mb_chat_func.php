@@ -222,7 +222,7 @@ switch ($formAcce) {
     break;
     case "func_chat_robotconfig":////////////////////////////////////////// func_chat_robotconfig 更改機器人應答狀態
         $nextOn = isset($_POST['nextOn']) ? intval($_POST['nextOn']) : 0;
-        //$up = $DB->update('configurations', array('config_value'=>$nextOn), array('config_code'=>'mess_robot'));
+        //$up = $DB->update('fsl_configurations', array('config_value'=>$nextOn), array('config_code'=>'mess_robot'));
         $up = $DB->setConfigVal($nextOn, 'mess_robot');
         if($up){
             $rtn = array(

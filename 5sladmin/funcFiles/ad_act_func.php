@@ -71,7 +71,7 @@ switch ($formAcce) {
             $i++;
         }
         $setArr['ad_updated'] = '[EXPR]NOW()';
-        $up = $DB->update('administrator', $setArr,array('ad_id'=>$adID));
+        $up = $DB->update('fsl_administrator', $setArr,array('ad_id'=>$adID));
         if($up){
             $imgUp = $_POST["imgUp"];
             $newUpPhoto = '';
@@ -126,7 +126,7 @@ switch ($formAcce) {
         if(trim($arrDatA[0]['value'])== trim($arrDatA[1]['value'] )){
             $ar=$arrDatA;
             $setArr=array('ad_updated'=> '[EXPR]NOW()', trim($arrDatA[0]['name']) => password_hash(trim($arrDatA[0]['value']), PASSWORD_DEFAULT));
-            $up = $DB->update('administrator', $setArr,array('ad_id'=>$adID));
+            $up = $DB->update('fsl_administrator', $setArr,array('ad_id'=>$adID));
             if($up){
                 $ilog = $DB->insSysLogs(51, CF_AD_ID, 2141, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
                 $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'更新登入密碼成功！！', 'upTime'=> $cDateTime);
@@ -186,7 +186,7 @@ switch ($formAcce) {
             $newCHK = strval($viewCHK.$addCHK.$editCHK.$delCHK);
             $comF=strval($optARR[$i]['default']);
             // 找出跟頁面與管理者相關聯的一筆權限紀錄 
-            $au = $DB->row("SELECT * FROM admin_auth WHERE ad_id = ? AND ap_pagecode = ?", array($adID,$idX));
+            $au = $DB->row("SELECT * FROM fsl_admin_auth WHERE ad_id = ? AND ap_pagecode = ?", array($adID,$idX));
             // 取得有紀錄的權限紀錄 ID，沒有的話賦值 0 
             $auID = ($au) ? intval($au['auth_id']) : 0;
 
@@ -194,7 +194,7 @@ switch ($formAcce) {
             if($newCHK==$comF){ // 若是頁面預設權限與 ajax 傳遞來的權限資料相同時處理 
                 if($auID>0){ // 若是有相關權限紀錄，刪除這個紀錄，系統將會自動讀取預設權限（與預設權限相同時沒有必要生成權限紀錄） 
                     $chkCount++;
-                    $del=$DB->query("DELETE FROM admin_auth WHERE auth_id=?", array($auID));
+                    $del=$DB->query("DELETE FROM fsl_admin_auth WHERE auth_id=?", array($auID));
                     if($del){ 
                         $colorCHG['adminPG_'.$idX ]='icheck-warning'; // 刪除成功後寫入更新 Class 狀態陣列（即時更改Checkbox顏色）
                         $succeCount++;
@@ -212,7 +212,7 @@ switch ($formAcce) {
                 );
                 if($auID>0){ // 若是已經有了權限紀錄時，更新這個權限紀錄 
                     $chkCount++;
-                    $up = $DB->query("UPDATE admin_auth SET auth_browse = :auth_browse, auth_addnew = :auth_addnew, auth_edit = :auth_edit, auth_delete = :auth_delete, ap_pagecode = :ap_pagecode WHERE auth_id = '".$auID."'", $goARR);
+                    $up = $DB->query("UPDATE fsl_admin_auth SET auth_browse = :auth_browse, auth_addnew = :auth_addnew, auth_edit = :auth_edit, auth_delete = :auth_delete, ap_pagecode = :ap_pagecode WHERE auth_id = '".$auID."'", $goARR);
                     if($up){ $succeCount++; }// 順利更新紀錄時，認定為此列紀錄處理成功 
                     else { // 若是更新失敗時處理 
                         if(intval($au['auth_browse'])==$viewCHK && intval($au['auth_addnew'])==$addCHK && intval($au['auth_edit'])==$editCHK && intval($au['auth_delete'])==$delCHK) { $succeCount++; }// 當更改資料並無異動時，即使更新失敗仍然認定為成功
@@ -220,7 +220,7 @@ switch ($formAcce) {
                     }
                 } else { // 若是並無權限紀錄時，便新建立一個權限紀錄 
                     $chkCount++;
-                    $ins = $DB->query("INSERT INTO admin_auth(ad_id,auth_browse,auth_addnew,auth_edit,auth_delete,ap_pagecode) VALUES('".$adID."',:auth_browse,:auth_addnew,:auth_edit,:auth_delete,:ap_pagecode)",$goARR);
+                    $ins = $DB->query("INSERT INTO fsl_admin_auth(ad_id,auth_browse,auth_addnew,auth_edit,auth_delete,ap_pagecode) VALUES('".$adID."',:auth_browse,:auth_addnew,:auth_edit,:auth_delete,:ap_pagecode)",$goARR);
                     if($ins){ // 建立紀錄成功時
                         $colorCHG['adminPG_'.$idX ]='icheck-success'; // 寫入更新 Class 狀態陣列（即時更改Checkbox顏色） 
                         $succeCount++;// 當然認定為處理成功 
@@ -265,7 +265,7 @@ switch ($formAcce) {
             $i++;
         }
         //---------------- 重複輸入檢查 ------------------//
-        $dupC = $DB->duplicateCheck('administrator',array(
+        $dupC = $DB->duplicateCheck('fsl_administrator',array(
             'ad_phone'=>$inArr['ad_phone'],
             'ad_email'=>$inArr['ad_email'],
             'ad_line'=>$inArr['ad_line'],
@@ -277,7 +277,7 @@ switch ($formAcce) {
         }
         //---------------- /重複輸入檢查 ------------------//
 
-        $ins = $DB->insert('administrator', $inArr);
+        $ins = $DB->insert('fsl_administrator', $inArr);
         if($ins && $ins > 0){
             //------------ 頭像更新檔名處理 --------------//
             $imgUp = $_POST["imgUp"];
@@ -301,8 +301,8 @@ switch ($formAcce) {
         echo json_encode($rtn);
     break;
     case "func_ad_delete":////////////////////////////////////////// func_ad_delete 刪除管理者資料
-        //$del = $DB->query("DELETE FROM administrator WHERE ad_id = ?", array($adID)); 
-        $up = $DB->update('administrator', array('ad_updated'=> '[EXPR]NOW()','ad_status'=>8), array('ad_id'=>$adID));
+        //$del = $DB->query("DELETE FROM fsl_administrator WHERE ad_id = ?", array($adID)); 
+        $up = $DB->update('fsl_administrator', array('ad_updated'=> '[EXPR]NOW()','ad_status'=>8), array('ad_id'=>$adID));
         if($up){
             $ilog = $DB->insSysLogs(51, CF_AD_ID, 2151, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>1); 

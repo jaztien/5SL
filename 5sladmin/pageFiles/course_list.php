@@ -158,7 +158,7 @@ $courseJS=_fn_getCachedJsonData("../jsonFiles/courses.json");
                     </thead>
                     <tbody>
                       <?php
-                        $listSql = "SELECT *, COUNT(*) OVER() 'totalNum' FROM courses";//, course_coordinates.STGeometryType() AS coordType
+                        $listSql = "SELECT *, COUNT(*) OVER() 'totalNum' FROM fsl_courses";//, course_coordinates.STGeometryType() AS coordType
                         if(!empty($searchURI) || !empty($searchAdmin)){ $listSql .= " WHERE 1=1"; }
                         if(!empty($searchText)){ 
                             $listSql .= " AND (

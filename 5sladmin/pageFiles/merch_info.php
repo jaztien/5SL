@@ -18,7 +18,7 @@ $sql .= ", a.merch_coordinates.Long AS lng";
 $sql .= ", a.merch_coordinates.Lat AS lat";
 $sql .= ", b.* , a.merch_coordinates.Long AS lng";
 $sql .= ", a.merch_coordinates.Lat AS lat";
-$sql .= " FROM merchandise a";
+$sql .= " FROM fsl_merchandise a";
 $sql .= " INNER JOIN merch_info b ON b.merch_id=a.merch_id";
 $sql .= " WHERE a.merch_id=?";
 $res = $DB->row($sql,array($mdID));
@@ -56,7 +56,7 @@ $S5 = $res['merch_s5'] ?? 0;
 $totAVE = ($S1 + $S2 + $S3 + $S4 + $S5)/5;
 //取得所屬會員的名稱以及會員等級
 if(!empty($res['mb_id'])){
-  $mbArr = $DB->row("SELECT mb_title,mb_level FROM members WHERE mb_id=?",array($res['mb_id']));
+  $mbArr = $DB->row("SELECT mb_title,mb_level FROM fsl_members WHERE mb_id=?",array($res['mb_id']));
 }
 //自JSON檔案取得評分項目名稱，連同評分分數，組合排列後做爲Javascript繪圖參數
 //$ratingItem = $idForJS['rating']['1'].'|'.$S1.','.$idForJS['rating']['2'].'|'.$S2.','.$idForJS['rating']['3'].'|'.$S3.','.$idForJS['rating']['4'].'|'.$S4.','.$idForJS['rating']['5'].'|'.$S5;
@@ -1836,7 +1836,7 @@ try {
                             </thead>
                             <tbody>
                               <?PHP
-                                $sql="SELECT * FROM data_rating WHERE rat_forid=? AND rat_for=?";
+                                $sql="SELECT * FROM fsl_rating WHERE rat_forid=? AND rat_for=?";
                                 $sr = $DB->query($sql,array($mdID,$idForItem));
                                 $i = 0; //以$i為$nameList這個陣列的索引值
                                 while($i<count($sr)){ 

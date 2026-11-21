@@ -147,7 +147,7 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
                     </thead>
                     <tbody>
                       <?php
-                        $listSql = "SELECT *, COUNT(*) OVER() AS totalNum FROM administrator LIMIT {$maxResult}";
+                        $listSql = "SELECT *, COUNT(*) OVER() AS totalNum FROM fsl_administrator LIMIT {$maxResult}";
                         //if(!empty($searchURI)){ $listSql .= " WHERE 1=1"; }
                         $sr = $DB->query($listSql);
                         $totalNum = intval(@$sr[0]['totalNum']);

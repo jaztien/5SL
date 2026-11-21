@@ -125,7 +125,7 @@ $maxResult = (!empty($searchURI)) ? 500 : 100;
                           <tr style="cursor:pointer;" data-currid="<?php echo $sr[$i]['lg_id']; ?>">
                             <td><?php echo $sr[$i]['lg_created']; ?></td>
                             <td><?php
-                            $mbnick = $DB->single("SELECT mb_nickname FROM members WHERE mb_id=?",array($sr[$i]['lg_forid']));
+                            $mbnick = $DB->single("SELECT mb_nickname FROM fsl_members WHERE mb_id=?",array($sr[$i]['lg_forid']));
                             echo $mbnick ?: '&nbsp;';
                             ?></td>
                             <td><?php echo $sr[$i]['lg_code']; ?></td>

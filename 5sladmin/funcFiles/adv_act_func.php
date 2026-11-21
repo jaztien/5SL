@@ -337,12 +337,12 @@ switch ($formAcce) {
                 //---------------- 預扣點數 ----------------//
                 $ptArr = array(
                     'mb_id' => intval($_POST['mb_id']),
-                    'mbp_trade' => (0-intval($_POST['cost'])),
-                    'mbp_for' => 5,
-                    'mbp_forid' => $ins,
-                    'mbp_status' => 2
+                    'pt_trade' => (0-intval($_POST['cost'])),
+                    'pt_for' => 5,
+                    'pt_forid' => $ins,
+                    'pt_status' => 2
                 );
-                $pins = $DB->insert('mb_points',$ptArr);
+                $pins = $DB->insert('fsl_points',$ptArr);
                 if($pins && $pins>0){
                     $addResult=true;
                 }
@@ -357,7 +357,7 @@ switch ($formAcce) {
         }
             //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
         $del = $DB->query("DELETE FROM advitising WHERE advi_id = ?", array($ins)); 
-        $pdel = $DB->query("DELETE FROM mb_points WHERE mbp_for = ? AND mbp_forid = ?", array(5,$ins)); 
+        $pdel = $DB->query("DELETE FROM fsl_points WHERE pt_for = ? AND pt_forid = ?", array(5,$ins)); 
         @unlink("../uploadFiles/adv/adviphoto_".$ins."_.jpg");
         @unlink("../uploadFiles/adv/adviphoto_".$ins."_banner.jpg");
         $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'申請廣告套裝失敗！請聯絡相關管理人員！！');
@@ -419,9 +419,9 @@ switch ($formAcce) {
             ), array('advi_id'=>$adviID));
             if($up){
                 //---- 扣除預扣點數
-                $pup = $DB->update('mb_points', array(
-                    'mbp_status'=>1
-                ),array('mb_id'=>$res['mb_id'],'mbp_for'=>5,'mbp_forid'=>$adviID));
+                $pup = $DB->update('fsl_points', array(
+                    'pt_status'=>1
+                ),array('mb_id'=>$res['mb_id'],'pt_for'=>5,'pt_forid'=>$adviID));
                 //---- 通知申購人
 
                 //---- /通知申購人
@@ -455,7 +455,7 @@ switch ($formAcce) {
         ), array('advi_id'=>$adviID));
         if($up){
             //---- 退回預扣點數
-            $pup = $DB->update('mb_points', array('mbp_status'=>0),array('mb_id'=>$arrDatA['mb_id'],'mbp_for'=>5,'mbp_forid'=>$adviID));
+            $pup = $DB->update('fsl_points', array('pt_status'=>0),array('mb_id'=>$arrDatA['mb_id'],'pt_for'=>5,'pt_forid'=>$adviID));
             //---- /退回預扣點數
             if($pup){
                 //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
@@ -476,7 +476,7 @@ switch ($formAcce) {
         $params = [];
         // 1. 安全地建立查詢條件（避免 SQL 注入與引數不匹配錯誤）
         // 處理 LIKE 的部分，將參數放入陣列中
-        $sql = "SELECT mb_id, mb_name, mb_title, mb_coexpert FROM members WHERE mb_title LIKE ?";
+        $sql = "SELECT mb_id, mb_name, mb_title, mb_coexpert FROM fsl_members WHERE mb_title LIKE ?";
         $params[] = "%" . $search . "%";
         // 如果是數字，再額外加上 OR 條件並新增綁定參數
         if (is_numeric($search)) { 

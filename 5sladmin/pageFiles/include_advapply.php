@@ -87,7 +87,7 @@ $svJS=_fn_getCachedJsonData("../jsonFiles/service.json");
             <select class="form-control" id="merch_id" name="merch_id">
                 <option value="">-請選擇站內房地課程商品-</option>
                 <?php
-                    $mdsql = "SELECT merch_id, merch_title, merch_add FROM merchandise WHERE mb_id=?";
+                    $mdsql = "SELECT merch_id, merch_title, merch_add FROM fsl_merchandise WHERE mb_id=?";
                     $mdsr = $DB->query($mdsql,array($_GET['mbID']));
                     $i = 0; 
                     $n = count($mdsr);

@@ -12,8 +12,8 @@ $svID=currID;
 //
 $res = $DB->row("SELECT * FROM sv_service WHERE sv_id=?",array($svID));
 //$pres = $DB->row("SELECT * FROM advi_pack WHERE advp_id=?",array($res['advp_id']));
-//$mres=$DB->row("SELECT * FROM members AS a INNER JOIN mb_info AS b ON b.mb_id=a.mb_id WHERE a.mb_id=?",array($res['mb_id']));
-//$mdres = $DB->row("SELECT * FROM merchandise WHERE merch_id=?",array($res['merch_id']));
+//$mres=$DB->row("SELECT * FROM fsl_members AS a INNER JOIN mb_info AS b ON b.mb_id=a.mb_id WHERE a.mb_id=?",array($res['mb_id']));
+//$mdres = $DB->row("SELECT * FROM fsl_merchandise WHERE merch_id=?",array($res['merch_id']));
 //$DB->closeConnection();
 
 //功能陣列建立
@@ -25,10 +25,10 @@ $mbJS = _fn_getCachedJsonData("../jsonFiles/member.json");
 //$mdJS = json_decode($mdGet,true);
 $mbArr = null;
 if(!empty($res['mb_id'])){
-  $mbArr = $DB->row("SELECT mb_title,mb_level FROM members WHERE mb_id=?",array($res['mb_id']));
+  $mbArr = $DB->row("SELECT mb_title,mb_level FROM fsl_members WHERE mb_id=?",array($res['mb_id']));
 }
 //--------------------- 評分計算 -----------------------
-$counT="SELECT AVG((rat_s1 + rat_s2 + rat_s3 + rat_s4 + rat_s5)/5) AS totAVE, AVG(rat_s1) AS S1, AVG(rat_s2) AS S2, AVG(rat_s3) AS S3, AVG(rat_s4) AS S4, AVG(rat_s5) AS S5 FROM data_rating WHERE rat_forid=? AND rat_for=?";
+$counT="SELECT AVG((rat_s1 + rat_s2 + rat_s3 + rat_s4 + rat_s5)/5) AS totAVE, AVG(rat_s1) AS S1, AVG(rat_s2) AS S2, AVG(rat_s3) AS S3, AVG(rat_s4) AS S4, AVG(rat_s5) AS S5 FROM fsl_rating WHERE rat_forid=? AND rat_for=?";
 $cnt = $DB->query($counT,array($svID,4));
 $S1 = !empty($cnt[0]['S1']) ? floatval($cnt[0]['S1']) : 0;
 $S2 = !empty($cnt[0]['S2']) ? floatval($cnt[0]['S2']) : 0;
@@ -480,7 +480,7 @@ if(!empty($svID)&&file_exists("../uploadFiles/sv/svphoto_".$svID."_thumb.jpg")){
                               $rvarr = $DB->query("SELECT * FROM data_reviews WHERE rv_for=? AND rv_forid=?",array(4,$svID));
                               $i = 0; //以$i為$nameList這個陣列的索引值
                               while($i<count($rvarr)){
-                                $adnick = $DB->single("SELECT ad_title FROM administrator WHERE ad_id=?",array($rvarr[$i]['ad_id']));
+                                $adnick = $DB->single("SELECT ad_title FROM fsl_administrator WHERE ad_id=?",array($rvarr[$i]['ad_id']));
                                 ?>
                                 <tr>
                                   <td><?php echo $rvarr[$i]['rv_created'] ?? '&nbsp;'; ?></td>
@@ -558,7 +558,7 @@ if(!empty($svID)&&file_exists("../uploadFiles/sv/svphoto_".$svID."_thumb.jpg")){
                             </thead>
                             <tbody>
                               <?php
-                                $sql="SELECT * FROM data_rating WHERE rat_forid=? AND rat_for=?";
+                                $sql="SELECT * FROM fsl_rating WHERE rat_forid=? AND rat_for=?";
                                 $sr = $DB->query($sql,array($svID,4));
                                 $i = 0; //以$i為$nameList這個陣列的索引值
                                 while($i<count($sr)){ 
@@ -625,7 +625,7 @@ if(!empty($svID)&&file_exists("../uploadFiles/sv/svphoto_".$svID."_thumb.jpg")){
                             </thead>
                             <tbody>
                               <?php
-                                $sql="SELECT * FROM data_rating WHERE rat_forid=? AND rat_for=?";
+                                $sql="SELECT * FROM fsl_rating WHERE rat_forid=? AND rat_for=?";
                                 $sr = $DB->query($sql,array($svID,4));
                                 $i = 0; //以$i為$nameList這個陣列的索引值
                                 while($i<count($sr)){ 

@@ -167,7 +167,7 @@ $courseJS=_fn_getCachedJsonData("../jsonFiles/courses.json");
                     </thead>
                     <tbody>
                       <?php
-                        $listSql = "SELECT *, COUNT(*) OVER() 'totalNum' FROM course_sessions";//, course_coordinates.STGeometryType() AS coordType
+                        $listSql = "SELECT *, COUNT(*) OVER() 'totalNum' FROM fsl_course_sessions";//, course_coordinates.STGeometryType() AS coordType
                         if(!empty($searchURI) || !empty($searchAdmin)){ $listSql .= " WHERE 1=1"; }
                         if(!empty($searchText)){ 
                             $listSql .= " AND (
@@ -224,7 +224,7 @@ $courseJS=_fn_getCachedJsonData("../jsonFiles/courses.json");
                         $totalNum = intval(@$sr[0]['totalNum']);
                         $i = 0; //以$i為$nameList這個陣列的索引值 
                         while($i<count($sr)){
-                          $courseRes = $DB->row("SELECT course_title FROM courses WHERE course_id = ? LIMIT 1",array($sr[$i]['course_id']));
+                          $courseRes = $DB->row("SELECT course_title FROM fsl_courses WHERE course_id = ? LIMIT 1",array($sr[$i]['course_id']));
                         ?>
                           <tr style="cursor:pointer;" data-currid="<?php echo $sr[$i]['sess_id'] ?? 0; ?>">
                             <td><span class="right badge<?php echo $courseJS['actionbadge'][$sr[$i]['sess_status'] ?? ''] ?? ''; ?>"><?php echo str_replace("/", "<br>/", $courseJS['status'][$sr[$i]['sess_status'] ?? ''] ?? ''); ?></span></td>

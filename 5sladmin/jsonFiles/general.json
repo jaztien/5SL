@@ -16,7 +16,7 @@
         "1":{
             "text":"會員(廠商、專家…等)",
             "short":"會員",
-            "table":"members",
+            "table":"fsl_members",
             "precol":"mb_",
             "idcol":"mb_id",
             "titlecol":"mb_title",
@@ -38,7 +38,7 @@
         "2":{
             "text":"課程商品",
             "short":"課程商品",
-            "table":"merchandise",
+            "table":"fsl_merchandise",
             "precol":"merch_",
             "idcol":"merch_id",
             "titlecol":"merch_title",
@@ -197,7 +197,7 @@
         "51":{
             "text":"系統管理人員",
             "short":"系統管理",
-            "table":"administrator",
+            "table":"fsl_administrator",
             "precol":"ad_",
             "joinid": "",
             "title":"",

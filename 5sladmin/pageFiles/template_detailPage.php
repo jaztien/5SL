@@ -427,17 +427,17 @@ $xxxxJS=_fn_getCachedJsonData("../jsonFiles/xxxxxxxx.json");
                               <tr>
                                 <td>[@userid@]</td>
                                 <td>會員ID</td>
-                                <td>members.mb_title.mb_id</td>
+                                <td>fsl_members.mb_title.mb_id</td>
                               </tr>
                               <tr>
                                 <td>[@username@]</td>
                                 <td>會員顯示名稱</td>
-                                <td>members.mb_title.mb_id</td>
+                                <td>fsl_members.mb_title.mb_id</td>
                               </tr>
                               <tr>
                                 <td>[@useremail@]</td>
                                 <td>會員電子郵件</td>
-                                <td>members.mb_email.mb_id</td>
+                                <td>fsl_members.mb_email.mb_id</td>
                               </tr>
                               <tr>
                                 <td>[@currdate@]</td>
@@ -462,12 +462,12 @@ $xxxxJS=_fn_getCachedJsonData("../jsonFiles/xxxxxxxx.json");
                               <tr>
                                 <td>[@inpoint@]</td>
                                 <td>現在儲值點數</td>
-                                <td>mb_points.mbp_trade.mb_id</td>
+                                <td>fsl_points.pt_trade.mb_id</td>
                               </tr>
                               <tr>
                                 <td>[@nowpoint@]</td>
                                 <td>現在儲值點數</td>
-                                <td>mb_points.mbp_trade.mb_id</td>
+                                <td>fsl_points.pt_trade.mb_id</td>
                               </tr>
                               <tr>
                                 <td>[@comptel@]</td>

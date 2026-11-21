@@ -50,7 +50,7 @@ if(is_array($geJS['idfor'][$idForIdx]['rating'])){
 
 //-----------------------------------------------------
 
-$counT="SELECT AVG((rat_s1 + rat_s2 + rat_s3 + rat_s4 + rat_s5)/5) AS totAVE, AVG(rat_s1) AS S1, AVG(rat_s2) AS S2, AVG(rat_s3) AS S3, AVG(rat_s4) AS S4, AVG(rat_s5) AS S5 FROM data_rating WHERE rat_forid=? AND rat_for=?";
+$counT="SELECT AVG((rat_s1 + rat_s2 + rat_s3 + rat_s4 + rat_s5)/5) AS totAVE, AVG(rat_s1) AS S1, AVG(rat_s2) AS S2, AVG(rat_s3) AS S3, AVG(rat_s4) AS S4, AVG(rat_s5) AS S5 FROM fsl_rating WHERE rat_forid=? AND rat_for=?";
 $cnt = $DB->query($counT,array($artiID,$idForIdx));
 $S1 = !empty($cnt[0]['S1']) ? floatval($cnt[0]['S1']) : 0;
 $S2 = !empty($cnt[0]['S2']) ? floatval($cnt[0]['S2']) : 0;
@@ -439,7 +439,7 @@ $ratingData = "4,5,4";
                               <select id="mb_id" name="mb_id" class="form-control js-data-example-ajax"<?php echo NdisAble; ?>>
                               <?php
                                 if(!empty($res['mb_id'])){
-                                  $msql = "SELECT a.mb_id, a.mb_title, b.mb_cate, b.mb_cotype, b.mb_coexpert FROM members AS a INNER JOIN mb_info AS b ON b.mb_id=a.mb_id WHERE a.mb_id=?";
+                                  $msql = "SELECT a.mb_id, a.mb_title, b.mb_cate, b.mb_cotype, b.mb_coexpert FROM fsl_members AS a INNER JOIN mb_info AS b ON b.mb_id=a.mb_id WHERE a.mb_id=?";
                                   $mres = $DB->row($msql,array($res['mb_id']));
                                   if($mres){
                                     echo "<option value='".$mres['mb_id']."'>";
@@ -882,13 +882,13 @@ $ratingData = "4,5,4";
                             <?php
                               $rsql = "
                                 SELECT r.*, m.mb_title
-                                FROM data_rating r
-                                LEFT JOIN members m ON r.mb_id = m.mb_id
+                                FROM fsl_rating r
+                                LEFT JOIN fsl_members m ON r.mb_id = m.mb_id
                                 WHERE rat_for=? AND rat_forid=? ORDER BY r.rat_id DESC LIMIT 200
                               ";
                               $rr = $DB->query($rsql,array(3,$artiID));
 
-                              //$sql="SELECT * FROM data_rating WHERE rat_forid=? AND rat_for=?";
+                              //$sql="SELECT * FROM fsl_rating WHERE rat_forid=? AND rat_for=?";
                               //$srr = $DB->query($sql,array($artiID,$idForIdx));
                               //$i = 0; //以$i為$nameList這個陣列的索引值
                               //while($i<count($srr)){
@@ -946,17 +946,17 @@ $ratingData = "4,5,4";
                               <tr>
                                 <td>[@userid@]</td>
                                 <td>會員ID</td>
-                                <td>members.mb_title.mb_id</td>
+                                <td>fsl_members.mb_title.mb_id</td>
                               </tr>
                               <tr>
                                 <td>[@username@]</td>
                                 <td>會員顯示名稱</td>
-                                <td>members.mb_title.mb_id</td>
+                                <td>fsl_members.mb_title.mb_id</td>
                               </tr>
                               <tr>
                                 <td>[@useremail@]</td>
                                 <td>會員電子郵件</td>
-                                <td>members.mb_email.mb_id</td>
+                                <td>fsl_members.mb_email.mb_id</td>
                               </tr>
                               <tr>
                                 <td>[@currdate@]</td>
@@ -996,12 +996,12 @@ $ratingData = "4,5,4";
                               <tr>
                                 <td>[@inpoint@]</td>
                                 <td>現在儲值點數</td>
-                                <td>mb_points.mbp_trade.mb_id</td>
+                                <td>fsl_points.pt_trade.mb_id</td>
                               </tr>
                               <tr>
                                 <td>[@nowpoint@]</td>
                                 <td>現在剩餘點數</td>
-                                <td>mb_points.mbp_trade.mb_id</td>
+                                <td>fsl_points.pt_trade.mb_id</td>
                               </tr>
                               <tr>
                                 <td>[@comptel@]</td>

@@ -74,7 +74,7 @@ switch ($formAcce) {
          $defChangeMess="";
          if(isset($_POST['defIdx'])==true){
             $upArr = array('merch_updated' => '[EXPR]GETDATE()', 'merch_defaultphoto'=>intval($_POST['defIdx']));
-            $up = $DB->update('merchandise',$upArr,array("merch_id"=>$mdID));
+            $up = $DB->update('fsl_merchandise',$upArr,array("merch_id"=>$mdID));
             if($up){
                $defChange = true;
                $defChangeMess = "，並同時更改預設主圖";

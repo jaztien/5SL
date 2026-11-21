@@ -41,9 +41,9 @@ $adTop = '';
 $adList = '';
 $adsql = "
 SELECT ad_id, ad_title, ad_authlevel, ad_status, 
-(SELECT CONVERT(INT, CONCAT(auth_browse, auth_addnew, auth_edit, auth_delete)) FROM admin_auth a WHERE ap_pagecode='PG_MESSBOARD' AND a.ad_id=d.ad_id) AS messauth, 
+(SELECT CONVERT(INT, CONCAT(auth_browse, auth_addnew, auth_edit, auth_delete)) FROM fsl_admin_auth a WHERE ap_pagecode='PG_MESSBOARD' AND a.ad_id=d.ad_id) AS messauth, 
 (SELECT COUNT(*) FROM data_chats e WHERE e.chat_incharge = d.ad_id AND e.chat_status <= 2) AS inchargeTotal 
-FROM administrator d ORDER BY messauth DESC, ad_authlevel DESC";
+FROM fsl_administrator d ORDER BY messauth DESC, ad_authlevel DESC";
 $adres = $DB->query($adsql, array());
 for($i=0;$i<count($adres);$i++){
   $adminID = $adres[$i]['ad_id'];

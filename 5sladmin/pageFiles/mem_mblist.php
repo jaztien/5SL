@@ -202,9 +202,9 @@ $locJS=_fn_getCachedJsonData("../jsonFiles/locations.json");
                     </thead>
                     <tbody>
                       <?php
-                        //$sr = $DB->query("SELECT * FROM members");
-                        //$listSql = "SELECT *, COUNT(*) OVER() 'totalNum' FROM members a INNER JOIN mb_info b ON b.mb_id = a.mb_id";
-                        $listSql = "SELECT *, COUNT(*) OVER() 'totalNum' FROM members";
+                        //$sr = $DB->query("SELECT * FROM fsl_members");
+                        //$listSql = "SELECT *, COUNT(*) OVER() 'totalNum' FROM fsl_members a INNER JOIN mb_info b ON b.mb_id = a.mb_id";
+                        $listSql = "SELECT *, COUNT(*) OVER() 'totalNum' FROM fsl_members";
                         if(!empty($searchURI)){ $listSql .= " WHERE 1=1"; }
                         if(!empty($searchText)){
                           $listSql .= " AND (";

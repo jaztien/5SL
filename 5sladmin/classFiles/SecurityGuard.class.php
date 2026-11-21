@@ -153,7 +153,7 @@
         $config = isset($this->eventConfigs[$eventType]) ? $this->eventConfigs[$eventType] : $this->eventConfigs['default'];
         // 不同關聯紀錄的表格與欄位
         if ($eventType === 'doRate') {
-            $targetTable   = 'data_rating';
+            $targetTable   = 'fsl_rating';
             $idColumn    = 'rat_id';
             $forColumn  = 'rat_for';
             $foridColumn  = 'rat_forid';
@@ -657,7 +657,7 @@
                         $deleteData['rat_s2'] = $s2;
                         //收回讚或倒讚的條件必須與按讚或倒讚的條件相同（可以忽略rat_review，按讚不需要評鑑文，符合三個條件就好：rat_id、rat_s1、rat_s2）
                         //當符合上述條件時，刪除評價紀錄
-                        $resDelete = $this->db->query("DELETE FROM data_rating WHERE rat_id=? AND rat_s1=? AND rat_s2=?",array($actionID,$s1,$s2));
+                        $resDelete = $this->db->query("DELETE FROM fsl_rating WHERE rat_id=? AND rat_s1=? AND rat_s2=?",array($actionID,$s1,$s2));
                         if ($resDelete === false) {
                             throw new Exception("無目標特定操作日誌寫入失敗 ($tableName)");
                         }

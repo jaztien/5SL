@@ -374,13 +374,13 @@ class DB
 		$rtnObj['config_crypt']=0;
 		$rtnObj['config_value']='';
 		if(!empty($codE)){
-			$res = $this->row("SELECT config_crypt, config_value FROM configurations WHERE config_code=? ",array($codE));
+			$res = $this->row("SELECT config_crypt, config_value FROM fsl_configurations WHERE config_code=? ",array($codE));
 			if($res) {
 				$rtnObj = $res;
 			}
 		}
 		else if(!empty($grouP)){
-			$res = $this->query("SELECT config_code, config_crypt, config_value FROM configurations WHERE config_group=? ",array($grouP));
+			$res = $this->query("SELECT config_code, config_crypt, config_value FROM fsl_configurations WHERE config_group=? ",array($grouP));
 			$i = 0;
 			$rtnArr = array();
 			while($i<count($res)){
@@ -396,7 +396,7 @@ class DB
 	public function setConfigVal($vaL,$codE = null)
 	{
 		if (empty($codE)) { return false; }
-		$up = $this->query("UPDATE configurations SET config_value= ? WHERE config_code = ?", array($vaL,$codE));
+		$up = $this->query("UPDATE fsl_configurations SET config_value= ? WHERE config_code = ?", array($vaL,$codE));
 		return $up;
 	}
 	//-----  以 ad_id 取得頁面操作權限 Array 陣列回傳  -----//
@@ -427,7 +427,7 @@ class DB
 		while($i<count($optARR)){
 			$idX=$optARR[$i]['pagecode'];
 			$gF=$optARR[$i]['default'];
-			$resi = $this->row("SELECT * FROM admin_auth WHERE ad_id=? AND ap_pagecode=?",array($iD, $idX));
+			$resi = $this->row("SELECT * FROM fsl_admin_auth WHERE ad_id=? AND ap_pagecode=?",array($iD, $idX));
 			if($resi){
 				$ari = array($idX => array(
 					"browse" => intval($resi['auth_browse']),
@@ -877,7 +877,7 @@ class DB
 			"iv_randcode" => $randCode,
 			"iv_status" => $invoiceStatus
 			);
-			$invIns = $this->insert('invoices', $invArr);
+			$invIns = $this->insert('fsl_invoices', $invArr);
 			if ($invIns && $invIns > 0) {
 				$payUp = $this->update('data_payments', array('pay_updated' => '[EXPR]NOW()','iv_id' => $invIns), array('pay_id' => $sendParam['payID']));
 				return array("done" => 1,"invIns" => 1,"payUp" => $payUp,"ivID" => $invIns,"ivUP" => 0);
@@ -901,7 +901,7 @@ class DB
 		}
 		if(!empty($needUpdate)){
 		$newLevel = $levelOBJ['newLevel'];
-		$up = $this->update('members',  array(
+		$up = $this->update('fsl_members',  array(
 			'mb_updated' => '[EXPR]NOW()',
 			'mb_level' => $newLevel
 		), array('mb_id'=>$mbID));
@@ -922,7 +922,7 @@ class DB
 		AVG(rat_s3) AS S3,
 		AVG(rat_s4) AS S4,
 		AVG(rat_s5) AS S5
-		FROM data_rating
+		FROM fsl_rating
 		WHERE mb_id=?";
 		$params = array($mbID);
 		if(!empty($for) && !empty($forID)){
@@ -943,7 +943,7 @@ class DB
 	public function _DB_get_invinfo($mbID)
 	{
 		if(empty($mbID)){ return false; }
-		$sql="SELECT * FROM invoices WHERE mb_id=? AND iv_status=? ORDER BY iv_published DESC";
+		$sql="SELECT * FROM fsl_invoices WHERE mb_id=? AND iv_status=? ORDER BY iv_published DESC";
 		$res = $this->row($sql,array($mbID,1));
 		if($res){
 			$rtnARR = array(
@@ -986,7 +986,7 @@ class DB
 		if(empty($rsoption)) { return ''; }
 		$preFix = 'M'.$rsoption;
 		if(empty($nowDate)) { $nowDate = date('Ymd', time()); }
-		$sql = "SELECT max(cast(right(merch_sn, 4) as SIGNED)) FROM merchandise WHERE merch_sn LIKE ?";
+		$sql = "SELECT max(cast(right(merch_sn, 4) as SIGNED)) FROM fsl_merchandise WHERE merch_sn LIKE ?";
 		$getmaxSN = $this->single($sql, array($preFix.$nowDate."%"));
 		if(!empty($getmaxSN)) {
 			$getNewSN = $preFix.$nowDate.str_pad($getmaxSN+1, 4, '0', STR_PAD_LEFT);

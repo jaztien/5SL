@@ -1,6 +1,7 @@
 <?php
 session_start();
 if (isset($_SESSION["SESS_AD_ID"]) && !empty($_SESSION["SESS_AD_ID"])) {
+    define('DOC_PATH_LAYER', './');
     require_once('./includeFiles/db.inc.php');
     $ilog = $DB->insSysLogs(51, $_SESSION["SESS_AD_ID"], 2061, '["'.$_SESSION["SESS_AD_ID"].'"]');//寫入操作記錄
 }

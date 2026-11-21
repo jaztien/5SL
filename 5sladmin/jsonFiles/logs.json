@@ -8,7 +8,7 @@
     },
     "lgidfrom":{
         "1" : {
-            "table" : "fn.administrator",
+            "table" : "fsl_administrator",
             "id" : "ad_id",
             "select" : "ad_name"
         },
@@ -18,7 +18,7 @@
             "select" : "mbinfo_name"
         },
         "3" : {
-            "table" : "fn.merchandise",
+            "table" : "fsl_merchandise",
             "id" : "merch_id",
             "select" : "merch_title"
         }

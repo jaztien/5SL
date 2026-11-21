@@ -57,7 +57,7 @@ switch ($formAcce) {
         if (!empty($arrDatA)) {
             $DB->beginTransaction();
             try {
-                $upA = $DB->update('courses', $arrDatA, array('course_id'=>$courseID));
+                $upA = $DB->update('fsl_courses', $arrDatA, array('course_id'=>$courseID));
                 if ($upA === 0 || $upA === false) {
                     // 主動大喊救命！強制中斷並空降到 catch 區塊執行全面撤銷
                     throw new Exception("課程資料表更新失敗：主要資料表影響 {$upA} 筆！");
@@ -131,8 +131,8 @@ switch ($formAcce) {
        
     break;
     case "func_course_delete":////////////////////////////////////////// func_mb_delete 刪除會員資料，這個刪除功能僅僅是將會員狀態改成8，也就是丟進垃圾桶，仍然可以取回。
-        //$del = $DB->query("DELETE FROM members WHERE mb_id = ?", array($mbID)); 
-        $up = $DB->query("UPDATE courses SET course_updated=getdate(), course_status = ? WHERE course_id = ?", array(8,$courseID));
+        //$del = $DB->query("DELETE FROM fsl_members WHERE mb_id = ?", array($mbID)); 
+        $up = $DB->query("UPDATE fsl_courses SET course_updated=getdate(), course_status = ? WHERE course_id = ?", array(8,$courseID));
         if($up){
             //$ilog = $DB->insSysLogs(51, CF_AD_ID, 2251, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功刪除課程資料！！', 'upTime'=> $cDateTime); 
@@ -150,7 +150,7 @@ switch ($formAcce) {
         if (!empty($arrDatA)) {
             $DB->beginTransaction();
             try {
-                $upA = $DB->update('course_sessions', $arrDatA, array('sess_id'=>$sessID));
+                $upA = $DB->update('fsl_course_sessions', $arrDatA, array('sess_id'=>$sessID));
                 if (empty($imgUp) && ($upA === 0 || $upA === false)) {
                     // 主動大喊救命！強制中斷並空降到 catch 區塊執行全面撤銷
                     throw new Exception("課程梯次資料表更新失敗：主要資料表影響 {$upA} 筆！");
@@ -191,7 +191,7 @@ switch ($formAcce) {
             $DB->beginTransaction();
 
             try {
-                $ins = $DB->insert('course_sessions', $arrDatA);
+                $ins = $DB->insert('fsl_course_sessions', $arrDatA);
                 if ($ins && $ins > 0) {
                     $currID = $ins;
                 }
@@ -227,8 +227,8 @@ switch ($formAcce) {
        
     break;
     case "func_sess_delete":////////////////////////////////////////// func_mb_delete 刪除會員資料，這個刪除功能僅僅是將會員狀態改成8，也就是丟進垃圾桶，仍然可以取回。
-        //$del = $DB->query("DELETE FROM members WHERE mb_id = ?", array($mbID)); 
-        $up = $DB->query("UPDATE course_sessions SET sess_updated=getdate(), sess_status = ? WHERE sess_id = ?", array(8,$sessID));
+        //$del = $DB->query("DELETE FROM fsl_members WHERE mb_id = ?", array($mbID)); 
+        $up = $DB->query("UPDATE fsl_course_sessions SET sess_updated=getdate(), sess_status = ? WHERE sess_id = ?", array(8,$sessID));
         if($up){
             //$ilog = $DB->insSysLogs(51, CF_AD_ID, 2251, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功刪除課程梯次資料！！', 'upTime'=> $cDateTime); 
@@ -257,7 +257,7 @@ switch ($formAcce) {
         if($search == ''){
             exit();
         }
-        $sql="SELECT a.mb_id, a.mb_title, b.mb_cate, b.mb_cotype, b.mb_coexpert FROM members AS a INNER JOIN mb_info AS b ON b.mb_id=a.mb_id WHERE";
+        $sql="SELECT a.mb_id, a.mb_title, b.mb_cate, b.mb_cotype, b.mb_coexpert FROM fsl_members AS a INNER JOIN mb_info AS b ON b.mb_id=a.mb_id WHERE";
         if (is_numeric($search)) {
             $sql .= " a.mb_id=?";//主鍵欄不得鍵入非數值，否則 WHERE 不起作用【bug】
         } else {

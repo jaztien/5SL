@@ -158,7 +158,7 @@ $locJS=_fn_getCachedJsonData("../jsonFiles/locations.json");
                     </thead>
                     <tbody>
                       <?php
-                        $listSql = "SELECT merch_id, merch_title, merch_rsoptions, merch_usecate, merch_bdcate, merch_city, merch_district, merch_add, merch_coordinates, merch_saleprice, merch_defaultphoto, merch_status, COUNT(*) OVER() 'totalNum' FROM merchandise";//, merch_coordinates.STGeometryType() AS coordType
+                        $listSql = "SELECT merch_id, merch_title, merch_rsoptions, merch_usecate, merch_bdcate, merch_city, merch_district, merch_add, merch_coordinates, merch_saleprice, merch_defaultphoto, merch_status, COUNT(*) OVER() 'totalNum' FROM fsl_merchandise";//, merch_coordinates.STGeometryType() AS coordType
                         if(!empty($searchURI) || !empty($searchAdmin)){ $listSql .= " WHERE 1=1"; }
                         if(!empty($searchText)){ $listSql .= " AND (merch_sn LIKE '%".$searchText."%' OR merch_title LIKE '%".$searchText."%' OR merch_add LIKE '%".$searchText."%' OR merch_superscript LIKE '%".$searchText."%' OR merch_subtitle LIKE '%".$searchText."%' OR merch_area LIKE '%".$searchText."%' OR merch_des LIKE '%".$searchText."%')"; }
                         if(!empty($searchBdtype)){ $listSql .= " AND merch_bdtype = ".$searchBdtype; }

@@ -110,11 +110,11 @@ $maxResult = (!empty($searchURI)) ? 200 : 50;
                     </thead>
                     <tbody>
                       <?php
-                        $listSql = "SELECT * FROM administrator";
+                        $listSql = "SELECT * FROM fsl_administrator";
                         //if(!empty($searchURI)){ $listSql .= " WHERE 1=1"; }
                         $listSql .= " ORDER BY ad_id DESC LIMIT {$maxResult}";
                         $sr = $DB->query($listSql);
-                        //$sr = $DB->query("SELECT * FROM (SELECT *, ROW_NUMBER() OVER (ORDER BY ad_id) as ROWNUM FROM administrator) a WHERE ROWNUM >= ? and ROWNUM <= ?",array(0,50));
+                        //$sr = $DB->query("SELECT * FROM (SELECT *, ROW_NUMBER() OVER (ORDER BY ad_id) as ROWNUM FROM fsl_administrator) a WHERE ROWNUM >= ? and ROWNUM <= ?",array(0,50));
                         $i = 0; //以$i為$nameList這個陣列的索引值
                         while($i<count($sr)){ 
                         ?>

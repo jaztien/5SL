@@ -11,17 +11,13 @@ require_once('../includeFiles/common.lib.php');
 //主要資料表欄位資料取得
 $mbID=currID;
 //主要資料表欄位資料取得
-$sql='SELECT * FROM members WHERE mb_id=?'; 
+$sql='SELECT * FROM fsl_members WHERE mb_id=?'; 
 $res = $DB->row($sql,array($mbID));
 //功能陣列建立，取自JSON檔案
-//$mdGet=file_get_contents("../jsonFiles/merchandise.json");
-//$merchGet=file_get_contents("../jsonFiles/merchinfo.json");
-//$geGet=file_get_contents("../jsonFiles/general.json");
 $mbJS = _fn_getCachedJsonData('../jsonFiles/member.json');
 $mdJS = _fn_getCachedJsonData('../jsonFiles/merchandise.json');
 $merchJS = _fn_getCachedJsonData('../jsonFiles/merchinfo.json');
 $geJS = _fn_getCachedJsonData('../jsonFiles/general.json');
-//$locGet=file_get_contents("../jsonFiles/locations.json");
 $locJS = _fn_getCachedJsonData('../jsonFiles/locations.json');
 foreach($mbJS['cotype'] as $key=>$Val){
     $coTypeJS[$key]=$Val['type'];
@@ -29,41 +25,19 @@ foreach($mbJS['cotype'] as $key=>$Val){
       $expertJS[$keyT]=$ValT;
     }
 }
-//--------------------- 評分計算 -----------------------
-/*
-$S1 = $res['mb_s1'] ?? 0;
-$S2 = $res['mb_s2'] ?? 0;
-$S3 = $res['mb_s3'] ?? 0;
-$S4 = $res['mb_s4'] ?? 0;
-$S5 = $res['mb_s5'] ?? 0;
-$totAVE = ($S1+$S2+$S3+$S4+$S5)/5;
-*/
-/*
-$counT="SELECT AVG((rat_s1 + rat_s2 + rat_s3 + rat_s4 + rat_s5)/5) AS totAVE, AVG(rat_s1) AS S1, AVG(rat_s2) AS S2, AVG(rat_s3) AS S3, AVG(rat_s4) AS S4, AVG(rat_s5) AS S5 FROM data_rating WHERE rat_forid=? AND rat_for=?";
-$cnt = $DB->query($counT,array($mbID,1));
-$S1 = !empty($cnt[0]['S1']) ? floatval($cnt[0]['S1']) : 0;
-$S2 = !empty($cnt[0]['S2']) ? floatval($cnt[0]['S2']) : 0;
-$S3 = !empty($cnt[0]['S3']) ? floatval($cnt[0]['S3']) : 0;
-$S4 = !empty($cnt[0]['S4']) ? floatval($cnt[0]['S4']) : 0;
-$S5 = !empty($cnt[0]['S5']) ? floatval($cnt[0]['S5']) : 0;
-$totAVE = !empty($cnt[0]['totAVE']) ? floatval($cnt[0]['totAVE']) : 0;
-*/
 //------------------ Get Points ------------------
 $sqlp="
-SELECT SUM(mbp_trade) AS toT, 
-SUM(CASE WHEN mbp_trade>0 AND mbp_redeem=1 THEN mbp_trade ELSE 0 END) AS toRN, 
-SUM(CASE WHEN mbp_trade>0 THEN mbp_trade ELSE 0 END) AS toIN, 
-SUM(CASE WHEN mbp_trade<0 THEN mbp_trade ELSE 0 END) AS toOUT 
-FROM mb_points WHERE mb_id=? AND mbp_status>?";
+SELECT SUM(pt_trade) AS toT, 
+SUM(CASE WHEN pt_trade>0 AND pt_redeem=1 THEN pt_trade ELSE 0 END) AS toRN, 
+SUM(CASE WHEN pt_trade>0 THEN pt_trade ELSE 0 END) AS toIN, 
+SUM(CASE WHEN pt_trade<0 THEN pt_trade ELSE 0 END) AS toOUT 
+FROM fsl_points WHERE mb_id=? AND pt_status>?";
 $srp = $DB->query($sqlp,array($mbID,0));
-
-
 $totalPoints=(!empty($res['mb_points']) && intval($res['mb_points'])==intval($srp[0]['toT'])) ? intval($res['mb_points']) : intval($srp[0]['toT']);
 $totalRedeem=(!empty($res['mb_cashback']) && intval($res['mb_cashback'])==intval($srp[0]['toRN'])) ? intval($res['mb_cashback']) : intval($srp[0]['toRN']);
 if($totalPoints > 0 && $totalRedeem > $totalPoints){
   $totalRedeem = $totalPoints;
 }
-
 //代表圖像設定
 if(!empty($mbID)&&file_exists("../uploadFiles/mb/mbphoto_".$mbID."_thumb.jpg")){
   $cropImgDisplay = 'show';
@@ -74,8 +48,6 @@ if(!empty($mbID)&&file_exists("../uploadFiles/mb/mbphoto_".$mbID."_thumb.jpg")){
   $mainimgpath = '../uploadFiles/imageFiles/nopic_400x300.jpg';
   $mainimgchk = "";
 }
-
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -546,49 +518,49 @@ if(!empty($mbID)&&file_exists("../uploadFiles/mb/mbphoto_".$mbID."_thumb.jpg")){
                           </thead>
                           <tbody>
                             <?php
-                              $sqlp="SELECT * FROM mb_points WHERE mb_id=? AND mbp_status>?";
+                              $sqlp="SELECT * FROM fsl_points WHERE mb_id=? AND pt_status>?";
                               $srp = $DB->query($sqlp,array($mbID,0));
                               $i = 0; //以$i為$nameList這個陣列的索引值
                               while($i<count($srp)){
                             ?>
                                 <tr style="background-color:<?php
-                                if($srp[$i]['mbp_trade']>0) echo "#D4EDE0";
+                                if($srp[$i]['pt_trade']>0) echo "#D4EDE0";
                                 else echo "#FFFFFF";
                                 ?>;">
-                                  <td><?php echo $srp[$i]['mbp_date'] ?? '&nbsp;'; ?></td>
+                                  <td><?php echo $srp[$i]['pt_date'] ?? '&nbsp;'; ?></td>
                                   <td><?php
-                                    echo $mbJS['ptstatus'][$srp[$i]['mbp_status']] ?? '&nbsp;';
+                                    echo $mbJS['ptstatus'][$srp[$i]['pt_status']] ?? '&nbsp;';
                                     /*
-                                    if($srp[$i]['mbp_trade']>0 && $srp[$i]['mbp_for']==0) echo "[儲值]";
+                                    if($srp[$i]['pt_trade']>0 && $srp[$i]['pt_for']==0) echo "[儲值]";
                                     else {
                                       echo '<span class="right badge badge-dark">'; 
-                                      switch($srp[$i]['mbp_status']){
+                                      switch($srp[$i]['pt_status']){
                                         case '2': echo "預扣"; break;
                                         case '9': echo "凍結"; break;
                                         default: echo ""; break;
                                       }
                                       echo '</span> ';
-                                      echo $geJS['idfor'][$srp[$i]['mbp_for']]['short'];
+                                      echo $geJS['idfor'][$srp[$i]['pt_for']]['short'];
                                     }
                                     */
                                   ?></td>
                                   <td>
                                     <?php
-                                      $tIncome=$srp[$i]['mbp_income'];
-                                      if($tIncome==1) echo '<i class="nav-icon fas fa-long-arrow-alt-up" style="color:#44a273;"></i>&nbsp;<b>+'.$srp[$i]['mbp_trade'].'</b>';
-                                      else echo '<i class="nav-icon fas fa-long-arrow-alt-down" style="color:#C35050;"></i>&nbsp;<b>'.$srp[$i]['mbp_trade'].'</b>';
+                                      $tIncome=$srp[$i]['pt_income'];
+                                      if($tIncome==1) echo '<i class="nav-icon fas fa-long-arrow-alt-up" style="color:#44a273;"></i>&nbsp;<b>+'.$srp[$i]['pt_trade'].'</b>';
+                                      else echo '<i class="nav-icon fas fa-long-arrow-alt-down" style="color:#C35050;"></i>&nbsp;<b>'.$srp[$i]['pt_trade'].'</b>';
                                     ?>
                                   </td>
                                   <td><?php
-                                      $getType = $srp[$i]['mbp_type'];
-                                      if($srp[$i]['mbp_for']==4){
+                                      $getType = $srp[$i]['pt_type'];
+                                      if($srp[$i]['pt_for']==4){
                                         $sql="SELECT sv_type, sv_title FROM sv_service WHERE sv_id=?";
-                                        $cr = $DB->row($sql,array($srp[$i]['mbp_forid']));
+                                        $cr = $DB->row($sql,array($srp[$i]['pt_forid']));
                                         echo $getType = $cr['sv_type'] ?? 0;
                                       }
                                       if(!empty($getType)) {
-                                        $getMBPtype = $geJS['idfor'][$srp[$i]['mbp_for']]['otype'][$getType] ?? [];
-                                        echo $getMBPtype && !is_array($getMBPtype) ? $getMBPtype : $geJS['idfor'][$srp[$i]['mbp_for']]['short'];
+                                        $getMBPtype = $geJS['idfor'][$srp[$i]['pt_for']]['otype'][$getType] ?? [];
+                                        echo $getMBPtype && !is_array($getMBPtype) ? $getMBPtype : $geJS['idfor'][$srp[$i]['pt_for']]['short'];
                                       } else {
                                         echo "&nbsp;";
                                       }
@@ -597,9 +569,9 @@ if(!empty($mbID)&&file_exists("../uploadFiles/mb/mbphoto_".$mbID."_thumb.jpg")){
                                   </td>
                                   <td>
                                     <?php
-                                      $getForInfo = $geJS['idfor'][$srp[$i]['mbp_for']] ?? [];//紀錄
+                                      $getForInfo = $geJS['idfor'][$srp[$i]['pt_for']] ?? [];//紀錄
                                       $getFromInfo = $geJS['idfor'][$getForInfo['joinid'] ?? null] ?? [];//項目
-                                      $idforTitle = $DB->getIDFORtitle($srp[$i]['mbp_forid'],$getForInfo,$getFromInfo);
+                                      $idforTitle = $DB->getIDFORtitle($srp[$i]['pt_forid'],$getForInfo,$getFromInfo);
                                       echo $idforTitle;
                                       ?><i class="nav-icon fas fa-sign-out-alt" style="position:absolute;right:12px;"></i>
                                     </td>
@@ -640,7 +612,7 @@ if(!empty($mbID)&&file_exists("../uploadFiles/mb/mbphoto_".$mbID."_thumb.jpg")){
                               $srr = $DB->query($sql,array($mbID));
                               $i = 0;
                               while($i<count($srr)){ 
-                                $mRes = $DB->row("SELECT merch_sn,merch_title FROM merchandise WHERE merch_id=?",array($srr[$i]['wl_forid']));
+                                $mRes = $DB->row("SELECT merch_sn,merch_title FROM fsl_merchandise WHERE merch_id=?",array($srr[$i]['wl_forid']));
                                 ?>
                                 <tr>
                                   <td><?php echo $geJS['idfor'][$srr[$i]['wl_for']]['short'] ?? '&nbsp;'; ?></td>

@@ -119,7 +119,7 @@ $maxResult = (!empty($searchURI)) ? 200 : 50;
                               c.ad_name
                           FROM data_logs a
                           LEFT JOIN sys_logstrings b ON a.lg_code = b.lg_code
-                          LEFT JOIN administrator c ON a.lg_forid = c.ad_id
+                          LEFT JOIN fsl_administrator c ON a.lg_forid = c.ad_id
                           WHERE lg_for=? ORDER BY a.lg_id DESC LIMIT 200
                         ";
                         $sr = $DB->query($sql,array(1));
@@ -133,7 +133,7 @@ $maxResult = (!empty($searchURI)) ? 200 : 50;
                           <tr style="cursor:pointer;" data-currid="<?php echo $log['lg_id']; ?>">
                             <td><?php echo $log['lg_created']; ?></td>
                             <td><?php
-                            //$adnick = $DB->single("SELECT ad_title FROM administrator WHERE ad_id=?",array($sr[$i]['lg_forid']));
+                            //$adnick = $DB->single("SELECT ad_title FROM fsl_administrator WHERE ad_id=?",array($sr[$i]['lg_forid']));
                             //echo $adnick ?: '&nbsp;';
                             echo $log['ad_title'] ?: '&nbsp;';
                             ?></td>

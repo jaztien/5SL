@@ -124,7 +124,7 @@ $advJS=_fn_getCachedJsonData("../jsonFiles/advitising.json");
                             <tr id="tr_<?php echo $sr[$i]['advi_id']; ?>" style="cursor:pointer;" data-currid="<?php echo $sr[$i]['advp_id']; ?>">
                               <td><span class="right badge<?php echo $advJS['badge'][$sr[$i]['advi_status']]; ?>"><?php echo $advJS['status'][$sr[$i]['advi_status']]; ?></span></td>
                               <td><?php
-                                  $mbsql="SELECT * FROM members WHERE mb_id=?";
+                                  $mbsql="SELECT * FROM fsl_members WHERE mb_id=?";
                                   $mbsr = $DB->row($mbsql,array($sr[$i]['mb_id']));
                                   echo $mbsr ? $mbsr['mb_title'] : '&nbsp;';
                               ?></td>
