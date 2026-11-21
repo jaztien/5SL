@@ -39,14 +39,14 @@ switch ($formAcce) {
         $i=0;
         while($i<count($ar)){
             $name=$ar[$i]['name'];
-            $cy = $DB->single("SELECT config_crypt FROM fsl_configurations WHERE config_code=? ",array($name));
+            $cy = DB->single("SELECT config_crypt FROM fsl_configurations WHERE config_code=? ",array($name));
             $val = (intval($cy)==1) ? $ar[$i]['value'] : $ar[$i]['value'] ;
             $setArr = array('config_value' => $val);
-            $up = $DB->update('fsl_configurations',$setArr ,array('config_code'=>$name));
+            $up = DB->update('fsl_configurations',$setArr ,array('config_code'=>$name));
             if($up){ $succeCount++; }
             $i++;
         }
-        $DB->closeConnection();
+        DB->closeConnection();
         if($succeCount > 0){
             /*
             switch($formAcce){
@@ -98,7 +98,7 @@ switch ($formAcce) {
             $toCol = $getPreCol.'visits';
             $doSql = "SELECT COUNT(1) AS totalSUM";
             $doSql .= " FROM data_visits WHERE vit_for = :vit_for AND vit_forid = :vit_forid";
-            $res = $DB->row($doSql, array('vit_for'=>$forVal,'vit_forid'=>$foridVal));
+            $res = DB->row($doSql, array('vit_for'=>$forVal,'vit_forid'=>$foridVal));
             if(empty($res)){
                 echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'同步校正操作失敗！請聯絡相關管理人員！！'));
                 exit();
@@ -107,7 +107,7 @@ switch ($formAcce) {
                     echo json_encode(array('RTN'=>1, 'msgType'=>'warning', 'msgStr'=>'造訪次數比對相符，無需同步校正！'));
                     exit();
                 } else {
-                    $up = $DB->update($toTable, array($toCol => $res['totalSUM']), array($toIdCol => $foridVal));
+                    $up = DB->update($toTable, array($toCol => $res['totalSUM']), array($toIdCol => $foridVal));
                     if($up){
                         echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功同步校正造訪次數，由 '.$thisVisits.' 次改為 '.$res['totalSUM'].' 次！', 'newVisits'=>$res['totalSUM']));
                         exit();
@@ -143,7 +143,7 @@ switch ($formAcce) {
 
             try {
                 $rateRes = false; 
-                $rawRow = $DB->row($rateSql, array('rat_for' => $forVal, 'rat_forid' => $foridVal));
+                $rawRow = DB->row($rateSql, array('rat_for' => $forVal, 'rat_forid' => $foridVal));
                 $rateRes = ($rawRow === false) ? 0 : $rawRow;
             } catch (PDOException $e) {
                 $rateRes = false; // 發生 SQL 錯誤，確保值維持為 false
@@ -214,7 +214,7 @@ switch ($formAcce) {
                 $msgStr = '成功同步校正評價記錄計算，總獲贊次數由 '.$thisRateTop.' 次改為 '.$rateRes['totalLike'].'次；總倒讚次數由 '.$thisRateBottom.' 次改為 '.$rateRes['totalUnlike'].' 次！！';
             } 
             if(!empty($updateArray)){
-                //$upSQL = $DB->update($toTable, $updateArray, array($toIdCol => $foridVal));
+                //$upSQL = DB->update($toTable, $updateArray, array($toIdCol => $foridVal));
                 $upSQL = 1;
                 if($upSQL && $upSQL > 0){
                     echo json_encode(
