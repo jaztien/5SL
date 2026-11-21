@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant-TW">
 <head>
     <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -8,41 +8,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="../imageFiles/favicon.ico" type="image/ico" />
     <title>Fifth Season Life 人生第五季 | Start Page</title>
+    
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="../pluginFiles/bootstrap5/bootstrap.min.css">
     <!-- Theme style -->
-    <link rel="stylesheet" href="../cssFiles/5sladmin.light.css">
+    <link rel="stylesheet" href="../cssFiles/adminlte.css">
+
+   <style>
+        /* 補回 AdminLTE 3 的 Logo 持續搖晃動畫 */
+        @keyframes wobbleLogo {
+            0%, 100% { transform: translateX(0%) rotate(0deg); }
+            15% { transform: translateX(-12%) rotate(-5deg); }
+            30% { transform: translateX(10%) rotate(3deg); }
+            45% { transform: translateX(-8%) rotate(-3deg); }
+            60% { transform: translateX(5%) rotate(2deg); }
+            75% { transform: translateX(-2%) rotate(-1deg); }
+        }
+        .animation__wobble {
+            /* 加上 infinite 讓動畫無限循環，2s 為一次完整週期 */
+            animation: wobbleLogo 2s ease-in-out infinite;
+        }
+    </style>
 </head>
 
-<body class="hold-transition login-page">
-    <div class="login-box">
-        <div class="login-logo">
-            <img src="../imageFiles/preloaderLOGO.png" alt="Fifth Season Life Logo" class="brand-image animation__wobble" style="vertical-align:baseline;margin-bottom:-26px;" height="80" width="80">
-            <div><img src="../imageFiles/5slADMINlogo_text1G.png" style="width:100%;"></div>
+<!-- [變更1] 使用 BS5 原生 Flex 實現滿版垂直水平置中，取代舊版 hold-transition login-page -->
+<body class="bg-body-tertiary min-vh-100 d-flex align-items-center justify-content-center m-0">
+    <!-- 外框容器：固定最大寬度 360px（手機版自動縮為 90%），並使用 Flex 垂直排列且水平置中 -->
+    <div class="d-flex flex-column align-items-center justify-content-center" style="width: 360px; max-width: 90%;">
+        
+        <!-- 第一張圖：圓形/主圖標，透過父層 align-items-center 嚴格置中 -->
+        <img src="../imageFiles/preloaderLOGO.png" 
+             alt="Fifth Season Life Logo" 
+             class="brand-image animation__wobble d-block mx-auto" 
+             style="margin-bottom: -18px; position: relative; z-index: 2;" 
+             height="80" 
+             width="80">
+        
+        <!-- 第二張圖：文字 Logo，寬度 100% 完全貼齊外框 (360px)，高度等比例自動縮放 -->
+        <div class="w-100 text-center">
+            <img src="../imageFiles/5slADMINlogo_text1G.png" 
+                 alt="5SeasonLife Admin" 
+                 class="d-block w-100 h-auto">
         </div>
+
     </div>
     <!-- jQuery -->
     <script src="../pluginFiles/jquery/jquery.min.js"></script>
-    <script>
-        //var $ = window.parent.jQuery;
-        $('.nav-item.nav-authpanel').hide();
-        $('.nav-item.nav-toppanel').hide();
-        $('.nav-item.nav-topbkredir').hide();
-      ////////////////////////////////////////////////////////////////
-// ---------------- jQuery FUNCTIONs 區域調用 ---------------- //
-// ---------------------------------------------------------- //
-////////////////////////////////////////////////////////////////
-  $(document).ready(function() {
+    <script type="text/javascript">
+    //************************************************************//
+    //***************** JAVASCRIPTS 全域調用參數設置 *****************//
+    //************************************************************//
+        // [變更2] 確保透過 window.parent 操作主外框的頂部按鈕列
+        if (window.parent && window.parent.$) {
+            window.parent.$('.nav-item.nav-authpanel').hide();
+            window.parent.$('.nav-item.nav-toppanel').hide();
+            window.parent.$('.nav-item.nav-topbkredir').hide();
+            window.parent.$('.nav-item.nav-topsearch').hide();
+            window.parent.$('.nav-item.nav-topexport').hide();
+        }
+
+    //************************************************************//
+    //***************** jQuery FUNCTIONs 區域調用 ******************//
+    //************************************************************//
+        $(document).ready(function() {
             //* iFrame 頁面中安全滯留倒數功能 scripts
             $('body').on('keypress click', function(){
-                let timerElm = $('#timer_on_exhausted');
-                if( timerElm.length ){
-                    timerElm.backward_timer('reset');
+                if (window.parent && window.parent.$) {
+                    let timerElm = window.parent.$('#timer_on_exhausted');
+                    if (timerElm.length) {
+                        timerElm.backward_timer('reset');
+                    }
                 }
             });
 
-
-        });
-        //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
-        $(document).ready(function() {
+            //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
             if (window.parent && typeof window.parent.treeviewReset === 'function') {
                 window.parent.treeviewReset();
             }
