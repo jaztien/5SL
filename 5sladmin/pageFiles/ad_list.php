@@ -50,6 +50,7 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
   <link rel="stylesheet" href="../cssFiles/adminlte.css">
   <!-- Custom JS style -->
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
+  <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 <!-- -------------------------- /CSS Link -------------------------- -->
 </head>
 <!-- [變更1] 移除舊版 hold-transition sidebar-mini 等多餘類別，改用 bg-body-tertiary -->

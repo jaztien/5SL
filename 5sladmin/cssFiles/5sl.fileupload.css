@@ -314,3 +314,42 @@
     display: none;
   }
 
+
+
+  /* 調整頭像右上角「刪除垃圾桶」位置，往左下移動貼近頭像邊緣 */
+.image_area {
+  position: relative;
+  display: inline-block; /* 確保外框緊貼頭像寬度，不會被拉寬到整欄 */
+}
+
+.image_area .cropImgTrash {
+  position: absolute;
+  top: 6px !important;      /* 數值越大越往下移（原本可能為 0 或負值） */
+  right: 6px !important;    /* 數值越大越往左移（原本可能貼在最右邊框線上） */
+  z-index: 10;
+  cursor: pointer;
+  
+  /* [選用視覺優化] 加上淡白圓底與微陰影，避免深色頭像時圖示看不清楚 */
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #dc3545;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.image_area .cropImgTrash:hover {
+  background-color: #dc3545;
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+/* 確保隱藏狀態依然有效 */
+.image_area .cropImgTrash.hide {
+  display: none !important;
+}

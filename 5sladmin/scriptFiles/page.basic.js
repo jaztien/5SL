@@ -158,9 +158,10 @@ function datatableCreate(tableID){
     "layout": {
       "bottomStart": ['info', 'pageLength'], 
       "bottomEnd": 'paging',
-      "topStart": hasButtons ? {
-                    buttons: newTableBut
-                } : null,
+      // 即使 newTableBut 為空陣列也初始化 buttons 容器，避免後續呼叫 .button().add() 報錯
+      "topStart": {
+          buttons: newTableBut
+      },
       "topEnd": null
     },
     language: {
@@ -181,6 +182,13 @@ function datatableCreate(tableID){
           "sPrevious": "上一頁",
           "sNext": "下一頁",
           "sLast": "末頁"
+      },
+      "drawCallback": function(settings) {
+        var $emptyTd = ths.find('tbody td.dt-empty, tbody td.dataTables_empty');
+        if ($emptyTd.length > 0) {
+          var colCount = ths.find('thead tr:first th').length;
+          $emptyTd.attr('colspan', colCount);
+        }
       },
       "oAria": {
           "sSortAscending": ": 以升序排列此列",
@@ -211,6 +219,14 @@ function datatableCreate(tableID){
       return;
     }
   });
+
+  var $tabPane = ths.closest('.tab-pane');
+  if ($tabPane.length > 0) {
+    var tabId = $tabPane.attr('id');
+    $('a[data-bs-toggle="tab"][href="#' + tabId + '"], button[data-bs-toggle="tab"][data-bs-target="#' + tabId + '"]').on('shown.bs.tab', function () {
+      mainTable.columns.adjust().responsive.recalc();
+    });
+  }
 
   return mainTable;
 }
@@ -258,6 +274,7 @@ function datatableGroup(tableID,pageMax,butClass){
     "drawCallback" : function () {
       thsPagi = $('#'+tableID+'_paginate');
       thsPagi.find('.page-item.active a').addClass(butClass);
+      $emptyTd.attr('colspan', colCount);
     }
   });
 
@@ -447,6 +464,21 @@ function postData(actionUrl, data) {
   $('body').append(mapForm);
   mapForm.submit();
 }
+
+/**
+ * 全站共用 Toast 通知呼叫器（自動判斷外框存在與否，防止單獨開啟內頁時報錯）
+ */
+function notifyToast(type, msg, title = '', delay = 3500) {
+  if (window.parent && typeof window.parent.showBS5Toast === 'function') {
+    window.parent.showBS5Toast(type, msg, title, delay);
+  } else if (typeof window.showBS5Toast === 'function') {
+    window.showBS5Toast(type, msg, title, delay);
+  } else {
+    // 單獨開啟內頁且未載入 Toast 容器時的備援提示
+    alert((title ? title + '：' : '') + msg);
+  }
+}
+
 function postDataToken(actionUrl, data) {
   var mapForm = $('<form id="mapform" action="' + actionUrl + '" method="post"></form>');
   for (var key in data) {

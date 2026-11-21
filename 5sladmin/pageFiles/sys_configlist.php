@@ -33,14 +33,17 @@ while($i<count($sr)){
 	<title> Fifth Season Life 人生第五季 | 系統參數設定 </title>
 <!-- -------------------------- CSS Link -------------------------- -->
   <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-  <!-- Bootstrap 5 -->
+  <link rel="stylesheet" href="../pluginFiles/googleapis/fonts.googleapis.css">
+  <!-- Bootstrap 5 & Bootstrap Icons -->
   <link rel="stylesheet" href="../pluginFiles/bootstrap5/bootstrap.min.css">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="../pluginFiles/fontawesome-free/css/all.css">
-  <!-- Theme style -->
-  <link rel="stylesheet" href="../cssFiles/5sladmin.light.css">
+  <link rel="stylesheet" href="../pluginFiles/bootstrap-icons/bootstrap-icons.min.css">
+  <!-- DataTables 3
+  <link rel="stylesheet" href="../pluginFiles/datatables3/datatables.min.css"> -->
+  <!-- Theme style (AdminLTE 4) -->
+  <link rel="stylesheet" href="../cssFiles/adminlte.css">
+  <!-- Custom JS style -->
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
+  <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 <!-- -------------------------- /CSS Link -------------------------- -->
 </head>
 <body class="layout-navbar-fixed hold-transition sidebar-mini">
@@ -641,7 +644,7 @@ while($i<count($sr)){
     <!-- /頁內全頁內容 -->
 
     <!-- jQuery -->
-    <script src="../pluginFiles/jquery/jquery.min.js"></script>
+    <script src="../pluginFiles/jquery/jquery-4.0.0.min.js"></script>
     <!-- 右側功能控制區 -->
       <aside class="control-sidebar control-sidebar-dark">
         <!-- 功能區內容 ------------------------------------ -->
@@ -653,18 +656,16 @@ while($i<count($sr)){
   <!-- /全頁框 -->
 <!-- ------------------------ Scripts Link ------------------------ -->
 <!-- jQuery is in front of footer file. -->
-<!-- Bootstrap 4 -->
-<script src="../pluginFiles/bootstrap/js/bootstrap.bundle.min.js"></script>
-<!-- jquery-validation
-<script src="../pluginFiles/jquery-validation/jquery.validate.min.js"></script>
-<script src="../pluginFiles/jquery-validation/additional-methods.min.js"></script> -->
-<!-- ezValidation -->
-<script src="../pluginFiles/validator/validator.js<?php echo '?t='.time(); ?>"></script>
-<!-- 5SL Admin App -->
-<script src="../scriptFiles/5sladmin.js"></script>
-<script src="../scriptFiles/page.basic.js"></script>
-<script src="../scriptFiles/iframe-state-keeper.js"></script>
-<script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <!-- jQuery -->
+  <!-- Bootstrap 5 -->
+  <script src="../pluginFiles/bootstrap5/bootstrap.bundle.min.js"></script>
+  <!-- DataTables 3 & Plugins
+  <script src="../pluginFiles/datatables3/datatables.min.js"></script> -->
+  <!-- 5SeasonLife App -->
+  <script src="../scriptFiles/adminlte.js"></script>
+  <script src="../scriptFiles/page.basic.js"></script>
+  <script src="../scriptFiles/iframe-state-keeper.js"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
 <!-- ------------------------ /Scripts Link ------------------------ -->
 <script type="text/javascript">
 

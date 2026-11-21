@@ -55,59 +55,179 @@
 /* 頂部功能面板外框 */
 /* ==================== 頂部功能操作與權限面板（統一外框視覺） ==================== */
 /* 1. 統一所有群組外框的高度、內距、邊框與垂直水平置中 */
+/* ==================== 頂部功能操作與權限面板（高對比狀態區分版） ==================== */
+/* ==========================================================================
+   頂部功能操作與權限面板（完整整合版：統一外框 + 絕對置中 + 高對比 Hover）
+   ========================================================================== */
+
+/* 1. 外層群組底盤：統一高度 36px 與淺灰底色 */
 .nav-item.nav-authpanel,
 .nav-item.nav-toppanel,
 .nav-item.nav-topbkredir,
 .nav-item.nav-topsearch,
 .nav-item.nav-topexport {
-  display: none;                 /* 預設隱藏，由 page.basic.inc.php 動態設為 flex */
-  align-items: center;           /* 強制所有圖示在框內垂直置中 */
-  justify-content: center;
-  height: 34px;                  /* 統一外框高度，徹底解決高低不一問題 */
-  padding: 0 6px;                /* 統一左右留白，上下交由 align-items 自動置中 */
-  gap: 8px;                      /* 圖示之間的統一間距（取代原本不一致的 margin） */
-  border: 1px solid #BAC3CD;
-  border-radius: 0.35rem;
-  background-color: #ffffff;     /* 淡淡白底增加按鈕質感（可依喜好移除） */
-  color: #DADFE4;
+  display: none;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 36px;
+  padding: 0 5px;
+  gap: 6px;
+  background-color: #f1f3f5;
+  border: 1px solid #ced4da;
+  border-radius: 0.4rem;
 }
 
-/* 2. 統一所有面板內圖示的大小、行高與外距 */
+/* 2. 基礎圖示方塊：強制使用 inline-flex !important 蓋過 jQuery .show()，確保永遠正中央 */
 .nav-item.nav-authpanel i,
 .nav-item.nav-toppanel i,
 .nav-item.nav-topbkredir i,
 .nav-item.nav-topsearch i,
 .nav-item.nav-topexport i {
-  font-size: 1.15rem;            /* 統一圖示視覺大小（約 18.4px，最適合 34px 高度的方框） */
-  line-height: 1;                /* 消除字體行高造成的上下偏移 */
-  margin: 0;                     /* 歸零原本各自不同的 margin */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.15s ease, transform 0.1s ease;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 0.3rem;
+  font-size: 1.05rem;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-shadow: 0 0 0.3px currentColor;
+  transition: all 0.15s ease;
 }
 
-/* 3. 權限顯示框與操作按鈕框的預設隱藏/顯示區隔 */
-.nav-item.nav-authpanel i {
-  color: #DADFE4;                /* 未授權時的淺灰色 */
+/* 確保 jQuery .hide() 設定的 display:none 依然生效 */
+.nav-item.nav-toppanel i[style*="display: none"],
+.nav-item.nav-topbkredir i[style*="display: none"],
+.nav-item.nav-topsearch i[style*="display: none"],
+.nav-item.nav-topexport i[style*="display: none"] {
+  display: none !important;
 }
+
+/* 3. 未啟用 / 無權限狀態 (Muted) */
+.nav-item.nav-authpanel i:not(.active),
+.nav-item.nav-toppanel i:not(.active) {
+  background-color: transparent !important;
+  color: #adb5bd !important;
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  border: 1px solid transparent !important;
+}
+
+/* 4. 權限指示燈 (已授權狀態) */
 .nav-item.nav-authpanel i.active {
-  color: #2C333E;                /* 已授權時的深色 */
+  background-color: #343a40 !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  cursor: default !important;
 }
 
-.nav-item.nav-toppanel i,
-.nav-item.nav-topbkredir i,
-.nav-item.nav-topsearch i,
-.nav-item.nav-topexport i {
-  display: none;                 /* 操作按鈕預設隱藏，由 page.basic.inc.php 個別 .show() */
+/* 5. 可點擊的操作按鈕 (通用基礎) */
+#topBut_add.active,
+#topBut_save.active,
+#topBut_upload.active,
+#topBut_reset.active,
+#topBut_delete.active,
+#topBut_bkurl.active,
+#topBut_search.active,
+#topBut_excel.active,
+#topBut_pdf.active,
+#topBut_print.active {
+  opacity: 1 !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
-/* 4. 點擊時的微縮回饋效果（僅限可點擊的 active 操作按鈕） */
+/* 6. 各按鈕專屬常駐色彩與明確 Hover 反白效果 */
+/* 儲存按鈕：亮起時為翠綠底白字，Hover 變深綠並微浮起 */
+#topBut_save.active {
+  background-color: #198754 !important;
+  border: 1px solid #198754 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 5px rgba(25, 135, 84, 0.35);
+}
+#topBut_save.active:hover {
+  background-color: #146c43 !important;
+  border-color: #13653f !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(25, 135, 84, 0.45);
+}
+
+/* 新增 / 上傳按鈕：經典藍色字，Hover 轉實心藍底白字 */
+#topBut_add.active,
+#topBut_upload.active {
+  background-color: #ffffff !important;
+  color: #0d6efd !important;
+  border: 1px solid #86b7fe !important;
+}
+#topBut_add.active:hover,
+#topBut_upload.active:hover {
+  background-color: #0d6efd !important;
+  border-color: #0d6efd !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(13, 110, 253, 0.3);
+}
+
+/* 刪除按鈕：警戒紅色字，Hover 轉實心紅底白字 */
+#topBut_delete.active {
+  background-color: #ffffff !important;
+  color: #dc3545 !important;
+  border: 1px solid #ea868f !important;
+}
+#topBut_delete.active:hover {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(220, 53, 69, 0.3);
+}
+
+/* 重置按鈕：琥珀橘色字，Hover 轉實心橘底白字 */
+#topBut_reset.active {
+  background-color: #ffffff !important;
+  color: #d97706 !important;
+  border: 1px solid #fcd34d !important;
+}
+#topBut_reset.active:hover {
+  background-color: #f59e0b !important;
+  border-color: #f59e0b !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(245, 158, 11, 0.3);
+}
+
+/* 搜尋 / 匯出 / 列印 / 返回前頁：深石板灰，Hover 轉實心深灰底白字 */
+#topBut_search.active,
+#topBut_excel.active,
+#topBut_pdf.active,
+#topBut_print.active,
+#topBut_bkurl.active {
+  background-color: #ffffff !important;
+  color: #343a40 !important;
+  border: 1px solid #adb5bd !important;
+}
+#topBut_search.active:hover,
+#topBut_excel.active:hover,
+#topBut_pdf.active:hover,
+#topBut_print.active:hover,
+#topBut_bkurl.active:hover {
+  background-color: #343a40 !important;
+  border-color: #343a40 !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(52, 58, 64, 0.25);
+}
+
+/* 7. 點擊按壓回饋 */
 .nav-item.nav-toppanel i.active:active,
 .nav-item.nav-topbkredir i.active:active,
 .nav-item.nav-topsearch i.active:active,
 .nav-item.nav-topexport i.active:active {
-  transform: scale(0.92);
+  transform: scale(0.92) !important;
 }
 
 /* ==================== 3. AdminLTE 4 側邊欄選單樣式覆寫 ==================== */

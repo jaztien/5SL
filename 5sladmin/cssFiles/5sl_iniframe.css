@@ -1,0 +1,247 @@
+    body {
+        background-image: url("../../imageFiles/mainBG03.jpg");
+        background-attachment: fixed;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+
+
+/* ==================== 現代化 Detail 卡片頂部頁籤 (.modern-card-tabs) ==================== */
+/* ==================== 清爽透明底極簡頁籤 (.modern-card-tabs) ==================== */
+/* 1. 頁籤導覽列底色：改為完全透明，只保留一條乾淨的底部灰色分隔線 */
+/* ==================== 清爽透明底極簡頁籤 (.modern-card-tabs) ==================== */
+/* 1. 頁籤導覽列底色：改為完全透明，只保留一條乾淨的底部灰色分隔線 */
+.modern-card-tabs .card-header {
+  background-color: transparent !important;
+  border-bottom: 1px solid #dee2e6 !important;
+  padding: 0.5rem 1rem 0 1rem !important;
+}
+
+.modern-card-tabs .nav-tabs {
+  border-bottom: none !important;
+  gap: 1.25rem; /* 頁籤之間拉開呼吸感 */
+}
+
+/* 2. 未選中的頁籤：透明底色 + 清晰中深灰文字 + 透明底線預留位置 */
+.modern-card-tabs .nav-tabs .nav-link {
+  background-color: transparent !important;
+  color: #6c757d !important;
+  font-weight: 500;
+  border: none !important;
+  border-bottom: 3px solid transparent !important;
+  border-radius: 0 !important;
+  padding: 0.65rem 0.25rem !important;
+  margin-bottom: -1px; /* 讓底線精準壓在 card-header 的分隔線上 */
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+/* 滑鼠懸停 (:hover)：文字變深黑，底部出現淺灰預覽線 */
+.modern-card-tabs .nav-tabs .nav-link:hover {
+  background-color: transparent !important;
+  color: #212529 !important;
+  border-bottom-color: #adb5bd !important;
+}
+
+/* 3. 選中的頁籤：保持透明底色 + 主題色粗體字 + 底部 3px 高對比主題色實線 */
+.modern-card-tabs .nav-tabs .nav-link.active {
+  background-color: transparent !important;
+  color: #236FB7 !important;
+  font-weight: 700 !important;
+  border-bottom: 3px solid #236FB7 !important;
+}
+
+/* 4. 自動連動 9 種顏色主題（僅改變選中頁籤的文字與底部 3px 指示線顏色，背景全透明） */
+.theme-blue .modern-card-tabs .nav-tabs .nav-link.active      { color: #236FB7 !important; border-bottom-color: #236FB7 !important; }
+.theme-green .modern-card-tabs .nav-tabs .nav-link.active     { color: #44a273 !important; border-bottom-color: #44a273 !important; }
+.theme-cyan .modern-card-tabs .nav-tabs .nav-link.active      { color: #17a2b8 !important; border-bottom-color: #17a2b8 !important; }
+.theme-gray .modern-card-tabs .nav-tabs .nav-link.active      { color: #495057 !important; border-bottom-color: #495057 !important; }
+.theme-lightgray .modern-card-tabs .nav-tabs .nav-link.active { color: #444F61 !important; border-bottom-color: #6c757d !important; }
+.theme-yellow .modern-card-tabs .nav-tabs .nav-link.active    { color: #b58900 !important; border-bottom-color: #ECC244 !important; }
+.theme-purple .modern-card-tabs .nav-tabs .nav-link.active    { color: #6f42c1 !important; border-bottom-color: #6f42c1 !important; }
+.theme-orange .modern-card-tabs .nav-tabs .nav-link.active    { color: #DF8233 !important; border-bottom-color: #DF8233 !important; }
+.theme-red .modern-card-tabs .nav-tabs .nav-link.active       { color: #C35050 !important; border-bottom-color: #C35050 !important; }
+/* ==================== 修正頭像「更改代表圖像」圓形內升起遮罩 ==================== */
+/* 1. 讓包裹頭像與 .overlay 的 <label> 成為嚴格的圓形裁切容器 */
+.image_area label[for^="cropUploadImage"] {
+  position: relative;
+  display: inline-block;
+  border-radius: 50%;       /* 強制裁切成與頭像相同的正圓形 */
+  overflow: hidden;         /* 關鍵：隱藏超出圓形邊界以外的方形區域 */
+  margin-bottom: 0;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+/* 2. 確保頭像圖片本身緊貼容器，消除底部微小留白 */
+.image_area label[for^="cropUploadImage"] img.imgEDicon {
+  display: block;
+  border-radius: 50%;
+}
+
+/* 3. 限制 .overlay 僅在圓形容器內從底部升起 */
+.image_area label[for^="cropUploadImage"] .overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 0;                /* 預設高度為 0（隱藏在圓形底部） */
+  background-color: rgba(255, 255, 255, 0.85);
+  color: #212529;           /* 確保在深色卡片模式下文字依然是清晰的深黑色 */
+  overflow: hidden;
+  transition: height 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 4. 滑鼠滑過頭像時，遮罩平滑升起至圓形下半部（約 38% 高度，視覺最協調） */
+.image_area label[for^="cropUploadImage"]:hover .overlay {
+  height: 38%;
+}
+
+/* 5. 調整內部文字樣式，避免被深色主題影響變白字 */
+.image_area label[for^="cropUploadImage"] .overtext {
+  position: static !important;
+  transform: none !important;
+  color: #212529 !important;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  padding-bottom: 4px;
+}
+
+/* 強化垃圾桶圖示的清晰度與對比度 */
+.image_area .cropImgTrash {
+  position: absolute;
+  top: 8px !important;
+  right: 8px !important;
+  z-index: 20;
+  cursor: pointer;
+  
+  /* [關鍵修正] 強制滿透明度，避免舊版 CSS 的 opacity 讓它變淡 */
+  opacity: 1 !important;
+  
+  /* 改用實心純白圓底 + 鮮明紅色圖示 + 細邊框，任何背景下都清晰可見 */
+  background-color: #ffffff !important;
+  color: #dc3545 !important;
+  border: 2px solid #dc3545;
+  
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
+  transition: transform 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.image_area .cropImgTrash:hover {
+  background-color: #dc3545 !important;
+  color: #ffffff !important;
+  transform: scale(1.1);
+}
+
+.image_area .cropImgTrash.hide {
+  display: none !important;
+}
+
+/* ==================== 全站表單輸入元件統一淺色底色 ==================== */
+/* 1. 一般可編輯狀態：套用柔和的極淺冷灰藍底色 (#f4f6f9)，讓欄位在白色卡片上更立體 */
+.app-content .form-control:not([readonly]):not(:disabled),
+.app-content .form-select:not(:disabled),
+.modal-body .form-control:not([readonly]):not(:disabled),
+.modal-body .form-select:not(:disabled) {
+  background-color: #f4f6f9;
+  border-color: #ced4da;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+/* 2. 滑鼠懸停 (:hover) 時稍微加深一點點，提示可點擊編輯 */
+.app-content .form-control:not([readonly]):not(:disabled):hover,
+.app-content .form-select:not(:disabled):hover,
+.modal-body .form-control:not([readonly]):not(:disabled):hover,
+.modal-body .form-select:not(:disabled):hover {
+  background-color: #edf1f5;
+}
+
+/* 3. 點擊輸入 (:focus) 時切換為純白底色，提升專注度與打字清晰度 */
+.app-content .form-control:not([readonly]):not(:disabled):focus,
+.app-content .form-select:not(:disabled):focus,
+.modal-body .form-control:not([readonly]):not(:disabled):focus,
+.modal-body .form-select:not(:disabled):focus {
+  background-color: #ffffff;
+}
+
+/* 4. 唯讀 (readonly) 與停用 (disabled) 欄位：維持較深的灰色底色，與可編輯欄位做出明確區隔 */
+.app-content .form-control[readonly],
+.app-content .form-control:disabled,
+.app-content .form-select:disabled,
+.modal-body .form-control[readonly],
+.modal-body .form-control:disabled,
+.modal-body .form-select:disabled {
+  background-color: #e2e6ea !important;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* 5. 未勾選狀態的 Checkbox / Radio 核取方塊也加上淡淡底色 */
+.app-content .form-check-input:not(:checked):not(:disabled),
+.modal-body .form-check-input:not(:checked):not(:disabled) {
+  background-color: #f4f6f9;
+  border-color: #adb5bd;
+}
+
+
+/* 確保無資料儲存格維持標準 table-cell 渲染並強制置中 */
+table.dataTable tbody tr:has(td.dt-empty),
+table.dataTable tbody tr:has(td.dataTables_empty) {
+    display: table-row !important;
+}
+
+/* 正確的 DataTables 無資料列置中樣式（不設定 td width，交由 colspan 自然合併） */
+table.dataTable tbody td.dt-empty,
+table.dataTable tbody td.dataTables_empty {
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 1.75rem 1rem !important;
+    color: #6c757d !important;
+    background-color: #f8f9fa !important;
+    cursor: default !important;
+}
+
+/* ==================== 全站放大 Bootstrap 5 Checkbox 與 Radio ==================== */
+/* 1. 放大核取方塊與單選按鈕（排除 .form-switch 切換開關） */
+.form-check:not(.form-switch) .form-check-input {
+  width: 1.35em;
+  height: 1.35em;
+  margin-top: 0.12em;       /* 微調垂直位置，與右側文字中心點對齊 */
+  cursor: pointer;
+}
+
+/* 2. 讓旁邊的文字標籤 (Label) 稍微增加左間距並支援手指游標 */
+.form-check:not(.form-switch) .form-check-label {
+  padding-left: 0.35em;
+  cursor: pointer;
+}
+
+/* 3. 針對「純方塊無文字」的表格或權限矩陣（如 ad_profile.php 第二分頁）歸零外距 */
+td .form-check-input,
+.row .form-check.mb-0 .form-check-input {
+  margin-top: 0;
+}
+
+/* ==================== 9 種顏色主題連動：卡片頂部邊框 (.card-outline) ==================== */
+.theme-blue .card-outline      { border-top: 3px solid #236FB7 !important; }
+.theme-green .card-outline     { border-top: 3px solid #44a273 !important; }
+.theme-cyan .card-outline      { border-top: 3px solid #17a2b8 !important; }
+.theme-gray .card-outline      { border-top: 3px solid #5F6E86 !important; }
+.theme-lightgray .card-outline { border-top: 3px solid #B8BFCB !important; }
+.theme-yellow .card-outline    { border-top: 3px solid #ECC244 !important; }
+.theme-purple .card-outline    { border-top: 3px solid #6f42c1 !important; }
+.theme-orange .card-outline    { border-top: 3px solid #DF8233 !important; }
+.theme-red .card-outline       { border-top: 3px solid #C35050 !important; }

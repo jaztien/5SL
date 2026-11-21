@@ -482,6 +482,10 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
     <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.17.0/browser/overlayscrollbars.browser.es6.min.js" crossorigin="anonymous"></script>
     <!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+    <!-- ==================== Bootstrap 5 原生 Toast 通知系統 ==================== -->
+    <!-- 固定於右上角，z-index 設為 10900 確保覆蓋於導覽列與 Modal 之上 -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 10900;" id="bs5ToastContainer"></div>
+
 
     <!-- ------------------------ /Scripts Link ------------------------ -->
     <script type="text/javascript">
@@ -497,6 +501,70 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
     //*************** JAVASCRIPTS FUNCTIONs 全域調用 ***************//
     //*************** 可接收include檔案要求後自定義動作 ***************//
     //**************************** ********************************//
+
+      /**
+       * 1. 全域原生 Bootstrap 5 Toast 顯示函式
+       * @param {string} type  - 訊息類型: 'success' | 'error' (或 'danger') | 'warning' | 'info'
+       * @param {string} msg   - 訊息內容 (支援純文字或簡單 HTML)
+       * @param {string} title - 選填標題
+       * @param {number} delay - 自動關閉毫秒數 (預設 3500ms，傳入 0 則不自動關閉)
+       */
+      window.showBS5Toast = function(type, msg, title = '', delay = 2500) {
+        const container = document.getElementById('bs5ToastContainer');
+        if (!container || typeof bootstrap === 'undefined') return;
+
+        // 類型視覺設定 (對應 Bootstrap 5 色彩與 Bootstrap Icons)
+        const typeConfig = {
+          success: { bg: 'text-bg-success', icon: 'bi-check-circle-fill',        closeBtn: 'btn-close-white' },
+          error:   { bg: 'text-bg-danger',  icon: 'bi-x-circle-fill',            closeBtn: 'btn-close-white' },
+          danger:  { bg: 'text-bg-danger',  icon: 'bi-x-circle-fill',            closeBtn: 'btn-close-white' },
+          warning: { bg: 'text-bg-warning', icon: 'bi-exclamation-triangle-fill',closeBtn: '' },
+          info:    { bg: 'text-bg-info',    icon: 'bi-info-circle-fill',         closeBtn: '' }
+        };
+
+        const cfg = typeConfig[type] || typeConfig.info;
+        const toastId = 'bs5_toast_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+        const autoHideAttr = delay > 0 ? `data-bs-autohide="true" data-bs-delay="${delay}"` : `data-bs-autohide="false"`;
+
+        const toastHtml = `
+          <div id="${toastId}" class="toast align-items-center ${cfg.bg} border-0 shadow-lg mb-2" role="alert" aria-live="assertive" aria-atomic="true" ${autoHideAttr}>
+            <div class="d-flex">
+              <div class="toast-body d-flex align-items-center gap-2 py-2 px-3">
+                <i class="bi ${cfg.icon} fs-5 flex-shrink-0"></i>
+                <div class="small">
+                  ${title ? `<strong class="d-block mb-1">${title}</strong>` : ''}
+                  <span>${msg}</span>
+                </div>
+              </div>
+              <button type="button" class="btn-close ${cfg.closeBtn} me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+          </div>
+        `;
+
+        container.insertAdjacentHTML('beforeend', toastHtml);
+        const toastEl = document.getElementById(toastId);
+        const bsToast = new bootstrap.Toast(toastEl);
+        bsToast.show();
+
+        // 動畫結束隱藏後自動清理 DOM 節點
+        toastEl.addEventListener('hidden.bs.toast', function() {
+          toastEl.remove();
+        });
+      };
+
+      /**
+       * 2. 向下相容橋接器：自動接管舊版 window.parent.toastr['success' / 'error' / 'warning' / 'info']
+       * 讓全站既有的內頁與後端回傳的 msgType 無需逐一修改即可無痛運作！
+       * window.parent.showBS5Toast('info', '報表已匯出完成', '系統通知', 5000);
+       */
+      window.toastr = {
+        success: (msg, title = '') => window.showBS5Toast('success', msg, title),
+        error:   (msg, title = '') => window.showBS5Toast('error',   msg, title),
+        warning: (msg, title = '') => window.showBS5Toast('warning', msg, title),
+        info:    (msg, title = '') => window.showBS5Toast('info',    msg, title)
+      };
+
+
 
       // 1. 呼叫 IFrame 內頁的全域函式 (如 doButSave, doButAdd, doButDelete)
       function callFrameFunc(funcName) {
