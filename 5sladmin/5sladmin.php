@@ -3,17 +3,17 @@ session_start();
 if (isset($_SESSION["SESS_AD_ID"]) && !empty($_SESSION["SESS_AD_ID"])) {
     define('DOC_PATH_LAYER', './');
     require_once('./includeFiles/db.inc.php');
-    $ilog = DB->insSysLogs(51, $_SESSION["SESS_AD_ID"], 2061, '["'.$_SESSION["SESS_AD_ID"].'"]');//寫入操作記錄
+    $ilog = DB->insSysLogs(51, $_SESSION["SESS_AD_ID"], 2061, '["'.$_SESSION["SESS_AD_ID"].'"]'); // 寫入操作記錄
 }
 $SESSID = 'PHPSESSID='.session_id();
 session_destroy();
 header("Expires: Mon, 26 Jul 1990 05:00:00 GMT");
-//定義本頁面的代碼，用於 SideBar 的開合效果以及本頁面管理權限使用。
-$PAGE_MARK = "PG_LOGIN";//登入頁面
+// 定義本頁面的代碼
+$PAGE_MARK = "PG_LOGIN"; // 登入頁面
 $PAGE_ITEM = "ITEM_LOGIN";
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant-TW">
 
 <head>
     <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
@@ -21,7 +21,7 @@ $PAGE_ITEM = "ITEM_LOGIN";
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="../imageFiles/favicon.ico" type="image/ico" />
+    <link rel="icon" href="./imageFiles/favicon.ico" type="image/ico" />
     <title>Fifth Season Life 人生第五季 | Admin Login Page</title>
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="./pluginFiles/googleapis/fonts.googleapis.css">
@@ -31,106 +31,121 @@ $PAGE_ITEM = "ITEM_LOGIN";
     <!-- Theme style (AdminLTE 4) -->
     <link rel="stylesheet" href="./cssFiles/adminlte.css">
     <style>
-    /*
-                .btn-primary{color:#fff;background-color:#133b61;border-color:rgba(99,99,99,1.00);box-shadow:none}
-                .btn-primary:hover{color:#fff;background-color:#1A5388;border-color:#236FB7}
-                .btn-primary.focus,.btn-primary:focus{color:#fff;background-color:#1A5388;border-color:#236FB7;box-shadow:0 0 0 0 rgba(38,143,255,.5)}    
-                .btn-primary.disabled, .btn-primary:disabled {color: #fff;background-color: #3F8ED9;border-color: #3F8ED9;}
-                .btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled).active,
-                .show > .btn-primary.dropdown-toggle {color: #fff;background-color: #236FB7;border-color: #005cbf;}
-                .btn-primary:not(:disabled):not(.disabled):active:focus, .btn-primary:not(:disabled):not(.disabled).active:focus,
-                .show > .btn-primary.dropdown-toggle:focus {box-shadow: 0 0 0 0 rgba(38, 143, 255, 0.5);}
-                    */
+        /* 補回 Logo 持續搖晃動畫 */
+        @keyframes wobbleLogo {
+            0%, 100% { transform: translateX(0%) rotate(0deg); }
+            15% { transform: translateX(-12%) rotate(-5deg); }
+            30% { transform: translateX(10%) rotate(3deg); }
+            45% { transform: translateX(-8%) rotate(-3deg); }
+            60% { transform: translateX(5%) rotate(2deg); }
+            75% { transform: translateX(-2%) rotate(-1deg); }
+        }
+        .animation__wobble {
+            animation: wobbleLogo 2s ease-in-out infinite;
+        }
+        .btn-primary {
+            color: #fff;
+            background-color: #133b61;
+            border-color: rgba(99, 99, 99, 1.00);
+        }
+        .btn-primary:hover, .btn-primary:focus {
+            color: #fff;
+            background-color: #1A5388;
+            border-color: #236FB7;
+        }
     </style>
 </head>
 
-<body class="hold-transition login-page">
-    <div class="login-box">
-        <div class="login-logo">
-            <img src="imageFiles/5slLOGO_sB&W.png" alt="5SeasonLife Logo" class="brand-image animation__wobble" style="vertical-align:baseline;margin-bottom:-26px;" height="80" width="80">
-            <!-- <div class="brand-text font-weight-bold" style="margin-top: -10px;margin-bottom: -8px;">Fifth Season Life<span class="brand-text font-weight-light"> ADMIN</span></div> -->
-            <div><img src="imageFiles/5slADMINlogo_text1G.png?t=3" style="width:100%;"></div>
+<body class="login-page bg-body-secondary">
+    <div class="login-box" style="width: 380px; max-width: 92%;">
+        <!-- 雙層 Logo 嚴格置中對齊 -->
+        <div class="login-logo d-flex flex-column align-items-center justify-content-center mb-3">
+            <img src="imageFiles/5slLOGO_sB&W.png" alt="5SeasonLife Logo" class="brand-image animation__wobble d-block mx-auto" style="margin-bottom: -18px; position: relative; z-index: 2;" height="80" width="80">
+            <div class="w-100 text-center">
+                <img src="imageFiles/5slADMINlogo_text1G.png?t=3" class="d-block w-100 h-auto" alt="Fifth Season Life Admin">
+            </div>
         </div>
         <!-- /.login-logo -->
-        <hr>
-        <div style="width:360px;margin-left:30px;">
-            <div>
-                <p class="login-box-msg" style="font-size: 75%;opacity: .6">帳戶的使用受到法律的保護及約束，請使用自己合法的帳戶</p>
-                <form id="loginForm" action="./loginaccess.php" method="post">
-                    <div class="input-group mb-3">
-                        <input id="loginUser" name="loginUser" type="text" class="form-control" placeholder="Username">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-user"></span>
-                            </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body login-card-body p-4">
+                <p class="login-box-msg text-muted small text-center mb-3">帳戶的使用受到法律的保護及約束，請使用自己合法的帳戶</p>
+
+                <!-- 使用 Bootstrap 5 原生驗證 (.needs-validation + novalidate) -->
+                <form id="loginForm" action="./loginaccess.php" method="post" class="needs-validation" novalidate>
+                    <div class="input-group has-validation mb-3">
+                        <input id="loginUser" name="loginUser" type="text" class="form-control" placeholder="Username" minlength="6" required>
+                        <div class="input-group-text">
+                            <i class="bi bi-person"></i>
                         </div>
+                        <div class="invalid-feedback">請輸入使用者名稱（至少 6 個字元）</div>
                     </div>
-                    <div class="input-group mb-3">
-                        <input id="loginPass" name="loginPass" type="password" class="form-control" placeholder="Password">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-lock"></span>
-                            </div>
+
+                    <div class="input-group has-validation mb-3">
+                        <input id="loginPass" name="loginPass" type="password" class="form-control" placeholder="Password" minlength="8" required>
+                        <div class="input-group-text">
+                            <i class="bi bi-lock"></i>
                         </div>
+                        <div class="invalid-feedback">請輸入登入密碼（至少 8 個字元）</div>
                     </div>
-                    <hr style="margin-top: 20px;">
-                    <div class="row">
-                        <div class="col-8">
-                            <div class="icheck-primary">
-                                <input type="checkbox" id="rememberme">
-                                <label for="rememberme" class="brand-text font-weight-light">
+
+                    <hr class="my-3">
+
+                    <div class="row align-items-center">
+                        <div class="col-7">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rememberme" value="1">
+                                <label class="form-check-label fw-light" for="rememberme">
                                     Remember Me!
                                 </label>
                             </div>
                         </div>
                         <!-- /.col -->
 
-                        <div class="col-4">
-                            <button id="signinBut" type="submit" class="btn btn-primary btn-block">Sign In</button>
-                            <div class="brand-text font-weight-light text-right" style="cursor:pointer;font-size:75%;" onclick="alert('管理操作守則還沒有寫好！小心操作別搗亂！！');">管理操作守則(?)
-                                <input type="hidden" id="token" name="token" value="">
-                            </div>
+                        <div class="col-5 d-grid">
+                            <button id="signinBut" type="submit" class="btn btn-primary">Sign In</button>
                         </div>
                         <!-- /.col -->
                     </div>
+
+                    <div class="text-end mt-2">
+                        <span class="fw-light text-secondary" style="cursor:pointer; font-size:0.75rem;" onclick="alert('管理操作守則還沒有寫好！小心操作別搗亂！！');">管理操作守則(?)</span>
+                        <input type="hidden" id="token" name="token" value="">
+                    </div>
                 </form>
-                <div id="testButtons" class="row col-md-12" style="margin-top: 20px;display:none">
-                    <div>以下為測試區域，非測試人員勿入！！</div>
-                    <a id="toAPItest" href="_test/api.html" target="_blank" class="btn btn-info btn-block">API Tester</a>
-                    <a id="toPHPtester" href="_test/test.php" target="_blank" class="btn btn-info btn-block">PHP/HTML Tester</a>
-                    <a id="toCHATtester" href="chat_in.html" target="_blank" class="btn btn-info btn-block">CHAT Tester</a>
-                    <a id="toColorChart" href="_test/color.html" target="_blank" class="btn btn-info btn-block">Color Chart</a>
-                    <a id="toadminLTE3" href="_test/adminLTE3/index.html" target="_blank" class="btn btn-info btn-block">adminLTE3</a>
+
+                <div id="testButtons" class="mt-3 pt-3 border-top" style="display:none;">
+                    <div class="small text-danger fw-bold mb-2">以下為測試區域，非測試人員勿入！！</div>
+                    <div class="d-grid gap-2">
+                        <a id="toAPItest" href="_test/api.html" target="_blank" class="btn btn-info btn-sm text-white">API Tester</a>
+                        <a id="toPHPtester" href="_test/test.php" target="_blank" class="btn btn-info btn-sm text-white">PHP/HTML Tester</a>
+                        <a id="toCHATtester" href="chat_in.html" target="_blank" class="btn btn-info btn-sm text-white">CHAT Tester</a>
+                        <a id="toColorChart" href="_test/color.html" target="_blank" class="btn btn-info btn-sm text-white">Color Chart</a>
+                        <a id="toadminLTE3" href="_test/adminLTE3/index.html" target="_blank" class="btn btn-info btn-sm text-white">adminLTE3</a>
+                    </div>
                 </div>
-
-                <!-- /.social-auth-links -->
-
-                <p class="mb-1">
-                    <!-- <a href="forgot-password.html">我忘記了密碼</a>-->
-                </p>
             </div>
             <!-- /.login-card-body -->
         </div>
     </div>
     <!-- /.login-box -->
+
     <!-- jQuery -->
     <script src="./pluginFiles/jquery/jquery-4.0.0.min.js"></script>
     <!-- Bootstrap 5 -->
     <script src="./pluginFiles/bootstrap5/bootstrap.bundle.min.js"></script>
     <!-- 5SeasonLife App -->
     <script src="./scriptFiles/adminlte.js"></script>
+    <!-- 引入 page.basic.js 以使用內建原生 calcMD5() 與 getCookieVal() -->
+    <script src="./scriptFiles/page.basic.js"></script>
     <script>
-    ////////////////////////////////////////////////////////////////
-    // ---------------- jQuery FUNCTIONs 區域調用 ---------------- //
-    // ---------------------------------------------------------- //
-    ////////////////////////////////////////////////////////////////
     $(document).ready(function() {
         // 💡 登入頁面 DOM 載入完成後，立刻徹底清空當前分頁的所有操作快取
         sessionStorage.clear();
         console.log("【安全防線】jQuery Ready 觸發：前端 sessionStorage 已完全清洗乾淨！");
-        ////////////////////////////////////////////////////////////////
+
         const rmCheck = $('#rememberme'),
-            userInput = $('#loginUser');
+              userInput = $('#loginUser');
 
         if (localStorage.checkbox && localStorage.checkbox !== "") {
             rmCheck.prop('checked', true);
@@ -139,64 +154,34 @@ $PAGE_ITEM = "ITEM_LOGIN";
             rmCheck.prop('checked', false);
             userInput.val('');
         }
-        $('#loginForm').validate({
-            submitHandler: function(form) {
-                if (rmCheck.prop('checked') && userInput.val() !== "") {
-                    localStorage.username = userInput.val();
-                    localStorage.checkbox = rmCheck.val();
-                } else {
-                    localStorage.username = "";
-                    localStorage.checkbox = "";
-                }
-                var uai = navigator.userAgent.toLowerCase();
-                //var muai = $.md5(uai + document.cookie);
-                var oNaviString = uai + 'PHPSESSID=' + getCookieVal('PHPSESSID');
-                var Omuai = $.md5(oNaviString);
-                var saltH = Omuai.substring(0, 12);
-                var saltT = Omuai.substr(Omuai.length - 12, 12);
-                var muai = $.md5(saltH + oNaviString + saltT);
-                $('#token').val(muai);
-                form.submit();
-            },
-            rules: {
-                loginUser: {
-                    required: true,
-                    minlength: 6
-                },
-                loginPass: {
-                    required: true,
-                    minlength: 8
-                },
-            },
-            messages: {
-                loginUser: {
-                    required: "請輸入使用者名稱",
-                    minlength: "使用者名稱至少需要 6 個字元"
-                },
-                loginPass: {
-                    required: "請輸入登入密碼",
-                    minlength: "登入密碼必須包含至少 8 個字元"
-                }
-            },
-            errorElement: 'span',
-            errorPlacement: function(error, element) {
-                error.addClass('invalid-feedback');
-                element.closest('.input-group').append(error);
-            },
-            highlight: function(element, errorClass, validClass) {
-                $(element).addClass('is-invalid');
-            },
-            unhighlight: function(element, errorClass, validClass) {
-                $(element).removeClass('is-invalid');
+
+        // [變更] 改用 Bootstrap 5 原生表單驗證 + page.basic.js 內建的 calcMD5()
+        $('#loginForm').on('submit', function(e) {
+            const formEl = this;
+            if (!formEl.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+                formEl.classList.add('was-validated');
+                return false;
             }
+            formEl.classList.add('was-validated');
+
+            if (rmCheck.prop('checked') && userInput.val() !== "") {
+                localStorage.username = userInput.val();
+                localStorage.checkbox = rmCheck.val();
+            } else {
+                localStorage.username = "";
+                localStorage.checkbox = "";
+            }
+
+            var uai = navigator.userAgent.toLowerCase();
+            var oNaviString = uai + 'PHPSESSID=' + getCookieVal('PHPSESSID');
+            var Omuai = calcMD5(oNaviString);
+            var saltH = Omuai.substring(0, 12);
+            var saltT = Omuai.substr(Omuai.length - 12, 12);
+            var muai = calcMD5(saltH + oNaviString + saltT);
+            $('#token').val(muai);
         });
-
-        function getCookieVal(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        }
-
 
         $('.login-logo div img').dblclick(function() {
             if ($('#testButtons').is(':visible')) { 
@@ -207,9 +192,7 @@ $PAGE_ITEM = "ITEM_LOGIN";
                 }
             }
         });
-
     });
     </script>
 </body>
-
 </html>
