@@ -61,13 +61,13 @@ switch ($formAcce) {
             //$rSql .= " bc_title=".$rString['parseTitle'];
             $rSql .= ")";
             //if(!empty($rString['parsePhase'])) $rSql .= " AND bc_purephase=".$rString['parsePhase'];
-            $searchRes = $DB->query($rSql,array(0));
+            $searchRes = DB->query($rSql,array(0));
 
 
-            $ilog = $DB->insSysLogs(CF_AD_ID,1,1110,'["'.CF_AD_ID.'","0"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(CF_AD_ID,1,1110,'["'.CF_AD_ID.'","0"]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功析出建案名稱結構！！', 'upTime'=> $cDateTime, 'rString'=> $rString, 'searchRes'=> $searchRes);
         } else {
-            $ilog = $DB->insSysLogs(CF_AD_ID,1,1010,'["'.CF_AD_ID.'","0"]');//寫入操作記錄//
+            $ilog = DB->insSysLogs(CF_AD_ID,1,1010,'["'.CF_AD_ID.'","0"]');//寫入操作記錄//
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'分析建案名稱結構失敗！請聯絡相關管理人員！！');
         }
         echo json_encode($rtn);
@@ -78,7 +78,7 @@ switch ($formAcce) {
 
 
 
-        $ilog = $DB->insSysLogs(CF_AD_ID,1,2380,'["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄
+        $ilog = DB->insSysLogs(CF_AD_ID,1,2380,'["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄
         $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'編輯視訊鏈結資料失敗！請重新操作或聯絡管理人員！！', 'upTime'=> $cDateTime, 'insID'=> $insI);
         echo json_encode($rtn);
     break;

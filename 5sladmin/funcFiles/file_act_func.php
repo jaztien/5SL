@@ -74,22 +74,22 @@ switch ($formAcce) {
          $defChangeMess="";
          if(isset($_POST['defIdx'])==true){
             $upArr = array('merch_updated' => '[EXPR]GETDATE()', 'merch_defaultphoto'=>intval($_POST['defIdx']));
-            $up = $DB->update('fsl_merchandise',$upArr,array("merch_id"=>$mdID));
+            $up = DB->update('fsl_merchandise',$upArr,array("merch_id"=>$mdID));
             if($up){
                $defChange = true;
                $defChangeMess = "，並同時更改預設主圖";
             }
             if($totalImg==0 && $defChange){
-               $ilog = $DB->insSysLogs(51, CF_AD_ID, 2421, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄//
+               $ilog = DB->insSysLogs(51, CF_AD_ID, 2421, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄//
                echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功更改預設圖檔！！'));
                exit();
             }
          }
-         $ilog = $DB->insSysLogs(51, CF_AD_ID, 2411, '["'.CF_AD_ID.'","'.$mdID.'","'.$upDone.'"]');//寫入操作記錄//
+         $ilog = DB->insSysLogs(51, CF_AD_ID, 2411, '["'.CF_AD_ID.'","'.$mdID.'","'.$upDone.'"]');//寫入操作記錄//
          echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功上傳 '.$upDone.' 張圖檔，校正裁切 '.$cropDone.' 張圖檔'.$defChangeMess.'！！'));
          exit();
       }
-      $ilog = $DB->insSysLogs(51, CF_AD_ID, 2410, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄//
+      $ilog = DB->insSysLogs(51, CF_AD_ID, 2410, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄//
       echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'檔案上傳不完全，請重新操作或聯絡管理人員！！'));
       exit();
    break;
@@ -128,18 +128,18 @@ switch ($formAcce) {
       if($upDone == $totalImg){
          if(isset($_POST['defIdx'])==true){
             $upArr = array('bc_updated' => '[EXPR]GETDATE()','bc_defaultphoto'=>intval($_POST['defIdx']));
-            $up = $DB->update('buildcase',$upArr,array("bc_id"=>$bcID));
+            $up = DB->update('buildcase',$upArr,array("bc_id"=>$bcID));
             if($totalImg==0){
-               $ilog = $DB->insSysLogs(51, CF_AD_ID, 2461, '["'.CF_AD_ID.'","'.$bcID.'"]');//寫入操作記錄//
+               $ilog = DB->insSysLogs(51, CF_AD_ID, 2461, '["'.CF_AD_ID.'","'.$bcID.'"]');//寫入操作記錄//
                echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功更改預設圖檔！！'));
                exit();
             }
          }
-         $ilog = $DB->insSysLogs(51, CF_AD_ID, 2451, '["'.CF_AD_ID.'","'.$bcID.'","'.$upDone.'"]');//寫入操作記錄//
+         $ilog = DB->insSysLogs(51, CF_AD_ID, 2451, '["'.CF_AD_ID.'","'.$bcID.'","'.$upDone.'"]');//寫入操作記錄//
           echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功上傳 '.$upDone.' 張圖檔，校正裁切 '.$cropDone.' 張圖檔！！'));
           exit();
       }
-      $ilog = $DB->insSysLogs(51, CF_AD_ID, 2450, '["'.CF_AD_ID.'","'.$bcID.'"]');//寫入操作記錄//
+      $ilog = DB->insSysLogs(51, CF_AD_ID, 2450, '["'.CF_AD_ID.'","'.$bcID.'"]');//寫入操作記錄//
       echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'檔案上傳不完全，請重新操作或聯絡管理人員！！'));
       exit();
    break;
@@ -160,11 +160,11 @@ switch ($formAcce) {
          @unlink($filePath."thumb.jpg") && 
          @unlink($filePath."tiny.jpg")
       ){
-         $ilog = $DB->insSysLogs(51, CF_AD_ID, 2481, '["'.CF_AD_ID.'","'.$path_parts['filename'].'"]');//寫入操作記錄//
+         $ilog = DB->insSysLogs(51, CF_AD_ID, 2481, '["'.CF_AD_ID.'","'.$path_parts['filename'].'"]');//寫入操作記錄//
          echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功刪除圖像！！'));
          exit();
       }
-      $ilog = $DB->insSysLogs(51, CF_AD_ID, 2480, '["'.CF_AD_ID.'","'.$path_parts['filename'].'"]');//寫入操作記錄//
+      $ilog = DB->insSysLogs(51, CF_AD_ID, 2480, '["'.CF_AD_ID.'","'.$path_parts['filename'].'"]');//寫入操作記錄//
       echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'圖像刪除失敗，請重新操作或聯絡管理人員！！'));
       exit();
    break;

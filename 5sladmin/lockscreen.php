@@ -10,7 +10,7 @@ if(!empty($_SESSION["SESS_AD_ID"])){
   $adID = $_SESSION["SESS_AD_ID"];
   define('DOC_PATH_LAYER', './');
   require_once('includeFiles/db.inc.php');
-  $ilog = $DB->insSysLogs(51, $adID, 1111, '["'.$adID.'"]');//寫入操作記錄
+  $ilog = DB->insSysLogs(51, $adID, 1111, '["'.$adID.'"]');//寫入操作記錄
 }
 unset($_SESSION["SESS_AD_ID"]);
 session_regenerate_id(TRUE);
@@ -41,13 +41,13 @@ if(!empty($backURI) && strlen($backURI) % 2 === 0){
 	<link rel="icon" href="../imageFiles/favicon.ico" type="image/ico" />
   <title>Fifth Season Life 人生第五季 | Lockscreen</title>
   <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="pluginFiles/fontawesome-free/css/all.css">
-  <!-- Toastr -->
-  <link rel="stylesheet" href="pluginFiles/toastr/toastr.min.css">
-  <!-- Theme style -->
-  <link rel="stylesheet" href="cssFiles/5sladmin.light.css">
+  <link rel="stylesheet" href="./pluginFiles/googleapis/fonts.googleapis.css">
+  <!-- Bootstrap 5 & Bootstrap Icons -->
+  <link rel="stylesheet" href="./pluginFiles/bootstrap5/bootstrap.min.css">
+  <link rel="stylesheet" href="./pluginFiles/bootstrap-icons/bootstrap-icons.min.css">
+  <!-- Theme style (AdminLTE 4) -->
+  <link rel="stylesheet" href="./cssFiles/adminlte.css">
+
   <style>
     .btn-primary{color:#fff;background-color:#133b61;border-color:rgba(99,99,99,1.00);box-shadow:none}
     .btn-primary:hover{color:#fff;background-color:#1A5388;border-color:#236FB7}
@@ -119,11 +119,11 @@ if(!empty($backURI) && strlen($backURI) % 2 === 0){
 <!-- /.center -->
 
 <!-- jQuery -->
-<script src="pluginFiles/jquery/jquery.min.js"></script>
-<!-- Bootstrap 4 -->
-<script src="pluginFiles/bootstrap/js/bootstrap.bundle.min.js"></script>
-<!-- Toastr -->
-<script src="pluginFiles/toastr/toastr.min.js"></script>
+<script src="./pluginFiles/jquery/jquery-4.0.0.min.js"></script>
+<!-- Bootstrap 5 -->
+<script src="./pluginFiles/bootstrap5/bootstrap.bundle.min.js"></script>
+<!-- 5SeasonLife App -->
+<script src="./scriptFiles/adminlte.js"></script>
 <!-- 5SeasonLife App -->
 <script src="scriptFiles/page.basic.js"></script>
 <script>

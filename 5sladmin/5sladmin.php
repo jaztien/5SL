@@ -3,7 +3,7 @@ session_start();
 if (isset($_SESSION["SESS_AD_ID"]) && !empty($_SESSION["SESS_AD_ID"])) {
     define('DOC_PATH_LAYER', './');
     require_once('./includeFiles/db.inc.php');
-    $ilog = $DB->insSysLogs(51, $_SESSION["SESS_AD_ID"], 2061, '["'.$_SESSION["SESS_AD_ID"].'"]');//寫入操作記錄
+    $ilog = DB->insSysLogs(51, $_SESSION["SESS_AD_ID"], 2061, '["'.$_SESSION["SESS_AD_ID"].'"]');//寫入操作記錄
 }
 $SESSID = 'PHPSESSID='.session_id();
 session_destroy();
@@ -23,15 +23,13 @@ $PAGE_ITEM = "ITEM_LOGIN";
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="../imageFiles/favicon.ico" type="image/ico" />
     <title>Fifth Season Life 人生第五季 | Admin Login Page</title>
-
     <!-- Google Font: Source Sans Pro -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="pluginFiles/fontawesome-free/css/all.min.css">
-    <!-- icheck bootstrap -->
-    <link rel="stylesheet" href="pluginFiles/icheck-bootstrap/icheck-bootstrap.min.css">
-    <!-- Theme style -->
-    <link rel="stylesheet" href="cssFiles/5sladmin.light.css<?php echo "?t=".time(); ?>">
+    <link rel="stylesheet" href="./pluginFiles/googleapis/fonts.googleapis.css">
+    <!-- Bootstrap 5 & Bootstrap Icons -->
+    <link rel="stylesheet" href="./pluginFiles/bootstrap5/bootstrap.min.css">
+    <link rel="stylesheet" href="./pluginFiles/bootstrap-icons/bootstrap-icons.min.css">
+    <!-- Theme style (AdminLTE 4) -->
+    <link rel="stylesheet" href="./cssFiles/adminlte.css">
     <style>
     /*
                 .btn-primary{color:#fff;background-color:#133b61;border-color:rgba(99,99,99,1.00);box-shadow:none}
@@ -116,15 +114,11 @@ $PAGE_ITEM = "ITEM_LOGIN";
     </div>
     <!-- /.login-box -->
     <!-- jQuery -->
-    <script src="pluginFiles/jquery/jquery.min.js"></script>
-    <script src="pluginFiles/jquery-md5/jquery.md5.js"></script>
-    <!-- Bootstrap 4 -->
-    <script src="pluginFiles/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- jquery-validation -->
-    <script src="pluginFiles/jquery-validation/jquery.validate.min.js"></script>
-    <script src="pluginFiles/jquery-validation/additional-methods.min.js"></script>
-    <!-- AdminLTE App -->
-    <script src="scriptFiles/5sladmin.min.js"></script>
+    <script src="./pluginFiles/jquery/jquery-4.0.0.min.js"></script>
+    <!-- Bootstrap 5 -->
+    <script src="./pluginFiles/bootstrap5/bootstrap.bundle.min.js"></script>
+    <!-- 5SeasonLife App -->
+    <script src="./scriptFiles/adminlte.js"></script>
     <script>
     ////////////////////////////////////////////////////////////////
     // ---------------- jQuery FUNCTIONs 區域調用 ---------------- //

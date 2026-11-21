@@ -63,7 +63,7 @@ if($datapass == false){
 switch ($formAcce) {
      case "func_advp_infoUpdate":////////////////////////////////////////// func_advp_infoUpdate 更新廣告套裝資料
         //----- 檢查投放規則，若無，終止更新！ -------//
-        $dupC = $DB->query("SELECT * FROM advi_rules WHERE advp_id=? AND advr_status=?",array($advpID,true));
+        $dupC = DB->query("SELECT * FROM advi_rules WHERE advp_id=? AND advr_status=?",array($advpID,true));
         if(!$dupC||$dupC==0){
             echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'廣告套裝未包含投放規則，中止更新！！'));
             exit();
@@ -81,7 +81,7 @@ switch ($formAcce) {
             $i++;
         }
         */
-        $up = $DB->update('advi_pack', $ar,array('advp_id'=>$advpID));
+        $up = DB->update('advi_pack', $ar,array('advp_id'=>$advpID));
         if($up){
 
             //------------ 代表圖像處理 --------------//
@@ -120,12 +120,12 @@ switch ($formAcce) {
                 }
             }
             //------------ /代表圖像處理 --------------//
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2311, '["'.CF_AD_ID.'","'.$advpID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2311, '["'.CF_AD_ID.'","'.$advpID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功編輯廣告套裝資料'.(isset($imgUpRtn) ? ($imgUpRtn ? '，以及代表圖像' : '，但圖像編輯失敗') : '').'！！', 'newUpPhoto'=> $newUpPhoto, 'upTime'=> $cDateTime); 
-            //$ilog = $DB->insSysLogs(CF_AD_ID,1,'02311',CF_AD_ID.','.$advpID);//寫入操作記錄
+            //$ilog = DB->insSysLogs(CF_AD_ID,1,'02311',CF_AD_ID.','.$advpID);//寫入操作記錄
             //$rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功編輯廣告套裝資料！！', 'upTime'=> $cDateTime);
         } else {
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2310, '["'.CF_AD_ID.'","'.$advpID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2310, '["'.CF_AD_ID.'","'.$advpID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'編輯廣告套裝資料失敗！請聯絡相關管理人員！！');
         }
         echo json_encode($rtn);
@@ -134,13 +134,13 @@ switch ($formAcce) {
         $inArr=$arrDatA;
         //$inArr = array_merge($ar, array('advp_published'=>$cDateTime));
         //---------------- 重複輸入檢查 ------------------//
-        $dupC = $DB->query("SELECT * FROM advi_pack WHERE advp_keycode=? OR advp_title=?",array($inArr['advp_keycode'],$inArr['advp_title']));
+        $dupC = DB->query("SELECT * FROM advi_pack WHERE advp_keycode=? OR advp_title=?",array($inArr['advp_keycode'],$inArr['advp_title']));
         if($dupC){
             echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'廣告套裝重複建立！！'));
             exit();
         }
        //---------------- /重複輸入檢查 ------------------//
-        $ins = $DB->insert('advi_pack', $inArr);
+        $ins = DB->insert('advi_pack', $inArr);
         if($ins && $ins > 0){
             //------------ 代表圖像處理 --------------//
             $imgUp = !empty($_POST["imgUp"]) ? $_POST["imgUp"] : "";
@@ -181,34 +181,34 @@ switch ($formAcce) {
             }
             //------------ /代表圖像處理 --------------//
             
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功新增廣告套裝！！', 'newID'=>$ins); 
         } 
         else { 
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'新增廣告套裝失敗！請聯絡相關管理人員！！'); 
         } /* 回傳失敗時的資訊 */
         echo json_encode($rtn);
     break;
     case "func_advp_delete":////////////////////////////////////////// func_advp_delete 刪除廣告推廣套裝
-        $del = $DB->query("DELETE FROM advi_pack WHERE advp_id = ?", array($advpID)); 
+        $del = DB->query("DELETE FROM advi_pack WHERE advp_id = ?", array($advpID)); 
         if($del){
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功刪除廣告套裝！！'); 
         } else {
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'刪除廣告套裝失敗！請聯絡相關管理人員！！'); 
         }
         echo json_encode($rtn);
     break;
     case "func_advp_ruleUpdate":////////////////////////////////////////// func_advp_ruleUpdate 更新管理者資料
         $arrDatA['advr_updated'] = '[EXPR]GETDATE()';
-        $up = $DB->update('advi_rules', $arrDatA,array('advr_id'=>$advrID));
+        $up = DB->update('advi_rules', $arrDatA,array('advr_id'=>$advrID));
         if($up){
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功編輯廣告投放規則！！','arr'=>array('newID'=>0));
         } else {
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'編輯廣告投放規則失敗！請聯絡相關管理人員！！');
         }
         echo json_encode($rtn);
@@ -231,32 +231,32 @@ switch ($formAcce) {
             $ar['advr_weekend'],
             $ar['advr_period']
         );
-        $dupC = $DB->query($dupSql,$dupArr);
+        $dupC = DB->query($dupSql,$dupArr);
         if($dupC && count($dupC)>0){
             echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'投放規則重複登錄！！'));
             exit();
         }
         //---------------- /重複輸入檢查 ------------------//
-        $ins = $DB->insert('advi_rules',$ar);
+        $ins = DB->insert('advi_rules',$ar);
         if($ins && $ins > 0){
             //$ar = array_merge($ar, array('newID' => $ins));
             $ar['newID'] = $ins;
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功新增廣告投放規則！！','arr'=>$ar);
             
         } else {
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'新增廣告投放規則失敗！請聯絡相關管理人員！！');
         }
         echo json_encode($rtn);    
     break;
     case "func_advp_ruleDelete":////////////////////////////////////////// func_advp_ruleDelete 刪除投放規則
-        $del = $DB->query("DELETE FROM advi_rules WHERE advr_id = ?", array($advrID)); 
+        $del = DB->query("DELETE FROM advi_rules WHERE advr_id = ?", array($advrID)); 
         if($del){
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功刪除廣告套裝！！', 'advrID'=>$advrID); 
         } else {
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'刪除廣告套裝失敗！請聯絡相關管理人員！！'); 
         }
         echo json_encode($rtn);
@@ -300,7 +300,7 @@ switch ($formAcce) {
             'advi_visitlimit'=>$_POST['advi_visitlimit'],
             'advi_status'=>6
         );
-        $ins = $DB->insert('advitising',$ar);
+        $ins = DB->insert('advitising',$ar);
         if($ins && $ins > 0){
             $photoUp=true;
             if($fileS){
@@ -342,22 +342,22 @@ switch ($formAcce) {
                     'mbp_forid' => $ins,
                     'mbp_status' => 2
                 );
-                $pins = $DB->insert('fsl_points',$ptArr);
+                $pins = DB->insert('fsl_points',$ptArr);
                 if($pins && $pins>0){
                     $addResult=true;
                 }
             }
             //---------------- /預扣點數 ----------------//
             if($addResult==true){
-                //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+                //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
                 $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功申請廣告套裝！！');
                 echo json_encode($rtn);    
                 exit();
             }
         }
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
-        $del = $DB->query("DELETE FROM advitising WHERE advi_id = ?", array($ins)); 
-        $pdel = $DB->query("DELETE FROM fsl_points WHERE mbp_for = ? AND mbp_forid = ?", array(5,$ins)); 
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+        $del = DB->query("DELETE FROM advitising WHERE advi_id = ?", array($ins)); 
+        $pdel = DB->query("DELETE FROM fsl_points WHERE mbp_for = ? AND mbp_forid = ?", array(5,$ins)); 
         @unlink("../uploadFiles/adv/adviphoto_".$ins."_.jpg");
         @unlink("../uploadFiles/adv/adviphoto_".$ins."_banner.jpg");
         $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'申請廣告套裝失敗！請聯絡相關管理人員！！');
@@ -365,12 +365,12 @@ switch ($formAcce) {
     break;
     case "func_adv_applyUpdate":////////////////////////////////////////// func_adv_applyUpdate
         $arrDatA['advi_updated'] = '[EXPR]GETDATE()';
-        $up = $DB->update('advitising', $arrDatA,array('advi_id'=>$adviID));
+        $up = DB->update('advitising', $arrDatA,array('advi_id'=>$adviID));
         if($up){
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功編輯廣告投放申購資料！！');
         } else {
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'編輯廣告投放申購資料失敗！請聯絡相關管理人員！！');
         }
         echo json_encode($rtn);
@@ -378,10 +378,10 @@ switch ($formAcce) {
     case "func_adv_sendApply":////////////////////////////////////////// form_doapply 建立執行紀錄
         // to status 1
         $sql="SELECT * FROM advitising WHERE advi_id = ?";
-        $res = $DB->row($sql,array($adviID));
+        $res = DB->row($sql,array($adviID));
         //---- 建立執行紀錄
         $rsql="SELECT * FROM advi_rules WHERE advp_id = ?";
-        $rres = $DB->query($rsql,array($res['advp_id']));
+        $rres = DB->query($rsql,array($res['advp_id']));
         $insNum = 0;
       
         $i=0;
@@ -404,7 +404,7 @@ switch ($formAcce) {
                 'advc_slogan' => $res['advi_slogan'],
                 'advc_status' => 1
             );
-            $ins = $DB->insert('adv_cues', $inArr);
+            $ins = DB->insert('adv_cues', $inArr);
             if($ins && $ins>0){ $insNum++; }
             $i++;
         }
@@ -413,32 +413,32 @@ switch ($formAcce) {
         
         //---- /建立執行紀錄
         if($insNum==count($rres)){ 
-            $up = $DB->update("advitising", array(
+            $up = DB->update("advitising", array(
                 'advi_updated'=>'[EXPR]GETDATE()',
                 'advi_status'=>1
             ), array('advi_id'=>$adviID));
             if($up){
                 //---- 扣除預扣點數
-                $pup = $DB->update('fsl_points', array(
+                $pup = DB->update('fsl_points', array(
                     'mbp_status'=>1
                 ),array('mb_id'=>$res['mb_id'],'mbp_for'=>5,'mbp_forid'=>$adviID));
                 //---- 通知申購人
 
                 //---- /通知申購人
                 if($pup){
-                    //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+                    //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
                     $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'已發佈且生成執行紀錄');
                     echo json_encode($rtn); 
                     exit();
                 }
             }
         }
-        $up = $DB->update("advitising", array(
+        $up = DB->update("advitising", array(
             'advi_updated'=>'[EXPR]GETDATE()',
             'advi_status'=>6
         ), array('advi_id'=>$adviID));
-        $del = $DB->query("DELETE FROM adv_cues WHERE advi_id = ?", array($adviID)); 
-        //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+        $del = DB->query("DELETE FROM adv_cues WHERE advi_id = ?", array($adviID)); 
+        //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
         $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'更改審核狀態失敗，已清除所有已建立的紀錄！');
         echo json_encode($rtn); 
 
@@ -447,18 +447,18 @@ switch ($formAcce) {
         if(!empty($arrDatA['advv_content'])){
             //$inArr = array_merge($arrDatA, array('advv_published'=>$cDateTime));
             $inArr = $arrDatA;
-            $ins = $DB->insert('advi_review', $inArr);
+            $ins = DB->insert('advi_review', $inArr);
         }
-        $up = $DB->update("advitising", array(
+        $up = DB->update("advitising", array(
             'advi_updated'=>'[EXPR]GETDATE()',
             'advi_status'=>$arrDatA['advv_step']
         ), array('advi_id'=>$adviID));
         if($up){
             //---- 退回預扣點數
-            $pup = $DB->update('fsl_points', array('mbp_status'=>0),array('mb_id'=>$arrDatA['mb_id'],'mbp_for'=>5,'mbp_forid'=>$adviID));
+            $pup = DB->update('fsl_points', array('mbp_status'=>0),array('mb_id'=>$arrDatA['mb_id'],'mbp_for'=>5,'mbp_forid'=>$adviID));
             //---- /退回預扣點數
             if($pup){
-                //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
+                //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn, '["vari1","vari2",...]');//寫入操作記錄
                 $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'駁回廣告申購案件成功！');
                 echo json_encode($rtn);
                 exit();
@@ -484,7 +484,7 @@ switch ($formAcce) {
             $params[] = $search;
         }
         // 2. 執行查詢
-        $res = $DB->query($sql, $params);
+        $res = DB->query($sql, $params);
         $totalMB = count($res);
         // 3. 建立符合 Select2 格式的乾淨陣列
         $output = [];

@@ -37,15 +37,15 @@ $cDateTime = date('Y-m-d H:i:s');
 switch ($formAcce) {
 //////-------------------- form_reenterPass 鎖定頁面時再登入 ---------------------//
     case "form_reenterPass":
-        $r = $DB->single("SELECT ad_password FROM fsl_administrator WHERE ad_id=?",array($arrDatA['adID']));
+        $r = DB->single("SELECT ad_password FROM fsl_administrator WHERE ad_id=?",array($arrDatA['adID']));
         if($r && password_verify($arrDatA['reenterPass'], $r)){//,_fn_FHMD5_encrypt($arrDatA['reenterPass'])
             $_SESSION["SESS_AD_ID"] = $arrDatA['adID'];
-            $ilog = $DB->insSysLogs(51, $_SESSION['SESS_AD_ID'], 2051, '["'.$_SESSION['SESS_AD_ID'].'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, $_SESSION['SESS_AD_ID'], 2051, '["'.$_SESSION['SESS_AD_ID'].'"]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success');
             echo json_encode($rtn);
             exit();
         }
-        //$ilog = $DB->insSysLogs(51, $_SESSION['SESS_AD_ID'], 2050, '["'.$_SESSION['SESS_AD_ID'].'"]');//寫入操作記錄
+        //$ilog = DB->insSysLogs(51, $_SESSION['SESS_AD_ID'], 2050, '["'.$_SESSION['SESS_AD_ID'].'"]');//寫入操作記錄
         $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=> '密碼錯誤，請重新操作或聯絡管理人員！！');
         echo json_encode($rtn);
 

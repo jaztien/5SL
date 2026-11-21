@@ -64,23 +64,23 @@ switch ($formAcce) {
             $upsql .= ", bc_coordinates = geography::STGeomFromText(null, 4326)";
         }
         $upsql .= " WHERE bc_id=?";
-        $up = $DB->query($upsql, array($bcID));
-        //$up = $DB->update('buildcase', $setArr,array('bc_id'=>$bcID));
+        $up = DB->query($upsql, array($bcID));
+        //$up = DB->update('buildcase', $setArr,array('bc_id'=>$bcID));
         if($up){
-            //$ilog = $DB->insSysLogs(CF_AD_ID,1,'2121',CF_AD_ID.','.$bcID);//寫入操作記錄
+            //$ilog = DB->insSysLogs(CF_AD_ID,1,'2121',CF_AD_ID.','.$bcID);//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功編輯社區案件資料！！', 'upTime'=> $cDateTime);
             echo json_encode($rtn);
             exit();
         } 
-        //$ilog = $DB->insSysLogs(51, CF_AD_ID, 2120, '["'.CF_AD_ID.'","'.$bcID.'"]');//寫入操作記錄
+        //$ilog = DB->insSysLogs(51, CF_AD_ID, 2120, '["'.CF_AD_ID.'","'.$bcID.'"]');//寫入操作記錄
         $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'編輯社區案件資料失敗！請聯絡相關管理人員！！');
         echo json_encode($rtn);
     break;
     case "func_bc_delete":////////////////////////////////////////// form_delete 刪除管理者資料
         /*
-        $del = $DB->query("DELETE FROM xxxxxxxx WHERE xxxx_id = ?", array(xxxxID)); 
+        $del = DB->query("DELETE FROM xxxxxxxx WHERE xxxx_id = ?", array(xxxxID)); 
         if($del){
-            $delauth = $DB->query("DELETE FROM xxxxxxxx WHERE xxxx_id = ?", array(xxxxID)); 
+            $delauth = DB->query("DELETE FROM xxxxxxxx WHERE xxxx_id = ?", array(xxxxID)); 
             //----- and more......
             @unlink("../uploadFiles/xxxx/xxphoto_" . xxxxID . "_.jpg");
             @unlink("../uploadFiles/xxxx/xxphoto_" . xxxxID . "_thumb.jpg");
@@ -97,7 +97,7 @@ switch ($formAcce) {
     case "func_bc_addnew":////////////////////////////////////////// func_bc_addnew 新增紀錄
         $inArr = $arrDatA;
         //$inArr['bc_id'] = null;
-        $ins = $DB->insert('buildcase', $inArr);
+        $ins = DB->insert('buildcase', $inArr);
         if($ins && $ins > 0){
             $rtn = array('RTN'=>2, 'msgType'=>'success', 'msgStr'=>'！！', 'newID'=>$ins); 
             echo json_encode($rtn);

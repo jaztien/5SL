@@ -54,7 +54,7 @@ switch ($formAcce) {
             $sql .= " chat_type=0";
         }
         $sql .=  " AND chat_published > ? AND chat_status < ? ORDER BY chat_published ASC";
-        $res = $DB->query($sql, array($toTime, 9));
+        $res = DB->query($sql, array($toTime, 9));
         $upres =0;
         if($res){
             if(!empty($chatType)&&!empty($joinID)){//更新會員已讀狀態
@@ -65,7 +65,7 @@ switch ($formAcce) {
                     $upsql .= " AND chat_type=0";
                 }
                 $upsql .= " AND chat_status=? AND chat_posttype=?";
-                $upres = $DB->query($upsql, array(1,1,$toTime,2,2));
+                $upres = DB->query($upsql, array(1,1,$toTime,2,2));
             }
             $rtn = $res;
         } else{
@@ -99,7 +99,7 @@ switch ($formAcce) {
         $sql .= " AND a.chat_published > ? AND a.chat_status < ? ORDER BY a.chat_published ASC";
         $params[] = $toTime;
         $params[] = 9;
-        $res = $DB->query($sql, $params);
+        $res = DB->query($sql, $params);
 
         $upres = 0;
         $rtn = array();
@@ -115,7 +115,7 @@ switch ($formAcce) {
                             AND chat_status = ? 
                             AND chat_posttype = ?";
                 $upParams = [1, 1, $toTime, $chatType, $joinID, 2, 2];
-                $upres = $DB->query($upsql, $upParams);
+                $upres = DB->query($upsql, $upParams);
             }
         }
 
@@ -183,12 +183,12 @@ switch ($formAcce) {
         //
         $messData['chat_message'] = $messContent;
         $messData['chat_published'] = $cDateTime;
-        $ins = $DB->insert('data_chats', $messData);
+        $ins = DB->insert('data_chats', $messData);
         //$ins = 123456;
         if($ins && $ins > 0){
             $messData['replymess'] = null;
             if(!empty($messData['chat_replyid'])){
-                $replyres = $DB->single("SELECT CONCAT(chat_messtype,'|',chat_message,'|',chat_filename,'|',chat_poster,'|',chat_published) FROM data_chats WHERE chat_id = ?",array($messData['chat_replyid']));
+                $replyres = DB->single("SELECT CONCAT(chat_messtype,'|',chat_message,'|',chat_filename,'|',chat_poster,'|',chat_published) FROM data_chats WHERE chat_id = ?",array($messData['chat_replyid']));
                 if($replyres){
                     $messData['replymess'] = $replyres;
                 }
@@ -214,7 +214,7 @@ switch ($formAcce) {
         $rtn = array();
         $sql = "SELECT * FROM data_chats WHERE chat_type=0 AND chat_joinid=0";
         $sql .= " AND chat_published > ? AND chat_status < ? ORDER BY chat_published ASC";
-        $res = $DB->query($sql, array($toTime, 9));
+        $res = DB->query($sql, array($toTime, 9));
         if($res){
             $rtn = $res;
         }
@@ -222,8 +222,8 @@ switch ($formAcce) {
     break;
     case "func_chat_robotconfig":////////////////////////////////////////// func_chat_robotconfig 更改機器人應答狀態
         $nextOn = isset($_POST['nextOn']) ? intval($_POST['nextOn']) : 0;
-        //$up = $DB->update('fsl_configurations', array('config_value'=>$nextOn), array('config_code'=>'mess_robot'));
-        $up = $DB->setConfigVal($nextOn, 'mess_robot');
+        //$up = DB->update('fsl_configurations', array('config_value'=>$nextOn), array('config_code'=>'mess_robot'));
+        $up = DB->setConfigVal($nextOn, 'mess_robot');
         if($up){
             $rtn = array(
                 'nextOn' => $nextOn
@@ -238,7 +238,7 @@ switch ($formAcce) {
             exit();
         }
         $sql = "UPDATE data_chats SET chat_read = chat_read+?, chat_status=? WHERE chat_id=?";
-        $res = $DB->query($sql, array(1, 1, $chatID));
+        $res = DB->query($sql, array(1, 1, $chatID));
         //$res = 1;
         if($res){
             echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr' => '應答紀錄已讀標記完成！'));
@@ -257,18 +257,18 @@ switch ($formAcce) {
         }
         switch ($act) {
             case 'keep':
-                $up = $DB->update('data_chats', array('chat_keep'=>$nextStep), array('chat_id'=>$chatID));
+                $up = DB->update('data_chats', array('chat_keep'=>$nextStep), array('chat_id'=>$chatID));
             break;
             case 'back':
-                $up = $DB->update('data_chats', array('chat_status'=>$nextStep), array('chat_id'=>$chatID));
+                $up = DB->update('data_chats', array('chat_status'=>$nextStep), array('chat_id'=>$chatID));
             break;
             case 'delete':
             case 'hidemess':
             case 'vio':
-                $up = $DB->update('data_chats', array('chat_status'=>$nextStep), array('chat_id'=>$chatID));
+                $up = DB->update('data_chats', array('chat_status'=>$nextStep), array('chat_id'=>$chatID));
             break;
             case 'marker':
-                $up = $DB->update('data_chats', array('chat_incharge'=>$nextStep), array('chat_id'=>$chatID));
+                $up = DB->update('data_chats', array('chat_incharge'=>$nextStep), array('chat_id'=>$chatID));
             break;
             default:
                 $up = 0;
@@ -302,14 +302,14 @@ switch ($formAcce) {
         FROM data_chats WHERE chat_type = ? AND chat_posttype = ? AND chat_published > DATEADD(day, -180, GETDATE())  AND chat_read = ? 
         ORDER BY chat_published DESC LIMIT 50
         ";
-        //$getUNread = $DB->query($sql, array(1,2,(time()-(86400*180)),0));
-        $getUNread = $DB->query($sql, array(1,2,0));
+        //$getUNread = DB->query($sql, array(1,2,(time()-(86400*180)),0));
+        $getUNread = DB->query($sql, array(1,2,0));
 
         foreach ($getUNread as $key => $value) {
             /*
             $chat_id = $value['chat_id'];
             $chat_postid = $value['chat_postid'];
-            $totAVE = $DB->single("SELECT mb_rating FROM mb_info WHERE mb_id = ?", array($chat_postid));
+            $totAVE = DB->single("SELECT mb_rating FROM mb_info WHERE mb_id = ?", array($chat_postid));
             $getStars = floor($totAVE);
             $getHStar = round($totAVE - $getStars);
             */
@@ -355,8 +355,8 @@ switch ($formAcce) {
         FROM data_notifications WHERE noti_published > DATEADD(day, -180, GETDATE()) 
         ORDER BY noti_published DESC LIMIT 50
         ";
-        $getInfo = $DB->query($sql, null);
-        //$getInfo = $DB->query($sql, array((time()-(86400*180))));
+        $getInfo = DB->query($sql, null);
+        //$getInfo = DB->query($sql, array((time()-(86400*180))));
         $totalNum = !empty($getInfo[0]['totalNum']) ? $getInfo[0]['totalNum'] : 0;    
         foreach ($getInfo as $key => $value) {
             $postPast = floor((time() - $value['noti_published']) / 3600);
@@ -405,13 +405,13 @@ switch ($formAcce) {
     case "func_resp_addnew"://///////////// func_resp_addnew 新增應答
         $arrDatA = isset($_POST['arrDatA']) ? $_POST['arrDatA'] : array();
         $arrDatB = isset($_POST['arrDatB']) ? $_POST['arrDatB'] : array();
-        $ins = $DB->insert('chatbot_response', $arrDatA);
+        $ins = DB->insert('chatbot_response', $arrDatA);
         //$ins = 1;
         if($ins){
             $i = 0;
             while($i<count($arrDatB)){
                 $arrDatB[$i]['rbot_id'] = $ins;
-                $qins = $DB->insert('chatbot_question', $arrDatB[$i]);
+                $qins = DB->insert('chatbot_question', $arrDatB[$i]);
                 $i++;
             }
             echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr' => '成功新增資料！', 'newID'=>$ins));
@@ -428,7 +428,7 @@ switch ($formAcce) {
             echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgType' => 'respID 為空值，操作失敗！'));
             exit();
         }
-        $up = $DB->update('chatbot_response', $arrDatA, array('rbot_id'=>$rbotID));
+        $up = DB->update('chatbot_response', $arrDatA, array('rbot_id'=>$rbotID));
         if($up){
             echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr' => '更新資料成功！'));
             exit();
@@ -442,9 +442,9 @@ switch ($formAcce) {
             echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgType' => 'respID 為空值，操作失敗！'));
             exit();
         }
-        $del = $DB->query('DELETE FROM chatbot_response WHERE rbot_id=?', array($rbotID));
+        $del = DB->query('DELETE FROM chatbot_response WHERE rbot_id=?', array($rbotID));
         if($del){
-            $qdel = $DB->query('DELETE FROM chatbot_question WHERE rbot_id=?', array($rbotID));
+            $qdel = DB->query('DELETE FROM chatbot_question WHERE rbot_id=?', array($rbotID));
             echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr' => '刪除資料成功！'));
             exit();
         }
@@ -454,7 +454,7 @@ switch ($formAcce) {
     case "func_qbot_status"://///////////// func_qbot_status
         $arrDatA = isset($_POST['arrDatA']) ? intval($_POST['arrDatA']) : 1;
         $qbotID = isset($_POST['qbotID']) ? intval($_POST['qbotID']) : 0;
-        $up = $DB->update('chatbot_question', array('qbot_status'=>$arrDatA), array('qbot_id'=>$qbotID));
+        $up = DB->update('chatbot_question', array('qbot_status'=>$arrDatA), array('qbot_id'=>$qbotID));
         if($up){
             echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr' => '更新資料成功！'));
             exit();
@@ -465,7 +465,7 @@ switch ($formAcce) {
     case "func_qbot_delete"://///////////// func_qbot_delete
         $arrDatA = isset($_POST['arrDatA']) ? intval($_POST['arrDatA']) : 1;
         $qbotID = isset($_POST['qbotID']) ? intval($_POST['qbotID']) : 0;
-        //$del = $DB->query("DELETE FROM chatbot_question WHERE qbot_id=?", array($qbotID));
+        //$del = DB->query("DELETE FROM chatbot_question WHERE qbot_id=?", array($qbotID));
         $del = 1;
         if($del){
             echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr' => '刪除資料成功！'));
@@ -477,7 +477,7 @@ switch ($formAcce) {
     case "func_qbot_update"://///////////// func_qbot_update
         $arrDatA = isset($_POST['arrDatA']) ? $_POST['arrDatA'] : array();
         $qbotID = isset($_POST['qbotID']) ? intval($_POST['qbotID']) : 0;
-        $up = $DB->update('chatbot_question', $arrDatA, array('qbot_id'=>$qbotID));
+        $up = DB->update('chatbot_question', $arrDatA, array('qbot_id'=>$qbotID));
         if($up){
             echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr' => '更新資料成功！'));
             exit();
@@ -493,7 +493,7 @@ switch ($formAcce) {
             echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr' => '新增資料成功！'));
             exit();
         }
-        //$ins = $DB->insert('chatbot_question', $arrDatA);
+        //$ins = DB->insert('chatbot_question', $arrDatA);
         $ins = 100000;
         if($ins){
             echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr' => '新增資料成功！', 'newID'=>$ins));

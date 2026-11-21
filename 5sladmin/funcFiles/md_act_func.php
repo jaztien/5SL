@@ -59,8 +59,8 @@ switch ($formAcce) {
         $arrDatA['merch_enddate'] = $arrDatA['merch_enddate'] !== '' ? $arrDatA['merch_enddate'] : null;
         //$arrDatA['merch_statusdate'] = $arrDatA['merch_enddate'] !== '' ? $arrDatA['merch_enddate'] : null;
         
-        $upA = $DB->update('fsl_merchandise', $arrDatA, array('merch_id'=>$mdID));
-        $upB = $DB->update('merch_info', $arrDatB, array('merch_id'=>$mdID));
+        $upA = DB->update('fsl_merchandise', $arrDatA, array('merch_id'=>$mdID));
+        $upB = DB->update('merch_info', $arrDatB, array('merch_id'=>$mdID));
         if($upA==1 && $upB==1){
             if(count($arrDatC) > 0 ){
                 $insARR = array(
@@ -71,12 +71,12 @@ switch ($formAcce) {
                     "mdpr_landprice" => $arrDatC['merch_landprice'],
                     "mdpr_parkprice" => $arrDatC['merch_parkprice']
                 );
-                $ins = $DB->insert('merch_prices',$insARR);
+                $ins = DB->insert('merch_prices',$insARR);
             }
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2330, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2330, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功編輯課程商品資料！！', 'upTime'=> $cDateTime);
         } else {
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2331, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄//
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2331, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄//
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'編輯課程商品資料失敗！請聯絡相關管理人員！！');
         }
         echo json_encode($rtn);
@@ -85,15 +85,15 @@ switch ($formAcce) {
     case "func_md_linkUpdate":////////////////////////////////////////// func_md_linkUpdate 編輯視訊鏈結
         if(!empty($arrDatA)){
             $arrDatA = stripslashes($arrDatA);
-            $up = $DB->update('fsl_merchandise', array('merch_updated'=>'[EXPR]GETDATE()', 'merch_vdolink'=>$arrDatA), array('merch_id'=>$mdID));
+            $up = DB->update('fsl_merchandise', array('merch_updated'=>'[EXPR]GETDATE()', 'merch_vdolink'=>$arrDatA), array('merch_id'=>$mdID));
             if($up){
-                $ilog = $DB->insSysLogs(51, CF_AD_ID, 2381, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄
+                $ilog = DB->insSysLogs(51, CF_AD_ID, 2381, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄
                 $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功編輯視訊鏈結資料！！', 'upTime'=> $cDateTime);
                 echo json_encode($rtn);
                 exit();
             }
         }
-        $ilog = $DB->insSysLogs(51, CF_AD_ID, 2380, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄
+        $ilog = DB->insSysLogs(51, CF_AD_ID, 2380, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄
         $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'編輯視訊鏈結資料失敗！請重新操作或聯絡管理人員！！', 'upTime'=> $cDateTime, 'insID'=> $insI);
         echo json_encode($rtn);
     break;
@@ -103,31 +103,31 @@ switch ($formAcce) {
     
     case "func_md_addnew":////////////////////////////////////////// form_addnew 新增管理者資料
         $insID=1;
-        $ilog = $DB->insSysLogs(51, CF_AD_ID, 2321, '["'.CF_AD_ID.'","'.$insID.'"]');//寫入操作記錄//
+        $ilog = DB->insSysLogs(51, CF_AD_ID, 2321, '["'.CF_AD_ID.'","'.$insID.'"]');//寫入操作記錄//
         $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功新增課程商品資料！！', 'upTime'=> $cDateTime, 'insID'=> $insID);
         echo json_encode($rtn);
         exit();
-        $ilog = $DB->insSysLogs(51, CF_AD_ID, 2320, '["'.CF_AD_ID.'","'.$insID.'"]');//寫入操作記錄//
+        $ilog = DB->insSysLogs(51, CF_AD_ID, 2320, '["'.CF_AD_ID.'","'.$insID.'"]');//寫入操作記錄//
         $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'新增課程商品資料失敗！請重新操作或聯絡管理人員！！');
         echo json_encode($rtn);
     break;
 
     case "func_md_delete"://////////// func_md_delete 刪除課程商品資料（使用狀態更新代替刪除，保留原始資料）
-        //$del = $DB->query("DELETE FROM fsl_members WHERE mb_id = ?", array($mbID)); 
-        $up = $DB->query("UPDATE fsl_merchandise SET merch_status = ? WHERE merch_id = ?", array(8,$mdID));
+        //$del = DB->query("DELETE FROM fsl_members WHERE mb_id = ?", array($mbID)); 
+        $up = DB->query("UPDATE fsl_merchandise SET merch_status = ? WHERE merch_id = ?", array(8,$mdID));
         if($up){
             /*
-            $del = $DB->query("DELETE FROM merch_info WHERE merch_id = ?", array($mdID)); 
+            $del = DB->query("DELETE FROM merch_info WHERE merch_id = ?", array($mdID)); 
             if($del){
                 @unlink("../uploadFiles/md/".$subFolder."/mdimg_" . $mdID ."_.jpg");
                 @unlink("../uploadFiles/md/".$subFolder."/mdimg_" . $mdID . "_thumb.jpg");
                 @unlink("../uploadFiles/md/".$subFolder."/mdimg_" . $mdID . "_tiny.jpg");
             }
             */
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2351, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄//
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2351, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄//
             $rtn = array('RTN'=>1); 
         } else {
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2350, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄//
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2350, '["'.CF_AD_ID.'","'.$mdID.'"]');//寫入操作記錄//
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'刪除課程商品資料失敗！請聯絡相關管理人員！！'); 
         }
         echo json_encode($rtn);
@@ -140,10 +140,10 @@ switch ($formAcce) {
         if(!empty($oppID)){//---------------- 更新資料 ------------------//
             $currID = $oppID;
             $upArr['opp_updated'] = '[EXPR]GETDATE()';
-            $up = $DB->update('merch_oppurchase', $upArr,array('opp_id'=>$oppID));
+            $up = DB->update('merch_oppurchase', $upArr,array('opp_id'=>$oppID));
         } else {//---------------- 新增資料 ------------------//
         //---------------- 重複輸入檢查 ------------------//
-            $dupC = $DB->duplicateCheck('merch_oppurchase',array(
+            $dupC = DB->duplicateCheck('merch_oppurchase',array(
                 //'opp_title'=>$upArr['opp_title'],
                 //'opp_subscript'=>$upArr['opp_subscript'],
                 'opp_keycode'=>$upArr['opp_keycode']
@@ -153,7 +153,7 @@ switch ($formAcce) {
                 exit();
             }
             //$upArr['opp_published'] = $cDateTime;
-            $ins = $DB->insert('merch_oppurchase', $upArr);
+            $ins = DB->insert('merch_oppurchase', $upArr);
             if($ins && $ins > 0){
                 $currID = $ins;
             }
@@ -163,10 +163,10 @@ switch ($formAcce) {
             $imgUp = !empty($_POST["imgUp"]) ? $_POST["imgUp"] : "";
             $imgUpRtn = array('imgUpRtn'=>true, 'imgUpDes'=>'', 'newUpPhoto'=>'');
             if(!empty($imgUp)) { $imgUpRtn = _fn_upload_avatar($imgUp, $currID, 'md/opp/oppphoto_'); }
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, (!empty($oppID)? 1010 : 1110), '["'.CF_AD_ID.'","'.$oppID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, (!empty($oppID)? 1010 : 1110), '["'.CF_AD_ID.'","'.$oppID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>(!empty($imgUp) ? ($imgUpRtn['imgUpRtn']!==false ? 'success' : 'warning') : 'success'), 'msgStr'=>'成功'.(!empty($oppID)?'編輯':'新增').'管理者資料'.(!empty($imgUp) ? ($imgUpRtn['imgUpRtn']!==false ? '，以及代表圖像' : '，但圖像編輯失敗') : '').'！！', 'newUpPhoto'=> $imgUpRtn['newUpPhoto'], 'upTime'=> $cDateTime, 'newID'=>$ins);
         } else {
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2380, '["'.CF_AD_ID.'","'.$oppID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2380, '["'.CF_AD_ID.'","'.$oppID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>(!empty($oppID)?'編輯':'新增').'管理者資料失敗！請聯絡相關管理人員！！');
         }
         echo json_encode($rtn);
@@ -179,7 +179,7 @@ switch ($formAcce) {
         $upArr['opd_enddate'] = $upArr['opd_enddate']!=='' ? $upArr['opd_enddate'] : null;
         $ins = 0;
         if(!empty($opdID)){
-            $up = $DB->update('merch_oppdata', $upArr,array('opd_id'=>$opdID));
+            $up = DB->update('merch_oppdata', $upArr,array('opd_id'=>$opdID));
             if($up && $up > 0){
                 echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'加購服務項目已'.($upArr['opd_status']==8 ? '刪除' : '更新').'！！'));
                 exit();
@@ -191,12 +191,12 @@ switch ($formAcce) {
             $dupSql .= " OR (opd_startdate <= ".$upArr['opd_startdate']." AND opd_enddate >= ".$upArr['opd_startdate'].")";
             $dupSql .= " OR (opd_startdate <= ".$upArr['opd_enddate']." AND opd_enddate >= ".$upArr['opd_enddate']."))";
             $dupSql .= " AND opd_status > ? AND opd_status < ?";
-            $dupC = $DB->query($dupSql,array(0, 8));
+            $dupC = DB->query($dupSql,array(0, 8));
             if($dupC){
                 echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'加購服務項目重複登錄！！'));
                 exit();
             }
-            $ins = $DB->insert('merch_oppdata', $upArr);
+            $ins = DB->insert('merch_oppdata', $upArr);
             if($ins && $ins > 0){
                 echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'已新增一筆加購服務項目！！', 'newID'=>$ins));
                 exit();
@@ -225,9 +225,9 @@ switch ($formAcce) {
             }
             $upsql .= ", scrc_status='".$upArr['scrc_status']."'";
             $upsql .= " WHERE scrc_id=?";
-            $up = $DB->query($upsql, array($scrcID));
+            $up = DB->query($upsql, array($scrcID));
 
-            //$up = $DB->update('socialcircle', $upArr, array('scrc_id'=>$scrcID));
+            //$up = DB->update('socialcircle', $upArr, array('scrc_id'=>$scrcID));
             /*
             if($up && $up > 0){
                 echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'商圈聚落資料已更新！！', 'upTime'=> $cDateTime));
@@ -237,7 +237,7 @@ switch ($formAcce) {
         } else {
         //---------------- 重複輸入檢查 ------------------//
             $dupSql = "SELECT scrc_id FROM socialcircle WHERE scrc_city='".$upArr['scrc_city']."' AND scrc_district='".$upArr['scrc_district']."' AND scrc_code='".$upArr['scrc_code']."' AND (scrc_title='".$upArr['scrc_title']."' OR scrc_circletitle='".$upArr['scrc_circletitle']."')";
-            $dupC = $DB->query($dupSql,array());
+            $dupC = DB->query($dupSql,array());
             if($dupC){
                 echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'商圈聚落資料重複紀錄！！'));
                 exit();
@@ -252,8 +252,8 @@ switch ($formAcce) {
                 $insql .= ", geography::STGeomFromText(null, 4326)";
             }
             $insql .= ", ".$upArr['scrc_status'].")";
-            $doins = $DB->query($insql, array());
-            $ins = $DB->lastInsertId();
+            $doins = DB->query($insql, array());
+            $ins = DB->lastInsertId();
             //echo json_encode(array('RTN'=>$ins));
             //exit();
             if($ins && $ins > 0){
@@ -265,10 +265,10 @@ switch ($formAcce) {
             $imgUp = !empty($_POST["imgUp"]) ? $_POST["imgUp"] : "";
             $imgUpRtn = array('imgUpRtn'=>true, 'imgUpDes'=>'', 'newUpPhoto'=>'');
             if(!empty($imgUp)) { $imgUpRtn = _fn_upload_avatar($imgUp, $currID, 'scrc/scrcphoto_'); }
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, (!empty($scrcID) ? 1010 : 1110), '["'.CF_AD_ID.'","'.$scrcID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, (!empty($scrcID) ? 1010 : 1110), '["'.CF_AD_ID.'","'.$scrcID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>$imgUpRtn['imgUpRtn']!==false ? 'success' : 'warning', 'msgStr'=>'成功'.(!empty($scrcID)?'編輯':'新增').'商圈聚落資料'.$imgUpRtn['imgUpDes'].'！！', 'newUpPhoto'=> $imgUpRtn['newUpPhoto'], 'upTime'=> $cDateTime, 'newID'=>$ins);
         } else {
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 1010, '["'.CF_AD_ID.'","'.$scrcID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 1010, '["'.CF_AD_ID.'","'.$scrcID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>(!empty($scrcID)?'編輯':'新增').'商圈聚落資料失敗！請聯絡相關管理人員！！');
         }
         echo json_encode($rtn);
@@ -281,7 +281,7 @@ switch ($formAcce) {
             echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'遺失重要傳遞值，商圈聚落資料刪除失敗！請聯絡相關管理人員！！'));
             exit();
         }
-        $del = $DB->query("DELETE FROM socialcircle WHERE scrc_id = ?", array($scrcID));
+        $del = DB->query("DELETE FROM socialcircle WHERE scrc_id = ?", array($scrcID));
         if($del){
             echo json_encode(array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功刪除商圈聚落資料！！'));
             exit();

@@ -56,7 +56,7 @@ switch ($formAcce) {
         $mainPhotoPath = '';
         $thumbPhotoPath = '';         
         if (!empty($arrDatA) || !empty($arrDatB)) {
-            $DB->beginTransaction();
+            DB->beginTransaction();
             try {
                 if (!empty($arrDatA)) {
                     $arrDatA['mb_updated'] = '[EXPR]NOW()';
@@ -67,16 +67,16 @@ switch ($formAcce) {
                     $arrDatA['mb_email'] = !empty($arrDatA['mb_email']) ? _fn_secure_crypto($arrDatA['mb_email']) : '';
                     $arrDatA['mb_line'] = !empty($arrDatA['mb_line']) ? _fn_secure_crypto($arrDatA['mb_line']) : '';
                     $arrDatA['mb_google'] = !empty($arrDatA['mb_google']) ? _fn_secure_crypto($arrDatA['mb_google']) : '';
-                    $upA = $DB->update('fsl_members', $arrDatA, array('mb_id'=>$mbID));
+                    $upA = DB->update('fsl_members', $arrDatA, array('mb_id'=>$mbID));
                 }
                 if(!empty($arrDatB)){
-                    $upB = $DB->update('mb_info', $arrDatB, array('mb_id'=>$mbID));
+                    $upB = DB->update('mb_info', $arrDatB, array('mb_id'=>$mbID));
                 }
 
                 if ($upA === 0 || $upB === 0 || $upA === false || $upB === false) {
                     // 主動大喊救命！強制中斷並空降到 catch 區塊執行全面撤銷
                     throw new Exception("雙表同步失敗：會員主要資料表影響 {$upA} 筆，進階資料表影響 {$upB} 筆，其中一方查無資料！");
-                    $ilog = $DB->insSysLogs(51, CF_AD_ID, 2220, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
+                    $ilog = DB->insSysLogs(51, CF_AD_ID, 2220, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
                     $returnArr = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'編輯會員資料失敗！請聯絡相關管理人員！！');
                 }
 
@@ -108,11 +108,11 @@ switch ($formAcce) {
                         }
                     }
                 }
-                $DB->commit();
-                $ilog = $DB->insSysLogs(51, CF_AD_ID, 2221, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
+                DB->commit();
+                $ilog = DB->insSysLogs(51, CF_AD_ID, 2221, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
                 $returnArr = array('RTN'=>1, 'msgType'=>(isset($imgUpRtn) ? ($imgUpRtn ? 'success' : 'warning') : 'success'), 'msgStr'=>'成功編輯會員資料'.(isset($imgUpRtn) ? ($imgUpRtn ? '，以及代表圖像' : '，但圖像編輯失敗') : '').'！！', 'upTime'=> $cDateTime);
             } catch (Exception $e) {
-                $DB->rollBack();
+                DB->rollBack();
                 // 如果圖像已經生成，就刪除它
                 if (!empty($mainPhotoPath) && is_file($mainPhotoPath)) {
                     @unlink($mainPhotoPath);
@@ -121,12 +121,12 @@ switch ($formAcce) {
                     @unlink($thumbPhotoPath);
                 }
                 error_log("[雙表 update 交易攔截] 更新已安全撤銷。成因: " . $e->getMessage());
-                $ilog = $DB->insSysLogs(51, CF_AD_ID, 2220, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
+                $ilog = DB->insSysLogs(51, CF_AD_ID, 2220, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
                 $returnArr = array('RTN'=>0, 'msgType'=>'warning', 'msgStr'=>'編輯會員資料失敗！請聯絡相關管理人員！！【ERROR】:'.$e->getMessage(), 'upTime'=> $cDateTime);
             }
 
         } else {
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2220, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2220, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
             $returnArr = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'傳入的會員資料為空，編輯會員資料失敗！請聯絡相關管理人員！！');
         }
         echo json_encode($returnArr);
@@ -136,45 +136,45 @@ switch ($formAcce) {
     //----------- form_addnew 新增管理者資料
     case "func_mb_addnew"://----------- form_addnew 新增管理者資料
         $insID=1;
-        $ilog = $DB->insSysLogs(51, CF_AD_ID, 2211, '["'.CF_AD_ID.'","'.$insID.'"]');//寫入操作記錄//
+        $ilog = DB->insSysLogs(51, CF_AD_ID, 2211, '["'.CF_AD_ID.'","'.$insID.'"]');//寫入操作記錄//
         $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功新增會員資料！！', 'upTime'=> $cDateTime, 'insID'=> $insID);
         echo json_encode($rtn);
         exit();
-        $ilog = $DB->insSysLogs(51, CF_AD_ID, 2210, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
+        $ilog = DB->insSysLogs(51, CF_AD_ID, 2210, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
         $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'新增會員資料失敗，請重新操作或聯絡管理人員！！');
         echo json_encode($rtn);
        
     break;
     case "func_mb_delete":////////////////////////////////////////// func_mb_delete 刪除會員資料，這個刪除功能僅僅是將會員狀態改成8，也就是丟進垃圾桶，仍然可以取回。
-        //$del = $DB->query("DELETE FROM fsl_members WHERE mb_id = ?", array($mbID)); 
-        $up = $DB->query("UPDATE fsl_members SET mb_updated=getdate(), mb_status = ? WHERE mb_id = ?", array(8,$mbID));
+        //$del = DB->query("DELETE FROM fsl_members WHERE mb_id = ?", array($mbID)); 
+        $up = DB->query("UPDATE fsl_members SET mb_updated=getdate(), mb_status = ? WHERE mb_id = ?", array(8,$mbID));
         if($up){
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2251, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2251, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
             $rtn = array('RTN'=>1); 
         } else {
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2250, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2250, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄//
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'刪除會員資料失敗！請聯絡相關管理人員！！'); 
         }
         echo json_encode($rtn);
     break;
     case "func_mb_needUpdate":////////////////////////////////////////// func_mb_needUpdate 更新課程商品需求範圍
-        $cid = $DB->single("SELECT mbn_id FROM mb_needs WHERE mb_id=?", array($mbID));
+        $cid = DB->single("SELECT mbn_id FROM mb_needs WHERE mb_id=?", array($mbID));
         if($cid && $cid>0){
-            $up = $DB->update('mb_needs',array('mbn_array'=>json_encode($arrNeed)),array('mbn_id'=>$cid));
+            $up = DB->update('mb_needs',array('mbn_array'=>json_encode($arrNeed)),array('mbn_id'=>$cid));
             if($up==1){
-                $ilog = $DB->insSysLogs(51, CF_AD_ID, 2231, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
+                $ilog = DB->insSysLogs(51, CF_AD_ID, 2231, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
                 $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功編輯課程商品需求範圍！！', 'upTime'=> $cDateTime);
             } else {
-                $ilog = $DB->insSysLogs(51, CF_AD_ID, 2230, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
+                $ilog = DB->insSysLogs(51, CF_AD_ID, 2230, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
                 $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'編輯課程商品需求範圍失敗！請聯絡相關管理人員！！');
             }
         } else {
-                $ins = $DB->insert('mb_needs', array('mb_id'=>$mbID,'mbn_array'=>json_encode($arrNeed)));
+                $ins = DB->insert('mb_needs', array('mb_id'=>$mbID,'mbn_array'=>json_encode($arrNeed)));
                 if($ins){
-                    $ilog = $DB->insSysLogs(51, CF_AD_ID, 2241, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
+                    $ilog = DB->insSysLogs(51, CF_AD_ID, 2241, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
                     $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功新增課程商品需求範圍！！', 'upTime'=> $cDateTime);
                 } else {
-                    $ilog = $DB->insSysLogs(51, CF_AD_ID, 2240, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
+                    $ilog = DB->insSysLogs(51, CF_AD_ID, 2240, '["'.CF_AD_ID.'","'.$mbID.'"]');//寫入操作記錄
                     $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'新增課程商品需求範圍失敗！請聯絡相關管理人員！！'.$ins);
                 }
         }
@@ -220,7 +220,7 @@ switch ($formAcce) {
             else $sql .= " value IN (".$ifExpert.")";
             $sql .= ")";
         }//當 $ifCotype 賦值時，「合作方種類」欄位為其一的搜尋條件
-        $res = $DB->query($sql,array($search));
+        $res = DB->query($sql,array($search));
         $totalMB = count($res);
         if($totalMB>0){
             $arr = '[';
