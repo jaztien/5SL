@@ -1,13 +1,4 @@
 ////////////////////////////////////////////////////////////////
-
-//var currID = $('#currID').val() || 0;
-/*
-var searchURI = {};//parseUriToObj
-if($('#searchURI').val() !== '') {
-  searchURI = parseUriToObj($('#searchURI').val());
-}
-  */
-////////////////////////////////////////////////////////////////
 // -------------- JAVASCRIPTS FUNCTIONs 全域調用 -------------- //
 // -------------- 可接收include檔案要求後自定義動作 -------------- //
 ////////////////////////////////////////////////////////////////
@@ -28,18 +19,16 @@ function datatableCreate(tableID){
   var search = false;
   if (ths.data('search') !== undefined) { search = true;}
   var pageMax = parseInt(ths.data('pagemax')) || 25;
-  //var jumpTO = parseInt(ths.data('jumpto'), 10) || 1;
-  //jumpTO = (jumpTO - 1) * pageMax;
   var butClass = ths.data('butClass') || 'gray';
   var currentPage = 1;
+  
   // 智慧判斷是否該套用初始 order
-  // 先去撈撈看有沒有這頁的 DataTable 歷史快取紀錄
   var hasSavedState = sessionStorage.getItem('DT_State_' + window.location.pathname);
   var defaultOrder = [[orderBy, sortOrder]];
-  // 如果有快取紀錄，就把初始 order 設為 undefined，避免它在初始化時覆蓋快取並重置頁碼
   if (hasSavedState) {
       defaultOrder = undefined; 
   }
+
   //------------- 表格按鈕群組設定 -----------------//
   var newTableBut=[];
   if (ths.attr('but-excel') != undefined) {
@@ -52,78 +41,85 @@ function datatableCreate(tableID){
     var printTitle = ths.attr('but-print');
     if(printTitle == ''){ printTitle = '無標題'; }
     newTableBut.push({
-                extend: 'print',
-                text: 'Print', // 按鈕上顯示的文字
-                title: printTitle,     // PDF/列印頁面的大標題
-                //messageTop: '本報表由系統自動產生', // 表格上方的備註文字
-                messageBottom: '--- 報表結束 ---', // 表格下方的備註文字
-                exportOptions: {
-                    columns: ':visible' // 只列印目前網頁上看得到的欄位 (隱藏欄位不列印)
-                },
-                customize: function (win) {
-                    // 自訂列印網頁的 CSS 樣式（選填）
-                    $(win.document.body)
-                        .css('font-size', '10pt')
-                        .css('color', '#333');
-                    // 讓表格在列印時滿版
-                    $(win.document.body).find('table')
-                        .addClass('compact')
-                        .css('font-size', 'inherit')
-                        .css('width', '100%');
-                    // 動態注入 CSS 實現橫向列印
-                    $(win.document.head).append('<style>@page { size: landscape; }</style>');
-              }
-            });
-  }
-  if (ths.attr('but-advsearch') != undefined) {
-    var currClass = "advSearchBut";
-    var currText = ' <i class="fa fa-search" data-widget="control-sidebar" data-controlsidebar-slide="true"> 進階搜尋</i>';
-    /*
-    if(ths.attr('onSearching') != undefined){
-      currClass = 'btn btn-info';
-      currText = '<span class="right badge badge-warning" style="position:absolute; top: -12px;">條件搜尋中</span> <i class="fa fa-search" data-widget="control-sidebar" data-controlsidebar-slide="true"> 進階搜尋</i>';
-    }
-    */
-    newTableBut.push({
-      className: currClass,
-      text: currText
+      extend: 'print',
+      text: 'Print',
+      title: printTitle,
+      messageBottom: '--- 報表結束 ---',
+      exportOptions: {
+          columns: ':visible'
+      },
+      customize: function (win) {
+          $(win.document.body)
+              .css('font-size', '10pt')
+              .css('color', '#333');
+          $(win.document.body).find('table')
+              .addClass('compact')
+              .css('font-size', 'inherit')
+              .css('width', '100%');
+          $(win.document.head).append('<style>@page { size: landscape; }</style>');
+      }
     });
   }
+
+  // [變更1] 進階搜尋按鈕：改用 Bootstrap Icons (bi-search) 並聯動 BS5 Offcanvas / doButSerach()
+  if (ths.attr('but-advsearch') != undefined) {
+    var currClass = "advSearchBut";
+    var currText = '<i class="bi bi-search"></i> 進階搜尋';
+    newTableBut.push({
+      className: currClass,
+      text: currText,
+      action: function (e) {
+        if (typeof doButSerach === 'function') {
+          doButSerach();
+        } else {
+          const offcanvasEl = document.getElementById('offcanvasSearch');
+          if (offcanvasEl) {
+            bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+          }
+        }
+      }
+    });
+  }
+
   //------------- 表格按鈕-新增按鈕 -----------------//
+  // [變更2] 圖示改用 Bootstrap Icons (bi-plus-circle)
   if (ths.attr('but-addnew') !== undefined) {
     var buttext = ths.attr('but-addnew');
     if(buttext == ''){ buttext = '新增資料'; }
     newTableBut.push({
       className:'advAddBut'+'-'+butClass,
-      text: '<i class="fa fa-circle-plus"> ' + buttext + '</i>',
+      text: '<i class="bi bi-plus-circle"></i> ' + buttext,
       action: function (e) {
         var tbInfo = mainTable.page.info();
-        //if (confirm('當按下按鍵繼續進行操作時，即代表同意遵循「人生第五季管理辦法」進行操作！\r\r確定進行資料新增操作？！')){
         var uri = ths.data('dirto');
-          uri += '?currID=' + $(this).data('currid');
+          uri += '?currID=' + ($(this).data('currid') || 0);
           uri += '&pageMax=' + pageMax;
           uri += '&currPage=' + tbInfo.page;
           uri += '&currOrder=' + mainTable.order();
           if($('#searchURI').val() !== '') { uri += '&' + $('#searchURI').val(); }
           window.location.replace(uri);
-        //}
       }
     });
   }
+
   //------------- 表格按鈕-開啟彈出視窗 -----------------//
+  // [變更3] 圖示改用 bi-plus-circle，並改用 Bootstrap 5 原生 Modal 實例開啟視窗
   if (ths.attr('but-popup') !== undefined) {
     var idPreTitle = tableID.split('_');
     var preTitle = idPreTitle[1];
     var buttext = ths.attr('but-popup');
     if(buttext == ''){ buttext = '新增資料'; }
-    //var emptyURI='?id=0&rulemode=&fixed=&posit=&group=&top=&indist=&weekday=&weekend=&period=&status=0';
     var emptyURI='?id=0';
-    //var emptyURI='';
     newTableBut.push({
       className:'popupBut'+'-'+butClass,
-      text: '<i class="fa fa-circle-plus"> ' + buttext + '</i>',
+      text: '<i class="bi bi-plus-circle"></i> ' + buttext,
       action: function (e) {
-        $('#'+preTitle+'_modal').show().addClass('show');
+        var modalEl = document.getElementById(preTitle + '_modal');
+        if (modalEl && typeof bootstrap !== 'undefined') {
+          bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        } else {
+          $('#'+preTitle+'_modal').show().addClass('show');
+        }
         //當 data-include 賦值時（有效的檔案名稱），則進行檔案載入
         if (ths.data('include') !== undefined && ths.data('include') !== '') {
           $('#'+preTitle+'_modal .modal-container').load(ths.data('include')+emptyURI);
@@ -131,10 +127,10 @@ function datatableCreate(tableID){
       }
     });
   }
+
   var hasButtons = (typeof newTableBut !== 'undefined' && newTableBut && newTableBut.length > 0);
-  //var mainTable = ths.DataTable({
   var mainTable = new DataTable(ths, {
-    "order": defaultOrder,// 💡 這裡改用我們剛剛智慧判斷過後的 defaultOrder
+    "order": defaultOrder,
     "paging": true,
     "pagingType": "full_numbers",
     "lengthChange": true,
@@ -145,8 +141,6 @@ function datatableCreate(tableID){
     "info": true,
     "autoWidth": false,
     "responsive": true,
-    //"displayStart": jumpTO,
-    //以下是穩健的狀態快取對接
     "stateSave": true, 
     "stateDuration": -1, 
     "stateSaveCallback": function(settings, data) {
@@ -155,21 +149,6 @@ function datatableCreate(tableID){
     "stateLoadCallback": function(settings) {
         return JSON.parse(sessionStorage.getItem('DT_State_' + window.location.pathname));
     },
-    //強制 DataTable 在載入完畢後，強制跳回到快取的頁碼位置（非必要）
-    /*
-    "initComplete": function(settings, json) {
-        var api = this.api();
-        var state = api.state.loaded();
-        
-        if (state && state.start !== undefined) {
-            var targetPage = Math.floor(state.start / state.length);
-            setTimeout(function() {
-                console.log("【生命週期強推】DataTable 載入完畢，強制彈回第 " + (targetPage + 1) + " 頁");
-                api.page(targetPage).draw('page'); //
-            }, 50);
-        }
-    },
-  */
     "columnDefs": [
         {
             "targets": colOrder,     
@@ -177,20 +156,13 @@ function datatableCreate(tableID){
         }
     ],
     "layout": {
-      // 定義左下方（bottomStart）同時放 info 和 pageLength，它們會自動並排！
       "bottomStart": ['info', 'pageLength'], 
-      "bottomEnd": 'paging',   // 右下方放分頁
+      "bottomEnd": 'paging',
       "topStart": hasButtons ? {
                     buttons: newTableBut
-                } : null,        // 清空預設的左上方位置
-      "topEnd": null       // 右上方維持搜尋
+                } : null,
+      "topEnd": null
     },
-        // 關鍵新增：每次換頁、重繪時自動觸發
-    //"dom": 'frt<"footer-left"il>p' ,//舊版本 1.x
-    //"lengthMenu": [[10, 25, 50, 100, 500, -1], [10, 25, 50, 100, 500, "All"]],
-    //"select": true,
-    //"keys": false,
-    //"colReorder": true,
     language: {
       "lengthMenu": "顯示 _MENU_ 筆/頁",
       "sProcessing": "處理中...",
@@ -215,58 +187,36 @@ function datatableCreate(tableID){
           "sSortDescending": ": 以降序排列此列"
       }
     }
-        /*
-    "drawCallback" : function () {
-      thsPagi = $('#'+tableID+'_paginate');
-      thsPagi.find('.page-item.active a').addClass(butClass);
-    }
-      */
   });
+
   //------------- 點選表格列時，導向到指定頁面 -----------------//
   mainTable.on('click','tbody tr',function(e) {
-    //點選表格列時，先檢查點選的地方是否為最後一個欄位（操作/選擇欄）
-    // 【最精準判斷】找出滑鼠當下點擊的元素，最鄰近的 td 是不是最後一欄
     var $clickedTd = $(e.target).closest('td');
-    // 【跳過最後一欄(留給附加操作)】如果點擊的是最後一欄，直接結束並放行讓按鈕或是 checkbox 處理
     if ($clickedTd.is(':last-child')) {
         return; 
     }
-    // 如果點擊的不是最後一欄，而且表格中帶有 data-dirto 時，則執行相應目標的導向操作
     if (ths.data('dirto') !== undefined && ths.data('dirto') !== '') {
       var targetUrl = ths.data('dirto');
       var uri = targetUrl + '?currID=' + $(this).data('currid');
       window.location.replace(uri);
     }
-    //觸發頁面中帶有 data-triggerto 的值的同名函式
-    //當 datatable 表格中沒有帶有 data-dirto，並且表格中帶有 data-triggerto 時，則啟動「動態函式映射」功能，並執行對應的函式
     else if(ths.data('triggerto') !== undefined && ths.data('triggerto') !== ''){
       if (typeof window[ths.data('triggerto')] === "function") {
-          window[ths.data('triggerto')]($(this)); //這裡就等同於執行 function 【data-triggerto】();
+          window[ths.data('triggerto')]($(this));
       } else {
           console.error("找不到名為 " + ths.data('triggerto') + " 的全域函式！");
       }
     }
-    //當 table 中沒有帶 data-dirto 也沒有帶 data-triggerto 時，則不執行任何動作
     else{
       return;
     }
   });
-  //------------- 表格按鈕組合及顯示 -----------------//
-  /*
-  if(newTableBut.length>0){
-    new $.fn.dataTable.Buttons( mainTable, {
-        buttons: newTableBut
-    });
-    mainTable.buttons( 0, null ).container().prependTo('#'+ths.prop('id')+'_wrapper .col-md-6:eq(0)');//table.table().container()
-  }
-    */
-  //輸出最終結果
+
   return mainTable;
 }
 
 
 function datatableGroup(tableID,pageMax,butClass){
-  //var ths = $('#'+tableID);
   var ths = $('[id^="'+tableID+'"]');
   var thsPagi;
   var groupTable = ths.DataTable({
@@ -280,10 +230,6 @@ function datatableGroup(tableID,pageMax,butClass){
     "responsive": true,
     "pageLength": pageMax,
     "displayStart": 0,
-    //"lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
-    //"select": true,
-    //"keys": false,
-    //"colReorder": true,
     language: {
       "lengthMenu": "顯示 _MENU_ 筆搜尋紀錄",
       "sProcessing": "處理中...",
@@ -330,37 +276,31 @@ function datatableGroup(tableID,pageMax,butClass){
   });
     
   var newTableBut=[];
-  //if (ths.attr('but-addnew') !== undefined) {
-    //var buttext = ths.attr('but-addnew');
-    //if(buttext == ''){ buttext = '新增資料'; }
-    buttext = '新增資料';
-    newTableBut.push({
-      className:'advAddBut'+'-'+butClass,
-      text: '<i class="fa fa-circle-plus"> ' + buttext + '</i>',
-      action: function (e) {
-        var tbInfo = groupTable.page.info();
-        var uri = ths.data('dirto');
-        uri += '?currID=' + $(this).data('currid');
-        uri += '&pageMax=' + pageMax;
-        uri += '&currPage=' + tbInfo.page;
-        uri += '&currOrder=' + groupTable.order();
-        if($('#searchURI').val() !== '') { uri += '&' + $('#searchURI').val(); }
-        window.location.replace(uri);  
-      }
-    });
- // }
+  buttext = '新增資料';
+  newTableBut.push({
+    className:'advAddBut'+'-'+butClass,
+    // [變更4] 圖示改用 Bootstrap Icons (bi-plus-circle)
+    text: '<i class="bi bi-plus-circle"></i> ' + buttext,
+    action: function (e) {
+      var tbInfo = groupTable.page.info();
+      var uri = ths.data('dirto');
+      uri += '?currID=' + ($(this).data('currid') || 0);
+      uri += '&pageMax=' + pageMax;
+      uri += '&currPage=' + tbInfo.page;
+      uri += '&currOrder=' + groupTable.order();
+      if($('#searchURI').val() !== '') { uri += '&' + $('#searchURI').val(); }
+      window.location.replace(uri);  
+    }
+  });
 
-  //if(newTableBut.length>0){
-    new $.fn.dataTable.Buttons( groupTable, {
-        buttons: newTableBut
-    });
-    groupTable.buttons( 0, null ).container().prependTo('#'+ths.prop('id')+'_wrapper .col-md-6:eq(0)');//table.table().container()
- //}
+  new $.fn.dataTable.Buttons( groupTable, {
+      buttons: newTableBut
+  });
+  groupTable.buttons( 0, null ).container().prependTo('#'+ths.prop('id')+'_wrapper .col-md-6:eq(0)');
   return groupTable;
-  
 }
-  // 簡易 JavaScript MD5 加密 
-  // 先用ls-byte轉換一個32位數字為十六進制字符串
+// 簡易 JavaScript MD5 加密 
+// 先用ls-byte轉換一個32位數字為十六進制字符串
 function rhex(num){
   var hex_chr = "0123456789abcdef";
   var str = "";
@@ -522,22 +462,17 @@ function getTokenVal(){
   var uai = navigator.userAgent.toLowerCase();
   var oNaviString = uai + 'PHPSESSID=' + getCookieVal('PHPSESSID');
   var Omuai = calcMD5(oNaviString);
-  var saltH = Omuai.slice(0, 12);//Omuai.substring(0,12);
-  var saltT = Omuai.slice(-12);//Omuai.substr(Omuai.length-12,12);
+  var saltH = Omuai.slice(0, 12);
+  var saltT = Omuai.slice(-12);
   var muai = calcMD5(saltH+oNaviString+saltT);
   return muai;
 }
 function getCookieVal(cookieName) {
-  /*
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-  */
   let cookie = {};
   document.cookie.split(';').forEach(function(el) {
     let [key,value] = el.split('=');
     cookie[key.trim()] = value;
-  })
+  });
   return cookie[cookieName];
 }
 
@@ -554,7 +489,7 @@ function arrayTOstring(arr,emptY=false){
     $.each(arr, function(i, val) {
       if($.isNumeric(val)==true) { stR += val + ','; }
       else { stR += '"' + val + '",'; }
-    })
+    });
     stR = '[' + stR.slice(0, -1) + ']'; 
   } else {
     if(emptY==false){ stR = '[]'; }
@@ -583,26 +518,22 @@ function datetimeToTimestamp(datetimeString) {
 }
 //取得星期數字與中文名稱
 function _js_fn_getWeekday(dateString) {
-    var dateObj = new Date(dateString); //將字串轉換成 Date 物件
-    var dayNumber = dateObj.getDay(); //取得星期數字 (0 ~ 6)
-    var weekNames = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];//定義中文名稱對照表
-    return { //回傳物件，讓你數字和中文名字都能拿得到
-        number: dayNumber,         // 例如: 1
-        name: weekNames[dayNumber] // 例如: "星期一"
+    var dateObj = new Date(dateString);
+    var dayNumber = dateObj.getDay();
+    var weekNames = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+    return {
+        number: dayNumber,
+        name: weekNames[dayNumber]
     };
 }
 
 /**
  * 計算所有的上課日期
- * @param {string} startDateStr - 起始日期字串 (例如 "2026-10-31")
- * @param {Array} classDays - 上課的星期數字陣列 (例如 代表一、四、六)
- * @param {number} totalClasses - 總堂數 (例如 10)
- * @returns {Array} 包含所有上課日期的字串陣列
  */
 function getCourseDatesTriple(startDateStr, classDays, totalClasses) {
-    var dateArray = [];    // 1. 裝純日期，例如 "2026-10-31"
-    var weekdayArray = []; // 2. 裝星期中文，例如 "星期六"
-    var numDayArray = [];  // 3. 裝星期數字，例如 6
+    var dateArray = [];
+    var weekdayArray = [];
+    var numDayArray = [];
     
     var weekNames = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
     var currentDate = new Date(startDateStr + 'T12:00:00');
@@ -623,39 +554,29 @@ function getCourseDatesTriple(startDateStr, classDays, totalClasses) {
         currentDate.setDate(currentDate.getDate() + 1);
     }
     
-    // 👇 關鍵追加：抓取陣列的最後一筆，即為「結業日期 / 最後一日」
-    // 如果總堂數是大於 0 的話才抓取，做個防呆
     var lastDate = dateArray.length > 0 ? dateArray[dateArray.length - 1] : "";
     var lastWeekday = weekdayArray.length > 0 ? weekdayArray[weekdayArray.length - 1] : "";
     
-    // 回傳時，多附帶一個結業日期的欄位
     return {
         dates: dateArray,
         weekdays: weekdayArray,
         dayNums: numDayArray,
-        endDate: lastDate,             // 👈 結業日期 (例如: "2026-11-21")
-        endWeekday: lastWeekday        // 👈 結業日星期 (例如: "星期六")
+        endDate: lastDate,
+        endWeekday: lastWeekday
     };
 }
 
-/**
- * 萬用拼接函式（可以自由挑選要怎麼組合日期、星期、週數三個資料）
- */
 ////////////////////////////////////////////////////////
 //--------------------- 萬用拼接函式 --------------------//
-//-----（可以自由挑選要怎麼組合日期、星期、週數三個資料） -----//
 ////////////////////////////////////////////////////////
 function courseDateCombine(dates, weekdays, dayNumbers) {
     return $.map(dates, function(dateStr, index) {
-        // 利用 index 隨時撈出對應的中文與數字
         var chineseDay = weekdays[index];
         var numericDay = dayNumbers[index];
-        // 範例 A：2026-10-31 (星期六) [6]
         return dateStr + " (" + chineseDay + ") [" + numericDay + "]";
-        // 範例 B：如果您只想拼日期跟數字，可以改成：
-        // return dateStr + " 星期代碼：" + numericDay;
     });
 }
+
 ////////////////////////////////////////////////////////
 //------- 萬用 URI 字串轉物件工具函式 (全瀏覽器相容) -------//
 ////////////////////////////////////////////////////////
@@ -669,9 +590,10 @@ function parseUriToObj(uriString) {
     }
 
     // 🚀 1. 優先判斷：如果瀏覽器支援現代寫法，直接光速執行
-    if (typeof URLSearchParams !== 'undefined' && typeof Object.fromEntries !== 'function') {
+    if (typeof URLSearchParams !== 'undefined' && typeof Object.fromEntries === 'function') {
         return Object.fromEntries(new URLSearchParams(uriString));
     }
+
     // 🍂 2. 備援方案：若不支援，自動降級切換成老舊瀏覽器相容寫法 (純 JS 迴圈)
     var objResult = {};
     var pairs = uriString.split('&');
@@ -688,6 +610,7 @@ function parseUriToObj(uriString) {
     
     return objResult;
 }
+
 /**
  * 搭配 ArticleRankingSystem 的前端獨立函式（支援 0分 全空心星）
  * 修正點：已全面修正為 JavaScript 標準的 += 拼接語法
@@ -720,5 +643,3 @@ function _js_fn_getStars(stars, asHtml) {
         return '★'.repeat(fullStarsCount) + (hasHalfStar ? '🌓' : '') + '☆'.repeat(emptyStarsCount);
     }
 }
-
-

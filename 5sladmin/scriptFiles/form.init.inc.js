@@ -4,17 +4,21 @@ $.getJSON('../jsonFiles/locations.json', function(data) {
 });
 
 //////////////////// 載入並定義頁面表單現狀 ////////////////////////
-var CHGform = $('.content-wrapper .content form');
+// [變更1] 兼容 AdminLTE 4 (.app-main .app-content) 與舊版 (.content-wrapper .content)
+var CHGform = $('.app-main .app-content form, .content-wrapper .content form');
 var ORGForm = CHGform.serialize();
+
 ////////////////////////////////////////////////////////////////
 // --------------------- JQUERY FUNCTIONs ------------------- //
 ////////////////////////////////////////////////////////////////
 $(function () {
-  
+  // 重新確保 DOM 載入完成後抓到正確的表單初始狀態
+  CHGform = $('.app-main .app-content form, .content-wrapper .content form');
+  ORGForm = CHGform.serialize();
+
   // --------------- 當改變城市選項時 ---------------------
-  //var distSelectorELement;
-  //$("select[data-select=city]").on('change', function(){
-  $('.tab-pane.active form, #form_search').on('change', "select[data-select=city]", function(){
+  // [變更2] 納入 #offcanvasSearch 與 .app-main 範圍進行事件委派
+  $(document).on('change', '.tab-pane.active form select[data-select=city], #form_search select[data-select=city], .app-main form select[data-select=city]', function(){
     var elM = $(this);
     var cityId = elM.val() || '';
     var cityElm = elM.prop('id');
@@ -23,26 +27,30 @@ $(function () {
       distElm.html('');
     }
     else { distElm.html('<option value="">-請選擇行政劃區-</option>'); }
-    if(cityId&&cityId!=''){
-      var disT=locobj[cityId]['district'];
-      $.each(disT,function(key, value){
+    if(cityId && cityId != '' && locobj && locobj[cityId]){
+      var disT = locobj[cityId]['district'];
+      $.each(disT, function(key, value){
         distElm.append('<option value="' + key + '">'+ value +'</option>');
       });
     }
     clearoptionselector($("select[bc-fromcity="+cityElm+"]"));
     clearoptionselector($("select[circ-fromcity="+cityElm+"]"));
   });
+
   // 改變責任社區選單
   function clearoptionselector(elM){
+    if(elM.length === 0) return;
     if(elM.prop('multiple')==true){
       elM.val(null).trigger('change');
       elM.html('');
     } else {
-      elM.html('<option value="">' + elM.data('placeholder') + '</option>');
+      elM.html('<option value="">' + (elM.data('placeholder') || '-請選擇-') + '</option>');
     }
   }
+
   // --------------- 當改變區劃選項時 ---------------------
-  $("select[data-select=dist]").on("change", function(e){
+  // [變更3] 改用 $(document).on 事件委派，確保分頁或 Offcanvas 內的選單皆可正常觸發
+  $(document).on("change", "select[data-select=dist]", function(e){
     var distThs = $(this);
     var distID = distThs.val();
     var listBc = distThs.attr('list-bc');
@@ -52,21 +60,21 @@ $(function () {
         type: 'post',
         url: '../funcFiles/district_subselector.php',
         data: {
-          'arrDatA':distID, 
+          'arrDatA': distID, 
           'commSelector': listBc, 
           'circleSelector': listCirc
         },
-        dataType: 'json',//data format  
+        dataType: 'json',
         async: false, 
       success: function (data) {
         console.log(data);
-          var commArr = data['comm'];
-          var circleArr = data['circle'];
+          var commArr = data['comm'] || [];
+          var circleArr = data['circle'] || [];
           var bcElm = $("select[bc-fromcity="+cityElm+"]");
-          //bcElm.html('<option value="">-請選擇社區建案-</option>');
           clearoptionselector(bcElm);
           for(var i=0; i<commArr.length; i++){
-            var optStr='<option value="' + commArr[i]['bc_id'] + '">[' + locobj[commArr[i]['bc_city']]['district'][commArr[i]['bc_district']] + '] '+ commArr[i]['bc_title'] +'</option>';
+            var distName = (locobj && locobj[commArr[i]['bc_city']]) ? locobj[commArr[i]['bc_city']]['district'][commArr[i]['bc_district']] : '';
+            var optStr='<option value="' + commArr[i]['bc_id'] + '">[' + distName + '] '+ commArr[i]['bc_title'] +'</option>';
             bcElm.append(optStr);
           }
           if(bcElm.data('addnew')=="1"){
@@ -74,8 +82,7 @@ $(function () {
           }
           //----------------
           var circElm = $("select[circ-fromcity="+cityElm+"]");
-          //circElm.html('<option value="">-請選擇生活商圈-</option>');
-          clearoptionselector(circElm)
+          clearoptionselector(circElm);
           for(var i=0; i<circleArr.length; i++){
             var coptStr='<option value="' + circleArr[i]['scrc_id'] + '">'+ circleArr[i]['scrc_title'];
             if(circleArr[i]['scrc_circletitle']!=""){ coptStr+='('+circleArr[i]['scrc_circletitle']+')'; }
@@ -88,54 +95,27 @@ $(function () {
         }
     });
   });
-  // --------------- 當改變社區建案選項時 ------------------addbc-fromcity
-  $("select[data-select=bc]").on('change', function(){
+
+  // --------------- 當改變社區建案選項時 ------------------
+  $(document).on('change', "select[data-select=bc]", function(){
     var bcThs = $(this);
     var commId = bcThs.val();
     var cityElm = bcThs.attr('bc-fromcity');
     var addbcElm = $("[addbc-fromcity='"+cityElm+"']");
-    if(commId=='N'){//當選擇自行新增建案項目時
+    if(commId=='N'){ // 當選擇自行新增建案項目時
       addbcElm.removeAttr("disabled").focus();
     } else {
-      addbcElm.val('').prop('disabled', 'disabled').blur();
+      addbcElm.val('').prop('disabled', true).blur();
     }
   });
 
-  //JazFIX: 改為外框操作，移往 5sladmin_iframe.php
-  /////////////// Top Navigator 按鈕群操作 //////////////////////
-  // 操作按鈕框_儲存/（新增/更新/上傳 通用）
-  /*
-  window.parent.$('#topBut_save').click(function(e){ 
-    e.preventDefault();
-    if(!$(this).hasClass('active')){ return false;}
-    var getFormPost = $('.tab-pane.active').prop("id");
-    if (confirm('當按下按鍵繼續進行操作時，即代表同意遵循「人生第五季管理辦法」進行操作！\r\r確定進行資料儲存操作？！')){
-      doButSave($('#form_'+ getFormPost));
-    }
-  });
-  // 操作按鈕框_復原
-  window.parent.$('#topBut_reset').click(function(e){ 
-    var getFormPost = $('.tab-pane.active').prop("id"); 
-    doButReset($('#form_'+ getFormPost));
-  });
-  // 操作按鈕框_刪除
-  window.parent.$('#topBut_delete').click(function(e){ 
-    var getFormPost = $('.tab-pane.active').prop("id");
-    if (confirm('這個操作將刪除這個頁面的資料，以及其相關聯的所有資料表記錄，部份刪除的資料將置入垃圾桶內，並有保留期限！\r\r確定刪除此筆資料？！')){
-      let recomF = prompt("請輸入安全驗證碼");
-      if (recomF == "我是豬") {
-        doButDelete();
-      }
-    }
-  });
-  */
   // 表單異動處理
-  $('.content-wrapper .content form :input:not(:file)').on('change input', function() {
+  // [變更4] 更新選取器至 AdminLTE 4 (.app-main .app-content)，同時保留舊版相容
+  $(document).on('change input', '.app-main .app-content form :input:not(:file), .content-wrapper .content form :input:not(:file)', function() {
     doSerializeCheck();
   });
+
   /////////////// Datatable 整合操作 //////////////////////
-  /** ************ 使用 AJAX Serialize（Array）POST 傳遞資料 ***************** **/
-  /** *********** 合併陣列欄位處理（尤指 Select & Checkbox & Radiobox） ******* **/
   $.fn.serializeObject = function () {
     var o = {};
     var a = this.serializeArray();
@@ -157,60 +137,46 @@ $(function () {
     });
     return o;
   };
-/**
- * 還原序列化到表單
- * @param {string} serializeString 序列化字串
- * 2024/11/05 : Jaz 修正 select2 通用語法，以及預清除多選選單內容
- * //使用方式
-  var serializeString = $('#myForm').serialize(); // 序列化
-  $('#myForm').doDeSerialize(serializeString); // 還原表單
- */
+
+  /**
+   * 還原序列化到表單
+   */
   $.fn.doDeSerialize = function(serializedString) {
     var $form = $(this);
     if($form.length==0) return;
     $form[0].reset();
-    $('select[multiple = multiple]').val(null).trigger('change');//預先清除所有多選選單內容
-    //serializedString = serializedString.replace(/+/g, '%20');
+    $('select[multiple = multiple]').val(null).trigger('change');
     var formFieldArray = serializedString.split("&");
-    //Loop over all name-value pairs
     $.each(formFieldArray, function(i, pair) {
         var nameValue = pair.split("=");
         var name = decodeURIComponent(nameValue[0]);
         var value = decodeURIComponent(nameValue[1]);
-        //Find one or more fields
         var $field = $form.find('[name="' + name + '"]');
         if($field.is("input")){
-            //Checkboxes and Radio types need to be handled differently
             if ($field[0].type == "radio" || $field[0].type == "checkbox") {
                 var $fieldWithValue = $field.filter('[value="' + value + '"]');
                 var isFound = ($fieldWithValue.length > 0);
-                //Special case if the value is not defined; value will be"on"
                 if (!isFound && value == "on") {
                     $field.first().prop("checked", true);
                 } else {
                     $fieldWithValue.prop("checked", isFound);
                 }
-            } else { //input
+            } else {
                 $field.val(value);
             }
-        }else if($field.is("select")){
+        } else if($field.is("select")){
           if($field[0].type == "select-multiple"){
-            // 多選的下拉選單
-            $field.val($field.val().concat([value]));
+            $field.val(($field.val() || []).concat([value]));
             $field.trigger('change');
           } else {
-            // 單選的下拉選單
             $field.val(value);
           }
-        } else { // textarea
+        } else {
             $field.val(value);
         }
-  
-    });//each
+    });
     return this;
-  }
-
-
+  };
 });
 
 ////////////////////////////////////////////////////////////////     
@@ -220,18 +186,23 @@ $(function () {
 // 表單異動處理執行
 function doSerializeCheck() {
   if(CHGform.serialize() !== ORGForm){
-    //window.parent.$('#topBut_save').addClass('active');
-    window.parent.$('#topBut_save').addClass('active');
+    if(window.parent && window.parent.$) {
+      window.parent.$('#topBut_save').addClass('active');
+    }
   } else { 
-    //window.parent.$('#topBut_save').removeClass('active');
-    window.parent.$('#topBut_save').removeClass('active');
+    if(window.parent && window.parent.$) {
+      window.parent.$('#topBut_save').removeClass('active');
+    }
   }
 }
+
 function doSerialize() {
-  //window.parent.$('#topBut_save').removeClass('active');
-  window.parent.$('#topBut_save').removeClass('active');
+  if(window.parent && window.parent.$) {
+    window.parent.$('#topBut_save').removeClass('active');
+  }
   ORGForm = CHGform.serialize();
 }
+
 // 将form.serialize() 转json
 function formToJson (data) {
   data=data.replace(/&/g,"\",\"");
@@ -240,28 +211,7 @@ function formToJson (data) {
   return data;
 }
   
-//////////////////////// AJAX 表單處理- form 內元件值結合成課程商品準備送出 ///////////////////////////////////////////
-// 在 class 中置入 「 notSubmit 」，代表這個元件值不將經由 Form Post 送出
-/*
-function getFormObjects(frm){
-  var formOBJ = {};
-  frm.find(":input").not(".notSubmit").each(function(index) {
-    var itype = $(this).attr('type');
-    var ikey = $(this).attr('id');
-    if(ikey=='' || typeof(ikey) == 'undefined' ){ return; }
-    if($(this).is('select')) {
-      if($(this).prop("multiple")){ formOBJ[ikey] = arrayTOstring($(this).val()); }
-      else { formOBJ[ikey] = $(this).val(); }
-    } else if (itype=='radio' || itype=='checkbox') {
-      ikey = $(this).attr('name');
-      if($(this).is(':checked')) { formOBJ[ikey] = $(this).val(); }
-      else { formOBJ[ikey] = ''; }
-    } else { formOBJ[ikey] = $(this).val(); }
-  });
-  return formOBJ;
-}
-*/
-
+//////////////////////// AJAX 表單處理 ///////////////////////////////////////////
 function getFormObjects(frm){
   var formOBJ = {};
   
@@ -297,11 +247,9 @@ function getFormObjects(frm){
           if (!formOBJ[ikey]) { formOBJ[ikey] = []; }
         }
       } else {
-        // ⭕【核心修改】：非群組的單個 checkbox
         if ($(this).is(':checked')) { 
           formOBJ[ikey] = $(this).val(); 
         } else { 
-          // 讀取 HTML 上設定的 data-unchecked 值，如果沒設，就預設給空字串 ''
           var uncheckedValue = $(this).data('unchecked');
           formOBJ[ikey] = (typeof uncheckedValue !== 'undefined') ? String(uncheckedValue) : ''; 
         }
@@ -334,10 +282,6 @@ function getFormObjects(frm){
   return formOBJ;
 }
 
-
-
-
-//var datA = frm.find(":input:not(.notSubmit,[name^=suneditor_])").serializeArray();
 function suneditorCreate(elM,typE='ez',w='100%',h='auto',holD='請利用編輯器，或直接留下HTML語法的內容...'){
   var buttonType=[];
   buttonType['full']=[
@@ -491,5 +435,3 @@ function suneditorCreate(elM,typE='ez',w='100%',h='auto',holD='請利用編輯�
 
   return editor;
 }
-
-

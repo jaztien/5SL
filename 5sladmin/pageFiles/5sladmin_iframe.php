@@ -36,9 +36,9 @@ while($ii<count($sidebar)){
 $sIDX = $sideBarIDX['ITEM_ARTI'];
 $getNum = DB->single("SELECT COUNT(arti_id) FROM articles WHERE arti_status=?",array(6));
 $getSum = $getNum;
-$sidebar[$sIDX]['badgeClass']='badge-warning';
+$sidebar[$sIDX]['badgeClass']='text-bg-warning';
 $sidebar[$sIDX]['badgeNum']=$getSum;
-$sidebar[$sIDX]['subgroup'][0]['badgeClass']='badge-warning';
+$sidebar[$sIDX]['subgroup'][0]['badgeClass']='text-bg-warning';
 $sidebar[$sIDX]['subgroup'][0]['badgeNum']=$getNum;
 // 未讀訊息數量 index: 5
 /*
@@ -68,11 +68,11 @@ $sIDX = $sideBarIDX['ITEM_AD'];
 $getNum = DB->single("SELECT COUNT(advp_id) FROM advi_pack WHERE advp_status=?",array(6));
 $getNum1 = DB->single("SELECT COUNT(advi_id) FROM advitising WHERE advi_status=?",array(6));
 $getSum = $getNum + $getNum1;
-$sidebar[$sIDX]['badgeClass']='badge-warning';
+$sidebar[$sIDX]['badgeClass']='text-bg-warning';
 $sidebar[$sIDX]['badgeNum']=$getSum;
-$sidebar[$sIDX]['subgroup'][0]['badgeClass']='badge-warning';
+$sidebar[$sIDX]['subgroup'][0]['badgeClass']='text-bg-warning';
 $sidebar[$sIDX]['subgroup'][0]['badgeNum']=$getNum;
-$sidebar[$sIDX]['subgroup'][1]['badgeClass']='badge-warning';
+$sidebar[$sIDX]['subgroup'][1]['badgeClass']='text-bg-warning';
 $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
 */
 ?>
@@ -85,7 +85,7 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="imageFiles/favicon.ico" type="image/ico" />
+  <link rel="icon" href="../imageFiles/favicon.ico" type="image/ico" />
   <title>Fifth Season Life 人生第五季 | 後台管理系統</title>
 
   <!-- Google Font: Source Sans Pro 
@@ -110,11 +110,10 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
     <!--begin::Required Plugin(AdminLTE)-->
     <link rel="stylesheet" href="../cssFiles/adminlte.css" />
     <link rel="stylesheet" href="../cssFiles/5sl.mainiframe.css" />
-  <!--begin::Third Party Plugin(OverlayScrollbars)-->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.17.0/styles/overlayscrollbars.min.css" crossorigin="anonymous"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.5/skeleton.css" crossorigin="anonymous"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/bootstrap5@7.1.5/theme.css" crossorigin="anonymous"/>
-
+    <!--begin::Third Party Plugin(OverlayScrollbars)
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.17.0/styles/overlayscrollbars.min.css" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.5/skeleton.css" crossorigin="anonymous"/>
+    --> 
   <style>
     /* 確保滿版 IFrame 架構下外層視窗不產生多餘捲軸 */
     html, body {
@@ -315,7 +314,9 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
                   $topIcon = !empty($rawIcon1) ? ' '.str_replace('fa-', 'bi-', $rawIcon1) : ' bi-folder';
                   
                   echo '<li data-pagecode="'.$sidebar[$i]['pagecode'].'" class="nav-item">';
-                  echo '<a href="'.$sidebar[$i]['url'].'" class="nav-link">';
+                  // 1. 第一層選單的 <a> 標籤
+                  $target1 = ($sidebar[$i]['url'] != '#' && !empty($sidebar[$i]['url'])) ? ' target="iFrame_main"' : '';
+                  echo '<a href="'.$sidebar[$i]['url'].'"'.$target1.' class="nav-link">';
                   echo '<i class="nav-icon bi'.$topIcon.'"></i>';
                   echo '<p>';
                   echo $sidebar[$i]['title'];
@@ -351,7 +352,9 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
                           }
 
                           echo '<li data-pagecode="'.$sidebar2[$si]['pagecode'].'" class="nav-item">';
-                          echo '<a href="'.$sidebar2[$si]['url'].'" class="nav-link">';
+                          // 2. 第二層選單的 <a> 標籤
+                          $target2 = ($sidebar2[$si]['url'] != '#' && !empty($sidebar2[$si]['url'])) ? ' target="iFrame_main"' : '';
+                          echo '<a href="'.$sidebar2[$si]['url'].'"'.$target2.' class="nav-link">';
                           echo '<i class="nav-icon'.$subIcon2.'"></i>';
                           echo '<p>';
                           echo $sidebar2[$si]['title'];
@@ -380,7 +383,9 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
                               $ti = 0;
                               while($ti < $subnum3){
                                   echo '<li data-pagecode="'.$sidebar3[$ti]['pagecode'].'" class="nav-item">';
-                                  echo '<a href="'.$sidebar3[$ti]['url'].'" class="nav-link">';
+                                  // 3. 第三層選單的 <a> 標籤
+                                  $target3 = ($sidebar3[$ti]['url'] != '#' && !empty($sidebar3[$ti]['url'])) ? ' target="iFrame_main"' : '';
+                                  echo '<a href="'.$sidebar3[$ti]['url'].'"'.$target3.' class="nav-link">';
                                   // [變更4] 第三層改用 bi-circle (對應原本的 far fa-circle)
                                   echo '<i class="nav-icon bi bi-circle"></i>';
                                   echo '<p>';
@@ -505,19 +510,51 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
       //---------------------------------------------------------//
       // 2. 供內頁加載完成後觸發自動展開對應側邊欄選單 (樹狀選單狀態同步)
       //---------------------------------------------------------//
-      function treeviewCheck(itemId, markId, subId) {
-        // 清除所有 active 狀態
-        $('.sidebar-menu .nav-link').removeClass('active');
-        // 展開父層目錄 (本版本使用 .menu-open)
-        if (itemId) {
-          const $parentItem = $('#' + itemId);
-          $parentItem.addClass('menu-open');
-          $parentItem.children('.nav-link').addClass('active');
+      /**
+       * 供 IFrame 內頁載入完成後同步展開並高亮側邊欄選單 (支援兩層與三層結構)
+       * @param {string} itemCode - 第一層分類代碼 (例如 'ITEM_SYS')
+       * @param {string} markCode - 目標頁面代碼 (例如 'PG_SYSADMIN')
+       * @param {string} subItemCode - 第二層子目錄代碼 (選填，若有三層結構時傳入)
+       */
+      function treeviewCheck(itemCode, markCode, subItemCode) {
+        const $sidebar = $('#sidebarL');
+        if (!$sidebar.length) return;
+
+        // 1. 清除所有現有的 active 與展開狀態
+        $sidebar.find('.nav-link').removeClass('active');
+        $sidebar.find('.nav-item').removeClass('menu-open');
+        $sidebar.find('.nav-treeview').hide(); // 確保未選中的子選單收合
+
+        // 2. 找出目標頁面節點 (透過 data-pagecode 屬性精準定位)
+        const $targetLi = markCode ? $sidebar.find('li[data-pagecode="' + markCode + '"]') : $();
+
+        if ($targetLi.length) {
+          // 為目標頁面本身加上 active (觸發淺灰底深字與右側小三角)
+          $targetLi.children('a.nav-link').addClass('active');
+
+          // 往上尋找所有父層的 .nav-item (自動支援 2 層與 3 層目錄！)
+          $targetLi.parents('li.nav-item').each(function() {
+            $(this).addClass('menu-open');
+            $(this).children('ul.nav-treeview').show(); // 確保子選單保持展開可見
+            $(this).children('a.nav-link').addClass('active');
+          });
+        } else if (itemCode) {
+          // 備援：若找不到 markCode，至少展開指定的父層分類
+          const $itemLi = $sidebar.find('li[data-pagecode="' + itemCode + '"]');
+          $itemLi.addClass('menu-open');
+          $itemLi.children('ul.nav-treeview').show();
+          $itemLi.children('a.nav-link').addClass('active');
         }
-        // 標記當前子項目
-        if (markId) {
-          $('#' + markId).addClass('active');
-        }
+      }
+
+      /**
+       * 供 Start Page 載入時重置所有選單狀態
+       */
+      function treeviewReset() {
+        const $sidebar = $('#sidebarL');
+        $sidebar.find('.nav-link').removeClass('active');
+        $sidebar.find('.nav-item').removeClass('menu-open');
+        $sidebar.find('.nav-treeview').slideUp(200);
       }
 
     //**************************** ********************************//

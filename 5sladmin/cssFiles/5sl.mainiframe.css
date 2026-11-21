@@ -53,44 +53,61 @@
 }
 
 /* 頂部功能面板外框 */
-.nav-item.nav-authpanel {
-  display: none;
-  padding-left: 2px;
-  padding-right: 2px;
-  border: 1px solid #BAC3CD;
-  border-radius: 0.35rem;
-}
-.nav-item.nav-authpanel i {
-  margin: 8px 4px 0px 4px;
-  color: #DADFE4;
-}
-.nav-item.nav-authpanel i.active {
-  color: #2C333E;
-}
-
+/* ==================== 頂部功能操作與權限面板（統一外框視覺） ==================== */
+/* 1. 統一所有群組外框的高度、內距、邊框與垂直水平置中 */
+.nav-item.nav-authpanel,
 .nav-item.nav-toppanel,
 .nav-item.nav-topbkredir,
 .nav-item.nav-topsearch,
 .nav-item.nav-topexport {
-  display: none;
-  padding-top: 4px;
-  padding-left: 2px;
-  padding-right: 2px;
+  display: none;                 /* 預設隱藏，由 page.basic.inc.php 動態設為 flex */
+  align-items: center;           /* 強制所有圖示在框內垂直置中 */
+  justify-content: center;
+  height: 34px;                  /* 統一外框高度，徹底解決高低不一問題 */
+  padding: 0 6px;                /* 統一左右留白，上下交由 align-items 自動置中 */
+  gap: 8px;                      /* 圖示之間的統一間距（取代原本不一致的 margin） */
   border: 1px solid #BAC3CD;
   border-radius: 0.35rem;
+  background-color: #ffffff;     /* 淡淡白底增加按鈕質感（可依喜好移除） */
   color: #DADFE4;
 }
+
+/* 2. 統一所有面板內圖示的大小、行高與外距 */
+.nav-item.nav-authpanel i,
 .nav-item.nav-toppanel i,
-.nav-item.nav-topbkredir i {
-  display: none;
-  margin: 8px 4px 0px 4px;
-  font-size: 1.6em;
-}
+.nav-item.nav-topbkredir i,
 .nav-item.nav-topsearch i,
 .nav-item.nav-topexport i {
-  display: none;
-  margin: 0px 4px 0px 4px;
-  font-size: 1.6em;
+  font-size: 1.15rem;            /* 統一圖示視覺大小（約 18.4px，最適合 34px 高度的方框） */
+  line-height: 1;                /* 消除字體行高造成的上下偏移 */
+  margin: 0;                     /* 歸零原本各自不同的 margin */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, transform 0.1s ease;
+}
+
+/* 3. 權限顯示框與操作按鈕框的預設隱藏/顯示區隔 */
+.nav-item.nav-authpanel i {
+  color: #DADFE4;                /* 未授權時的淺灰色 */
+}
+.nav-item.nav-authpanel i.active {
+  color: #2C333E;                /* 已授權時的深色 */
+}
+
+.nav-item.nav-toppanel i,
+.nav-item.nav-topbkredir i,
+.nav-item.nav-topsearch i,
+.nav-item.nav-topexport i {
+  display: none;                 /* 操作按鈕預設隱藏，由 page.basic.inc.php 個別 .show() */
+}
+
+/* 4. 點擊時的微縮回饋效果（僅限可點擊的 active 操作按鈕） */
+.nav-item.nav-toppanel i.active:active,
+.nav-item.nav-topbkredir i.active:active,
+.nav-item.nav-topsearch i.active:active,
+.nav-item.nav-topexport i.active:active {
+  transform: scale(0.92);
 }
 
 /* ==================== 3. AdminLTE 4 側邊欄選單樣式覆寫 ==================== */

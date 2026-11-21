@@ -20,13 +20,13 @@
     "9": "最高管理者"
   },
   "badge": {
-    "0": " badge-danger",
-    "1": " badge-success",
-    "2": " badge-primary",
-    "3": " badge-warning",
-    "6": " badge-warning",
-    "7": " badge-warning",
-    "8": " badge-warning",
-    "9": " badge-dark"
+    "0": " text-bg-danger",
+    "1": " text-bg-success",
+    "2": " text-bg-primary",
+    "3": " text-bg-warning",
+    "6": " text-bg-warning",
+    "7": " text-bg-warning",
+    "8": " text-bg-warning",
+    "9": " text-bg-dark"
   }
 }
