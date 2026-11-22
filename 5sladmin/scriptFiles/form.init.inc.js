@@ -249,7 +249,7 @@ function getFormObjects(frm){
       } else {
         if ($(this).is(':checked')) { 
           formOBJ[ikey] = $(this).val(); 
-        } else { 
+        } else {
           var uncheckedValue = $(this).data('unchecked');
           formOBJ[ikey] = (typeof uncheckedValue !== 'undefined') ? String(uncheckedValue) : ''; 
         }

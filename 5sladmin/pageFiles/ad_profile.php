@@ -114,8 +114,8 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
         <div class="container-fluid">
           <div class="row">
             <!-- 左側個人資訊卡片 -->
-            <div class="col-md-4">
-              <div class="card card-primary card-outline shadow-sm bg-body-secondary bg-opacity-75" data-bs-theme="dark">
+            <div class="col-md-3">
+              <div class="card card-primary card-outline shadow-sm">
                 <div class="card-body box-profile">
                   <div class="text-center">
                     <!-- Image Area -->
@@ -142,26 +142,26 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
 
                   <!-- [變更9] list-group-unbordered 改用 BS5 原生 list-group-flush，float-right 改為 float-end -->
                   <ul class="list-group list-group-flush mb-3">
-                    <li class="list-group-item px-0 bg-transparent">
+                    <li class="list-group-item px-0">
                       <b>狀態</b> <a class="float-end text-decoration-none<?php echo (!empty($res['ad_status']) && $res['ad_status']==1) ? "" : " text-danger"; ?>"><?php echo !empty($res['ad_status']) ? $adJS['status'][$res['ad_status']] : "&nbsp;"; ?></a>
                     </li>
-                    <li class="list-group-item px-0 bg-transparent">
+                    <li class="list-group-item px-0">
                       <b>暱稱</b> <a class="float-end text-decoration-none"><?php echo !empty($res['ad_title']) ? $res['ad_title'] : "&nbsp;"; ?></a>
                     </li>
-                    <li class="list-group-item px-0 bg-transparent">
+                    <li class="list-group-item px-0">
                       <b>電子郵箱</b> <a class="float-end text-decoration-none"><?php echo !empty($res['ad_email']) ? $res['ad_email'] : "&nbsp;"; ?></a>
                     </li>
-                    <li class="list-group-item px-0 bg-transparent">
+                    <li class="list-group-item px-0">
                       <b>手機號碼</b> <a class="float-end text-decoration-none"><?php echo !empty($res['ad_phone']) ? $res['ad_phone'] : "&nbsp;"; ?></a>
                     </li>
-                    <li class="list-group-item px-0 bg-transparent">
+                    <li class="list-group-item px-0">
                       <b>Line ID</b> <a class="float-end text-decoration-none"><?php echo !empty($res['ad_line']) ? $res['ad_line'] : "&nbsp;"; ?></a>
                     </li>
-                    <li class="list-group-item px-0 bg-transparent">
-                      <b>編輯日期</b> <a class="float-end text-decoration-none"><?php echo !empty($res['ad_updated']) ? $res['ad_updated'] : "&nbsp;"; ?></a>
+                    <li class="list-group-item px-0">
+                      <b>編輯日期</b> <a class="float-end text-dark text-decoration-none"><?php echo !empty($res['ad_updated']) ? $res['ad_updated'] : "&nbsp;"; ?></a>
                     </li>
-                    <li class="list-group-item px-0 bg-transparent">
-                      <b>建立日期</b> <a class="float-end text-decoration-none"><b><?php echo !empty($res['ad_published']) ? $res['ad_published'] : "&nbsp;"; ?></b></a>
+                    <li class="list-group-item px-0">
+                      <b>建立日期</b> <a class="float-end text-dark text-decoration-none"><b><?php echo !empty($res['ad_published']) ? $res['ad_published'] : "&nbsp;"; ?></b></a>
                     </li>
                   </ul>
                 </div>
@@ -172,7 +172,7 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
             <!-- /.col -->
 
             <!-- 右側多分頁表單區 -->
-            <div class="col-md-8">
+            <div class="col-md-9">
               <div class="card shadow-sm modern-card-tabs">
                 <div class="card-header p-2">
                   <!-- [變更10] data-toggle="tab" 改為 data-bs-toggle="tab" -->

@@ -17,17 +17,19 @@ $res  = ($mbID > 0) ? DB->row("SELECT * FROM fsl_members WHERE mb_id = ? AND mb_
 if (!is_array($res)) $res = array();
 
 // 敏感加密欄位解密供後台檢視編輯（手機、身分證、地址）
-$decPhone = (!empty($res['mb_phone'])) ? _fn_secure_crypto($res['mb_phone'], 'de') : '';
-$decIdno  = (!empty($res['mb_idno']))  ? _fn_secure_crypto($res['mb_idno'], 'de')  : '';
-$decAddr  = (!empty($res['mb_addr']))  ? _fn_secure_crypto($res['mb_addr'], 'de')  : '';
+$decPhone = (!empty($res['mb_cellphone'])) ? _fn_secure_crypto($res['mb_cellphone'], 'de') : '';
+//$decIdno  = (!empty($res['mb_idno']))  ? _fn_secure_crypto($res['mb_idno'], 'de')  : '';
+$decAddr  = (!empty($res['mb_add']))  ? _fn_secure_crypto($res['mb_add'], 'de')  : '';
 
 // 代表圖像設定
 if (!empty($mbID) && file_exists("../uploadFiles/mb/mbphoto_" . $mbID . "_.jpg")) {
   $cropImgDisplay = 'show';
   $mainimgpath    = '../uploadFiles/mb/mbphoto_' . $mbID . '_.jpg?' . time();
+  $mainimgchk = 'mbphoto_'.$mbID.'_.jpg';
 } else {
   $cropImgDisplay = 'hide';
-  $mainimgpath    = '../imageFiles/nopic_user_400x400.jpg';
+  $mainimgpath    = '../imageFiles/nopic_user_200x200.jpg';
+  $mainimgchk = "";
 }
 
 // 統計數據與關聯清單（僅編輯既有會員時查詢）
@@ -76,6 +78,9 @@ if ($mbID > 0) {
 
 $levelLabels  = array(1 => '一般會員', 2 => '向光學員', 3 => 'VIP 會員');
 $statusLabels = array(0 => '停權凍結', 1 => '正常啟用', 2 => '待信箱驗證');
+//功能陣列建立，取自JSON檔案
+$mbJS = _fn_getCachedJsonData("../jsonFiles/member.json");
+$locJS = _fn_getCachedJsonData("../jsonFiles/locations.json");
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
@@ -92,6 +97,8 @@ $statusLabels = array(0 => '停權凍結', 1 => '正常啟用', 2 => '待信箱�
   <link rel="stylesheet" href="../pluginFiles/bootstrap5/bootstrap.min.css">
   <link rel="stylesheet" href="../pluginFiles/bootstrap-icons/bootstrap-icons.min.css">
   <link rel="stylesheet" href="../pluginFiles/datatables3/datatables.min.css">
+  <!-- flatpickr -->
+  <link rel="stylesheet" href="../pluginFiles/flatpickr/flatpickr.min.css">
   <link rel="stylesheet" href="../cssFiles/adminlte.css">
   <link rel="stylesheet" href="../pluginFiles/dropzone/dropzone.css" />
   <link rel="stylesheet" href="../pluginFiles/cropper/cropper.css"/>
@@ -131,8 +138,8 @@ $statusLabels = array(0 => '停權凍結', 1 => '正常啟用', 2 => '待信箱�
         <div class="container-fluid">
           <div class="row">
             <!-- 左側個人資訊卡片 -->
-            <div class="col-md-4 mb-3">
-              <div class="card card-primary card-outline shadow-sm bg-body-secondary bg-opacity-75" data-bs-theme="dark">
+            <div class="col-md-3 mb-3">
+              <div class="card card-primary card-outline shadow-lg">
                 <div class="card-body box-profile">
                   <div class="text-center">
                     <div class="image_area">
@@ -149,43 +156,51 @@ $statusLabels = array(0 => '停權凍結', 1 => '正常啟用', 2 => '待信箱�
                       <?php include('include_avatarmodal.php'); ?>
                     </div>
                   </div>
-                  <h3 class="profile-username text-center mt-2" id="sideMbName"><?php echo !empty($res['mb_name']) ? htmlspecialchars(_fn_secure_crypto($res['mb_name'],'de')) : ($mbID > 0 ? '未填寫姓名' : '新建立會員'); ?></h3>
-                  <p class="text-warning text-center small mb-3" id="sideMbLevel"><?php echo $levelLabels[(int)($res['mb_level'] ?? 1)] ?? '一般會員'; ?></p>
+                  <h3 class="profile-username text-center mt-2" id="sideMbName"><?php echo !empty($res['mb_name']) ? _fn_secure_crypto(htmlspecialchars($res['mb_name']),'de') : ($mbID > 0 ? '未填寫姓名' : '新建立會員'); ?></h3>
+                  <p class="text-warning text-center small mb-3" id="sideMbLevel"><?php echo $mbJS['levels'][$res['mb_level']]['title'] ?? '一般會員'; ?></p>
 
-                  <ul class="list-group list-group-flush mb-2 small">
-                    <li class="list-group-item px-0 bg-transparent d-flex justify-content-between">
+                  <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item px-0 d-flex justify-content-between">
                       <b>帳號狀態</b>
                       <span id="sideMbStatus" class="<?php echo ((int)($res['mb_status'] ?? 1) === 1) ? 'text-success' : 'text-danger'; ?>">
-                        <?php echo $statusLabels[(int)($res['mb_status'] ?? 1)] ?? '正常啟用'; ?>
+                        <?php echo $mbJS[(int)($res['mb_status'] ?? 1)] ?? '正常啟用'; ?>
                       </span>
                     </li>
-                    <li class="list-group-item px-0 bg-transparent d-flex justify-content-between">
+                    <li class="list-group-item px-0 d-flex justify-content-between">
                       <b>可用 PTS 點數</b>
                       <span class="fw-bold text-warning" id="sideMbPoints"><?php echo number_format((int)($res['mb_points'] ?? 0)); ?> PTS</span>
                     </li>
-                    <li class="list-group-item px-0 bg-transparent d-flex justify-content-between">
+                    <li class="list-group-item px-0 d-flex justify-content-between">
                       <b>累計有效消費</b>
                       <span class="text-info fw-bold">NT$ <?php echo number_format($totalSpent); ?></span>
                     </li>
-                    <li class="list-group-item px-0 bg-transparent d-flex justify-content-between">
+                    <li class="list-group-item px-0 d-flex justify-content-between">
                       <b>已報名課程數</b>
                       <span><?php echo $enrollCount; ?> 堂</span>
                     </li>
-                    <li class="list-group-item px-0 bg-transparent d-flex justify-content-between">
+                    <li class="list-group-item px-0 d-flex justify-content-between">
                       <b>最後更新</b>
-                      <span class="text-white-50" id="sideMbUpdated"><?php echo !empty($res['mb_updated']) ? $res['mb_updated'] : '-'; ?></span>
+                      <span class="text-dark" id="sideMbUpdated"><?php echo $res['mb_updated'] ?? '-'; ?></span>
                     </li>
-                    <li class="list-group-item px-0 bg-transparent d-flex justify-content-between">
+                    <li class="list-group-item px-0 d-flex justify-content-between">
                       <b>註冊時間</b>
-                      <span class="text-white-50"><?php echo !empty($res['mb_created']) ? $res['mb_created'] : '-'; ?></span>
+                      <span class="text-dark"><?php echo $res['mb_published'] ?? '-'; ?></span>
                     </li>
                   </ul>
                 </div>
               </div>
+              <div class="card card-success shadow-lg mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">會員受評</h3>
+                </div>
+                <div class="card-body py-2">
+
+                </div>
+              </div>
             </div>
             <!-- 右側多分頁管理區 -->
-            <div class="col-md-8">
-              <div class="card shadow-sm modern-card-tabs">
+            <div class="col-md-9">
+              <div class="card shadow-lg modern-card-tabs">
                 <div class="card-header p-2">
                   <ul class="nav nav-tabs card-header-tabs" role="tablist">
                     <li class="nav-item" role="presentation">
@@ -213,131 +228,222 @@ $statusLabels = array(0 => '停權凍結', 1 => '正常啟用', 2 => '待信箱�
                   </ul>
                 </div>
 
-                <div class="card-body">
+                <div class="card-body bg-opacity-50">
                   <div class="tab-content">
                     <!-- Tab 1: 基本資料、等級權限與預設發票載具 -->
                     <div class="tab-pane fade show active" id="tabMenu1" role="tabpanel">
+                      <div class="small text-secondary">
+                        <i class="bi bi-exclamation-circle me-1"></i>被授權的管理者可以新增或更改會員資料，唯「會員帳號(電郵)」必須具有最高管理權限的管理者始得編輯，由工作人員新增資料之後的會員，仍需要經過郵箱驗證才可以行使會員權益。
+                      </div>
+                      <hr>
                       <form id="form_tabMenu1" action="../funcFiles/mb_act_func.php" method="post" data-func="func_mb_infoUpdate" novalidate>
+                        <input type="hidden" name="mainimgchk" id="mainimgchk" class="notSubmit" value="<?php echo $mainimgchk; ?>">
                         <div class="row g-3">
                           <div class="col-md-6">
-                            <label class="form-label small fw-bold">登入帳號 (Email) <span class="text-danger">*</span></label>
-                            <input type="email" class="form-control form-control-sm" id="mb_email" name="mb_email"
-                                   value="<?php echo htmlspecialchars(_fn_secure_crypto($res['mb_email'],'de') ?? ''); ?>"
-                                   <?php echo ($mbID > 0) ? 'readonly' : 'required'; ?> placeholder="member@example.com">
+                            <label class="form-label small fw-bold">登入帳號 (Email)(加密儲存) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <!-- 💡 換成平面簡約圖標 -->
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" class="form-control<?php echo ($mbID > 0) ? ' notSubmit' : ''; ?>" id="mb_email" name="mb_email"
+                                      value="<?php echo htmlspecialchars(_fn_secure_crypto($res['mb_email'] ?? '','de')); ?>"
+                                      <?php echo ($mbID > 0) ? 'readonly' : 'required'; ?> placeholder="member@example.com">
+                                <span class="input-group-text b-0 p-0">
+                                  <input type="checkbox" class="btn-check" id="mb_email_verified" name="mb_email_verified" data-unchecked="0" value="1" autocomplete="off"<?php echo !empty($res['mb_email_verified']) ? ' checked' : ''; ?>/>
+                                  <label class="btn btn-outline-primary btn-toggle-status" for="mb_email_verified" data-on="已驗證" data-off="未驗證"></label>
+                                </span>
+                                
+                            </div>
                           </div>
                           <div class="col-md-6">
                             <label class="form-label small fw-bold">
                               <?php echo ($mbID > 0) ? '重設登入密碼 (不修改請留空)' : '初始登入密碼 *'; ?>
                             </label>
-                            <input type="password" class="form-control form-control-sm" id="mb_password" name="mb_password"
+                            <div class="input-group">
+                                <!-- 💡 換成平面簡約圖標 -->
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input type="password" class="form-control" autocomplete="new-password" id="mb_password" name="mb_password"
                                    <?php echo ($mbID === 0) ? 'required minlength="6"' : ''; ?> placeholder="至少 6 碼英數字">
+                                <!-- 💡 整合實用功能：明隱切換眼球 (平面化) -->
+                                <span class="input-group-text password-toggle text-muted" id="togglePasswordBtn"><i class="bi bi-eye"></i></span>
+                            </div>
+                            
                           </div>
 
+                          <div class="col-12"><div class="hr-more">基本資料</div><hr class="my-1"></div>
+                          
                           <div class="col-md-4">
-                            <label class="form-label small fw-bold">真實姓名 <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control form-control-sm" id="mb_name" name="mb_name" required
-                                   value="<?php echo htmlspecialchars(_fn_secure_crypto($res['mb_name'],'de') ?? ''); ?>">
+                            <label class="form-label small fw-bold">真實姓名(加密儲存) <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="mb_name" name="mb_name" required
+                                   value="<?php echo htmlspecialchars(_fn_secure_crypto($res['mb_name'] ?? '','de')); ?>">
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">顯示暱稱</label>
-                            <input type="text" class="form-control form-control-sm" id="mb_nick" name="mb_nick"
+                            <input type="text" class="form-control" id="mb_title" name="mb_title"
                                    value="<?php echo htmlspecialchars($res['mb_title'] ?? ''); ?>">
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">性別</label>
-                            <select class="form-select form-select-sm" id="mb_gender" name="mb_gender">
-                              <option value="N" <?php echo (($res['mb_gender'] ?? 'N') === 'N') ? 'selected' : ''; ?>>不透露 / 未設定</option>
-                              <option value="F" <?php echo (($res['mb_gender'] ?? '') === 'F') ? 'selected' : ''; ?>>女性 (F)</option>
-                              <option value="M" <?php echo (($res['mb_gender'] ?? '') === 'M') ? 'selected' : ''; ?>>男性 (M)</option>
+                            <select class="form-select" id="mb_gender" name="mb_gender">
+                            <?php
+                                foreach($mbJS['gender'] as $key => $value){
+                                    echo '<option value="'.$key.'"';
+                                    if($key==""){ echo " disabled"; }
+                                    if(($res['mb_gender'] ?? null) == $key) echo " selected";
+                                    echo '>'.$value.'</option>';
+                                }
+                            ?>
                             </select>
                           </div>
 
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">出生年月日</label>
-                            <input type="date" class="form-control form-control-sm" id="mb_birth" name="mb_birth"
-                                   value="<?php echo htmlspecialchars($res['mb_birth'] ?? ''); ?>">
+                            <input type="date" class="form-control" id="mb_birth" name="mb_birth"
+                                   value="<?php echo htmlspecialchars($res['mb_birth'] ?? ''); ?>" placeholder="yyyy-mm-dd">
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">聯絡手機 (加密儲存)</label>
-                            <input type="text" class="form-control form-control-sm" id="mb_phone" name="mb_phone"
-                                   value="<?php echo htmlspecialchars($decPhone); ?>" placeholder="09xxxxxxxx">
+                            <div class="input-group">
+                              <input type="text" class="form-control" id="mb_cellphone" name="mb_cellphone"
+                                    value="<?php echo htmlspecialchars($decPhone); ?>" placeholder="09xxxxxxxx">
+                              <span class="input-group-text p-0">
+                                <input type="checkbox" class="btn-check" id="mb_cellphone_verified" name="mb_cellphone_verified" data-unchecked="0" value="1" autocomplete="off"<?php echo !empty($res['mb_cellphone_verified']) ? ' checked' : ''; ?>/>
+                                <label class="btn btn-outline-primary btn-toggle-status" for="mb_cellphone_verified" data-on="已驗證" data-off="未驗證"></label>
+                              </span>
+                           </div>
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">身分證字號 (加密儲存)</label>
-                            <input type="text" class="form-control form-control-sm text-uppercase" id="mb_idno" name="mb_idno"
-                                   value="<?php echo htmlspecialchars($decIdno); ?>" placeholder="A123456789">
+                            <input type="text" class="form-control text-uppercase notSubmit" id="mb_idno" name="mb_idno"
+                                   value="<?php //echo htmlspecialchars($decIdno); ?>" placeholder="A123456789">
                           </div>
 
                           <div class="col-md-4">
-                            <label class="form-label small fw-bold">居住縣市代碼</label>
-                            <input type="text" class="form-control form-control-sm" id="mb_city" name="mb_city"
-                                   value="<?php echo htmlspecialchars($res['mb_city'] ?? ''); ?>" placeholder="如：01 (台北市)">
+                            <label class="form-label small fw-bold">居住城市</label>
+                            <select class="form-control" id="mb_city" name="mb_city" placeholder="通訊地址" data-placeholder="-請選擇居住城市-" data-select="city">
+                            <option value="">-請選擇居住城市-</option>
+                            <?php
+                            foreach($locJS as $key => $value) {
+                              echo "<option value='".$value['value']."'";
+                              if(!empty($res['mb_city']) && $res['mb_city']==$value['value']) { echo " selected"; }
+                              echo ">".$value['text']."</option>";
+                            }
+                            ?>
+                            </select>
                           </div>
-                          <div class="col-md-8">
+                          <div class="col-md-4">
+                            <label class="form-label small fw-bold">行政區劃</label>
+                            <select class="form-control" id="mb_district" name="mb_district" placeholder="行政區劃" data-placeholder="-請選擇行政區劃-" dist-fromcity="mb_city" style="width: 100%;">
+                            <?php
+                            if(!empty($res['mb_city'])) {
+                              echo "<option value='0'>-請選擇行政劃區-</option>";
+                              foreach($locJS[$res['mb_city']]['district'] as $key => $value){
+                                echo "<option value='".$key."'";
+                                if(!empty($res['mb_district']) && $res['mb_district']==$key) { echo " selected"; }
+                                echo ">".$value."</option>";
+                              }
+                            }
+                            ?>
+                            </select>
+                          </div>
+                          <div class="col-md-4">
                             <label class="form-label small fw-bold">通訊 / 宅配地址 (加密儲存)</label>
-                            <input type="text" class="form-control form-control-sm" id="mb_addr" name="mb_addr"
+                            <input type="text" class="form-control" id="mb_add" name="mb_add"
                                    value="<?php echo htmlspecialchars($decAddr); ?>">
                           </div>
 
-                          <div class="col-12"><hr class="my-1"></div>
+                          <div class="col-12"><div class="hr-more">帳戶訊息</div><hr class="my-1"></div>
 
                           <!-- 會員等級、狀態與驗證設定 -->
                           <div class="col-md-4">
+                            <label class="form-label small fw-bold">會員分類</label>
+                            <select class="form-select" id="mb_type" name="mb_type">
+                            <?php
+                                foreach($mbJS['mbtype'] as $key => $value){
+                                    echo '<option value="'.$key.'"';
+                                    if($key==""){ echo " disabled"; }
+                                    if(($res['mb_type'] ?? null) == $key) echo " selected";
+                                    echo '>'.$value.'</option>';
+                                }
+                            ?>
+                            </select>
+                          </div>
+                          <div class="col-md-4">
                             <label class="form-label small fw-bold">會員等級</label>
-                            <select class="form-select form-select-sm" id="mb_level" name="mb_level">
-                              <option value="1" <?php echo ((int)($res['mb_level'] ?? 1) === 1) ? 'selected' : ''; ?>>1 - 一般會員</option>
-                              <option value="2" <?php echo ((int)($res['mb_level'] ?? 1) === 2) ? 'selected' : ''; ?>>2 - 向光學員</option>
-                              <option value="3" <?php echo ((int)($res['mb_level'] ?? 1) === 3) ? 'selected' : ''; ?>>3 - VIP 會員</option>
+                            <select class="form-select" id="mb_level" name="mb_level">
+                            <?php
+                                foreach($mbJS['levels'] as $key => $value){
+                                    echo '<option value="'.$key.'"';
+                                    if($key==""){ echo " disabled"; }
+                                    if(($res['mb_level'] ?? null) == $key) echo " selected";
+                                    echo '>'.$value['title'].'</option>';
+                                }
+                            ?>
                             </select>
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">帳號狀態</label>
-                            <select class="form-select form-select-sm" id="mb_status" name="mb_status">
-                              <option value="1" <?php echo ((int)($res['mb_status'] ?? 1) === 1) ? 'selected' : ''; ?>>1 - 正常啟用</option>
-                              <option value="2" <?php echo ((int)($res['mb_status'] ?? 1) === 2) ? 'selected' : ''; ?>>2 - 待信箱驗證</option>
-                              <option value="0" <?php echo ((int)($res['mb_status'] ?? 1) === 0) ? 'selected' : ''; ?>>0 - 停權凍結</option>
+                            <select class="form-select" id="mb_status" name="mb_status">
+                            <?php
+                                foreach($mbJS['status'] as $key => $value){
+                                    echo '<option value="'.$key.'"';
+                                    if($key==""){ echo " disabled"; }
+                                    if(($res['mb_status'] ?? null) == $key) echo " selected";
+                                    echo '>'.$value.'</option>';
+                                }
+                            ?>
+                            </select>
+                          </div>
+
+                          <div class="col-12"><div class="hr-more">交易參數</div><hr class="my-1"></div>
+
+                          <!-- 常用電子發票載具與公司統編偏好 -->
+                          <div class="col-md-4">
+                            <label class="form-label small fw-bold">預設發票類型</label>
+                            <select class="form-select" id="mb_inv_type" name="mb_inv_type">
+                            <?php
+                                foreach($mbJS['invtype'] as $key => $value){
+                                    echo '<option value="'.$key.'"';
+                                    if($key==""){ echo " disabled"; }
+                                    if(($res['mb_inv_type'] ?? null) == $key) echo " selected";
+                                    echo '>'.$value.'</option>';
+                                }
+                            ?>
                             </select>
                           </div>
                           <div class="col-md-4">
-                            <label class="form-label small fw-bold">信箱驗證狀態</label>
-                            <select class="form-select form-select-sm" id="mb_email_verified" name="mb_email_verified">
-                              <option value="1" <?php echo ((int)($res['mb_email_verified'] ?? 0) === 1) ? 'selected' : ''; ?>>1 - 已完成驗證</option>
-                              <option value="0" <?php echo ((int)($res['mb_email_verified'] ?? 0) === 0) ? 'selected' : ''; ?>>0 - 尚未驗證</option>
-                            </select>
-                          </div>
-
-                          <div class="col-12"><hr class="my-1"></div>
-
-                          <!-- 常用電子發票載具與公司統編偏好 -->
-                          <div class="col-md-3">
-                            <label class="form-label small fw-bold">預設發票類型</label>
-                            <select class="form-select form-select-sm" name="mb_inv_type">
-                              <option value="1" <?php echo ((int)($res['mb_inv_type'] ?? 1) === 1) ? 'selected' : ''; ?>>二聯式個人</option>
-                              <option value="2" <?php echo ((int)($res['mb_inv_type'] ?? 1) === 2) ? 'selected' : ''; ?>>三聯式公司</option>
-                            </select>
-                          </div>
-                          <div class="col-md-3">
                             <label class="form-label small fw-bold">預設載具方式</label>
-                            <select class="form-select form-select-sm" name="mb_carrier_type">
-                              <option value="0" <?php echo ((int)($res['mb_carrier_type'] ?? 0) === 0) ? 'selected' : ''; ?>>會員載具</option>
-                              <option value="1" <?php echo ((int)($res['mb_carrier_type'] ?? 0) === 1) ? 'selected' : ''; ?>>手機條碼</option>
-                              <option value="2" <?php echo ((int)($res['mb_carrier_type'] ?? 0) === 2) ? 'selected' : ''; ?>>自然人憑證</option>
+                            <select class="form-select" id="mb_carrier_type" name="mb_carrier_type">
+                            <?php
+                                foreach($mbJS['carrier'] as $key => $value){
+                                    echo '<option value="'.$key.'"';
+                                    if($key==""){ echo " disabled"; }
+                                    if(($res['mb_carrier_type'] ?? null) == $key) echo " selected";
+                                    echo '>'.$value.'</option>';
+                                }
+                            ?>
                             </select>
                           </div>
-                          <div class="col-md-6">
+                          <div class="col-md-4">
                             <label class="form-label small fw-bold">預設載具條碼 (如 /AB12345)</label>
-                            <input type="text" class="form-control form-control-sm text-uppercase" name="mb_carrier_code"
+                            <input type="text" class="form-control text-uppercase" id="mb_carrier_code" name="mb_carrier_code"
                                    value="<?php echo htmlspecialchars($res['mb_carrier_code'] ?? ''); ?>">
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">預設公司統一編號</label>
-                            <input type="text" class="form-control form-control-sm" name="mb_tax_id" maxlength="8"
+                            <input type="text" class="form-control" id="mb_tax_id" name="mb_tax_id" maxlength="8"
                                    value="<?php echo htmlspecialchars($res['mb_tax_id'] ?? ''); ?>">
                           </div>
                           <div class="col-md-8">
                             <label class="form-label small fw-bold">預設公司發票抬頭</label>
-                            <input type="text" class="form-control form-control-sm" name="mb_company_title"
+                            <input type="text" class="form-control" id="mb_company_title" name="mb_company_title"
                                    value="<?php echo htmlspecialchars($res['mb_company_title'] ?? ''); ?>">
+                          </div>
+
+                          <div class="col-12"><div class="hr-more">管理相關</div><hr class="my-1"></div>
+                          
+                          <div class="col-md-12">
+                            <label class="form-label small fw-bold">管理者註記</label>
+                            <textarea class="form-control" id="mb_remark" name="mb_remark" col="4"><?php echo htmlspecialchars($res['mb_remark'] ?? ''); ?></textarea>
                           </div>
                         </div>
                       </form>
@@ -348,18 +454,18 @@ $statusLabels = array(0 => '停權凍結', 1 => '正常啟用', 2 => '待信箱�
                       <form id="form_adjust_pts" class="row g-2 align-items-end p-3 bg-light border rounded-3 mb-4">
                         <div class="col-md-3">
                           <label class="form-label small fw-bold">異動方向</label>
-                          <select class="form-select form-select-sm" id="adjPtsDir">
+                          <select class="form-select" id="adjPtsDir">
                             <option value="add">補發增加 (+)</option>
                             <option value="sub">手動扣除 (-)</option>
                           </select>
                         </div>
                         <div class="col-md-3">
                           <label class="form-label small fw-bold">異動點數 (PTS)</label>
-                          <input type="number" class="form-control form-control-sm" id="adjPtsVal" min="1" max="100000" placeholder="輸入正整數" required>
+                          <input type="number" class="form-control" id="adjPtsVal" min="1" max="100000" placeholder="輸入正整數" required>
                         </div>
                         <div class="col-md-4">
                           <label class="form-label small fw-bold">異動原因備註 <span class="text-danger">*</span></label>
-                          <input type="text" class="form-control form-control-sm" id="adjPtsMemo" placeholder="如：活動專案加贈 / 客服補償" required>
+                          <input type="text" class="form-control" id="adjPtsMemo" placeholder="如：活動專案加贈 / 客服補償" required>
                         </div>
                         <div class="col-md-2 d-grid">
                           <button type="submit" class="btn btn-warning btn-sm fw-bold"><i class="bi bi-plus-slash-minus me-1"></i>執行調帳</button>
@@ -383,7 +489,7 @@ $statusLabels = array(0 => '停權凍結', 1 => '正常啟用', 2 => '待信箱�
                             ?>
                             <tr>
                               <td><?php echo (int)$pl['pt_id']; ?></td>
-                              <td class="text-muted"><?php echo htmlspecialchars($pl['pt_created'] ?? ''); ?></td>
+                              <td class="text-muted"><?php echo htmlspecialchars($pl['pt_date'] ?? ''); ?></td>
                               <td class="text-end fw-bold <?php echo ($delta >= 0) ? 'text-success' : 'text-danger'; ?>">
                                 <?php echo ($delta >= 0 ? '+' : '') . number_format($delta); ?>
                               </td>
@@ -527,6 +633,8 @@ $statusLabels = array(0 => '停權凍結', 1 => '正常啟用', 2 => '待信箱�
   <script src="../pluginFiles/jquery/jquery-4.0.0.min.js"></script>
   <script src="../pluginFiles/bootstrap5/bootstrap.bundle.min.js"></script>
   <script src="../pluginFiles/datatables3/datatables.min.js"></script>
+  <script src="../pluginFiles/flatpickr/flatpickr.min.js"></script>
+  <script src="../pluginFiles/flatpickr/location/zh_tw.js"></script>
   <script src="../pluginFiles/dropzone/dropzone.js"></script>
   <script src="../pluginFiles/cropper/cropper.js"></script>
   <script src="../scriptFiles/adminlte.js"></script>
@@ -587,7 +695,13 @@ $statusLabels = array(0 => '停權凍結', 1 => '正常啟用', 2 => '待信箱�
   function ajaxPOST(frm) {
     var $frm = frm || $('#form_tabMenu1');
     var accE = (0 == parseInt('<?php echo $mbID; ?>')) ? 'func_mb_addnew' : $frm.data('func');
-    var datA = $frm.find(":input").not(".notSubmit").serializeArray();
+    if($('#mb_password').val() !== ''){
+      $('#mb_password').removeClass('notSubmit');
+    } else {
+      $('#mb_password').addClass('notSubmit');
+    }
+    //var datA = $frm.find(":input").not(".notSubmit").serializeArray();
+    var datA = getFormObjects($frm);
     var imgBase64 = (typeof cropImage64 !== 'undefined' && cropImage64 !== '')
                     ? cropImage64
                     : ($('#main_crop_area').data('cropImage64') || '');
@@ -604,6 +718,7 @@ $statusLabels = array(0 => '停權凍結', 1 => '正常啟用', 2 => '待信箱�
       },
       dataType: 'json',
       success: function(data) {
+        console.log(data);
         if (accE == 'func_mb_addnew' && data['RTN'] == 1) {
           window.parent.toastr['success'](data['msgStr']);
           window.location.replace("mb_detail.php?currID=" + data['newID']);
@@ -627,7 +742,7 @@ $statusLabels = array(0 => '停權凍結', 1 => '正常啟用', 2 => '待信箱�
           if (typeof doSerialize === 'function') doSerialize();
         }
       },
-      error: function() {
+      error: function(err) {
         if (window.parent && window.parent.toastr) {
           window.parent.toastr['error']('系統讀寫錯誤，請聯絡管理人員！');
         }
@@ -636,10 +751,15 @@ $statusLabels = array(0 => '停權凍結', 1 => '正常啟用', 2 => '待信箱�
   }
 
   $(document).ready(function() {
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
+    ////////////////////////////////////////////////////////
+    if (typeof flatpickr !== 'undefined') {
+            flatpickr($('input[type="date"]'), {
+                locale: 'zh_tw',
+                dateFormat: 'Y-m-d',   // 嚴格統一為 yyyy-mm-dd
+                allowInput: true,      // 允許直接用鍵盤輸入 2026-11-17
+                disableMobile: true    // 手機與平板也強制維持 yyyy-mm-dd 格式，不被系統原生輪盤覆蓋
+            });
+    }
 
     if ($('#dataTable_mbpts').length)    datatableCreate('dataTable_mbpts');
     if ($('#dataTable_mbenroll').length) datatableCreate('dataTable_mbenroll');
@@ -655,7 +775,6 @@ $statusLabels = array(0 => '停權凍結', 1 => '正常啟用', 2 => '待信箱�
         window.parent.toastr['warning']('請輸入大於 0 的點數與異動原因！');
         return;
       }
-
       $.post('../funcFiles/mb_act_func.php', {
         'formAcce': 'func_mb_adjustPts',
         'token': getTokenVal(),
@@ -664,6 +783,7 @@ $statusLabels = array(0 => '停權凍結', 1 => '正常啟用', 2 => '待信箱�
         'adjVal': val,
         'adjMemo': memo
       }, function(data) {
+        console.log(data);
         window.parent.toastr[data['msgType']](data['msgStr']);
         if (data['RTN'] == 1) {
           $('#sideMbPoints').text(Number(data['newPoints']).toLocaleString() + ' PTS');
@@ -686,6 +806,22 @@ $statusLabels = array(0 => '停權凍結', 1 => '正常啟用', 2 => '待信箱�
 
     $('li.prevLink').on('click', function() {
       window.location.replace(getCurrentURI('', 'mb_list.php'));
+    });
+
+    $('#togglePasswordBtn').on('click', function() {
+        const passwordInput = document.getElementById('mb_password');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            $(this).text('🙈');
+        } else {
+            passwordInput.type = 'password';
+            $(this).text('👁️');
+        }
+    });
+
+    $('body').on('keypress click', function() {
+      let timerElm = window.parent.$('#timer_on_exhausted');
+      if (timerElm.length) timerElm.backward_timer('reset');
     });
 
     if (window.parent && typeof window.parent.treeviewCheck === 'function') {

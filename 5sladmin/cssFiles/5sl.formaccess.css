@@ -72,10 +72,10 @@ text-align: right;
   position: relative;
   left: 50%;
   right: 50%;
-  top: -30px;
+  top: 16px;
   margin-left:-70px;
   color: #FFF;
-  font: normal 1em/14px;
+  font-size:0.85em !important;
   vertical-align: middle;
   text-align: center;
   border-radius: 4px;
@@ -478,8 +478,16 @@ table.theme-red thead > tr > th, table.theme-red tfoot > tr > td, table.theme-re
 .pagination .page-item .page-link:hover {
     color: #000000 !important;
 }
+/* ==================== Checkbox ==================== */
+/* 預設未勾選狀態：顯示 data-off 文字 */
+.btn-toggle-status::after {
+  content: attr(data-off);
+}
 
-
+/* 勾選狀態 (:checked)：顯示 data-on 文字 */
+.btn-check:checked + .btn-toggle-status::after {
+  content: attr(data-on);
+}
 
 /*
 .advAddBut{

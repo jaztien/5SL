@@ -1,67 +1,98 @@
-    body {
-        background-image: url("../../imageFiles/mainBG03.jpg");
-        background-attachment: fixed;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-    }
+/* 強制 IFrame 內頁始終保留垂直捲軸空間，徹底消除版面左右位移 */
+html {
+  overflow-y: scroll;          /* 1. 傳統標準寫法：始終顯示垂直捲軸軌道（內容不足時呈禁用灰態） */
+  scrollbar-gutter: stable;    /* 2. 現代瀏覽器進階屬性：預留穩定的捲軸溝槽寬度，切換分頁或展開選單零抖動 */
+}
 
+body {
+    background-image: url("../../imageFiles/mainBG03.jpg");
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
 
 
 /* ==================== 現代化 Detail 卡片頂部頁籤 (.modern-card-tabs) ==================== */
 /* ==================== 清爽透明底極簡頁籤 (.modern-card-tabs) ==================== */
 /* 1. 頁籤導覽列底色：改為完全透明，只保留一條乾淨的底部灰色分隔線 */
 /* ==================== 清爽透明底極簡頁籤 (.modern-card-tabs) ==================== */
-/* 1. 頁籤導覽列底色：改為完全透明，只保留一條乾淨的底部灰色分隔線 */
+/* ==================== 飽和主題實心底色頁籤 (.modern-card-tabs) ==================== */
+/* 1. 頁籤導覽列預設底色（預設藍色主題） */
 .modern-card-tabs .card-header {
-  background-color: transparent !important;
-  border-bottom: 1px solid #dee2e6 !important;
-  padding: 0.5rem 1rem 0 1rem !important;
+  background-color: #236FB7 !important;
+  border-bottom: none !important;
+  padding: 0.55rem 0.85rem 0 0.85rem !important;
 }
 
 .modern-card-tabs .nav-tabs {
   border-bottom: none !important;
-  gap: 1.25rem; /* 頁籤之間拉開呼吸感 */
+  gap: 6px;
 }
 
-/* 2. 未選中的頁籤：透明底色 + 清晰中深灰文字 + 透明底線預留位置 */
+/* 2. 未選中的頁籤：增加高度並將文字位置往上微調 */
 .modern-card-tabs .nav-tabs .nav-link {
-  background-color: transparent !important;
-  color: #6c757d !important;
+  background-color: rgba(255, 255, 255, 0.14) !important;
+  color: rgba(255, 255, 255, 0.92) !important;
   font-weight: 500;
   border: none !important;
-  border-bottom: 3px solid transparent !important;
-  border-radius: 0 !important;
-  padding: 0.65rem 0.25rem !important;
-  margin-bottom: -1px; /* 讓底線精準壓在 card-header 的分隔線上 */
-  transition: color 0.15s ease, border-color 0.15s ease;
+  border-top-left-radius: 0.4rem !important;
+  border-top-right-radius: 0.4rem !important;
+  
+  /* [微調] 增加高度，並讓下方留白略多於上方 (0.65rem 1.2rem 0.75rem)，文字就會自然往上提 */
+  padding: 0.65rem 1.2rem 1.25rem 1.2rem !important;
+  line-height: 1.2 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  transition: all 0.15s ease-in-out;
 }
 
-/* 滑鼠懸停 (:hover)：文字變深黑，底部出現淺灰預覽線 */
+/* 3. Hover 懸停狀態：背景提亮至 28% 白光，文字變純白 */
 .modern-card-tabs .nav-tabs .nav-link:hover {
-  background-color: transparent !important;
-  color: #212529 !important;
-  border-bottom-color: #adb5bd !important;
+  background-color: rgba(255, 255, 255, 0.28) !important;
+  color: #ffffff !important;
 }
 
-/* 3. 選中的頁籤：保持透明底色 + 主題色粗體字 + 底部 3px 高對比主題色實線 */
+/* 4. 選中的頁籤：純白實心背景（與下方表單無縫融合）+ 主題色粗體字 */
 .modern-card-tabs .nav-tabs .nav-link.active {
-  background-color: transparent !important;
+  background-color: #ffffff !important;
   color: #236FB7 !important;
   font-weight: 700 !important;
-  border-bottom: 3px solid #236FB7 !important;
 }
 
-/* 4. 自動連動 9 種顏色主題（僅改變選中頁籤的文字與底部 3px 指示線顏色，背景全透明） */
-.theme-blue .modern-card-tabs .nav-tabs .nav-link.active      { color: #236FB7 !important; border-bottom-color: #236FB7 !important; }
-.theme-green .modern-card-tabs .nav-tabs .nav-link.active     { color: #44a273 !important; border-bottom-color: #44a273 !important; }
-.theme-cyan .modern-card-tabs .nav-tabs .nav-link.active      { color: #17a2b8 !important; border-bottom-color: #17a2b8 !important; }
-.theme-gray .modern-card-tabs .nav-tabs .nav-link.active      { color: #495057 !important; border-bottom-color: #495057 !important; }
-.theme-lightgray .modern-card-tabs .nav-tabs .nav-link.active { color: #444F61 !important; border-bottom-color: #6c757d !important; }
-.theme-yellow .modern-card-tabs .nav-tabs .nav-link.active    { color: #b58900 !important; border-bottom-color: #ECC244 !important; }
-.theme-purple .modern-card-tabs .nav-tabs .nav-link.active    { color: #6f42c1 !important; border-bottom-color: #6f42c1 !important; }
-.theme-orange .modern-card-tabs .nav-tabs .nav-link.active    { color: #DF8233 !important; border-bottom-color: #DF8233 !important; }
-.theme-red .modern-card-tabs .nav-tabs .nav-link.active       { color: #C35050 !important; border-bottom-color: #C35050 !important; }
+/* 5. 9 種主題連動：飽和主色導覽列 + 對應選中文字色 */
+.theme-blue .modern-card-tabs .card-header                     { background-color: #236FB7 !important; }
+.theme-blue .modern-card-tabs .nav-tabs .nav-link.active      { color: #236FB7 !important; }
+
+.theme-green .modern-card-tabs .card-header                    { background-color: #44a273 !important; }
+.theme-green .modern-card-tabs .nav-tabs .nav-link.active     { color: #2e7d56 !important; }
+
+.theme-cyan .modern-card-tabs .card-header                     { background-color: #17a2b8 !important; }
+.theme-cyan .modern-card-tabs .nav-tabs .nav-link.active      { color: #117a8b !important; }
+
+.theme-gray .modern-card-tabs .card-header                     { background-color: #5F6E86 !important; }
+.theme-gray .modern-card-tabs .nav-tabs .nav-link.active      { color: #3b4554 !important; }
+
+.theme-purple .modern-card-tabs .card-header                   { background-color: #6f42c1 !important; }
+.theme-purple .modern-card-tabs .nav-tabs .nav-link.active    { color: #512d91 !important; }
+
+.theme-orange .modern-card-tabs .card-header                   { background-color: #DF8233 !important; }
+.theme-orange .modern-card-tabs .nav-tabs .nav-link.active    { color: #b5621d !important; }
+
+.theme-red .modern-card-tabs .card-header                      { background-color: #C35050 !important; }
+.theme-red .modern-card-tabs .nav-tabs .nav-link.active       { color: #993737 !important; }
+
+/* 6. 淺色系主題（黃色、淺灰）特別處理：導覽列字體自動改為深黑字，避免白字看不見 */
+.theme-yellow .modern-card-tabs .card-header                   { background-color: #ECC244 !important; }
+.theme-yellow .modern-card-tabs .nav-tabs .nav-link            { background-color: rgba(0, 0, 0, 0.06) !important; color: #3b2d04 !important; }
+.theme-yellow .modern-card-tabs .nav-tabs .nav-link:hover      { background-color: rgba(0, 0, 0, 0.14) !important; color: #000000 !important; }
+.theme-yellow .modern-card-tabs .nav-tabs .nav-link.active     { background-color: #ffffff !important; color: #69510A !important; }
+
+.theme-lightgray .modern-card-tabs .card-header                { background-color: #B8BFCB !important; }
+.theme-lightgray .modern-card-tabs .nav-tabs .nav-link         { background-color: rgba(0, 0, 0, 0.06) !important; color: #2c3440 !important; }
+.theme-lightgray .modern-card-tabs .nav-tabs .nav-link:hover   { background-color: rgba(0, 0, 0, 0.14) !important; color: #000000 !important; }
+.theme-lightgray .modern-card-tabs .nav-tabs .nav-link.active  { background-color: #ffffff !important; color: #444F61 !important; }
+
 /* ==================== 修正頭像「更改代表圖像」圓形內升起遮罩 ==================== */
 /* 1. 讓包裹頭像與 .overlay 的 <label> 成為嚴格的圓形裁切容器 */
 .image_area label[for^="cropUploadImage"] {

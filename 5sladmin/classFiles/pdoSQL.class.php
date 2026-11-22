@@ -656,6 +656,14 @@ class DB
 		return array('totalPays'=>$totalPays, 'totalPayTo'=>$totalPayTo, 'totalIncome'=>$totalIncome, 'totalPoint'=>$totalPoint, 'totalFree'=>$totalFree);
 	}
 	//-----  取得指定會員剩餘點數  -----//
+	/**
+ * 依據 fsl_points 流水帳即時彙算會員 PTS 紅利點數統計資訊
+ * @param int         $mb_id      會員 ID
+ * @param bool        $syncMember 是否順便將彙算後的正確可用餘額同步回寫至 fsl_members.mb_points
+ * @param object|null $dbObj      選填資料庫物件（前台傳入 $DB，後台留空自動使用 DB 常數）
+ * @return array ['available' => int, 'total_earned' => int, 'total_spent' => int, 'last_balance' => int, 'record_count' => int]
+ */
+/*
 	public function getTotalPoints($mbID = 0)
 	{
 		if(empty($mbID)){ return false; }
@@ -687,6 +695,7 @@ class DB
 		}
 		return array('totalPoints'=>$totalPoints, 'pointIN'=>$pointIN, 'pointOUT'=>$pointOUT, 'totalRedeem'=>$totalRedeem, 'redeemIN'=>$redeemIN, 'redeemOUT'=>$redeemOUT, 'totalFree'=>$totalFree);
 	}
+*/
 	//-----  取得紀錄相關的所屬項目抬頭  -----//
 	public function getIDFORtitle($idforID, $getForInfo=array(), $getFromInfo=array(), $getTypeInfo='')
 	{
