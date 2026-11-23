@@ -1,12 +1,12 @@
-
-# 排除所有以「.」開頭的隱藏檔案與資料夾（包含所有子目錄）
 .*
-
-# 例外：保留 .gitignore 本身，讓設定規則能同步到 GitHub
 !.gitignore
 !.htaccess
-5sladmin/includeFiles/
-5sladmin/_test/
-_nearest/
-_skipFiles/
-_oldVersion/
+_*
+@*
+*(*)*
+db.inc.php
+common.lib.php
+QPay.inc.php
+sendmail.lib.php
+pluginFiles/
+uploadFiles/
