@@ -62,6 +62,8 @@ $cDateTime = date('Y-m-d H:i:s');
 switch ($formAcce) {
     case "func_ad_infoUpdate":////////////////////////////////////////// func_ad_infoUpdate 更新管理者資料
         $ar=$arrDatA;
+        $imgUp = $_POST["imgUp"] ?? '';
+        $imgMsg = '';
         $setArr=array();
         $i=0;
         while($i<count($ar)-1){
@@ -72,49 +74,19 @@ switch ($formAcce) {
         }
         $setArr['ad_updated'] = '[EXPR]NOW()';
         $up = DB->update('fsl_administrator', $setArr,array('ad_id'=>$adID));
-        if($up){
-            $imgUp = $_POST["imgUp"];
-            $newUpPhoto = '';
-            if(!empty($imgUp)){
-                $imgUpRtn = false;
-                if($imgUp=='@DELETE@'){
-                    if(
-                        @unlink('../uploadFiles/ad/adphoto_' . $adID . '_.jpg') &&
-                        @unlink('../uploadFiles/ad/adphoto_' . $adID . '_thumb.jpg')
-                    ){
-                        $imgUpRtn = true;
-                        if($adID == CF_AD_ID){
-                            $_SESSION['SESS_AD_THUMB'] = 'imageFiles/nopic_user_128x128.jpg';
-                            $newUpPhoto ='../imageFiles/nopic_user_200x200.jpg';
-                        }
-                    }
-                } else {
-                    $image_array_1 = explode(";", $imgUp);
-                    $image_array_2 = explode(",", $image_array_1[1]);
-                    $imgUp = base64_decode($image_array_2[1]);
-                    if(!empty($adID)){
-                        $imageName = '../uploadFiles/ad/adphoto_' . $adID . '_.jpg';
-                        if (file_put_contents($imageName, $imgUp)!==false){
-                            chmod($imageName, 0755);
-                        }
-                        //---------------- 製作縮圖 ----------------//
-                        $thumbName = '../uploadFiles/ad/adphoto_' . $adID . '_thumb.jpg';
-                        $toThumb = _fn_resize_crop($imageName, $thumbName, 200, 200);
-                        if($toThumb){
-                            chmod($thumbName, 0755);
-                            $imgUpRtn = true;
-                            if($adID == CF_AD_ID){
-                                $_SESSION['SESS_AD_THUMB'] = 'uploadFiles/ad/adphoto_' . $adID . '_thumb.jpg';
-                                $newUpPhoto = '../'.$thumbName;
-                            }
-                        }
-                    }
+        if($up && $imgUp !== ''){
+            $imgOk = _fn_image_upload($imgUp, '../uploadFiles/ad/adphoto_' . $adID, 800, 600);
+            if ($imgOk) {
+                $imgMsg = '並同步更新頭像！';
+                if($adID == CF_AD_ID){
+                    $_SESSION['SESS_AD_THUMB'] = 'uploadFiles/ad/adphoto_' . $adID . '_thumb.jpg';
+                    $newUpPhoto = '../uploadFiles/ad/adphoto_' . $adID . '_thumb.jpg';
                 }
             }
-            $ilog = DB->insSysLogs(51, CF_AD_ID, 2121, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
-            $rtn = array('RTN'=>1, 'msgType'=>(isset($imgUpRtn) ? ($imgUpRtn ? 'success' : 'warning') : 'success'), 'msgStr'=>'成功編輯管理者資料'.(isset($imgUpRtn) ? ($imgUpRtn ? '，以及代表圖像' : '，但圖像編輯失敗') : '').'！！', 'newUpPhoto'=> $newUpPhoto, 'upTime'=> $cDateTime);
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, 2121, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
+            $rtn = array('RTN'=>1, 'msgType'=>(isset($imgUpRtn) ? ($imgUpRtn ? 'success' : 'warning') : 'success'), 'msgStr'=>'成功編輯管理者資料！'.$imgMsg, 'newUpPhoto'=> $newUpPhoto, 'upTime'=> $cDateTime);
         } else {
-            $ilog = DB->insSysLogs(51, CF_AD_ID, 2120, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, 2120, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'編輯管理者資料失敗！請聯絡相關管理人員！！');
         }
         echo json_encode($rtn);

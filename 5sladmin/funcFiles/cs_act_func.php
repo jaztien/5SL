@@ -37,22 +37,22 @@ switch ($formAcce) {
     }
 
     $upTime = date('Y-m-d H:i:s');
-    $formData['parent_id']           = (int)($formData['parent_id'] ?? 0);
-    $formData['course_show_pricing'] = (int)($formData['course_show_pricing'] ?? 1);
-    $formData['course_is_hot']       = (int)($formData['course_is_hot'] ?? 0);
-    $formData['course_sort']         = (int)($formData['course_sort'] ?? 100);
-    $formData['course_type']         = (int)($formData['course_type'] ?? 1);
-    $formData['course_cost']         = (float)($formData['course_cost'] ?? 0);
-    $formData['course_lesson']       = max(1, (int)($formData['course_lesson'] ?? 1));
-    $formData['course_duration']     = max(15, (int)($formData['course_duration'] ?? 60));
-    $formData['course_max']          = max(1, (int)($formData['course_max'] ?? 20));
-    $formData['course_status']       = (int)($formData['course_status'] ?? 1);
-    $formData['course_startdate']    = !empty($formData['course_startdate']) ? $formData['course_startdate'] : date('Y-m-d');
-    $formData['course_starttime']    = !empty($formData['course_starttime']) ? $formData['course_starttime'] : '14:00:00';
+    //$formData['parent_id']           = (int)($formData['parent_id'] ?? 0);
+    //$formData['course_show_pricing'] = (int)($formData['course_show_pricing'] ?? 1);
+    //$formData['course_is_hot']       = (int)($formData['course_is_hot'] ?? 0);
+    //$formData['course_sort']         = (int)($formData['course_sort'] ?? 100);
+    //$formData['course_type']         = (int)($formData['course_type'] ?? 1);
+    //$formData['course_cost']         = (float)($formData['course_cost'] ?? 0);
+    //$formData['course_lesson']       = max(1, (int)($formData['course_lesson'] ?? 1));
+    //$formData['course_duration']     = max(15, (int)($formData['course_duration'] ?? 60));
+    //$formData['course_max']          = max(1, (int)($formData['course_max'] ?? 20));
+    //$formData['course_status']       = (int)($formData['course_status'] ?? 1);
+    //$formData['course_startdate']    = !empty($formData['course_startdate']) ? $formData['course_startdate'] : date('Y-m-d');
+    //$formData['course_starttime']    = !empty($formData['course_starttime']) ? $formData['course_starttime'] : '14:00:00';
 
     if ($acc === 'add') {
       $formData['course_published'] = $upTime;
-      $formData['course_ribbon']    = '';
+      //$formData['course_ribbon']    = '';
       $res   = DB->insert('fsl_courses', $formData);
       $newID = (int)DB->lastInsertId();
       $targetID = $newID;
@@ -73,9 +73,11 @@ switch ($formAcce) {
     // 處理課程封面裁切圖上傳
     $imgMsg = '';
     if ($targetID > 0 && $imgUp !== '') {
+      /*
       if (!is_dir('../uploadFiles/cs/')) {
         @mkdir('../uploadFiles/cs/', 0755, true);
       }
+        */
       $imgOk = _fn_image_upload($imgUp, '../uploadFiles/cs/cimg_' . $targetID, 800, 600);
       if ($imgOk) {
         $imgMsg = '並同步更新封面圖！';

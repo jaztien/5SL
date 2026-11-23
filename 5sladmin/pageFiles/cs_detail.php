@@ -34,7 +34,7 @@ if (!empty($csID) && file_exists("../uploadFiles/cs/cimg_" . $csID . "_.jpg")) {
   $mainimgchk     = '';
 } else {
   $cropImgDisplay = 'hide';
-  $mainimgpath    = '../imageFiles/nopic_200x200.jpg';
+  $mainimgpath    = '../imageFiles/nopic_400x300.jpg';
   $mainimgchk     = '';
 }
 
@@ -178,7 +178,7 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                           <div class="overlay">
                             <div class="overtext"><?php echo !empty($csID) ? "更改" : "新增"; ?>課程封面</div>
                           </div>
-                          <input type="file" name="image" class="image d-none" id="cropUploadImage" crop-width="600" crop-height="800">
+                          <input type="file" name="image" class="image d-none" id="cropUploadImage" crop-width="800" crop-height="600">
                         </label>
                       </form>
                       <?php include('include_avatarmodal.php'); ?>

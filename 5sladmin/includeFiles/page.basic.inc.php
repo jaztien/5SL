@@ -76,109 +76,135 @@ $topNavConfig = [
 ];
 ?>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 確保在有父視窗且父視窗已載入 jQuery 的環境下執行
-    if (!window.parent || !window.parent.$) return;
-
-    const $p = window.parent.$;
+(function() {
     const cfg = <?php echo json_encode($topNavConfig, JSON_UNESCAPED_UNICODE); ?>;
 
-    const $authPanel   = $p('.nav-item.nav-authpanel');
-    const $topPanel    = $p('.nav-item.nav-toppanel');
-    const $topSearch   = $p('.nav-item.nav-topsearch');
-    const $topExport   = $p('.nav-item.nav-topexport');
-    const $topBKredir  = $p('.nav-item.nav-topbkredir');
+    function syncParentTopNavbar() {
+        if (!window.parent || !window.parent.document) return false;
+        const pDoc = window.parent.document;
 
-    // 1. 全面重置所有面板與圖示狀態
-    $authPanel.find('i').removeClass('active');
-    $topPanel.find('i').removeClass('active').hide();
-    $topSearch.find('i').removeClass('active').hide();
-    $topExport.find('i').removeClass('active').hide();
-    $topBKredir.find('i').removeClass('active').hide();
+        const authPanel  = pDoc.querySelector('.nav-item.nav-authpanel');
+        const topPanel   = pDoc.querySelector('.nav-item.nav-toppanel');
+        const topSearch  = pDoc.querySelector('.nav-item.nav-topsearch');
+        const topExport  = pDoc.querySelector('.nav-item.nav-topexport');
+        const topBKredir = pDoc.querySelector('.nav-item.nav-topbkredir');
 
-    // 2. 顯示並點亮四大權限圖示 (Bootstrap 5 Flex 建議使用 d-flex 顯示，若 CSS 原本為 inline-block 則用 show())
-    if ($authPanel.length > 0) {
-        $authPanel.css('display', 'flex');
-        if (cfg.auth.browse) $authPanel.find('i#topAuth_browser').addClass('active');
-        if (cfg.auth.addnew) $authPanel.find('i#topAuth_addnew').addClass('active');
-        if (cfg.auth.edit)   $authPanel.find('i#topAuth_edit').addClass('active');
-        if (cfg.auth.delete) $authPanel.find('i#topAuth_delete').addClass('active');
-    }
+        if (!authPanel) return false;
 
-    // 3. 操作按鈕框控制 (結合 PAGE_OPANEL 與實際授權防呆)
-    const hasAnyAuth = cfg.auth.browse || cfg.auth.addnew || cfg.auth.edit || cfg.auth.delete;
-    if (cfg.opanel > 0 && hasAnyAuth && $topPanel.length > 0) {
-        $topPanel.css('display', 'flex');
+        // 1. 全面重置所有面板與圖示的 active 狀態
+        authPanel.querySelectorAll('i').forEach(el => el.classList.remove('active'));
+        if (topPanel)   topPanel.querySelectorAll('i').forEach(el => { el.classList.remove('active'); el.style.display = 'none'; });
+        if (topSearch)  topSearch.querySelectorAll('i').forEach(el => { el.classList.remove('active'); el.style.display = 'none'; });
+        if (topExport)  topExport.querySelectorAll('i').forEach(el => { el.classList.remove('active'); el.style.display = 'none'; });
+        if (topBKredir) topBKredir.querySelectorAll('i').forEach(el => { el.classList.remove('active'); el.style.display = 'none'; });
 
-        if (cfg.opanel === 1) {
-            // 列表頁：新增按鈕 (有新增權限才亮起 active)
-            const $addBtn = $topPanel.find('i#topBut_add').show();
-            cfg.auth.addnew ? $addBtn.addClass('active') : $addBtn.removeClass('active');
-        } else if (cfg.opanel === 2 || cfg.opanel === 5) {
-            // 編輯/新增頁：儲存按鈕 (預設灰色，等表單異動後才由 JS 加上 active)
-            $topPanel.find('i#topBut_save').show().removeClass('active');
-        } else if (cfg.opanel === 3) {
-            // 上傳頁：上傳與刪除按鈕
-            const $upBtn = $topPanel.find('i#topBut_upload').show();
-            (cfg.auth.addnew || cfg.auth.edit) ? $upBtn.addClass('active') : $upBtn.removeClass('active');
-            
-            if (cfg.auth.delete) {
-                $topPanel.find('i#topBut_delete').show().addClass('active');
+        // 2. 嚴格依照 cfg.auth 的 true / false 點亮或熄滅四大權限圖示
+        authPanel.style.display = 'flex';
+        const toggleAuthIcon = (id, allow) => {
+            const icon = authPanel.querySelector('#' + id);
+            if (!icon) return;
+            if (allow === true) {
+                icon.classList.add('active');
+            } else {
+                icon.classList.remove('active');
             }
-        } else if (cfg.opanel === 4) {
-            // 詳細資料編輯頁：儲存與刪除按鈕
-            $topPanel.find('i#topBut_save').show().removeClass('active');
-            if (cfg.auth.delete) {
-                $topPanel.find('i#topBut_delete').show().addClass('active');
+        };
+        toggleAuthIcon('topAuth_browser', cfg.auth.browse);
+        toggleAuthIcon('topAuth_addnew',  cfg.auth.addnew);
+        toggleAuthIcon('topAuth_edit',    cfg.auth.edit);
+        toggleAuthIcon('topAuth_delete',  cfg.auth.delete);
+
+        // 3. 操作按鈕框控制 (結合 PAGE_OPANEL 與實際授權防呆)
+        const hasAnyAuth = cfg.auth.browse || cfg.auth.addnew || cfg.auth.edit || cfg.auth.delete;
+        if (cfg.opanel > 0 && hasAnyAuth && topPanel) {
+            topPanel.style.display = 'flex';
+            const btnAdd   = topPanel.querySelector('#topBut_add');
+            const btnSave  = topPanel.querySelector('#topBut_save');
+            const btnUp    = topPanel.querySelector('#topBut_upload');
+            const btnDel   = topPanel.querySelector('#topBut_delete');
+            const btnReset = topPanel.querySelector('#topBut_reset');
+
+            if (cfg.opanel === 1 && btnAdd) {
+                btnAdd.style.display = 'inline-flex';
+                cfg.auth.addnew ? btnAdd.classList.add('active') : btnAdd.classList.remove('active');
+            } else if ((cfg.opanel === 2 || cfg.opanel === 5) && btnSave) {
+                btnSave.style.display = 'inline-flex';
+                btnSave.classList.remove('active');
+            } else if (cfg.opanel === 3) {
+                if (btnUp) {
+                    btnUp.style.display = 'inline-flex';
+                    (cfg.auth.addnew || cfg.auth.edit) ? btnUp.classList.add('active') : btnUp.classList.remove('active');
+                }
+                if (btnDel && cfg.auth.delete) {
+                    btnDel.style.display = 'inline-flex';
+                    btnDel.classList.add('active');
+                }
+            } else if (cfg.opanel === 4) {
+                if (btnSave) {
+                    btnSave.style.display = 'inline-flex';
+                    btnSave.classList.remove('active');
+                }
+                if (btnDel && cfg.auth.delete) {
+                    btnDel.style.display = 'inline-flex';
+                    btnDel.classList.add('active');
+                }
             }
+
+            if (btnReset) {
+                btnReset.style.display = 'inline-flex';
+                btnReset.classList.add('active');
+            }
+        } else if (topPanel) {
+            topPanel.style.display = 'none';
         }
 
-        // 無論 PAGE_OPANEL 為何，皆顯示重置按鈕
-        $topPanel.find('i#topBut_reset').show().addClass('active');
-    } else {
-        $topPanel.hide();
-    }
-
-    // 4. 搜尋按鈕框控制
-    if (cfg.search > 0 && $topSearch.length > 0) {
-        $topSearch.css('display', 'flex');
-        const $searchIcon = $topSearch.find('i#topBut_search');
-        if (cfg.search === 1) {
-            $searchIcon.find('span').hide();
-        } else {
-            $searchIcon.find('span').show();
+        // 4. 搜尋按鈕框控制
+        if (cfg.search > 0 && topSearch) {
+            topSearch.style.display = 'flex';
+            const searchIcon = topSearch.querySelector('#topBut_search');
+            if (searchIcon) {
+                searchIcon.style.display = 'inline-flex';
+                searchIcon.classList.add('active');
+            }
+        } else if (topSearch) {
+            topSearch.style.display = 'none';
         }
-        $searchIcon.show().addClass('active');
-    } else {
-        $topSearch.hide();
-    }
 
-    // 5. 匯出按鈕框控制
-    if (cfg.export > 0 && $topExport.length > 0) {
-        $topExport.css('display', 'flex');
-        if (cfg.export === 1) {
-            $topExport.find('i#topBut_excel').show().addClass('active');
-            $topExport.find('i#topBut_print').hide().removeClass('active');
-        } else if (cfg.export === 2) {
-            $topExport.find('i#topBut_print').show().addClass('active');
-            $topExport.find('i#topBut_excel').hide().removeClass('active');
-        } else {
-            $topExport.find('i#topBut_excel').show().addClass('active');
-            $topExport.find('i#topBut_print').show().addClass('active');
+        // 5. 匯出按鈕框控制
+        if (cfg.export > 0 && topExport) {
+            topExport.style.display = 'flex';
+            const btnExcel = topExport.querySelector('#topBut_excel');
+            const btnPrint = topExport.querySelector('#topBut_print');
+            if (btnExcel) btnExcel.style.display = (cfg.export === 1 || cfg.export === 3) ? 'inline-flex' : 'none';
+            if (btnPrint) btnPrint.style.display = (cfg.export === 2 || cfg.export === 3) ? 'inline-flex' : 'none';
+            if (btnExcel && (cfg.export === 1 || cfg.export === 3)) btnExcel.classList.add('active');
+            if (btnPrint && (cfg.export === 2 || cfg.export === 3)) btnPrint.classList.add('active');
+        } else if (topExport) {
+            topExport.style.display = 'none';
         }
-    } else {
-        $topExport.hide();
+
+        // 6. 返回前頁按鈕框控制
+        if (cfg.bkRedir > 0 && topBKredir) {
+            topBKredir.style.display = 'flex';
+            const btnBk = topBKredir.querySelector('#topBut_bkurl');
+            if (btnBk) {
+                btnBk.style.display = 'inline-flex';
+                btnBk.classList.add('active');
+            }
+        } else if (topBKredir) {
+            topBKredir.style.display = 'none';
+        }
+
+        return true;
     }
 
-    // 6. 返回前頁按鈕框控制
-    if (cfg.bkRedir > 0 && $topBKredir.length > 0) {
-        $topBKredir.css('display', 'flex');
-        $topBKredir.find('i#topBut_bkurl').show().addClass('active');
-    } else {
-        $topBKredir.hide();
+    // 立即嘗試執行，若父視窗尚未就緒則於 DOMContentLoaded 再次同步
+    if (!syncParentTopNavbar()) {
+        document.addEventListener('DOMContentLoaded', syncParentTopNavbar);
     }
-});
+})();
 </script>
+
 <?php
 ///////////////////////////////////////////////////////////////////////////
 // 頁面讀寫權限佈局 // auBROWSE,auADDNEW,auEDIT,auDELETE
