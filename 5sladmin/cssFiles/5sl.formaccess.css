@@ -357,12 +357,6 @@ table.dataTable.table {
     .dataTables_filter {
       display: none !important;
     }
-    #dataSearch {
-      background-color: #dbf0e6;
-      color: #000000;
-      height: 54px;
-    }
-
 
 
 /* --------------------------------------------------------------------------

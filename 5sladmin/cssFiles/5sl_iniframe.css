@@ -276,3 +276,77 @@ td .form-check-input,
 .theme-purple .card-outline    { border-top: 3px solid #6f42c1 !important; }
 .theme-orange .card-outline    { border-top: 3px solid #DF8233 !important; }
 .theme-red .card-outline       { border-top: 3px solid #C35050 !important; }
+
+
+/* ==========================================================================
+   全站列表頁 (*_list.php) 與詳情頁 (*_detail.php) 自動撐滿視窗同高布局
+   ========================================================================== */
+html, body {
+  min-height: 100vh;
+}
+
+.app-wrapper,
+.app-main {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 1.25rem;
+}
+
+.app-content > .container-fluid {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 讓主內容 Row 自動撐滿剩餘視窗高度 */
+.app-content > .container-fluid > .row {
+  flex: 1 1 auto;
+  align-items: stretch;
+}
+
+/* 1. 列表頁 (*_list.php)：單一主卡片自動撐滿高度，底部留白協調 */
+.app-content > .container-fluid > .row > .col-12 {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content > .container-fluid > .row > .col-12 > .card {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content > .container-fluid > .row > .col-12 > .card > .card-body {
+  flex: 1 1 auto;
+}
+
+/* 2. 詳情頁 (*_detail.php)：左側個人資訊卡與右側多分頁卡左右等高且自動撐滿頁面 */
+.app-content > .container-fluid > .row > [class*="col-md-"] {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 當左側只有一張卡片，或右側為多分頁卡片 (.modern-card-tabs) 時，直接撐滿整欄高度 */
+.app-content > .container-fluid > .row > [class*="col-md-"] > .card:only-child,
+.app-content > .container-fluid > .row > [class*="col-md-"] > .modern-card-tabs {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content > .container-fluid > .row > [class*="col-md-"] > .card:only-child > .card-body,
+.app-content > .container-fluid > .row > [class*="col-md-"] > .modern-card-tabs > .card-body {
+  flex: 1 1 auto;
+}
+
+/* 若左側有兩張卡片（例如 mb_detail.php 上方個人資料卡 + 下方「會員受評」卡），讓下方卡片自動補滿剩餘高度 */
+.app-content > .container-fluid > .row > [class*="col-md-"] > .card:not(:only-child):last-child {
+  flex: 1 1 auto;
+}

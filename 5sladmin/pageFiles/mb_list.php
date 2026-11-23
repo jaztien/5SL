@@ -111,26 +111,28 @@ $statusMap = array(
           <div class="row">
             <div class="col-12">
               <div class="card card-outline shadow-sm">
-                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="card-header d-flex flex-wrap align-items-center gap-2">
+                  <!-- 左側：Title 與筆數徽章 -->
                   <div class="d-flex align-items-center gap-2">
-                    <span class="fw-bold"><i class="bi bi-people-fill me-1 text-primary"></i>會員清單</span>
+                    <span class="fw-bold"><i class="bi bi-journal-richtext me-1 text-success"></i>會員清單</span>
                     <span class="badge text-bg-light border">共 <span id="resultCount"><?php echo $totalNum > $maxResult ? $totalNum . " 筆符合，表列 " . $maxResult : $totalNum; ?></span> 筆</span>
                   </div>
-                  <div class="input-group input-group-sm" style="max-width: 260px;">
-                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                  <!-- 右側：手機版自動填滿 100%，平板/電腦版 (md 以上) 縮為自動寬度並靠右 -->
+                  <div class="input-group input-group-sm w-auto flex-grow-1 flex-md-grow-0 ms-md-auto">
+                    <span class="input-group-text bg-white"><i class="bi bi-funnel"></i></span>
                     <input type="text" id="dataSearch" class="form-control" placeholder="表格內即時快篩...">
+                    <span class="input-group-text bg-white"><i class="bi bi-x-lg"></i></span>
                   </div>
                 </div>
-
                 <div class="card-body">
                   <div class="table-responsive">
-                    <table id="dataTable_mblist" class="table table-hover table-bordered align-middle w-100 small">
-                      <thead class="table-light">
+                    <table id="dataTable_mblist" class="table table-striped table-hover table-bordered align-middle w-100 small" data-search="1">
+                      <thead class="table-light text-nowrap">
                         <tr>
                           <th class="text-center" style="width: 60px;">ID</th>
                           <th class="text-center" style="width: 65px;">頭像</th>
-                          <th>帳號 (Email)</th>
-                          <th>姓名 / 暱稱</th>
+                          <th>帳號(Email)</th>
+                          <th>姓名/暱稱</th>
                           <th>聯絡手機</th>
                           <th class="text-center">會員等級</th>
                           <th class="text-end">PTS 點數</th>
@@ -153,7 +155,7 @@ $statusMap = array(
                           <td class="text-center">
                             <img src="<?php echo $avatarSrc; ?>" class="rounded-circle border" width="38" height="38" style="object-fit: cover;" alt="Avatar">
                           </td>
-                          <td class="fw-semibold text-primary"><?php echo htmlspecialchars(_fn_secure_crypto($row['mb_email'],'de') ?? ''); ?></td>
+                          <td class="fw-200"><?php echo htmlspecialchars(_fn_secure_crypto($row['mb_email'],'de') ?? ''); ?></td>
                           <td>
                             <div class="fw-bold text-dark"><?php echo htmlspecialchars(_fn_secure_crypto($row['mb_name'],'de') ?? '-'); ?></div>
                             <?php if (!empty($row['mb_nick'])): ?>

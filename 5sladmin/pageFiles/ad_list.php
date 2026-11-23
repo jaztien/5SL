@@ -111,8 +111,8 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
                 <!-- /.card-header -->
 
                 <div class="card-body theme-green">
-                  <table id="dataTable_adlist" class="table table-bordered table-striped table-hover w-100" data-pagemax="25" data-dirto="ad_profile.php" but-excel but-print="人生第五季管理人員資料紀錄" data-search>
-                    <thead>
+                  <table id="dataTable_adlist" class="table table-striped table-hover table-bordered align-middle w-100 small" but-excel but-print="人生第五季管理人員資料紀錄" data-search>
+                    <thead class="table-light text-nowrap">
                       <tr>
                         <th>狀態</th>
                         <th>ID</th>
@@ -132,7 +132,7 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
                         $i = 0;
                         while($i<count($sr)){ 
                         ?>
-                            <tr style="cursor:pointer;" data-currid="<?php echo $sr[$i]['ad_id']; ?>">
+                            <tr style="cursor:pointer;" onclick="window.location.href='ad_profile.php?currID=<?php echo $sr[$i]['ad_id']; ?>';" data-currid="<?php echo $sr[$i]['ad_id']; ?>">
                               <td>
                                 <!-- [注意] 請確認 administrator.json 中的 badge 欄位已更新為 BS5 的 text-bg-* 類別 -->
                                 <span class="badge <?php echo trim($adJS['badge'][$sr[$i]['ad_status']]); ?>"><?php echo $adJS['status'][$sr[$i]['ad_status']]; ?></span>
