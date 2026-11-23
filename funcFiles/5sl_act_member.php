@@ -9,11 +9,6 @@ $datapass = true;
 $action = $_POST['action'] ?? '';
 $dataForm = isset($_POST['dataForm']) ? $_POST['dataForm'] : null;
 
-$action = "act_member_login";
-$_POST['loginAccount'] = "jaztien@gmail.com";
-$_POST['loginPass'] = "jazz0603";
-
-
 if (empty($action)) {
     echo json_encode(array('success'=>0, 'code'=>'[@-errorcode-@]', 'message'=>'傳遞值 $action 為空白或遺失，表單傳送失敗！請聯絡相關管理人員！！'));
     exit();
