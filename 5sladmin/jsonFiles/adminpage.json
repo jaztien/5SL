@@ -137,7 +137,7 @@
     },
     {
       "title": "課程商品資料管理",
-      "pagecode": "ITEM_MERCH",
+      "pagecode": "ITEM_COURSE",
       "url": "#",
       "badgeClass": "",
       "badgeNum": "",
@@ -146,7 +146,7 @@
         {
           "title": "課程資料紀錄",
           "pagecode": "PG_COURSE",
-          "url": "course_list.php",
+          "url": "cs_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
