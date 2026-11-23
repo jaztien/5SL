@@ -122,10 +122,10 @@ $maxResult = (!empty($searchURI)) ? 200 : 50;
                           LEFT JOIN fsl_administrator c ON a.lg_forid = c.ad_id
                           WHERE lg_for=? ORDER BY a.lg_id DESC LIMIT 200
                         ";
-                        $sr = $DB->query($sql,array(1));
+                        $sr = DB->query($sql,array(1));
 
 
-                        //$sr = $DB->query("SELECT * FROM data_logs WHERE lg_for=? ORDER BY lg_created DESC LIMIT 200",array(1));
+                        //$sr = DB->query("SELECT * FROM data_logs WHERE lg_for=? ORDER BY lg_created DESC LIMIT 200",array(1));
                         //$i = 0; //以$i為$nameList這個陣列的索引值
                         //while($i<count($sr)){ 
                         foreach ($sr as $log) {
@@ -133,13 +133,13 @@ $maxResult = (!empty($searchURI)) ? 200 : 50;
                           <tr style="cursor:pointer;" data-currid="<?php echo $log['lg_id']; ?>">
                             <td><?php echo $log['lg_created']; ?></td>
                             <td><?php
-                            //$adnick = $DB->single("SELECT ad_title FROM fsl_administrator WHERE ad_id=?",array($sr[$i]['lg_forid']));
+                            //$adnick = DB->single("SELECT ad_title FROM fsl_administrator WHERE ad_id=?",array($sr[$i]['lg_forid']));
                             //echo $adnick ?: '&nbsp;';
                             echo $log['ad_title'] ?: '&nbsp;';
                             ?></td>
                             <td style="font-size:1.2em;font-weight:bold;"><?php echo $sr[$i]['lg_code']; ?></td>
                             <td><?php
-                                //$oStr = $DB->single("SELECT lg_string FROM sys_logstrings WHERE lg_code=?",array($sr[$i]['lg_code']));
+                                //$oStr = DB->single("SELECT lg_string FROM sys_logstrings WHERE lg_code=?",array($sr[$i]['lg_code']));
                                 //echo _fn_getLogString($sr[$i]['lg_params'],$oStr) ?: '&nbsp;';
                                 echo _fn_getLogString($log['lg_params'], $log['lg_string']) ?: '&nbsp;';
                             ?></td>
@@ -147,7 +147,7 @@ $maxResult = (!empty($searchURI)) ? 200 : 50;
                         <?php 
                           //$i++;
                           } 
-                          //$DB->closeConnection();
+                          //DB->closeConnection();
                         ?>
                     </tbody>
                     <tfoot>

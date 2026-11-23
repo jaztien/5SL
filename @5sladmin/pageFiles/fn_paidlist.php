@@ -116,7 +116,7 @@ $geJS=_fn_getCachedJsonData("../jsonFiles/general.json");
                         //if(!empty($searchURI)){ $listSql .= " WHERE 1=1"; }
 
                         $listSql = " ORDER BY pay_date ASC LIMIT {$maxResult}";
-                        $sr = $DB->query($listSql,array(0,9));
+                        $sr = DB->query($listSql,array(0,9));
                       
                         $i = 0; //以$i為$nameList這個陣列的索引值
                         $totalAmount=0;
@@ -135,12 +135,12 @@ $geJS=_fn_getCachedJsonData("../jsonFiles/general.json");
                           } else {
                             $fontColor="";
                           }
-                          //$invres = $DB->row("SELECT iv_id FROM fsl_invoices WHERE mb_id=? AND pay_id=? AND iv_status=?",array($mbID,$sr[$i]['pay_id'],1));
+                          //$invres = DB->row("SELECT iv_id FROM fsl_invoices WHERE mb_id=? AND pay_id=? AND iv_status=?",array($mbID,$sr[$i]['pay_id'],1));
                           ?>
                           <tr style="cursor:pointer;" data-currid="<?php echo $sr[$i]['mb_id']; ?>">
                             <td><?PHP echo $sr[$i]['pay_date'] ?? '&nbsp;'; ?></td>
                             <td><?PHP
-                              $mbres = $DB->single ("SELECT mb_title FROM fsl_members WHERE mb_id=?",array($sr[$i]['mb_id']));
+                              $mbres = DB->single ("SELECT mb_title FROM fsl_members WHERE mb_id=?",array($sr[$i]['mb_id']));
                               echo $mbres ? '<button type="button" class="btn btn-block btn-primary btn-sm mbBut" data-mbid="'.$sr[$i]['mb_id'].'">'.$mbres.'</button>' : '&nbsp;';
                             ?></td>
                             <td><?PHP echo $sr[$i]['pay_orderno'] ?? '&nbsp;'; ?></td>

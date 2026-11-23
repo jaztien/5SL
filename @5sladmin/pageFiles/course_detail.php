@@ -12,7 +12,7 @@ require_once('../classFiles/eRanking.class.php');
 //
 $courseID=currID;
 //
-$res = $DB->row("SELECT * FROM fsl_courses WHERE course_id=?",array($courseID));
+$res = DB->row("SELECT * FROM fsl_courses WHERE course_id=?",array($courseID));
 //功能陣列建立
 $courseJS=_fn_getCachedJsonData("../jsonFiles/courses.json");
 $geJS=_fn_getCachedJsonData("../jsonFiles/general.json");
@@ -24,7 +24,7 @@ $idForRateMode = $idForJS['ratemode'] ?? 5;
 //--------------------- 評分計算 -----------------------
 /*
 $counT="SELECT AVG((rat_s1 + rat_s2 + rat_s3 + rat_s4 + rat_s5)/5) AS totAVE, AVG(rat_s1) AS S1, AVG(rat_s2) AS S2, AVG(rat_s3) AS S3, AVG(rat_s4) AS S4, AVG(rat_s5) AS S5 FROM fsl_rating WHERE rat_forid=? AND rat_for=?";
-$cnt = $DB->query($counT,array($courseID,5));
+$cnt = DB->query($counT,array($courseID,5));
 $S1 = !empty($cnt[0]['S1']) ? floatval($cnt[0]['S1']) : 0;
 $S2 = !empty($cnt[0]['S2']) ? floatval($cnt[0]['S2']) : 0;
 $S3 = !empty($cnt[0]['S3']) ? floatval($cnt[0]['S3']) : 0;
@@ -535,7 +535,7 @@ $totalSess = 0;
                           <tbody>
                             <?php
                               $sql="SELECT * FROM fsl_course_sessions WHERE course_id=?";
-                              $srr = $DB->query($sql,array($courseID));
+                              $srr = DB->query($sql,array($courseID));
                               $totalSess = count($srr);
                               $i = 0; //以$i為$nameList這個陣列的索引值
                               while($i < $totalSess){ 
@@ -593,9 +593,9 @@ $totalSess = 0;
                                 LEFT JOIN fsl_administrator c ON a.lg_forid = c.ad_id
                                 WHERE lg_forid=? AND lg_for=? ORDER BY a.lg_id DESC LIMIT 200
                               ";
-                              $sr = $DB->query($sql,array($courseID,1));
+                              $sr = DB->query($sql,array($courseID,1));
                               //$sql="SELECT * FROM data_logs WHERE lg_forid=? AND lg_for=?";
-                              //$srr = $DB->query($sql,array($courseID,1));
+                              //$srr = DB->query($sql,array($courseID,1));
                               //$i = 0; //以$i為$nameList這個陣列的索引值
                               //while($i<count($srr)){ 
                               foreach ($sr as $log) {
@@ -643,7 +643,7 @@ $totalSess = 0;
                             <tbody>
                               <?php
                                 $sql="SELECT * FROM fsl_rating WHERE rat_forid=? AND rat_for=?";
-                                $sr = $DB->query($sql,array($courseID,5));
+                                $sr = DB->query($sql,array($courseID,5));
                                 $i = 0; //以$i為$nameList這個陣列的索引值
                                 while($i<count($sr)){ 
                                   ?>

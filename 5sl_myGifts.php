@@ -9,11 +9,11 @@ $mb_id = (int)($_SESSION['mbID'] ?? $_SESSION['user_id'] ?? 0);
 $mb_lvl = isset($_SESSION['mbLevel']) ? (int)$_SESSION['mbLevel'] : 3;
 
 // 1. 查詢會員目前真實 PTS 點數餘額（若無資料庫則預設 0
-$db_pts = ($mb_id > 0) ? $DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]) : false;
+$db_pts = ($mb_id > 0) ? DB->single("SELECT mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]) : false;
 $member_pts = ($db_pts !== false && $db_pts !== null) ? (int)$db_pts : 0;
 
 // 在頂部 PHP 查詢區補上真實累計消費金額
-$total_spent = ($mb_id > 0) ? (int)$DB->single("SELECT COALESCE(SUM(ord_total), 0) FROM fsl_orders WHERE mb_id = ? AND ord_status IN (2, 3, 4)", [$mb_id]) : 0;
+$total_spent = ($mb_id > 0) ? (int)DB->single("SELECT COALESCE(SUM(ord_total), 0) FROM fsl_orders WHERE mb_id = ? AND ord_status IN (2, 3, 4)", [$mb_id]) : 0;
 $next_target = 50000;
 $spent_pct   = min(100, (int)round(($total_spent / $next_target) * 100));
 $remain_amt  = max(0, $next_target - $total_spent);
@@ -28,7 +28,7 @@ $sql_gifts = "
     WHERE r.mb_id = ?
     ORDER BY (r.grec_status = 0) DESC, r.grec_created DESC
 ";
-$gift_records = ($mb_id > 0) ? $DB->query($sql_gifts, [$mb_id]) : [];
+$gift_records = ($mb_id > 0) ? DB->query($sql_gifts, [$mb_id]) : [];
 if (!is_array($gift_records)) $gift_records = [];
 
 // 3. 預先批次撈出這些禮品關聯的數位下載檔案 (fsl_merchandise)，避免迴圈內重複查詢
@@ -44,7 +44,7 @@ foreach ($gift_records as $gr) {
 }
 if (!empty($all_merch_ids)) {
     $placeholders = implode(',', array_fill(0, count($all_merch_ids), '?'));
-    $merch_rows = $DB->query(
+    $merch_rows = DB->query(
         "SELECT merch_id, merch_type, merch_title, merch_download_url, merch_file_format FROM fsl_merchandise WHERE merch_id IN ($placeholders)",
         array_values($all_merch_ids)
     );
@@ -72,11 +72,11 @@ $source_labels = [
 
 // 4. 查詢會員 PTS 紅利點數異動明細 (mb_points)
 $pts_logs = ($mb_id > 0)
-    ? $DB->query("SELECT * FROM fsl_points WHERE mb_id = ? AND pt_status = 1 ORDER BY pt_date DESC, pt_id DESC LIMIT 30", [$mb_id])
+    ? DB->query("SELECT * FROM fsl_points WHERE mb_id = ? AND pt_status = 1 ORDER BY pt_date DESC, pt_id DESC LIMIT 30", [$mb_id])
     : [];
 if (!is_array($pts_logs)) $pts_logs = [];
 // 5. 查詢「VIP 等級專屬優惠活動」(gifts.gift_target_type = 1)
-$vip_gifts = $DB->query(
+$vip_gifts = DB->query(
     "SELECT * FROM fsl_gifts WHERE gift_target_type = 1 AND gift_status = 1 ORDER BY gift_target_minlvl ASC, gift_id ASC"
 );
 if (!is_array($vip_gifts)) $vip_gifts = [];
@@ -84,7 +84,7 @@ if (!is_array($vip_gifts)) $vip_gifts = [];
 // 查詢該會員「本月已領取」過的 VIP 禮遇 gift_id 清單
 $claimed_vip_ids = [];
 if ($mb_id > 0) {
-    $claimed_rows = $DB->query(
+    $claimed_rows = DB->query(
         "SELECT DISTINCT gift_id FROM fsl_gift_records WHERE mb_id = ? AND grec_source_type = 5 AND DATE_FORMAT(grec_created, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')",
         [$mb_id]
     );

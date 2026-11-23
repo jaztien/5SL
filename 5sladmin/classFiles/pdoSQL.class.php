@@ -323,7 +323,14 @@ class DB
 		if (!empty($sql)) {
 			$message .= "\r\nRaw SQL : " . $sql;
 		}
-		$this->logObject->write($message, $this->DBName . md5($this->DBPassword));
+		
+		// [修正] 確保 logObject 已初始化才寫入日誌，避免掩蓋真實的 SQL 錯誤
+		if (is_object($this->logObject)) {
+			$this->logObject->write($message, $this->DBName . md5($this->DBPassword));
+		} else {
+			error_log("PDO Exception (logObject is null): " . $message);
+		}
+
 		// 修正：同步捕捉 MySQL 的斷線特徵：'server has gone away' 或 'Lost connection'
 		if (
 		self::AUTO_RECONNECT
@@ -334,14 +341,14 @@ class DB
 		) {
 			$this->SetFailureFlag();
 			$this->retryAttempt ++;
-			$this->logObject->write('Retry ' . $this->retryAttempt . ' times', $this->DBName . md5($this->DBPassword));
+			if (is_object($this->logObject)) {
+				$this->logObject->write('Retry ' . $this->retryAttempt . ' times', $this->DBName . md5($this->DBPassword));
+			}
 			call_user_func_array(array($this, $method), $parameters);
 		} else {
-		throw $e;
+			throw $e;
 		}
 	}
-
-
 
 
 //--------------------------------------------------------------------//

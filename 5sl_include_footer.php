@@ -169,9 +169,9 @@ $wheel_keycode = 'LUCKY_WHEEL_2026';
 $wheel_awards_js = [];
 
 if (isset($DB)) {
-    $lot_row = $DB->row("SELECT lot_id, lot_title FROM fsl_lotteries WHERE lot_keycode = ? AND lot_status = 1", [$wheel_keycode]);
+    $lot_row = DB->row("SELECT lot_id, lot_title FROM fsl_lotteries WHERE lot_keycode = ? AND lot_status = 1", [$wheel_keycode]);
     if ($lot_row) {
-        $slot_rows = $DB->query(
+        $slot_rows = DB->query(
             "SELECT loti_slot_order, loti_label, loti_color FROM fsl_lottery_items WHERE lot_id = ? ORDER BY loti_slot_order ASC",
             [(int)$lot_row['lot_id']]
         );

@@ -59,7 +59,7 @@ $cDateTime = date('Y-m-d H:i:s');
 */
 /*
 if(!empty($artiCODE)){
-    $getArtiARR = $DB->row("SELECT arti_subscript,arti_body FROM articles WHERE arti_keycode=? AND arti_status=?",array($artiCODE,1));
+    $getArtiARR = DB->row("SELECT arti_subscript,arti_body FROM articles WHERE arti_keycode=? AND arti_status=?",array($artiCODE,1));
 }
 */
 /*
@@ -67,7 +67,7 @@ function _fn_email_sending($artiCODE,$setFrom=[],$setTo=[],$setCC=[],$setBCC=[],
     
     //取得紀錄內容
     require_once('../includeFiles/db.inc.php');
-    $getArtiARR = $DB->row("SELECT arti_subscript,arti_body FROM articles WHERE arti_keycode=? AND arti_status=?",array($artiCODE,1));
+    $getArtiARR = DB->row("SELECT arti_subscript,arti_body FROM articles WHERE arti_keycode=? AND arti_status=?",array($artiCODE,1));
     if(!$getArtiARR || empty($getArtiARR['arti_subscript']) || empty($getArtiARR['arti_body'])){
         return false;
     }
@@ -164,9 +164,9 @@ switch ($formAcce) {
 
         $replaceTag = !empty($arrDatA['replaceTag']) ? $arrDatA['replaceTag'] : [];
         $replaceStr = !empty($arrDatA['replaceStr']) ? $arrDatA['replaceStr'] : [];
-        $compEmailADD = $DB->getConfigVal('comp_email');
-        $compEmailFrom = $DB->getConfigVal('comp_fullname');
-        $sendRTN = $DB->doSendEmail(
+        $compEmailADD = DB->getConfigVal('comp_email');
+        $compEmailFrom = DB->getConfigVal('comp_fullname');
+        $sendRTN = DB->doSendEmail(
             '',
             $replaceTag,$replaceStr,
             '【測試預覽】'.$arrDatA['subject'],

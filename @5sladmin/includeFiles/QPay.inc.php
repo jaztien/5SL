@@ -1,7 +1,7 @@
 ﻿<?php
 	//require_once "../classFiles/QPay.class.php";
 	require_once('../includeFiles/db.inc.php');
-	$getQpayInfo = $DB->getConfigVal('','qpay');
+	$getQpayInfo = DB->getConfigVal('','qpay');
 	//API 位置
 	
 	$ifQpayTestUrl = $getQpayInfo['qpay_test']['config_value'];

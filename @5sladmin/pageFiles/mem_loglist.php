@@ -118,26 +118,26 @@ $maxResult = (!empty($searchURI)) ? 500 : 100;
 
 
                         $listSql .= " ORDER BY lg_created DESC LIMIT {$maxResult}";
-                        $sr = $DB->query($listSql,array(2));
+                        $sr = DB->query($listSql,array(2));
                         $i = 0; //以$i為$nameList這個陣列的索引值
                         while($i<count($sr)){ 
                         ?>
                           <tr style="cursor:pointer;" data-currid="<?php echo $sr[$i]['lg_id']; ?>">
                             <td><?php echo $sr[$i]['lg_created']; ?></td>
                             <td><?php
-                            $mbnick = $DB->single("SELECT mb_nickname FROM fsl_members WHERE mb_id=?",array($sr[$i]['lg_forid']));
+                            $mbnick = DB->single("SELECT mb_nickname FROM fsl_members WHERE mb_id=?",array($sr[$i]['lg_forid']));
                             echo $mbnick ?: '&nbsp;';
                             ?></td>
                             <td><?php echo $sr[$i]['lg_code']; ?></td>
                             <td><?php
-                                $oStr = $DB->single("SELECT lg_string FROM sys_logstrings WHERE lg_code=?",array($sr[$i]['lg_code']));
+                                $oStr = DB->single("SELECT lg_string FROM sys_logstrings WHERE lg_code=?",array($sr[$i]['lg_code']));
                                 echo _fn_getLogString($sr[$i]['lg_params'],$oStr);
                             ?></td>
                           </tr>
                       <?php 
                           $i++;
                           } 
-                          //$DB->closeConnection();
+                          //DB->closeConnection();
                       ?>
                     </tbody>
                     <tfoot>

@@ -18,7 +18,7 @@ $sql_orders = "
     WHERE o.mb_id = ?
     ORDER BY o.ord_created DESC
 ";
-$order_list = ($mb_id > 0) ? $DB->query($sql_orders, [$mb_id]) : [];
+$order_list = ($mb_id > 0) ? DB->query($sql_orders, [$mb_id]) : [];
 if (!is_array($order_list)) $order_list = [];
 
 // 2. 預先批次撈取這些訂單底下的所有課程/商品明細 (fsl_order_items)，避免 N+1 查詢
@@ -26,7 +26,7 @@ $items_by_order = [];
 if (!empty($order_list)) {
     $ord_ids = array_column($order_list, 'ord_id');
     $placeholders = implode(',', array_fill(0, count($ord_ids), '?'));
-    $all_items = $DB->query("SELECT * FROM fsl_order_items WHERE ord_id IN ($placeholders) ORDER BY ordi_id ASC", $ord_ids);
+    $all_items = DB->query("SELECT * FROM fsl_order_items WHERE ord_id IN ($placeholders) ORDER BY ordi_id ASC", $ord_ids);
     if (is_array($all_items)) {
         foreach ($all_items as $it) {
             $items_by_order[(int)$it['ord_id']][] = $it;
@@ -43,7 +43,7 @@ $sql_refunds = "
     WHERE r.mb_id = ?
     ORDER BY r.ref_created DESC
 ";
-$refund_list = ($mb_id > 0) ? $DB->query($sql_refunds, [$mb_id]) : [];
+$refund_list = ($mb_id > 0) ? DB->query($sql_refunds, [$mb_id]) : [];
 if (!is_array($refund_list)) $refund_list = [];
 
 // 計算進行中退費案件數量

@@ -21,7 +21,7 @@ $sql .= ", a.merch_coordinates.Lat AS lat";
 $sql .= " FROM fsl_merchandise a";
 $sql .= " INNER JOIN merch_info b ON b.merch_id=a.merch_id";
 $sql .= " WHERE a.merch_id=?";
-$res = $DB->row($sql,array($mdID));
+$res = DB->row($sql,array($mdID));
 if(!empty($res)){
   unset($res['merch_lng']);//移除經緯度欄位
   unset($res['merch_lat']);//移除經緯度欄位
@@ -56,7 +56,7 @@ $S5 = $res['merch_s5'] ?? 0;
 $totAVE = ($S1 + $S2 + $S3 + $S4 + $S5)/5;
 //取得所屬會員的名稱以及會員等級
 if(!empty($res['mb_id'])){
-  $mbArr = $DB->row("SELECT mb_title,mb_level FROM fsl_members WHERE mb_id=?",array($res['mb_id']));
+  $mbArr = DB->row("SELECT mb_title,mb_level FROM fsl_members WHERE mb_id=?",array($res['mb_id']));
 }
 //自JSON檔案取得評分項目名稱，連同評分分數，組合排列後做爲Javascript繪圖參數
 //$ratingItem = $idForJS['rating']['1'].'|'.$S1.','.$idForJS['rating']['2'].'|'.$S2.','.$idForJS['rating']['3'].'|'.$S3.','.$idForJS['rating']['4'].'|'.$S4.','.$idForJS['rating']['5'].'|'.$S5;
@@ -67,7 +67,7 @@ try {
     // SQL Server 把時間切好（105 代表 YYYY-MM-DD 格式），並下別名
     $sql = "SELECT CONVERT(VARCHAR(10), mdpr_create, 105) AS [date], mdpr_listprice AS [price] 
             FROM merch_prices WHERE merch_id = ?";
-    $prr = $DB->query($sql, array($mdID));
+    $prr = DB->query($sql, array($mdID));
     //直接用 PHP 內建函式把指定的直行（Column）抽出來變成一維清單
     $prARR = array(
         'date'  => array_column($prr, 'date'),
@@ -490,7 +490,7 @@ try {
                                 <?PHP
                                   if(!empty($res['merch_district'])) {
                                     $sqlscrc="SELECT scrc_id,scrc_title,scrc_circletitle FROM socialcircle WHERE TRANSLATE(scrc_district,'[]',',,') LIKE '%,".$res['merch_district'].",%' AND scrc_status=? ORDER BY scrc_title ASC";
-                                    $resscrc = $DB->query($sqlscrc,array(1));
+                                    $resscrc = DB->query($sqlscrc,array(1));
                                     $i=0;
                                     while($i<count($resscrc)){
                                       echo "<option value='".$resscrc[$i]['scrc_id']."'";
@@ -514,7 +514,7 @@ try {
                                 <?PHP
                                   if(!empty($res['merch_district'])) {
                                     $sqlcomm="SELECT bc_id, bc_title FROM buildcase WHERE bc_district=? AND bc_status<=? ORDER BY bc_title ASC";
-                                    $rescom = $DB->query($sqlcomm,array($res['merch_district'],5));
+                                    $rescom = DB->query($sqlcomm,array($res['merch_district'],5));
                                     $i=0;
                                     while($i<count($rescom)){
                                       echo "<option value='".$rescom[$i]['bc_id']."'";
@@ -1699,10 +1699,10 @@ try {
                             </thead>
                             <tbody>
                               <?PHP
-                                $opares = $DB->query("SELECT * FROM merch_oppdata WHERE merch_id = ?",array($mdID));
+                                $opares = DB->query("SELECT * FROM merch_oppdata WHERE merch_id = ?",array($mdID));
                                 $opai = 0; //以$i為$nameList這個陣列的索引值
                                 while($opai < count($opares)){
-                                    $oppTitle = $DB->single("SELECT opp_title FROM merch_oppurchase WHERE opp_id = ?",array($opares[$opai]['opp_id']));
+                                    $oppTitle = DB->single("SELECT opp_title FROM merch_oppurchase WHERE opp_id = ?",array($opares[$opai]['opp_id']));
                                     $uriData = [
                                       'opdID'          => $opares[$opai]['opd_id'],
                                       'oppID'          => $opares[$opai]['opp_id'],
@@ -1780,7 +1780,7 @@ try {
                             </thead>
                             <tbody>
                               <?PHP
-                                $prr = $DB->query("SELECT * FROM merch_prices WHERE merch_id=?",array($mdID));
+                                $prr = DB->query("SELECT * FROM merch_prices WHERE merch_id=?",array($mdID));
                                 $i = 0; //以$i為$nameList這個陣列的索引值
                                 while($i<count($prr)){ 
                                   ?>
@@ -1837,7 +1837,7 @@ try {
                             <tbody>
                               <?PHP
                                 $sql="SELECT * FROM fsl_rating WHERE rat_forid=? AND rat_for=?";
-                                $sr = $DB->query($sql,array($mdID,$idForItem));
+                                $sr = DB->query($sql,array($mdID,$idForItem));
                                 $i = 0; //以$i為$nameList這個陣列的索引值
                                 while($i<count($sr)){ 
                                   ?>

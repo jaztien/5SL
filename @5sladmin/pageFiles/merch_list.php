@@ -185,7 +185,7 @@ $locJS=_fn_getCachedJsonData("../jsonFiles/locations.json");
                         }
 
                         $listSql .= " ORDER BY merch_published DESC LIMIT 500";
-                        $sr = $DB->query($listSql);
+                        $sr = DB->query($listSql);
                         $totalNum = intval(@$sr[0]['totalNum']);
                         $i = 0; //以$i為$nameList這個陣列的索引值 
                         while($i<count($sr)){ 
@@ -362,7 +362,7 @@ $locJS=_fn_getCachedJsonData("../jsonFiles/locations.json");
                 <?PHP
                   if(!empty($searchDist)) {
                     $sqlscrc="SELECT scrc_id,scrc_title,scrc_circletitle FROM socialcircle WHERE TRANSLATE(scrc_district,'[]',',,') LIKE '%,".$searchDist.",%' AND scrc_status=? ORDER BY scrc_title ASC";
-                    $resscrc = $DB->query($sqlscrc,array(1));
+                    $resscrc = DB->query($sqlscrc,array(1));
                     $i=0;
                     while($i<count($resscrc)){
                       echo "<option value='".$resscrc[$i]['scrc_id']."'";
@@ -383,7 +383,7 @@ $locJS=_fn_getCachedJsonData("../jsonFiles/locations.json");
                 <?PHP
                   if(!empty($searchDist)) {
                     $sqlcomm="SELECT bc_id, bc_title FROM buildcase WHERE bc_district=? AND bc_status<=? ORDER BY bc_title ASC";
-                    $rescom = $DB->query($sqlcomm,array($searchDist,5));
+                    $rescom = DB->query($sqlcomm,array($searchDist,5));
                     $i=0;
                     while($i<count($rescom)){
                       echo "<option value='".$rescom[$i]['bc_id']."'";

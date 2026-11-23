@@ -13,11 +13,11 @@ require_once('../includeFiles/common.lib.php');
 $cateArr = isset($_REQUEST['cateArr']) ? explode(',', $_REQUEST['cateArr']) : array(0);
 //功能陣列建立，取自JSON檔案
 //$arrayString=file_get_contents("../jsonFiles/imagelist.min.json");
-//$arrayString = $DB->single("SELECT sj_json FROM sys_json WHERE sj_code=?",array('sysimglist'));
-//$arrayString = $DB->single("SELECT xj_json FROM sys_json WHERE xj_code=?",array('sysimglist'));
+//$arrayString = DB->single("SELECT sj_json FROM sys_json WHERE sj_code=?",array('sysimglist'));
+//$arrayString = DB->single("SELECT xj_json FROM sys_json WHERE xj_code=?",array('sysimglist'));
 //$imgJS2 = json_decode($arrayString,true);
 
-$imglist = $DB->query("SELECT * FROM data_vdoimg WHERE vi_type=? AND vi_status=?",array(1,1));
+$imglist = DB->query("SELECT * FROM data_vdoimg WHERE vi_type=? AND vi_status=?",array(1,1));
 $arrayString = '{"statusCode":200,"result":[';
 $i = 0; //以$i為$nameList這個陣列的索引值
 $num = count($imglist);

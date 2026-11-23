@@ -61,14 +61,14 @@ switch ($formAcce) {
             $upArr['arti_updated'] = '[EXPR]GETDATE()';
             try {
                 $currID = $artiID;
-                $up = $DB->update('articles', $upArr,array('arti_id'=>$artiID));
+                $up = DB->update('articles', $upArr,array('arti_id'=>$artiID));
             } catch (Exception $e) {
                 echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>$e->getMessage()));
                 exit();
             }
         } else {
             //---------------- 重複輸入檢查 ------------------//
-            $dupC = $DB->duplicateCheck('articles',array(
+            $dupC = DB->duplicateCheck('articles',array(
                 'arti_keycode'=>$upArr['arti_keycode']                                                                                          
             ));
             if($dupC){
@@ -77,7 +77,7 @@ switch ($formAcce) {
             }
             //---------------- /重複輸入檢查 ------------------//
             try {
-                $ins = $DB->insert('articles', $upArr);
+                $ins = DB->insert('articles', $upArr);
                 if($ins && $ins > 0){
                     $currID = $ins;
                 }
@@ -118,10 +118,10 @@ switch ($formAcce) {
                     }
                 }
             }
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, (!empty($artiID) ? 1010 : 1110), '["'.CF_AD_ID.'","'.$artiID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, (!empty($artiID) ? 1010 : 1110), '["'.CF_AD_ID.'","'.$artiID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>(isset($imgUpRtn) ? ($imgUpRtn ? 'success' : 'warning') : 'success'), 'msgStr'=>'成功'.(!empty($artiID)?'編輯':'新增').'圖文模板資料'.(isset($imgUpRtn) ? ($imgUpRtn ? '，以及代表圖像' : '，但圖像編輯失敗') : '').'！！', 'newUpPhoto'=> $newUpPhoto, 'upTime'=> $cDateTime, 'newID'=>$ins);
         } else {
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, (!empty($artiID) ? 1010 : 1110), '["'.CF_AD_ID.'","'.$artiID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, (!empty($artiID) ? 1010 : 1110), '["'.CF_AD_ID.'","'.$artiID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>(!empty($artiID)?'編輯':'新增').'圖文模板資料失敗！請聯絡相關管理人員！！');
         }
         echo json_encode($rtn);
@@ -134,7 +134,7 @@ switch ($formAcce) {
         $i=0;
         
         //---------------- /重複輸入檢查 ------------------//
-        $ins = $DB->insert('articles', $inArr);
+        $ins = DB->insert('articles', $inArr);
         if($ins && $ins > 0){
             $imgUp = $_POST["imgUp"];
             $newUpPhoto = '';
@@ -168,11 +168,11 @@ switch ($formAcce) {
                     }
                 }
             }
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 1110, '["'.CF_AD_ID.'","'.$artiID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 1110, '["'.CF_AD_ID.'","'.$artiID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功新增文章資料'.(isset($imgUpRtn) ? ($imgUpRtn ? '，以及代表圖像' : '，但圖像編輯失敗') : '').'！！', 'newUpPhoto'=> $newUpPhoto, 'newID'=>$ins, 'upTime'=> $cDateTime);
         } 
         else { 
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 1010, '["'.CF_AD_ID.'","'.$artiID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 1010, '["'.CF_AD_ID.'","'.$artiID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'新增文章資料失敗！請聯絡相關管理人員！！');
         }
         echo json_encode($rtn);
@@ -182,8 +182,8 @@ switch ($formAcce) {
 
     case "func_arti_delete":////////////////////////////////////////// form_delete 刪除管理者資料
 
-        //$del = $DB->query("DELETE FROM articles WHERE ad_id = ?", array($artiID)); 
-        $up = $DB->update('articles', array(
+        //$del = DB->query("DELETE FROM articles WHERE ad_id = ?", array($artiID)); 
+        $up = DB->update('articles', array(
             'arti_updated'=> '[EXPR]GETDATE()',
             'arti_status'=>8
         ), array('arti_id'=>$artiID));

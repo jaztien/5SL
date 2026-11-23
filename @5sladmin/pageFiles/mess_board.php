@@ -32,7 +32,7 @@ $backUrl .= !empty($podCast) ? '&podCast='.$podCast : '';
 $backUrl .= !empty($privTab) ? '&privTab='.$privTab : '';
 $backUrl = substr($backUrl,1);
 //
-$robotStatus = $DB->getConfigVal("mess_robot");//自系統設定資料表中取得機器人回覆狀態
+$robotStatus = DB->getConfigVal("mess_robot");//自系統設定資料表中取得機器人回覆狀態
 $robotStatus = intval($robotStatus['config_value']);//取得機器人回覆狀態中的數值。0｜1
 // 生成管理者列表（依本頁面權限）
 $posterAvatar = array();
@@ -44,7 +44,7 @@ SELECT ad_id, ad_title, ad_authlevel, ad_status,
 (SELECT CONVERT(INT, CONCAT(auth_browse, auth_addnew, auth_edit, auth_delete)) FROM fsl_admin_auth a WHERE ap_pagecode='PG_MESSBOARD' AND a.ad_id=d.ad_id) AS messauth, 
 (SELECT COUNT(*) FROM data_chats e WHERE e.chat_incharge = d.ad_id AND e.chat_status <= 2) AS inchargeTotal 
 FROM fsl_administrator d ORDER BY messauth DESC, ad_authlevel DESC";
-$adres = $DB->query($adsql, array());
+$adres = DB->query($adsql, array());
 for($i=0;$i<count($adres);$i++){
   $adminID = $adres[$i]['ad_id'];
   $authClass = intval($adres[$i]['messauth']) < 1100 ? ' woPermit' : ' wPermit';//佈置有無權限狀態
@@ -191,7 +191,7 @@ for($i=0;$i<count($adres);$i++){
                     FROM data_chats a WHERE a.chat_type = ? AND a.chat_posttype = ? AND a.chat_published > ?
                     ORDER BY a.chat_published ASC, unreadNum DESC
                     ";
-                    $fromres = $DB->query($sql, array(2,1,2,$toTime), PDO::FETCH_GROUP | PDO::FETCH_ASSOC | PDO::FETCH_UNIQUE);
+                    $fromres = DB->query($sql, array(2,1,2,$toTime), PDO::FETCH_GROUP | PDO::FETCH_ASSOC | PDO::FETCH_UNIQUE);
                     if($fromres){
                       foreach($fromres as $key => $val){
                         //預製頭像縮圖陣列

@@ -68,7 +68,7 @@ switch ($formAcce) {
      case "func_sv_infoUpdate":////////////////////////////////////////// func_sv_infoUpdate 更新廣告套裝資料
         $upArr = $arrDatA;
         $upArr['sv_updated'] = '[EXPR]GETDATE()';
-        $up = $DB->update('sv_service', $upArr, array('sv_id'=>$svID));
+        $up = DB->update('sv_service', $upArr, array('sv_id'=>$svID));
         if($up){
             //------------ 代表圖像處理 --------------//
             $imgUp = $_POST["imgUp"];
@@ -106,10 +106,10 @@ switch ($formAcce) {
                 }
             }
             //------------ /代表圖像處理 --------------//
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功修改開放式服務資料'.(isset($imgUpRtn) ? ($imgUpRtn ? '，以及代表圖像' : '，但圖像編輯失敗') : '').'！！', 'newUpPhoto'=> $newUpPhoto, 'upTime'=> $cDateTime); 
         } else {
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'error', 'msgStr'=>'修改開放式服務提案失敗！請聯絡相關管理人員！！');
         }
         echo json_encode($rtn);
@@ -119,14 +119,14 @@ switch ($formAcce) {
         $inArr = $arrDatA;
         //---------------- 重複輸入檢查 ------------------//
         /*
-        $dupC = $DB->query("SELECT * FROM advi_pack WHERE advp_keycode=? OR advp_title=?",array($inArr['advp_keycode'],$inArr['advp_title']));
+        $dupC = DB->query("SELECT * FROM advi_pack WHERE advp_keycode=? OR advp_title=?",array($inArr['advp_keycode'],$inArr['advp_title']));
         if($dupC){
             echo json_encode(array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'廣告套裝重複建立！！'));
             exit();
         }
         */
        //---------------- /重複輸入檢查 ------------------//
-        $ins = $DB->insert('sv_service', $inArr);
+        $ins = DB->insert('sv_service', $inArr);
         if($ins && $ins > 0){
             //------------ 代表圖像處理 --------------//
             $imgUp = $_POST["imgUp"];
@@ -148,11 +148,11 @@ switch ($formAcce) {
             }
             //------------ /代表圖像處理 --------------//
             
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功新增開放式服務資料！！', 'insID'=>$ins); 
         } 
         else { 
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'新增開放式服務資料失敗！請聯絡相關管理人員！！'); 
         } /* 回傳失敗時的資訊 */
         echo json_encode($rtn);
@@ -164,28 +164,28 @@ switch ($formAcce) {
 
 
     case "form_svdelete":////////////////////////////////////////// form_svdelete 刪除開放式服務提案紀錄
-        $del = $DB->query("DELETE FROM sv_service WHERE sv_id = ?", array($svID)); 
+        $del = DB->query("DELETE FROM sv_service WHERE sv_id = ?", array($svID)); 
         if($del){
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功刪除開放式服務紀錄！！'); 
         } else {
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'刪除開放式服務紀錄失敗！請聯絡相關管理人員！！'); 
         }
         echo json_encode($rtn);
     break;
     case "form_doreject":////////////////////////////////////////// form_doreject 退回/駁回開放式服務提案
         
-        $up = $DB->update('sv_service', array(
+        $up = DB->update('sv_service', array(
             'sv_updated'=>'[EXPR]GETDATE()',
             'sv_review'=>$arrDatA['rv_review'],
             'sv_status'=>$arrDatA['rv_status']
             ),array('sv_id'=>$svID));
         if($up){
-            $ins = $DB->insert('data_reviews', $arrDatA);
+            $ins = DB->insert('data_reviews', $arrDatA);
             if($ins && $ins > 0){
                 //JazNOTE:do notification
-                //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
+                //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
                 $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功退回/駁回開放式服務提案！！');
                 echo json_encode($rtn);
                 exit();
@@ -194,7 +194,7 @@ switch ($formAcce) {
                 
             }
         }
-        //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
+        //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
         $rtn = array('RTN'=>1, 'msgType'=>'error', 'msgStr'=>'退回/駁回開放式服務提案失敗！請聯絡相關管理人員！！');
         echo json_encode($rtn);
 
@@ -202,16 +202,16 @@ switch ($formAcce) {
     case "form_doreview":////////////////////////////////////////// form_review 
         //$rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>json_encode($arrDatA));
         //echo json_encode($rtn);exit();
-        $up = $DB->update('sv_service', array(
+        $up = DB->update('sv_service', array(
             'sv_updated'=>'[EXPR]GETDATE()',
             'sv_review'=>$arrDatA['rv_status'],
             'sv_status'=>$arrDatA['rv_status']
             ),array('sv_id'=>$svID));
         if($up){
-            $ins = $DB->insert('data_reviews', $arrDatA);
+            $ins = DB->insert('data_reviews', $arrDatA);
             if($ins && $ins > 0){
                 //JazNOTE:do notification
-                //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
+                //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
                 $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'成功審核通過開放式服務提案！！');
                 echo json_encode($rtn);
                 exit();
@@ -220,7 +220,7 @@ switch ($formAcce) {
                 
             }
         } 
-        //$ilog = $DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
+        //$ilog = DB->insSysLogs(51, CF_AD_ID, nnnnn,'["vari1","vari2",...]');//寫入操作記錄
         $rtn = array('RTN'=>1, 'msgType'=>'error', 'msgStr'=>'通過開放式服務提案失敗！請聯絡相關管理人員！！');
         echo json_encode($rtn);
 

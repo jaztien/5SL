@@ -110,8 +110,8 @@ $geJS=_fn_getCachedJsonData("../jsonFiles/general.json");
                         if(!empty($searchURI)){ $listSql .= " WHERE 1=1"; }
 
                         $listSql .= " ORDER BY rbot_id DESC LIMIT {$maxResult}";
-                        $sr = $DB->query($listSql);
-                        //$DB->closeConnection();
+                        $sr = DB->query($listSql);
+                        //DB->closeConnection();
                         $i = 0; //以$i為$nameList這個陣列的索引值
                         while($i<count($sr)){ 
                         ?>

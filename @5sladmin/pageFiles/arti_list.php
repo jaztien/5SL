@@ -159,7 +159,7 @@ $artiJS=_fn_getCachedJsonData("../jsonFiles/articles.json");
                           if(!empty($searchIfpay)){ $listSql .= " AND arti_payfor = ".$searchIfpay; }
                           if(!empty($searchStatus)){ $listSql .= " AND arti_status = ".$searchStatus; }
                           $listSql .= " ORDER BY arti_id DESC LIMIT {$maxResult}";
-                          $sr = $DB->query($listSql);
+                          $sr = DB->query($listSql);
                           $totalNum = intval(@$sr[0]['totalNum']);
                           $dateNow = new DateTime();
                           $i = 0; //以$i為$nameList這個陣列的索引值

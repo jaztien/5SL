@@ -117,8 +117,8 @@ $svJS = _fn_getCachedJsonData("../jsonFiles/service.json");
                           //if(!empty($searchURI)){ $listSql .= " WHERE 1=1"; }
 
                           $listSql .= " ORDER BY sv_published DESC LIMIT {$maxResult}";
-                          $sr = $DB->query($listSql);
-                          //$DB->closeConnection();
+                          $sr = DB->query($listSql);
+                          //DB->closeConnection();
                           $i = 0; //以$i為$nameList這個陣列的索引值
                           while($i<count($sr)){ 
                           ?>

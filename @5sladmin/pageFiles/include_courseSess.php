@@ -12,8 +12,8 @@ if(!empty($_GET['sessid'])&&file_exists("../uploadFiles/course/sessimg_".$_GET['
   $mainimgpath2 = '../uploadFiles/imageFiles/nopic_400x300.jpg';
   $mainimgchk2 = "";
 }
-$courseres = $DB->row("SELECT course_duration,course_lesson FROM fsl_courses WHERE course_id=?",array($_GET['courseid'] ?? 0));
-$sessres = $DB->row("SELECT * FROM fsl_course_sessions WHERE sess_id=?",array($_GET['sessid'] ?? 0));
+$courseres = DB->row("SELECT course_duration,course_lesson FROM fsl_courses WHERE course_id=?",array($_GET['courseid'] ?? 0));
+$sessres = DB->row("SELECT * FROM fsl_course_sessions WHERE sess_id=?",array($_GET['sessid'] ?? 0));
 $lessonCount = $sessres['sess_lesson'] ?? 0;
 ?>
 <div class="card card-body">

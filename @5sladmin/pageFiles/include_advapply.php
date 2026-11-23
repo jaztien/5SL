@@ -88,7 +88,7 @@ $svJS=_fn_getCachedJsonData("../jsonFiles/service.json");
                 <option value="">-請選擇站內房地課程商品-</option>
                 <?php
                     $mdsql = "SELECT merch_id, merch_title, merch_add FROM fsl_merchandise WHERE mb_id=?";
-                    $mdsr = $DB->query($mdsql,array($_GET['mbID']));
+                    $mdsr = DB->query($mdsql,array($_GET['mbID']));
                     $i = 0; 
                     $n = count($mdsr);
                     while($i<$n){
@@ -108,7 +108,7 @@ $svJS=_fn_getCachedJsonData("../jsonFiles/service.json");
                 <option value="">-請選擇開放式服務課程商品-</option>
                 <?php
                     $svsql = "SELECT * FROM sv_service WHERE mb_id=?";
-                    $svsr = $DB->query($svsql,array($_GET['mbID']));
+                    $svsr = DB->query($svsql,array($_GET['mbID']));
                     $i = 0; 
                     $n = count($svsr);
                     while($i<$n){

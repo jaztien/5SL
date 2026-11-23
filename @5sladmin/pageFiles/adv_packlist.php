@@ -115,7 +115,7 @@ $advJS=_fn_getCachedJsonData("../jsonFiles/advitising.json");
                           $listSql = "SELECT * FROM advi_pack ORDER BY advp_id DESC LIMIT {$maxResult}";
                           //if(!empty($searchURI)){ $listSql .= " WHERE 1=1"; }
 
-                          $sr = $DB->query($listSql);
+                          $sr = DB->query($listSql);
                           $i = 0; //以$i為$nameList這個陣列的索引值
                           while($i<count($sr)){ 
                           ?>

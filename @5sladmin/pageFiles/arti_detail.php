@@ -12,8 +12,8 @@ require_once('../classFiles/eRanking.class.php');
 //
 $artiID=currID;
 //
-$res = $DB->row("SELECT * FROM articles WHERE arti_id=?",array($artiID));
-//$DB->closeConnection();
+$res = DB->row("SELECT * FROM articles WHERE arti_id=?",array($artiID));
+//DB->closeConnection();
 //代表圖像設定
 if(!empty($artiID)&&file_exists("../uploadFiles/ar/arphoto_".$artiID."_thumb.jpg")){
   $cropImgDisplay = 'show';
@@ -51,7 +51,7 @@ if(is_array($geJS['idfor'][$idForIdx]['rating'])){
 //-----------------------------------------------------
 
 $counT="SELECT AVG((rat_s1 + rat_s2 + rat_s3 + rat_s4 + rat_s5)/5) AS totAVE, AVG(rat_s1) AS S1, AVG(rat_s2) AS S2, AVG(rat_s3) AS S3, AVG(rat_s4) AS S4, AVG(rat_s5) AS S5 FROM fsl_rating WHERE rat_forid=? AND rat_for=?";
-$cnt = $DB->query($counT,array($artiID,$idForIdx));
+$cnt = DB->query($counT,array($artiID,$idForIdx));
 $S1 = !empty($cnt[0]['S1']) ? floatval($cnt[0]['S1']) : 0;
 $S2 = !empty($cnt[0]['S2']) ? floatval($cnt[0]['S2']) : 0;
 $S3 = !empty($cnt[0]['S3']) ? floatval($cnt[0]['S3']) : 0;
@@ -440,7 +440,7 @@ $ratingData = "4,5,4";
                               <?php
                                 if(!empty($res['mb_id'])){
                                   $msql = "SELECT a.mb_id, a.mb_title, b.mb_cate, b.mb_cotype, b.mb_coexpert FROM fsl_members AS a INNER JOIN mb_info AS b ON b.mb_id=a.mb_id WHERE a.mb_id=?";
-                                  $mres = $DB->row($msql,array($res['mb_id']));
+                                  $mres = DB->row($msql,array($res['mb_id']));
                                   if($mres){
                                     echo "<option value='".$mres['mb_id']."'>";
                                     echo "【".$mres['mb_id']."】";
@@ -886,10 +886,10 @@ $ratingData = "4,5,4";
                                 LEFT JOIN fsl_members m ON r.mb_id = m.mb_id
                                 WHERE rat_for=? AND rat_forid=? ORDER BY r.rat_id DESC LIMIT 200
                               ";
-                              $rr = $DB->query($rsql,array(3,$artiID));
+                              $rr = DB->query($rsql,array(3,$artiID));
 
                               //$sql="SELECT * FROM fsl_rating WHERE rat_forid=? AND rat_for=?";
-                              //$srr = $DB->query($sql,array($artiID,$idForIdx));
+                              //$srr = DB->query($sql,array($artiID,$idForIdx));
                               //$i = 0; //以$i為$nameList這個陣列的索引值
                               //while($i<count($srr)){
                               foreach ($rr as $rat) {

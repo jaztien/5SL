@@ -220,11 +220,11 @@ $courseJS=_fn_getCachedJsonData("../jsonFiles/courses.json");
                         if(!empty($searchStatus)){ $listSql .= " AND sess_status = ".$searchStatus; }
 
                         $listSql .= " ORDER BY sess_startdate DESC";
-                        $sr = $DB->query($listSql);
+                        $sr = DB->query($listSql);
                         $totalNum = intval(@$sr[0]['totalNum']);
                         $i = 0; //以$i為$nameList這個陣列的索引值 
                         while($i<count($sr)){
-                          $courseRes = $DB->row("SELECT course_title FROM fsl_courses WHERE course_id = ? LIMIT 1",array($sr[$i]['course_id']));
+                          $courseRes = DB->row("SELECT course_title FROM fsl_courses WHERE course_id = ? LIMIT 1",array($sr[$i]['course_id']));
                         ?>
                           <tr style="cursor:pointer;" data-currid="<?php echo $sr[$i]['sess_id'] ?? 0; ?>">
                             <td><span class="right badge<?php echo $courseJS['actionbadge'][$sr[$i]['sess_status'] ?? ''] ?? ''; ?>"><?php echo str_replace("/", "<br>/", $courseJS['status'][$sr[$i]['sess_status'] ?? ''] ?? ''); ?></span></td>

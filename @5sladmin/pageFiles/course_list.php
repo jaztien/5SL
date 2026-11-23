@@ -197,7 +197,7 @@ $courseJS=_fn_getCachedJsonData("../jsonFiles/courses.json");
                         if(!empty($searchStatus)){ $listSql .= " AND course_status = ".$searchStatus; }
 
                         $listSql .= " ORDER BY course_published DESC";
-                        $sr = $DB->query($listSql);
+                        $sr = DB->query($listSql);
                         $totalNum = intval(@$sr[0]['totalNum']);
                         $i = 0; //以$i為$nameList這個陣列的索引值 
                         while($i<count($sr)){ 

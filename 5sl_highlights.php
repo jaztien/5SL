@@ -9,7 +9,7 @@ $sql_media = "
     WHERE med_status = 1
     ORDER BY med_event_date DESC, med_sort ASC, med_id DESC
 ";
-$raw_media = isset($DB) ? $DB->query($sql_media) : array();
+$raw_media = isset($DB) ? DB->query($sql_media) : array();
 if (!is_array($raw_media)) $raw_media = array();
 
 $all_highlights = array();

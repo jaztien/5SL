@@ -121,8 +121,8 @@ $mdJS=_fn_getCachedJsonData("../jsonFiles/merchandise.json");
                         if(!empty($searchText)){ $listSql .= " AND (opp_title LIKE '%".$searchText."%' OR opp_keycode LIKE '%".$searchText."%' OR opp_subscript LIKE '%".$searchText."%')"; }
                         if(!empty($searchOPPtype)){ $listSql .= " AND opp_type = ".$searchOPPtype; }
                         if($searchOPPstatus!=""){ $listSql .= " AND opp_status = ".$searchOPPstatus; }
-                        $sr = $DB->query($listSql);
-                        //$DB->closeConnection();
+                        $sr = DB->query($listSql);
+                        //DB->closeConnection();
                         $i = 0; //以$i為$nameList這個陣列的索引值 
                         while($i<count($sr)){ 
                         ?>

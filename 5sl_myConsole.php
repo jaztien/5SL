@@ -17,7 +17,7 @@ $sql_noti = "
     ORDER BY n.no_created DESC
     LIMIT 50
 ";
-$noti_list = ($mb_id > 0) ? $DB->query($sql_noti, [$mb_id, $mb_id, $mb_lvl]) : [];
+$noti_list = ($mb_id > 0) ? DB->query($sql_noti, [$mb_id, $mb_id, $mb_lvl]) : [];
 if (!is_array($noti_list)) $noti_list = [];
 
 // 計算未讀總數 (nor_id 為 NULL 代表尚未閱讀)
@@ -42,7 +42,7 @@ $sql_tickets = "
     WHERE mb_id = ?
     ORDER BY spt_updated DESC
 ";
-$ticket_list = ($mb_id > 0) ? $DB->query($sql_tickets, [$mb_id]) : [];
+$ticket_list = ($mb_id > 0) ? DB->query($sql_tickets, [$mb_id]) : [];
 if (!is_array($ticket_list)) $ticket_list = [];
 
 // 預先撈出這些工單底下的對話明細並依 spt_id 分組（避免 N+1 查詢效能問題）
@@ -55,7 +55,7 @@ if (!empty($ticket_list)) {
         WHERE spt_id IN ($placeholders)
         ORDER BY spr_created ASC
     ";
-    $all_replies = $DB->query($sql_replies, $spt_ids);
+    $all_replies = DB->query($sql_replies, $spt_ids);
     if (is_array($all_replies)) {
         foreach ($all_replies as $rep) {
             $replies_by_ticket[$rep['spt_id']][] = $rep;
@@ -76,7 +76,7 @@ $sql_wishlist = "
     WHERE w.mb_id = ?
     ORDER BY w.wish_created DESC
 ";
-$raw_wishlist = ($mb_id > 0) ? $DB->query($sql_wishlist, array($mb_id)) : array();
+$raw_wishlist = ($mb_id > 0) ? DB->query($sql_wishlist, array($mb_id)) : array();
 if (!is_array($raw_wishlist)) $raw_wishlist = array();
 
 $res_type_labels = array(
@@ -179,14 +179,14 @@ $sql_upcoming = "
       ABS(TIMESTAMPDIFF(SECOND, NOW(), CONCAT(s.sess_startdate, ' ', s.sess_starttime))) ASC
     LIMIT 2
 ";
-$upcoming_schedules = ($mb_id > 0) ? $DB->query($sql_upcoming, array($mb_id)) : array();
+$upcoming_schedules = ($mb_id > 0) ? DB->query($sql_upcoming, array($mb_id)) : array();
 if (!is_array($upcoming_schedules)) $upcoming_schedules = array();
 
 $week_chars = array('日', '一', '二', '三', '四', '五', '六');
 
 // 預載所有上架課程詳細資訊（供「前往報名 / 我要預約」確認視窗顯示主圖、簡介、價格）
 $courses_detail_map = array();
-$all_courses_rows = $DB->query("SELECT course_id, course_title, course_brief, course_cost, course_type, course_max FROM fsl_courses WHERE course_status = 1");
+$all_courses_rows = DB->query("SELECT course_id, course_title, course_brief, course_cost, course_type, course_max FROM fsl_courses WHERE course_status = 1");
 if (is_array($all_courses_rows)) {
     foreach ($all_courses_rows as $cr) {
         $cid = (int)$cr['course_id'];
@@ -208,7 +208,7 @@ if (is_array($all_courses_rows)) {
 }
 
 // 預載所有課程目前開放報名的梯次 / 預約時段 (fsl_course_sessions)
-$sess_rows = $DB->query("
+$sess_rows = DB->query("
     SELECT s.sess_id, s.course_id, s.sess_batch, s.sess_altname, s.sess_startdate, s.sess_starttime, s.sess_duration, s.sess_enrollee, c.course_max
     FROM fsl_course_sessions s
     INNER JOIN fsl_courses c ON s.course_id = c.course_id
@@ -236,7 +236,7 @@ if (is_array($sess_rows)) {
 
 // 預載所有上架商品詳細資訊（供「立即購買」確認視窗顯示主圖、簡介、價格與庫存數量）
 $merch_detail_map = array();
-$all_merch_rows = $DB->query("
+$all_merch_rows = DB->query("
     SELECT merch_id, merch_title, merch_brief, merch_price_twd, merch_price_usd, merch_sale_usd, merch_type, merch_stock
     FROM fsl_merchandise
     WHERE merch_status = 1

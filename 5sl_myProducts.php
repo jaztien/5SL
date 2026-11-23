@@ -20,7 +20,7 @@ $sql_enrolls = "
     WHERE e.mb_id = ? AND e.enr_status != 0
     ORDER BY e.enr_pay_status DESC, s.sess_startdate DESC, s.sess_starttime DESC
 ";
-$all_enrolls = ($mb_id > 0) ? $DB->query($sql_enrolls, [$mb_id]) : [];
+$all_enrolls = ($mb_id > 0) ? DB->query($sql_enrolls, [$mb_id]) : [];
 if (!is_array($all_enrolls)) $all_enrolls = [];
 
 // 拆分為「一般線上/實體課程 (course_type=1)」與「一對一顧問預約 (course_type=2)」
@@ -49,7 +49,7 @@ $avg_progress = !empty($my_courses) ? (int)round($total_pct_sum / count($my_cour
 
 // 2. 預撈一對一顧問服務「目前開放可改期的未來空檔時段」(fsl_course_sessions)
 $open_slots_by_course = [];
-$slot_rows = $DB->query("
+$slot_rows = DB->query("
     SELECT s.sess_id, s.course_id, s.sess_startdate, s.sess_starttime, s.sess_duration, s.sess_altname
     FROM fsl_course_sessions s
     INNER JOIN fsl_courses c ON s.course_id = c.course_id
@@ -77,11 +77,11 @@ if (is_array($slot_rows)) {
 
 // 查詢會員剩餘免費一對一輔導次數
 $free_consult_quota = ($mb_id > 0)
-    ? (int)$DB->single("SELECT mb_free_consult_quota FROM fsl_members WHERE mb_id = ?", [$mb_id])
+    ? (int)DB->single("SELECT mb_free_consult_quota FROM fsl_members WHERE mb_id = ?", [$mb_id])
     : 0;
 
 // 查詢所有開放預約的一對一顧問服務項目 (course_type = 2)
-$consult_services = $DB->query("
+$consult_services = DB->query("
     SELECT course_id, course_title, course_brief, course_cost, course_max
     FROM fsl_courses
     WHERE course_type = 2 AND course_status = 1
@@ -100,7 +100,7 @@ $sql_resources = "
     WHERE r.res_status = 1
     ORDER BY r.res_sort ASC, r.res_id DESC
 ";
-$raw_resources = ($mb_id > 0) ? $DB->query($sql_resources, [$mb_id]) : [];
+$raw_resources = ($mb_id > 0) ? DB->query($sql_resources, [$mb_id]) : [];
 if (!is_array($raw_resources)) $raw_resources = [];
 
 $resource_list = [];

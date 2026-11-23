@@ -20,7 +20,7 @@ if(!empty($podCast)){
 }
 $sendActive = (empty($chatType)&&!empty($podCast))||(!empty($chatType)&&!empty($joinID)) ? 1 : 0;
 $onChatter = '';
-$robotStatus = $DB->getConfigVal("mess_robot");
+$robotStatus = DB->getConfigVal("mess_robot");
 $robotStatus = intval($robotStatus['config_value']);
 
 /* [*] TreeMenu 左側選單佈局，包含 Badge 計數框 ------------ */
@@ -34,7 +34,7 @@ while($ii<count($sidebar)){
 }
 // 圖文模版相關待辦案件數量 index: 4
 $sIDX = $sideBarIDX['ITEM_ARTI'];
-$getNum = $DB->single("SELECT COUNT(arti_id) FROM articles WHERE arti_status=?",array(6));
+$getNum = DB->single("SELECT COUNT(arti_id) FROM articles WHERE arti_status=?",array(6));
 $getSum = $getNum;
 $sidebar[$sIDX]['badgeClass']='badge-warning';
 $sidebar[$sIDX]['badgeNum']=$getSum;
@@ -44,7 +44,7 @@ $sidebar[$sIDX]['subgroup'][0]['badgeNum']=$getNum;
 /*
 $sIDX = $sideBarIDX['ITEM_MESS'];
 $toTime   = (new DateTime())->modify('-180 days')->format('Y-m-d H:i:s');//保留至N日前
-$getNum = $DB->single("SELECT COUNT(chat_id) FROM data_chats WHERE chat_type = ? AND chat_posttype=? AND chat_published > ? AND chat_status=?",array(1,2,$toTime,2));
+$getNum = DB->single("SELECT COUNT(chat_id) FROM data_chats WHERE chat_type = ? AND chat_posttype=? AND chat_published > ? AND chat_status=?",array(1,2,$toTime,2));
 $getSum = $getNum;
 $sidebar[$sIDX]['badgeClass']='badge-success';
 $sidebar[$sIDX]['badgeNum']=$getSum;
@@ -55,7 +55,7 @@ $sidebar[$sIDX]['subgroup'][0]['badgeNum']=$getNum;
 // 服務相關待辦案件數量 index: 6
 /*
 $sIDX = $sideBarIDX['ITEM_SERV'];
-$getNum = $DB->single("SELECT COUNT(sv_id) FROM sv_service WHERE sv_status IN (?,?,?)",array(6,7,8));
+$getNum = DB->single("SELECT COUNT(sv_id) FROM sv_service WHERE sv_status IN (?,?,?)",array(6,7,8));
 $getSum = $getNum;
 $sidebar[$sIDX]['badgeClass']='badge-danger';
 $sidebar[$sIDX]['badgeNum']=$getSum;
@@ -65,8 +65,8 @@ $sidebar[$sIDX]['subgroup'][0]['badgeNum']=$getNum;
 // 廣告相關待辦案件數量 index: 7
 /*
 $sIDX = $sideBarIDX['ITEM_AD'];
-$getNum = $DB->single("SELECT COUNT(advp_id) FROM advi_pack WHERE advp_status=?",array(6));
-$getNum1 = $DB->single("SELECT COUNT(advi_id) FROM advitising WHERE advi_status=?",array(6));
+$getNum = DB->single("SELECT COUNT(advp_id) FROM advi_pack WHERE advp_status=?",array(6));
+$getNum1 = DB->single("SELECT COUNT(advi_id) FROM advitising WHERE advi_status=?",array(6));
 $getSum = $getNum + $getNum1;
 $sidebar[$sIDX]['badgeClass']='badge-warning';
 $sidebar[$sIDX]['badgeNum']=$getSum;
@@ -423,7 +423,7 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
     <!-- /////////////////////////////////////////////////////////// -->
     <!--  -->
     <footer class="main-footer text-sm">
-      <span style="font-size:0.75em;"><b>Version</b> <span style="color:#C35050;"><?php $getVersion = $DB->getConfigVal('sys_version'); echo $getVersion['config_value']; ?></span>&nbsp;&nbsp;&nbsp;&nbsp;Copyright &copy; 2023 <strong><?php $getENname = $DB->getConfigVal('comp_enname');echo $getENname['config_value']; ?> </strong> All rights reserved.</span>
+      <span style="font-size:0.75em;"><b>Version</b> <span style="color:#C35050;"><?php $getVersion = DB->getConfigVal('sys_version'); echo $getVersion['config_value']; ?></span>&nbsp;&nbsp;&nbsp;&nbsp;Copyright &copy; 2023 <strong><?php $getENname = DB->getConfigVal('comp_enname');echo $getENname['config_value']; ?> </strong> All rights reserved.</span>
       <div class="float-right d-none d-sm-inline-block">
         <span style="font-size:0.75em;"><b>WebSocket:</b></span>&nbsp;&nbsp;<button id="ind_websocket" class="socketalert"></button>
       </div>
@@ -997,7 +997,7 @@ function backIframe() {
     });
     
     //------------------------------------------------------------------------
-    //let countdownSec = parseInt('<?php $getidleout = $DB->getConfigVal('sys_idleout'); echo $getidleout['config_value']; ?>');
+    //let countdownSec = parseInt('<?php $getidleout = DB->getConfigVal('sys_idleout'); echo $getidleout['config_value']; ?>');
     let countdownSec = 600;
     $('#timer_on_exhausted').backward_timer({
       seconds: countdownSec,//600

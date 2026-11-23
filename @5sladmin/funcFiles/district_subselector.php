@@ -35,11 +35,11 @@ if(!empty($commSelector)){
     //$resARR = array();
     if(empty($multiSelect)){
         $sql = "SELECT bc_id,bc_title,bc_city,bc_district FROM buildcase WHERE bc_district=? AND bc_status<=? ORDER BY bc_title ASC";
-        $res = $DB->query($sql, array($arrDatA,5));
+        $res = DB->query($sql, array($arrDatA,5));
         //$commArray= $res;
     } else {
         $sql = "SELECT bc_id,bc_title,bc_city,bc_district FROM buildcase WHERE bc_district IN ('".implode("','",$arrDatA)."') AND bc_status<=? ORDER BY bc_district, bc_title ASC";
-        $res = $DB->query($sql, array(5));
+        $res = DB->query($sql, array(5));
         //$commArray= $res; 
     }
 /*
@@ -58,7 +58,7 @@ if(!empty($commSelector)){
    $commArray= $res; 
 }
 if(!empty($circleSelector)){
-    $cres = $DB->query("SELECT scrc_id,scrc_title,scrc_circletitle FROM socialcircle WHERE TRANSLATE(scrc_district, '[]', ',,') LIKE '%,".$arrDatA.",%' AND scrc_status=? ORDER BY scrc_title ASC",array(1));
+    $cres = DB->query("SELECT scrc_id,scrc_title,scrc_circletitle FROM socialcircle WHERE TRANSLATE(scrc_district, '[]', ',,') LIKE '%,".$arrDatA.",%' AND scrc_status=? ORDER BY scrc_title ASC",array(1));
     if($cres){
         $circleArray= $cres; 
     }

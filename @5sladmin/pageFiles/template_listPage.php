@@ -120,7 +120,7 @@ $maxResult = (!empty($searchURI)) ? 200 : 50;
                       <?php
                         $listSql = "SELECT * FROM fsl_administrator";
                         $listSql .= " ORDER BY ad_id DESC LIMIT {$maxResult}";
-                        $sr = $DB->query($listSql);
+                        $sr = DB->query($listSql);
                         $i = 0;
                         while($i<count($sr)){ 
                         ?>

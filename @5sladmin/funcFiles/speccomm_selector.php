@@ -16,7 +16,7 @@ if( empty($_POST['arrDatA'])){
 define('arrDatA',(isset($_POST['arrDatA'])) ? $_POST['arrDatA'] : null);
 //-------------------------------------------------------------------------------//
    /*
-    $res = $DB->query("SELECT comm_id,comm_title FROM data_comms WHERE comm_district IN (:comm_district) AND comm_status='1'",array('comm_district' => arrDatA));
+    $res = DB->query("SELECT comm_id,comm_title FROM data_comms WHERE comm_district IN (:comm_district) AND comm_status='1'",array('comm_district' => arrDatA));
     if($res){
         echo json_encode($res); 
     } else {
@@ -24,10 +24,10 @@ define('arrDatA',(isset($_POST['arrDatA'])) ? $_POST['arrDatA'] : null);
     }
     */
     $arrAY=array();
-    $loc = $DB->query("SELECT loc_title,loc_code FROM data_locations WHERE loc_code IN (:loc_code) AND loc_depth='3' AND loc_status='1'",array('loc_code' => arrDatA));
+    $loc = DB->query("SELECT loc_title,loc_code FROM data_locations WHERE loc_code IN (:loc_code) AND loc_depth='3' AND loc_status='1'",array('loc_code' => arrDatA));
     $i=0;
     while($i<count($loc)){
-        $res = $DB->query("SELECT comm_id,comm_title FROM data_comms WHERE comm_district=? AND comm_status='1'",array($loc[$i]['loc_code']));
+        $res = DB->query("SELECT comm_id,comm_title FROM data_comms WHERE comm_district=? AND comm_status='1'",array($loc[$i]['loc_code']));
         $arrA = array('coDe'=>$loc[$i]['loc_code'],'lTit'=>$loc[$i]['loc_title'],'coMm'=>$res);
         array_push($arrAY,$arrA);
         $i++;

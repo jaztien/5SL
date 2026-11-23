@@ -11,7 +11,7 @@
 require_once('5sladmin/includeFiles/db.inc.php');
 require_once '5sladmin/classFiles/ZoomManager.class.php';
 
-$getZoomInfo = $DB->getConfigVal('','zoom');
+$getZoomInfo = DB->getConfigVal('','zoom');
 $accountId    = $getZoomInfo['zoom_accountid']['config_value'];
 $clientId     = $getZoomInfo['zoom_clientid']['config_value'];
 $clientSecret = $getZoomInfo['zoom_clientsecret']['config_value'];

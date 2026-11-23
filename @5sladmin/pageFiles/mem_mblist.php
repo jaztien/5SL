@@ -202,7 +202,7 @@ $locJS=_fn_getCachedJsonData("../jsonFiles/locations.json");
                     </thead>
                     <tbody>
                       <?php
-                        //$sr = $DB->query("SELECT * FROM fsl_members");
+                        //$sr = DB->query("SELECT * FROM fsl_members");
                         //$listSql = "SELECT *, COUNT(*) OVER() 'totalNum' FROM fsl_members a INNER JOIN mb_info b ON b.mb_id = a.mb_id";
                         $listSql = "SELECT *, COUNT(*) OVER() 'totalNum' FROM fsl_members";
                         if(!empty($searchURI)){ $listSql .= " WHERE 1=1"; }
@@ -243,7 +243,7 @@ $locJS=_fn_getCachedJsonData("../jsonFiles/locations.json");
                         }
 
                         $listSql .= " ORDER BY mb_id DESC LIMIT {$maxResult}";
-                        $sr = $DB->query($listSql);
+                        $sr = DB->query($listSql);
                         $totalNum = intval(@$sr[0]['totalNum']);
                         $i = 0; //以$i為$nameList這個陣列的索引值
                         while($i<count($sr)){ 

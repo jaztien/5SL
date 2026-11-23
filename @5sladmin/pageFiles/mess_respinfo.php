@@ -11,8 +11,8 @@ require_once('../includeFiles/common.lib.php');
 //
 $rbotID=currID;
 //
-$res = $DB->row("SELECT * FROM chatbot_response WHERE rbot_id=?",array($rbotID));
-//$DB->closeConnection();
+$res = DB->row("SELECT * FROM chatbot_response WHERE rbot_id=?",array($rbotID));
+//DB->closeConnection();
 
 //功能陣列建立
 // Get the contents of the JSON file
@@ -173,7 +173,7 @@ $geJS=_fn_getCachedJsonData("../jsonFiles/general.json");
                         <div class="card-body">
                             <ul id="qbot_list" class="navbar-nav qbot_list">
                                 <?php
-                                    $qr = $DB->query("SELECT * FROM chatbot_question WHERE rbot_id=?",array($rbotID));
+                                    $qr = DB->query("SELECT * FROM chatbot_question WHERE rbot_id=?",array($rbotID));
                                     $qi = 0; //以$i為$nameList這個陣列的索引值
                                     while ($qi < count($qr)) {
                                 ?>

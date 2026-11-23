@@ -13,8 +13,8 @@ require_once('../includeFiles/common.lib.php');
 $cateArr = isset($_REQUEST['cateArr']) ? explode(',', $_REQUEST['cateArr']) : array(0);
 //功能陣列建立，取自JSON檔案
 //$imgGet=file_get_contents("../jsonFiles/imagelist.min.json");
-//$imgGet = $DB->single("SELECT sj_json FROM sys_json WHERE sj_code=?",array('sysimglist'));
-$imgGet = $DB->single("SELECT xj_json FROM sys_json WHERE xj_code=?",array('sysimglist'));
+//$imgGet = DB->single("SELECT sj_json FROM sys_json WHERE sj_code=?",array('sysimglist'));
+$imgGet = DB->single("SELECT xj_json FROM sys_json WHERE xj_code=?",array('sysimglist'));
 $imgJS = json_decode($imgGet,true);
 
 ?>

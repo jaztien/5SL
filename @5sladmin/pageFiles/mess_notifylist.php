@@ -115,8 +115,8 @@ $geJS=_fn_getCachedJsonData("../jsonFiles/general.json");
 
                         $listSql .= " ORDER BY noti_id DESC LIMIT {$maxResult}";
 
-                        $sr = $DB->query($listSql);
-                        //$DB->closeConnection();
+                        $sr = DB->query($listSql);
+                        //DB->closeConnection();
                         $i = 0; //以$i為$nameList這個陣列的索引值
                         while($i<count($sr)){ 
                         ?>

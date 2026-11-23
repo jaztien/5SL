@@ -8,7 +8,7 @@ include_once '5sl_include_header.php';
 $mb_id = (int)($_SESSION['mbID'] ?? $_SESSION['user_id'] ?? 0);
 
 // 1. 查詢會員基本資料與可用 PTS 點數餘額（自動帶入預設收件人資訊）
-$member_info = ($mb_id > 0) ? $DB->row("SELECT mb_name, mb_title, mb_cellphone, mb_add, mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]) : [];
+$member_info = ($mb_id > 0) ? DB->row("SELECT mb_name, mb_title, mb_cellphone, mb_add, mb_points FROM fsl_members WHERE mb_id = ?", [$mb_id]) : [];
 $member_pts  = (int)($member_info['mb_points'] ?? 0);
 $def_name    = !empty($member_info['mb_name']) ? _fn_secure_crypto($member_info['mb_name'], 'de') : ($member_info['mb_title'] ?? '');
 $def_phone   = !empty($member_info['mb_cellphone']) ? _fn_secure_crypto($member_info['mb_cellphone'], 'de') : '';
@@ -27,7 +27,7 @@ $sql_cart = "
     WHERE ci.mb_id = ?
     ORDER BY ci.cart_id ASC
 ";
-$cart_rows = ($mb_id > 0) ? $DB->query($sql_cart, [$mb_id]) : [];
+$cart_rows = ($mb_id > 0) ? DB->query($sql_cart, [$mb_id]) : [];
 if (!is_array($cart_rows)) $cart_rows = [];
 
 // 整理購物車項目顯示數據
@@ -84,7 +84,7 @@ foreach ($cart_rows as $cr) {
 }
 
 // 3. 查詢會員名下可用的折價券 (fsl_gift_records + fsl_gifts)
-$my_coupons = ($mb_id > 0) ? $DB->query("
+$my_coupons = ($mb_id > 0) ? DB->query("
     SELECT r.grec_id, g.gift_title, g.gift_discount_usd
     FROM fsl_gift_records r
     INNER JOIN fsl_gifts g ON r.gift_id = g.gift_id
@@ -96,7 +96,7 @@ if (!is_array($my_coupons)) $my_coupons = [];
 
 // 4. 讀取會員預設發票偏好
 $mb_inv = ($mb_id > 0)
-    ? $DB->row("SELECT mb_inv_type, mb_carrier_type, mb_carrier_code, mb_tax_id, mb_company_title FROM fsl_members WHERE mb_id = ?", [$mb_id])
+    ? DB->row("SELECT mb_inv_type, mb_carrier_type, mb_carrier_code, mb_tax_id, mb_company_title FROM fsl_members WHERE mb_id = ?", [$mb_id])
     : array();
 $def_inv_type      = (int)($mb_inv['mb_inv_type'] ?? 1);
 $def_carrier_type  = (int)($mb_inv['mb_carrier_type'] ?? 0);

@@ -8,7 +8,7 @@ $mb_lvl     = isset($_SESSION['mbLevel']) ? (int)$_SESSION['mbLevel'] : 3;
 // 查詢目前登入會員已收藏的課程 ID 陣列（供首頁卡片自動點亮實心愛心）
 $user_wished_courses = [];
 if (!empty($mb_id) && $mb_id > 0 && isset($DB)) {
-    $wish_rows = $DB->query(
+    $wish_rows = DB->query(
         "SELECT wish_target_id FROM fsl_wishlists WHERE mb_id = ? AND wish_target_type = 1",
         [$mb_id]
     );
@@ -22,7 +22,7 @@ if (!empty($mb_id) && $mb_id > 0 && isset($DB)) {
 // 預載所有上架課程詳細資訊與開放梯次（供首頁點擊「立即預約報名 / 我要預約」先跳出確認彈窗）
 $home_courses_map = array();
 if (isset($DB)) {
-    $cs_rows = $DB->query("SELECT course_id, course_title, course_brief, course_cost, course_type, course_max FROM fsl_courses WHERE course_status = 1");
+    $cs_rows = DB->query("SELECT course_id, course_title, course_brief, course_cost, course_type, course_max FROM fsl_courses WHERE course_status = 1");
     if (is_array($cs_rows)) {
         foreach ($cs_rows as $cr) {
             $cid = (int)$cr['course_id'];
@@ -43,7 +43,7 @@ if (isset($DB)) {
         }
     }
 
-    $sess_rows = $DB->query("
+    $sess_rows = DB->query("
         SELECT s.sess_id, s.course_id, s.sess_batch, s.sess_altname, s.sess_startdate, s.sess_starttime, s.sess_duration, s.sess_enrollee, c.course_max
         FROM fsl_course_sessions s
         INNER JOIN fsl_courses c ON s.course_id = c.course_id
@@ -613,7 +613,7 @@ if (isset($DB)) {
                                 ORDER BY med_is_featured DESC, med_event_date DESC, med_sort ASC, med_id DESC
                                 LIMIT 12
                             ";
-                    $home_media_rows = isset($DB) ? $DB->query($sql_home_media) : array();
+                    $home_media_rows = isset($DB) ? DB->query($sql_home_media) : array();
                     if (!is_array($home_media_rows)) $home_media_rows = array();
 
                     foreach ($home_media_rows as $row):
@@ -729,7 +729,7 @@ if (isset($DB)) {
                                 WHERE course_status = 1 AND course_show_pricing = 1
                                 ORDER BY course_sort ASC, course_id ASC
                             ";
-                    $pricing_cards = isset($DB) ? $DB->query($sql_pricing) : array();
+                    $pricing_cards = isset($DB) ? DB->query($sql_pricing) : array();
                     if (!is_array($pricing_cards)) $pricing_cards = array();
 
                     foreach ($pricing_cards as $pc):

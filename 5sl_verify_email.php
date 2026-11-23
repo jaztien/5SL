@@ -9,7 +9,7 @@ $statusMsg   = '找不到對應的驗證資訊，此連結可能已經使用過�
 $memberTitle = '';
 
 if ($token !== '' && preg_match('/^[a-f0-9]{32}$/i', $token) && isset($DB)) {
-    $vcRow = $DB->row(
+    $vcRow = DB->row(
         "SELECT vc.vc_id, vc.mb_id, vc.vc_expiretime, m.mb_title, m.mb_email_verified
          FROM fsl_verify_codes vc
          INNER JOIN fsl_members m ON vc.mb_id = m.mb_id
@@ -24,7 +24,7 @@ if ($token !== '' && preg_match('/^[a-f0-9]{32}$/i', $token) && isset($DB)) {
 
         if ((int)$vcRow['mb_email_verified'] === 1) {
             // 已經驗證過
-            $DB->query("DELETE FROM fsl_verify_codes WHERE vc_id = ?", [(int)$vcRow['vc_id']]);
+            DB->query("DELETE FROM fsl_verify_codes WHERE vc_id = ?", [(int)$vcRow['vc_id']]);
             $verifyState = 'success';
             $statusTitle = '您的電子信箱已完成驗證！';
             $statusMsg   = "親愛的 {$memberTitle}，您的電子信箱先前已通過認證，現在即可直接登入會員中心。";
@@ -35,17 +35,17 @@ if ($token !== '' && preg_match('/^[a-f0-9]{32}$/i', $token) && isset($DB)) {
             $statusMsg   = "親愛的 {$memberTitle}，為了保障您的帳戶安全，此認證連結已逾時失效。請點擊下方按鈕重新發送新的驗證信！";
         } else {
             // 驗證通過：將 mb_email_verified 更新為 1，並刪除已使用的驗證碼
-            $DB->beginTransaction();
+            DB->beginTransaction();
             try {
-                $DB->query("UPDATE fsl_members SET mb_email_verified = 1, mb_updated = NOW() WHERE mb_id = ?", [$mId]);
-                $DB->query("DELETE FROM fsl_verify_codes WHERE mb_id = ? AND vc_mode = 1", [$mId]);
-                $DB->commit();
+                DB->query("UPDATE fsl_members SET mb_email_verified = 1, mb_updated = NOW() WHERE mb_id = ?", [$mId]);
+                DB->query("DELETE FROM fsl_verify_codes WHERE mb_id = ? AND vc_mode = 1", [$mId]);
+                DB->commit();
 
                 $verifyState = 'success';
                 $statusTitle = '電子信箱驗證成功！帳戶已正式啟用';
                 $statusMsg   = "歡迎加入 Fifth Season Life 人生第五季，{$memberTitle}！您的會員權益已全數開通，立即登入開啟專屬旅程。";
             } catch (Exception $e) {
-                $DB->rollBack();
+                DB->rollBack();
                 $verifyState = 'invalid';
                 $statusTitle = '系統驗證處理異常';
                 $statusMsg   = '啟用帳戶時發生暫時性錯誤，請稍後再試或聯繫客服人員。';

@@ -146,7 +146,7 @@ $logJS=_fn_getCachedJsonData("../jsonFiles/logs.json");
                         $sql = "SELECT * FROM data_logs WHERE 1=1";
                         $sql .= $exSearchSql;
                         $sql .= " ORDER BY lg_created DESC{$topMax}";
-                        $sr = $DB->query($sql ,array());
+                        $sr = DB->query($sql ,array());
                         $i = 0; //以$i為$nameList這個陣列的索引值
                         while($i<count($sr)){ 
                         ?>
@@ -158,10 +158,10 @@ $logJS=_fn_getCachedJsonData("../jsonFiles/logs.json");
                             <td><?php echo $logJS['lgtype'][$sr[$i]['lg_for']]??'&nbsp;'; ?></td>
                             <td><?php
                               if($sr[$i]['lg_for']==1){
-                                  $adnick = $DB->single("SELECT ad_title FROM fsl_administrator WHERE ad_id=?",array($sr[$i]['lg_forid']));
+                                  $adnick = DB->single("SELECT ad_title FROM fsl_administrator WHERE ad_id=?",array($sr[$i]['lg_forid']));
                                   echo $adnick ?: '&nbsp;';
                               }elseif($sr[$i]['lg_for']==2){
-                                  $mbnick = $DB->single("SELECT mb_nickname FROM fsl_members WHERE mb_id=?",array($sr[$i]['lg_forid']));
+                                  $mbnick = DB->single("SELECT mb_nickname FROM fsl_members WHERE mb_id=?",array($sr[$i]['lg_forid']));
                                   echo $mbnick ?: '&nbsp;';
                               }else{
                                   echo '系統';
@@ -169,14 +169,14 @@ $logJS=_fn_getCachedJsonData("../jsonFiles/logs.json");
                             ?></td>
                             <td style="font-size:1.2em;font-weight:bold;"><?php echo $sr[$i]['lg_code']; ?></td>
                             <td><?php
-                                $oStr = $DB->single("SELECT lg_string FROM sys_logstrings WHERE lg_code=?",array($sr[$i]['lg_code']));
+                                $oStr = DB->single("SELECT lg_string FROM sys_logstrings WHERE lg_code=?",array($sr[$i]['lg_code']));
                                 echo _fn_getLogString($sr[$i]['lg_params'],$oStr);
                             ?></td>
                           </tr>
                         <?php 
                           $i++;
                           } 
-                          //$DB->closeConnection();
+                          //DB->closeConnection();
                         ?>
                     </tbody>
                     <tfoot>

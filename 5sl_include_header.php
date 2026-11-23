@@ -18,13 +18,13 @@ if ($mb_id > 0 && isset($DB)) {
         $mb_lvl = (int)($_SESSION['mbLevel'] ?? $_SESSION['user_lvl'] ?? 0);
 
         // 1. 購物車件數
-        $global_cart_count = (int)$DB->single(
+        $global_cart_count = (int)DB->single(
             "SELECT COUNT(*) FROM fsl_cart_items WHERE mb_id = ?",
             [$mb_id]
         );
 
         // 2. 未讀系統通知（與 5sl_myConsole.php 完全一致：nor_id 為 NULL 代表未讀）
-        $unread_ntf = (int)$DB->single(
+        $unread_ntf = (int)DB->single(
             "SELECT COUNT(*)
              FROM fsl_notifications n
              LEFT JOIN fsl_notification_reads nr ON n.noti_id = nr.noti_id AND nr.mb_id = ?
@@ -36,11 +36,11 @@ if ($mb_id > 0 && isset($DB)) {
         $global_unread_msg = $unread_ntf;
 
         // 3. 待領取禮品 + 已達成待領取任務獎勵
-        $pending_gifts = (int)$DB->single(
+        $pending_gifts = (int)DB->single(
             "SELECT COUNT(*) FROM fsl_gift_records WHERE mb_id = ? AND grec_status = 0",
             [$mb_id]
         );
-        $pending_quests = (int)$DB->single(
+        $pending_quests = (int)DB->single(
             "SELECT COUNT(*) FROM fsl_quest_records WHERE mb_id = ? AND qrec_status = 1",
             [$mb_id]
         );

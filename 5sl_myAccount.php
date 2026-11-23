@@ -5,7 +5,7 @@ $current_page = 'myAccount';
 include_once '5sl_include_header.php';
 $mb_id = (int)($_SESSION['mbID'] ?? $_SESSION['user_id'] ?? 0);
 $locJS = _fn_getCachedJsonData('5sladmin/jsonFiles/locations.json');
-$res = $DB->row('SELECT * FROM fsl_members WHERE mb_id=?',array($_SESSION['mbID'] ?? 0));
+$res = DB->row('SELECT * FROM fsl_members WHERE mb_id=?',array($_SESSION['mbID'] ?? 0));
 ?>
 
 <div class="container my-5 py-4">

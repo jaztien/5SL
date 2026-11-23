@@ -71,7 +71,7 @@ switch ($formAcce) {
             $i++;
         }
         $setArr['ad_updated'] = '[EXPR]NOW()';
-        $up = $DB->update('fsl_administrator', $setArr,array('ad_id'=>$adID));
+        $up = DB->update('fsl_administrator', $setArr,array('ad_id'=>$adID));
         if($up){
             $imgUp = $_POST["imgUp"];
             $newUpPhoto = '';
@@ -111,10 +111,10 @@ switch ($formAcce) {
                     }
                 }
             }
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2121, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2121, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>(isset($imgUpRtn) ? ($imgUpRtn ? 'success' : 'warning') : 'success'), 'msgStr'=>'成功編輯管理者資料'.(isset($imgUpRtn) ? ($imgUpRtn ? '，以及代表圖像' : '，但圖像編輯失敗') : '').'！！', 'newUpPhoto'=> $newUpPhoto, 'upTime'=> $cDateTime);
         } else {
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2120, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2120, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'編輯管理者資料失敗！請聯絡相關管理人員！！');
         }
         echo json_encode($rtn);
@@ -126,12 +126,12 @@ switch ($formAcce) {
         if(trim($arrDatA[0]['value'])== trim($arrDatA[1]['value'] )){
             $ar=$arrDatA;
             $setArr=array('ad_updated'=> '[EXPR]NOW()', trim($arrDatA[0]['name']) => password_hash(trim($arrDatA[0]['value']), PASSWORD_DEFAULT));
-            $up = $DB->update('fsl_administrator', $setArr,array('ad_id'=>$adID));
+            $up = DB->update('fsl_administrator', $setArr,array('ad_id'=>$adID));
             if($up){
-                $ilog = $DB->insSysLogs(51, CF_AD_ID, 2141, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
+                $ilog = DB->insSysLogs(51, CF_AD_ID, 2141, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
                 $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'更新登入密碼成功！！', 'upTime'=> $cDateTime);
             } else {
-                $ilog = $DB->insSysLogs(51, CF_AD_ID, 2140, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
+                $ilog = DB->insSysLogs(51, CF_AD_ID, 2140, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
                 $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'更新登入密碼失敗！請聯絡相關管理人員！！');
             }
         } else {
@@ -186,7 +186,7 @@ switch ($formAcce) {
             $newCHK = strval($viewCHK.$addCHK.$editCHK.$delCHK);
             $comF=strval($optARR[$i]['default']);
             // 找出跟頁面與管理者相關聯的一筆權限紀錄 
-            $au = $DB->row("SELECT * FROM fsl_admin_auth WHERE ad_id = ? AND ap_pagecode = ?", array($adID,$idX));
+            $au = DB->row("SELECT * FROM fsl_admin_auth WHERE ad_id = ? AND ap_pagecode = ?", array($adID,$idX));
             // 取得有紀錄的權限紀錄 ID，沒有的話賦值 0 
             $auID = ($au) ? intval($au['auth_id']) : 0;
 
@@ -194,7 +194,7 @@ switch ($formAcce) {
             if($newCHK==$comF){ // 若是頁面預設權限與 ajax 傳遞來的權限資料相同時處理 
                 if($auID>0){ // 若是有相關權限紀錄，刪除這個紀錄，系統將會自動讀取預設權限（與預設權限相同時沒有必要生成權限紀錄） 
                     $chkCount++;
-                    $del=$DB->query("DELETE FROM fsl_admin_auth WHERE auth_id=?", array($auID));
+                    $del=DB->query("DELETE FROM fsl_admin_auth WHERE auth_id=?", array($auID));
                     if($del){ 
                         $colorCHG['adminPG_'.$idX ]='icheck-warning'; // 刪除成功後寫入更新 Class 狀態陣列（即時更改Checkbox顏色）
                         $succeCount++;
@@ -212,7 +212,7 @@ switch ($formAcce) {
                 );
                 if($auID>0){ // 若是已經有了權限紀錄時，更新這個權限紀錄 
                     $chkCount++;
-                    $up = $DB->query("UPDATE fsl_admin_auth SET auth_browse = :auth_browse, auth_addnew = :auth_addnew, auth_edit = :auth_edit, auth_delete = :auth_delete, ap_pagecode = :ap_pagecode WHERE auth_id = '".$auID."'", $goARR);
+                    $up = DB->query("UPDATE fsl_admin_auth SET auth_browse = :auth_browse, auth_addnew = :auth_addnew, auth_edit = :auth_edit, auth_delete = :auth_delete, ap_pagecode = :ap_pagecode WHERE auth_id = '".$auID."'", $goARR);
                     if($up){ $succeCount++; }// 順利更新紀錄時，認定為此列紀錄處理成功 
                     else { // 若是更新失敗時處理 
                         if(intval($au['auth_browse'])==$viewCHK && intval($au['auth_addnew'])==$addCHK && intval($au['auth_edit'])==$editCHK && intval($au['auth_delete'])==$delCHK) { $succeCount++; }// 當更改資料並無異動時，即使更新失敗仍然認定為成功
@@ -220,7 +220,7 @@ switch ($formAcce) {
                     }
                 } else { // 若是並無權限紀錄時，便新建立一個權限紀錄 
                     $chkCount++;
-                    $ins = $DB->query("INSERT INTO fsl_admin_auth(ad_id,auth_browse,auth_addnew,auth_edit,auth_delete,ap_pagecode) VALUES('".$adID."',:auth_browse,:auth_addnew,:auth_edit,:auth_delete,:ap_pagecode)",$goARR);
+                    $ins = DB->query("INSERT INTO fsl_admin_auth(ad_id,auth_browse,auth_addnew,auth_edit,auth_delete,ap_pagecode) VALUES('".$adID."',:auth_browse,:auth_addnew,:auth_edit,:auth_delete,:ap_pagecode)",$goARR);
                     if($ins){ // 建立紀錄成功時
                         $colorCHG['adminPG_'.$idX ]='icheck-success'; // 寫入更新 Class 狀態陣列（即時更改Checkbox顏色） 
                         $succeCount++;// 當然認定為處理成功 
@@ -235,13 +235,13 @@ switch ($formAcce) {
 
 
         if($rtnSta==true){ 
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2131, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2131, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=>'更新操作權限成功！！', 'upTime' => $cDateTime, 'colorCHG'=>$colorCHG); 
             echo json_encode($rtn);
             exit();
         } /* 回傳成功時的資訊 */
         else {
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2130, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2130, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'更新操作權限失敗！請聯絡相關管理人員！！', 'upTime' => $cDateTime, 'colorCHG'=>array()); 
             echo json_encode($rtn);
             exit();
@@ -265,7 +265,7 @@ switch ($formAcce) {
             $i++;
         }
         //---------------- 重複輸入檢查 ------------------//
-        $dupC = $DB->duplicateCheck('fsl_administrator',array(
+        $dupC = DB->duplicateCheck('fsl_administrator',array(
             'ad_phone'=>$inArr['ad_phone'],
             'ad_email'=>$inArr['ad_email'],
             'ad_line'=>$inArr['ad_line'],
@@ -277,7 +277,7 @@ switch ($formAcce) {
         }
         //---------------- /重複輸入檢查 ------------------//
 
-        $ins = $DB->insert('fsl_administrator', $inArr);
+        $ins = DB->insert('fsl_administrator', $inArr);
         if($ins && $ins > 0){
             //------------ 頭像更新檔名處理 --------------//
             $imgUp = $_POST["imgUp"];
@@ -291,23 +291,23 @@ switch ($formAcce) {
                     _fn_resize_image($imageName,'../uploadFiles/ad/adphoto_' . $ins . '_thumb.jpg', 100, 100);//製作縮圖
                 }
             }
-            $ilog = $DB->insSysLogs(CF_AD_ID,1,2111,'["'.CF_AD_ID.'","'.$ins.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(CF_AD_ID,1,2111,'["'.CF_AD_ID.'","'.$ins.'"]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'newID'=>$ins); 
             echo json_encode($rtn);
             exit();
         } 
-        $ilog = $DB->insSysLogs(51, CF_AD_ID, 2110, '["'.CF_AD_ID.'"]');//寫入操作記錄
+        $ilog = DB->insSysLogs(51, CF_AD_ID, 2110, '["'.CF_AD_ID.'"]');//寫入操作記錄
         $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'新增管理者失敗！請聯絡相關管理人員！！'); 
         echo json_encode($rtn);
     break;
     case "func_ad_delete":////////////////////////////////////////// func_ad_delete 刪除管理者資料
-        //$del = $DB->query("DELETE FROM fsl_administrator WHERE ad_id = ?", array($adID)); 
-        $up = $DB->update('fsl_administrator', array('ad_updated'=> '[EXPR]NOW()','ad_status'=>8), array('ad_id'=>$adID));
+        //$del = DB->query("DELETE FROM fsl_administrator WHERE ad_id = ?", array($adID)); 
+        $up = DB->update('fsl_administrator', array('ad_updated'=> '[EXPR]NOW()','ad_status'=>8), array('ad_id'=>$adID));
         if($up){
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2151, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2151, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>1); 
         } else {
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2150, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2150, '["'.CF_AD_ID.'","'.$adID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=>'刪除管理者失敗！請聯絡相關管理人員！！'); 
         }
         echo json_encode($rtn);
@@ -342,16 +342,16 @@ switch ($formAcce) {
     case "func_ad_imgdelete":////////////////////////////////////////// imgdelete 刪除圖像
         $inID = implode(",", $arrDatA);
         $delNum = count($arrDatA);
-        $del = $DB->query("DELETE FROM data_vdoimg WHERE vi_id IN (".$inID.")");
+        $del = DB->query("DELETE FROM data_vdoimg WHERE vi_id IN (".$inID.")");
         if($del){ 
             foreach( $arrDatB as $value){
                 @unlink($value);
             }
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2521, '["'.CF_AD_ID.'","'.$delNum.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2521, '["'.CF_AD_ID.'","'.$delNum.'"]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=> '成功刪除圖像紀錄', 'keyDel'=> '');
         }//順利更新紀錄時，認定為此列紀錄處理成功
         else { //若是更新失敗時處理
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2520, '["'.CF_AD_ID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2520, '["'.CF_AD_ID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=> '刪除圖像紀錄失敗', 'upTime'=> time());
         }
         echo json_encode($rtn);
@@ -393,27 +393,27 @@ switch ($formAcce) {
                     $putReturn = file_put_contents("../uploadFiles/".$fileName, $decodedImage);
                     if($putReturn !== false){//當成功完成檔案上傳，且生成檔案於指定資料夾中時
                         if(!empty($viID)){//當這個請求有ID值後送時，更新這個紀錄的資料
-                            $up = $DB->update('data_vdoimg', array('vi_updated'=>'[EXPR]NOW()', 'vi_name'=>$name, 'vi_alt'=>$alt, 'vi_src'=>$fileName, 'vi_tag'=>$tag), array('vi_id'=>$viID));
+                            $up = DB->update('data_vdoimg', array('vi_updated'=>'[EXPR]NOW()', 'vi_name'=>$name, 'vi_alt'=>$alt, 'vi_src'=>$fileName, 'vi_tag'=>$tag), array('vi_id'=>$viID));
                         } else {//當這個請求沒有ID值後送時，新增一筆紀錄資料
-                            $ins = $DB->insert('data_vdoimg', array('vi_name'=>$name, 'vi_alt'=>$alt, 'vi_src'=>$fileName, 'vi_tag'=>$tag));
+                            $ins = DB->insert('data_vdoimg', array('vi_name'=>$name, 'vi_alt'=>$alt, 'vi_src'=>$fileName, 'vi_tag'=>$tag));
                         }
                     } 
                 }
             }
         } else {//當沒有檔案執行上傳時，這個請求只能是更新這個紀錄的資料
-            $up = $DB->update('data_vdoimg', array('vi_updated'=>'[EXPR]NOW()', 'vi_name'=>$name, 'vi_alt'=>$alt, 'vi_tag'=>$tag), array('vi_id'=>$viID));
+            $up = DB->update('data_vdoimg', array('vi_updated'=>'[EXPR]NOW()', 'vi_name'=>$name, 'vi_alt'=>$alt, 'vi_tag'=>$tag), array('vi_id'=>$viID));
         }
 
         if($up){
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2511, '["'.CF_AD_ID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2511, '["'.CF_AD_ID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=> '成功編輯圖像紀錄', 'newCate'=> $newCate);
         }/* 順利更新紀錄時，認定為此列紀錄處理成功 */
         else if($ins){ 
-            //$ilog = $DB->insSysLogs(51, CF_AD_ID, '2511', CF_AD_ID);//寫入操作記錄
+            //$ilog = DB->insSysLogs(51, CF_AD_ID, '2511', CF_AD_ID);//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=> '成功新增圖像紀錄', 'newCate'=> $newCate, 'newIdx'=> $file_count);
         }/* 順利更新紀錄時，認定為此列紀錄處理成功 */
         else { /* 若是更新失敗時處理 */
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2510, '["'.CF_AD_ID.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2510, '["'.CF_AD_ID.'"]');//寫入操作記錄
             $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=> '編輯圖像紀錄失敗', 'upTime'=> time());
         }
         echo json_encode($rtn);
@@ -432,12 +432,12 @@ switch ($formAcce) {
 
         //check batch
         $file_batch = 1;
-        $getBatchNum = $DB->single("SELECT csvio_batch FROM sys_csvio WHERE csvio_filetitle='".$file_title."' AND csvio_part='".$file_part."' ORDER BY csvio_batch DESC", array(0));
+        $getBatchNum = DB->single("SELECT csvio_batch FROM sys_csvio WHERE csvio_filetitle='".$file_title."' AND csvio_part='".$file_part."' ORDER BY csvio_batch DESC", array(0));
         if(!empty($getBatchNum)) {
             $file_batch = $getBatchNum + 1;
         }
         //Get destination table's last insert ID
-        $getLastID = $DB->single("SELECT IDENT_CURRENT($file_table)", array(0));
+        $getLastID = DB->single("SELECT IDENT_CURRENT($file_table)", array(0));
         $getLastID = !empty($getLastID) ? $getLastID : 0;
         if($uFile) {
             $tmpFilePath = $uFile['tmp_name'];
@@ -460,11 +460,11 @@ switch ($formAcce) {
                         'csvio_remark' => $file_remark,
                         'csvio_status' => 1
                     );
-                    $ins = $DB->insert('sys_csvio', $inArr);
+                    $ins = DB->insert('sys_csvio', $inArr);
                     if($ins){
                         $inArr['csvio_id'] = $ins;
                         $inArr['getLastID'] = $getLastID;
-                        $ilog = $DB->insSysLogs(51, CF_AD_ID, 2601, '["'.CF_AD_ID.'","'.$file_name.'"]');//寫入操作記錄
+                        $ilog = DB->insSysLogs(51, CF_AD_ID, 2601, '["'.CF_AD_ID.'","'.$file_name.'"]');//寫入操作記錄
                         $rtn = array('RTN'=>1, 'msgType'=>'success', 'fInfo'=> $inArr, 'upTime'=> time());
                         echo json_encode($rtn);
                         exit();
@@ -472,16 +472,16 @@ switch ($formAcce) {
                 }      
             }    
         }
-        $ilog = $DB->insSysLogs(51, CF_AD_ID, 2600, '["'.CF_AD_ID.'","'.$file_name.'"]');//寫入操作記錄
+        $ilog = DB->insSysLogs(51, CF_AD_ID, 2600, '["'.CF_AD_ID.'","'.$file_name.'"]');//寫入操作記錄
         $rtn = array('RTN'=>0, 'msgType'=>'error', 'uFile'=> $uFile['tmp_name'], 'upTime'=> time());
         echo json_encode($rtn);
     break;
     case "func_ad_getcsvinfo":////////////////////////////////////////// func_ad_getcsvinfo 取得匯入檔案資料
         $csvID = isset($_POST['csvID']) ? $_POST['csvID'] : 0;
         if(!empty($csvID)){
-            $cio = $DB->row("SELECT * FROM sys_csvio WHERE csvio_id=?",array($csvID));
+            $cio = DB->row("SELECT * FROM sys_csvio WHERE csvio_id=?",array($csvID));
             if(!empty($cio['csvio_table'])){
-                $getLastID = $DB->single("SELECT IDENT_CURRENT('".$cio['csvio_table']."')", array(0));
+                $getLastID = DB->single("SELECT IDENT_CURRENT('".$cio['csvio_table']."')", array(0));
                 $getLastID = !empty($getLastID) ? $getLastID : 0;
             } else {
                 $getLastID = 0;
@@ -527,7 +527,7 @@ switch ($formAcce) {
                 $colNum = count($toColArr);
             } elseif($i==3){
                 if($csvTrun=='t') {
-                    $trun = $DB->query("TRUNCATE TABLE ".$toTable, array());
+                    $trun = DB->query("TRUNCATE TABLE ".$toTable, array());
                 }
             } elseif($i==5){
 
@@ -541,7 +541,7 @@ switch ($formAcce) {
                 if(empty($line[0])){
                     unset($actArr[$toColArr[0]]);
                 }
-                $ins = $DB->insert($toTable, $actArr);
+                $ins = DB->insert($toTable, $actArr);
 
             }
             $i++;
@@ -567,7 +567,7 @@ switch ($formAcce) {
                 $colNum = count($toColArr);
             } elseif($i==3){
                 if($csvTrun=='t') {
-                    $trun = $DB->query("TRUNCATE TABLE ".$toTable, array());
+                    $trun = DB->query("TRUNCATE TABLE ".$toTable, array());
                 }
             } else {
                 $actArr=array();
@@ -589,7 +589,7 @@ switch ($formAcce) {
                         //$rtn = array('RTN'=>0, 'msgType'=>'error', 'toTable'=> $toTable, 'actArr'=> $actArr);
                         //echo json_encode($rtn);
                         //exit();
-                        $ins = $DB->insert($toTable, $actArr);
+                        $ins = DB->insert($toTable, $actArr);
                         if($ins && $ins > 0){
                             $cDoneData++;
                         } else {
@@ -601,7 +601,7 @@ switch ($formAcce) {
                         $cProcessData++;
                         if(!empty($line[0])){
                             $idCol[$toColArr[0]]=$line[0];
-                            $up = $DB->update($toTable, $actArr,$idCol);
+                            $up = DB->update($toTable, $actArr,$idCol);
                             if($up){
                                 $cDoneData++;
                             } else {
@@ -617,7 +617,7 @@ switch ($formAcce) {
                         $cProcessData++;
                         if(!empty($line[0])){
                             $idCol[$toColArr[0]]=$line[0];
-                            $up = $DB->update($toTable, $actArr,$idCol);
+                            $up = DB->update($toTable, $actArr,$idCol);
                             if($up){
                                 $cDoneData++;
                             } else {
@@ -625,7 +625,7 @@ switch ($formAcce) {
                                 $errorRowStr .= "error update row: ".$i."\n";
                             }
                         } else {
-                            $ins = $DB->insert($toTable, $actArr);
+                            $ins = DB->insert($toTable, $actArr);
                             if($ins && $ins > 0){
                                 $cDoneData++;
                             } else {
@@ -667,12 +667,12 @@ switch ($formAcce) {
         }
 
         if($cDoneData > 0){
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2651, '["'.CF_AD_ID.'","'.$csvName.'","'.$cDoneData.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2651, '["'.CF_AD_ID.'","'.$csvName.'","'.$cDoneData.'"]');//寫入操作記錄
             $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=> '成功匯入 '.$cDoneData.' 筆檔案資料'.$errorMess.'！！', 'done'=>$cDoneData, 'error'=>$cDoneData, 'importNum'=>$i-4);
             echo json_encode($rtn);
             return false;
         } else {
-            $ilog = $DB->insSysLogs(51, CF_AD_ID, 2650, '["'.CF_AD_ID.'","'.$csvName.'"]');//寫入操作記錄
+            $ilog = DB->insSysLogs(51, CF_AD_ID, 2650, '["'.CF_AD_ID.'","'.$csvName.'"]');//寫入操作記錄
             if($cProcessData > 0){
                 $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=> '匯入檔案資料失敗，請檢查匯入檔案中，ID欄位的賦值狀態，在非自動匯入狀態下，ID有賦值的欄位無法新增，而ID為空值的欄位無法編輯，詳情請查閱 ErrorLog 檔案！！', 'done'=>0, 'importNum'=>0);
                 echo json_encode($rtn);
@@ -686,22 +686,22 @@ switch ($formAcce) {
         $csvID = isset($_POST['csvID']) ? $_POST['csvID'] : 0;
         $csvName = isset($_POST['csvName']) ? $_POST['csvName'] : '';
         if(!empty($csvID)){
-            $del = $DB->query("DELETE FROM sys_csvio WHERE csvio_id=?", array($csvID));
+            $del = DB->query("DELETE FROM sys_csvio WHERE csvio_id=?", array($csvID));
             if($del){
                 if(unlink("../dataFiles/csvio/".$csvName)){
-                    $ilog = $DB->insSysLogs(51, CF_AD_ID, 2621, '["'.CF_AD_ID.'","'.$csvName.'"]');//寫入操作記錄
+                    $ilog = DB->insSysLogs(51, CF_AD_ID, 2621, '["'.CF_AD_ID.'","'.$csvName.'"]');//寫入操作記錄
                     $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=> '刪除已匯入檔案資料成功！！');
                     echo json_encode($rtn);
                     exit();
                 } else {
-                    $ilog = $DB->insSysLogs(51, CF_AD_ID, 2630, '["'.CF_AD_ID.'","'.$csvName.'"]');//寫入操作記錄
+                    $ilog = DB->insSysLogs(51, CF_AD_ID, 2630, '["'.CF_AD_ID.'","'.$csvName.'"]');//寫入操作記錄
                     $rtn = array('RTN'=>1, 'msgType'=>'warning', 'msgStr'=> '刪除已匯入檔案資料成功，但檔案刪除失敗，請手動刪除檔案「'.$csvName.'」！！');
                     echo json_encode($rtn);
                     exit();
                 }
             }
         }
-        $ilog = $DB->insSysLogs(51, CF_AD_ID, 2620, '["'.CF_AD_ID.'","'.$csvName.'"]');//寫入操作記錄
+        $ilog = DB->insSysLogs(51, CF_AD_ID, 2620, '["'.CF_AD_ID.'","'.$csvName.'"]');//寫入操作記錄
         $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=> '刪除已匯入檔案資料失敗，請重新操作或聯絡管理人員！！');
         echo json_encode($rtn);
     break;
@@ -710,15 +710,15 @@ switch ($formAcce) {
         $ar=$arrDatA;
         $ar['csvio_updated']='[EXPR]NOW()';
         if(!empty($csvID)){
-            $up = $DB->update('sys_csvio', $ar,array('csvio_id'=>$csvID));
+            $up = DB->update('sys_csvio', $ar,array('csvio_id'=>$csvID));
             if($up){
-                $ilog = $DB->insSysLogs(51, CF_AD_ID, 2611, '["'.CF_AD_ID.'","'.$csvID.'"]');//寫入操作記錄
+                $ilog = DB->insSysLogs(51, CF_AD_ID, 2611, '["'.CF_AD_ID.'","'.$csvID.'"]');//寫入操作記錄
                 $rtn = array('RTN'=>1, 'msgType'=>'success', 'msgStr'=> '編輯已匯入檔案資料成功！！');
                 echo json_encode($rtn);
                 exit();
             }
         }
-        $ilog = $DB->insSysLogs(51, CF_AD_ID, 2610, '["'.CF_AD_ID.'","'.$csvID.'"]');//寫入操作記錄
+        $ilog = DB->insSysLogs(51, CF_AD_ID, 2610, '["'.CF_AD_ID.'","'.$csvID.'"]');//寫入操作記錄
         $rtn = array('RTN'=>0, 'msgType'=>'error', 'msgStr'=> '編輯已匯入檔案資料失敗，請重新操作或聯絡管理人員！！');
         echo json_encode($rtn);
     break;

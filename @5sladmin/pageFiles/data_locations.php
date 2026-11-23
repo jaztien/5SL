@@ -9,7 +9,7 @@ define('PAGE_ITEM2','ITEM_DATAS');
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
 $topARR=array();
-$loc_a = $DB->query("SELECT loc_code, loc_title, loc_depth, loc_status FROM data_locations WHERE loc_depth=? AND loc_status=?",array(1,1));
+$loc_a = DB->query("SELECT loc_code, loc_title, loc_depth, loc_status FROM data_locations WHERE loc_depth=? AND loc_status=?",array(1,1));
 $i=0;
 echo count($loc_a);
 while($i<count($loc_a)){
@@ -102,7 +102,7 @@ $locCode = (!empty($_GET['locCode'])) ? $_GET['locCode'] : $topARR[0]['code'];
                   <?php 
                   $i=0;
                   $cityARR=array();
-                  $loc_b = $DB->query("SELECT loc_code, loc_title FROM data_locations WHERE loc_depth=? AND loc_status=? AND loc_pcode=?",array(2,1,$locCode));
+                  $loc_b = DB->query("SELECT loc_code, loc_title FROM data_locations WHERE loc_depth=? AND loc_status=? AND loc_pcode=?",array(2,1,$locCode));
                   //$cityARR[$i]=array('pcode'=>$loc_b[$i]['code']);
                   while($i<count($loc_b)){
                     $cityARR[$i]=array('code'=>$loc_b[$i]['loc_code'],'title'=>$loc_b[$i]['loc_title']);
@@ -117,7 +117,7 @@ $locCode = (!empty($_GET['locCode'])) ? $_GET['locCode'] : $topARR[0]['code'];
                     <?php
                       $ci=0;
                       while($ci<count($cityARR)){
-                        $loc_area = $DB->query("SELECT * FROM data_locations WHERE loc_depth=? AND loc_status=? AND loc_pcode=?",array(3,1,$cityARR[$ci]['code']));
+                        $loc_area = DB->query("SELECT * FROM data_locations WHERE loc_depth=? AND loc_status=? AND loc_pcode=?",array(3,1,$cityARR[$ci]['code']));
                     ?>
                     <div class="tab-pane<?php echo ($ci==0) ? ' active' : ''; ?>" id="locTab<?php echo $cityARR[$ci]['code'];?>">
                       <table id="locTableList<?php echo $cityARR[$ci]['code'];?>" class="table table-bordered table-striped table-hover">

@@ -149,7 +149,7 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
                       <?php
                         $listSql = "SELECT *, COUNT(*) OVER() AS totalNum FROM fsl_administrator LIMIT {$maxResult}";
                         //if(!empty($searchURI)){ $listSql .= " WHERE 1=1"; }
-                        $sr = $DB->query($listSql);
+                        $sr = DB->query($listSql);
                         $totalNum = intval(@$sr[0]['totalNum']);
                         $i = 0; //以$i為$nameList這個陣列的索引值
                         while($i<count($sr)){ 

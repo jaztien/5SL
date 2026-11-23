@@ -13,7 +13,7 @@ function _fn_email_sending($htmlBody,$subJect,$setFrom=[],$setTo=[],$setCC=[],$s
     require '../pluginFiles/phpmailer/src/PHPMailer.php';
     require '../pluginFiles/phpmailer/src/SMTP.php';
     /*
-    $getArtiARR = $DB->row("SELECT arti_subscript,arti_body FROM articles WHERE arti_keycode=? AND arti_status=?",array($artiCODE,1));
+    $getArtiARR = DB->row("SELECT arti_subscript,arti_body FROM articles WHERE arti_keycode=? AND arti_status=?",array($artiCODE,1));
     if(!$getArtiARR || empty($getArtiARR['arti_subscript']) || empty($getArtiARR['arti_body'])){
         return false;
     }

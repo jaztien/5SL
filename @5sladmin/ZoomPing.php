@@ -7,7 +7,7 @@ require_once('includeFiles/db.inc.php');
 require_once 'classFiles/ZoomManager.class.php';
 
 // --- 🎯 請在此填入您要測試的四個核心參數 ---
-$getZoomInfo = $DB->getConfigVal('','zoom');
+$getZoomInfo = DB->getConfigVal('','zoom');
 $accountId    = $getZoomInfo['zoom_accountid']['config_value'];
 $clientId     = $getZoomInfo['zoom_clientid']['config_value'];
 $clientSecret = $getZoomInfo['zoom_clientsecret']['config_value'];

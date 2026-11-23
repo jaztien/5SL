@@ -238,7 +238,7 @@ echo $actArr['B-'];
                           <tbody>
                             <?php
                               $sql="SELECT * FROM sys_csvio WHERE csvio_status=?";
-                              $srr = $DB->query($sql,array(1));
+                              $srr = DB->query($sql,array(1));
                               $i = 0; //以$i為$nameList這個陣列的索引值
                               while($i<count($srr)){ 
                                 ?>

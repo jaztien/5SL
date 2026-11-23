@@ -13,8 +13,8 @@ require_once('../includeFiles/common.lib.php');
 //
 $oppID=currID;
 //取得頁面資料
-$res = $DB->row("SELECT * FROM merch_oppurchase WHERE opp_id=?",array($oppID));
-//$DB->closeConnection();
+$res = DB->row("SELECT * FROM merch_oppurchase WHERE opp_id=?",array($oppID));
+//DB->closeConnection();
 //代表圖像設定
 if(!empty($oppID)&&file_exists("../uploadFiles/md/opp/oppphoto_".$oppID."_thumb.jpg")){
   $cropImgDisplay = 'show';
@@ -32,7 +32,7 @@ $geJS=merchJS("../jsonFiles/general.json");
 //--------------------- 評分計算 -----------------------
 $idForItem = 6;//對應 general.json["idfor"] ## 1-會員(廠商、專家…等)；2-課程商品；3-文章;4-服務；5-廣告套裝；6-加購服務；11-儲值紀錄；12-廣告紀錄；13-加購紀錄
 $counT="SELECT AVG((rat_s1 + rat_s2 + rat_s3 + rat_s4 + rat_s5)/5) AS totAVE, AVG(rat_s1) AS S1, AVG(rat_s2) AS S2, AVG(rat_s3) AS S3, AVG(rat_s4) AS S4, AVG(rat_s5) AS S5 FROM fsl_rating WHERE rat_forid=? AND rat_for=?";
-$cnt = $DB->query($counT,array($oppID,$idForItem));
+$cnt = DB->query($counT,array($oppID,$idForItem));
 $S1 = !empty($cnt[0]['S1']) ? floatval($cnt[0]['S1']) : 0;
 $S2 = !empty($cnt[0]['S2']) ? floatval($cnt[0]['S2']) : 0;
 $S3 = !empty($cnt[0]['S3']) ? floatval($cnt[0]['S3']) : 0;
@@ -405,7 +405,7 @@ $ratingData = $S1.','.$S2.','.$S3.','.$S4.','.$S5;
                           <tbody>
                             <?php
                               $sql="SELECT * FROM merch_oppdata WHERE opp_id=?";
-                              $srr = $DB->query($sql,array($oppID));
+                              $srr = DB->query($sql,array($oppID));
                               $i = 0; //以$i為這個陣列的索引值
                               while($i<count($srr)){ 
                                 ?>
@@ -461,7 +461,7 @@ $ratingData = $S1.','.$S2.','.$S3.','.$S4.','.$S5;
                           <tbody>
                             <?php
                               $sql="SELECT * FROM fsl_rating WHERE rat_forid=? AND rat_for=?";
-                              $srr = $DB->query($sql,array($oppID,$idForItem));
+                              $srr = DB->query($sql,array($oppID,$idForItem));
                               $i = 0; //以$i為$nameList這個陣列的索引值
                               while($i<count($srr)){ 
                                 ?>

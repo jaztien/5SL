@@ -10,8 +10,8 @@ require_once('../includeFiles/common.lib.php');
 //
 $xxxxID=currID;
 //
-$res = $DB->row("SELECT * FROM xxxxxxxx WHERE xxxx_id=?",array($xxxxID));
-//$DB->closeConnection();
+$res = DB->row("SELECT * FROM xxxxxxxx WHERE xxxx_id=?",array($xxxxID));
+//DB->closeConnection();
 //代表圖像設定
 if(!empty($xxxxID)&&file_exists("../uploadFiles/xx/xxphoto_".$xxxxID."_thumb.jpg")){
   $cropImgDisplay = 'show';
@@ -372,7 +372,7 @@ $xxxxJS=_fn_getCachedJsonData("../jsonFiles/xxxxxxxx.json");
                           <tbody>
                             <?php
                               $sql="SELECT * FROM data_logs WHERE lg_forid=? AND lg_for=?";
-                              $srr = $DB->query($sql,array($xxxxID,1));
+                              $srr = DB->query($sql,array($xxxxID,1));
                               $i = 0; //以$i為$nameList這個陣列的索引值
                               while($i<count($srr)){ 
                                 ?>
@@ -380,7 +380,7 @@ $xxxxJS=_fn_getCachedJsonData("../jsonFiles/xxxxxxxx.json");
                                   <td><?php echo $srr[$i]['lg_code']; ?></td>
                                   <td><?php echo $srr[$i]['lg_created']; ?></td>
                                   <td><?php
-                                  $oStr = $DB->single("SELECT lg_string FROM sys_logstrings WHERE lg_code=?",array($srr[$i]['lg_code']));
+                                  $oStr = DB->single("SELECT lg_string FROM sys_logstrings WHERE lg_code=?",array($srr[$i]['lg_code']));
                                   echo _fn_getLogString($srr[$i]['lg_params'],$oStr);
                                   ?></td>
                                 </tr>

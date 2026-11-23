@@ -1286,7 +1286,7 @@ function _fn_email_sending($subJect='',$htmlBody='',$setTo=[],$setCC=[],$setBCC=
     require '../pluginFiles/phpmailer/src/PHPMailer.php';
     require '../pluginFiles/phpmailer/src/SMTP.php';
     /*
-    $getArtiARR = $DB->row("SELECT arti_subscript,arti_body FROM articles WHERE arti_keycode=? AND arti_status=?",array('PUBSUCCESS',1));
+    $getArtiARR = DB->row("SELECT arti_subscript,arti_body FROM articles WHERE arti_keycode=? AND arti_status=?",array('PUBSUCCESS',1));
     if(!$getArtiARR || empty($getArtiARR['arti_subscript']) || empty($getArtiARR['arti_body'])){
         return false;
     }
@@ -1574,7 +1574,7 @@ function _fn_hours_passed(?string $created_at): string
  * @return array ['pass' => bool, 'message' => string]
  */
 function _fn_checkEligibility($DB, $mb_id, $target_type, $target_id) {
-    $rules = $DB->query(
+    $rules = DB->query(
         "SELECT * FROM fsl_eligibility_rules WHERE erule_target_type = ? AND erule_target_id = ? AND erule_status = 1 ORDER BY erule_sort ASC, erule_id ASC",
         array((int)$target_type, (int)$target_id)
     );
@@ -1585,7 +1585,7 @@ function _fn_checkEligibility($DB, $mb_id, $target_type, $target_id) {
     }
 
     // 預先撈取會員基本資料（含加密欄位解密）
-    $member = ($mb_id > 0) ? $DB->row("SELECT * FROM fsl_members WHERE mb_id = ?", array((int)$mb_id)) : null;
+    $member = ($mb_id > 0) ? DB->row("SELECT * FROM fsl_members WHERE mb_id = ?", array((int)$mb_id)) : null;
     if (!$member) {
         return array('pass' => false, 'message' => '請先登入會員帳號以驗證優惠資格！');
     }
@@ -1647,7 +1647,7 @@ function _fn_checkEligibility($DB, $mb_id, $target_type, $target_id) {
 
             // 6. MySQL 累計消費金額門檻查詢 (fsl_orders)
             case 'total_spent':
-                $spent = (float)$DB->single(
+                $spent = (float)DB->single(
                     "SELECT COALESCE(SUM(ord_total), 0) FROM fsl_orders WHERE mb_id = ? AND ord_status IN (2, 3, 4)",
                     array((int)$mb_id)
                 );

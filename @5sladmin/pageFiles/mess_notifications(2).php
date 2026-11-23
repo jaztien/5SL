@@ -111,8 +111,8 @@ $geJS=_fn_getCachedJsonData("../jsonFiles/general.json");
                         $listSql = "SELECT TOP {$maxResult} * FROM data_notifications";
                         if(!empty($searchURI)){ $listSql .= " WHERE 1=1"; }
 
-                        $sr = $DB->query($listSql);
-                        //$DB->closeConnection();
+                        $sr = DB->query($listSql);
+                        //DB->closeConnection();
                         $i = 0; //以$i為$nameList這個陣列的索引值
                         while($i<count($sr)){ 
                         ?>

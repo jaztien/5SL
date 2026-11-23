@@ -12,7 +12,7 @@ require_once('../includeFiles/common.lib.php');
 $mbID=currID;
 //主要資料表欄位資料取得
 $sql='SELECT * FROM fsl_members WHERE mb_id=?'; 
-$res = $DB->row($sql,array($mbID));
+$res = DB->row($sql,array($mbID));
 //功能陣列建立，取自JSON檔案
 $mbJS = _fn_getCachedJsonData('../jsonFiles/member.json');
 $mdJS = _fn_getCachedJsonData('../jsonFiles/merchandise.json');
@@ -32,7 +32,7 @@ SUM(CASE WHEN pt_trade>0 AND pt_redeem=1 THEN pt_trade ELSE 0 END) AS toRN,
 SUM(CASE WHEN pt_trade>0 THEN pt_trade ELSE 0 END) AS toIN, 
 SUM(CASE WHEN pt_trade<0 THEN pt_trade ELSE 0 END) AS toOUT 
 FROM fsl_points WHERE mb_id=? AND pt_status>?";
-$srp = $DB->query($sqlp,array($mbID,0));
+$srp = DB->query($sqlp,array($mbID,0));
 $totalPoints=(!empty($res['mb_points']) && intval($res['mb_points'])==intval($srp[0]['toT'])) ? intval($res['mb_points']) : intval($srp[0]['toT']);
 $totalRedeem=(!empty($res['mb_cashback']) && intval($res['mb_cashback'])==intval($srp[0]['toRN'])) ? intval($res['mb_cashback']) : intval($srp[0]['toRN']);
 if($totalPoints > 0 && $totalRedeem > $totalPoints){
@@ -519,7 +519,7 @@ if(!empty($mbID)&&file_exists("../uploadFiles/mb/mbphoto_".$mbID."_thumb.jpg")){
                           <tbody>
                             <?php
                               $sqlp="SELECT * FROM fsl_points WHERE mb_id=? AND pt_status>?";
-                              $srp = $DB->query($sqlp,array($mbID,0));
+                              $srp = DB->query($sqlp,array($mbID,0));
                               $i = 0; //以$i為$nameList這個陣列的索引值
                               while($i<count($srp)){
                             ?>
@@ -555,7 +555,7 @@ if(!empty($mbID)&&file_exists("../uploadFiles/mb/mbphoto_".$mbID."_thumb.jpg")){
                                       $getType = $srp[$i]['pt_type'];
                                       if($srp[$i]['pt_for']==4){
                                         $sql="SELECT sv_type, sv_title FROM sv_service WHERE sv_id=?";
-                                        $cr = $DB->row($sql,array($srp[$i]['pt_forid']));
+                                        $cr = DB->row($sql,array($srp[$i]['pt_forid']));
                                         echo $getType = $cr['sv_type'] ?? 0;
                                       }
                                       if(!empty($getType)) {
@@ -571,7 +571,7 @@ if(!empty($mbID)&&file_exists("../uploadFiles/mb/mbphoto_".$mbID."_thumb.jpg")){
                                     <?php
                                       $getForInfo = $geJS['idfor'][$srp[$i]['pt_for']] ?? [];//紀錄
                                       $getFromInfo = $geJS['idfor'][$getForInfo['joinid'] ?? null] ?? [];//項目
-                                      $idforTitle = $DB->getIDFORtitle($srp[$i]['pt_forid'],$getForInfo,$getFromInfo);
+                                      $idforTitle = DB->getIDFORtitle($srp[$i]['pt_forid'],$getForInfo,$getFromInfo);
                                       echo $idforTitle;
                                       ?><i class="nav-icon fas fa-sign-out-alt" style="position:absolute;right:12px;"></i>
                                     </td>
@@ -609,10 +609,10 @@ if(!empty($mbID)&&file_exists("../uploadFiles/mb/mbphoto_".$mbID."_thumb.jpg")){
                           <tbody>
                             <?php
                               $sql="SELECT wl_created,wl_for,wl_forid FROM data_wishlist WHERE mb_id=?";//wishlist
-                              $srr = $DB->query($sql,array($mbID));
+                              $srr = DB->query($sql,array($mbID));
                               $i = 0;
                               while($i<count($srr)){ 
-                                $mRes = $DB->row("SELECT merch_sn,merch_title FROM fsl_merchandise WHERE merch_id=?",array($srr[$i]['wl_forid']));
+                                $mRes = DB->row("SELECT merch_sn,merch_title FROM fsl_merchandise WHERE merch_id=?",array($srr[$i]['wl_forid']));
                                 ?>
                                 <tr>
                                   <td><?php echo $geJS['idfor'][$srr[$i]['wl_for']]['short'] ?? '&nbsp;'; ?></td>
@@ -671,7 +671,7 @@ if(!empty($mbID)&&file_exists("../uploadFiles/mb/mbphoto_".$mbID."_thumb.jpg")){
                           <tbody>
                             <?php
                               $sql="SELECT * FROM data_logs WHERE lg_forid=? AND lg_for=?";
-                              $srr = $DB->query($sql,array($mbID,2));
+                              $srr = DB->query($sql,array($mbID,2));
                               $i = 0; //以$i為$nameList這個陣列的索引值
                               while($i<count($srr)){ 
                                 ?>
@@ -679,7 +679,7 @@ if(!empty($mbID)&&file_exists("../uploadFiles/mb/mbphoto_".$mbID."_thumb.jpg")){
                                   <td><?php echo $srr[$i]['lg_code']; ?></td>
                                   <td><?php echo $srr[$i]['lg_created']; ?></td>
                                   <td><?php
-                                  $oStr = $DB->single("SELECT lg_string FROM sys_logstrings WHERE lg_code=?",array($srr[$i]['lg_code']));
+                                  $oStr = DB->single("SELECT lg_string FROM sys_logstrings WHERE lg_code=?",array($srr[$i]['lg_code']));
                                   echo _fn_getLogString($srr[$i]['lg_params'],$oStr);
                                   ?></td>
                                 </tr>
