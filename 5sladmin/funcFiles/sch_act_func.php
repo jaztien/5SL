@@ -1,0 +1,259 @@
+<?php
+require_once('../includeFiles/init.inc.php');
+require_once('../includeFiles/db.inc.php');
+require_once('../includeFiles/common.lib.php');
+
+header('Content-Type: application/json; charset=utf-8');
+
+if (empty($_SESSION['SESS_AD_ID'])) {
+  echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '登入已逾時，請重新登入後台系統！']);
+  exit();
+}
+
+$token    = $_POST['token'] ?? '';
+$formAcce = trim((string)($_POST['formAcce'] ?? ''));
+$formData = (array)($_POST['arrDatA'] ?? array());
+$schID    = (int)($_POST['schID'] ?? 0);
+
+if (function_exists('_fn_chkToken') && !_fn_chkToken($token)) {
+  echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '安全驗證失敗（Token 無效），請重新整理頁面後再試！']);
+  exit();
+}
+
+switch ($formAcce) {
+
+  // =========================================================================
+  // 1. FullCalendar 6 日曆事件 JSON 來源 (func_sch_calFeed)
+  // =========================================================================
+  case 'func_sch_calFeed':
+    $start = trim((string)($_POST['start'] ?? ''));
+    $end   = trim((string)($_POST['end'] ?? ''));
+
+    $where = " WHERE sch_exec_status != 9 ";
+    $params = array();
+    if ($start !== '' && $end !== '') {
+      $where .= " AND sch_start_at >= ? AND sch_start_at <= ? ";
+      $params[] = substr($start, 0, 10) . ' 00:00:00';
+      $params[] = substr($end, 0, 10) . ' 23:59:59';
+    }
+
+    $rows = DB->query("SELECT * FROM fsl_schedules {$where} ORDER BY sch_start_at ASC", $params);
+    $events = array();
+    if (is_array($rows)) {
+      foreach ($rows as $r) {
+        $prefix = ((int)$r['sch_trigger_enable'] === 1) ? '🔔 ' : '';
+        $events[] = array(
+          'id'              => (int)$r['sch_id'],
+          'title'           => $prefix . $r['sch_title'],
+          'start'           => str_replace(' ', 'T', $r['sch_start_at']),
+          'end'             => !empty($r['sch_end_at']) ? str_replace(' ', 'T', $r['sch_end_at']) : null,
+          'allDay'          => ((int)$r['sch_all_day'] === 1),
+          'backgroundColor' => $r['sch_color'] ?: '#3b82f6',
+          'borderColor'     => $r['sch_color'] ?: '#3b82f6'
+        );
+      }
+    }
+    echo json_encode($events, JSON_UNESCAPED_UNICODE);
+    exit();
+  break;
+
+  // =========================================================================
+  // 2. 從日曆左側拖放快捷範本快速建立排程 (func_sch_quickDrop)
+  // =========================================================================
+  case 'func_sch_quickDrop':
+    $title   = trim((string)($_POST['sch_title'] ?? '新排程事件'));
+    $cate    = trim((string)($_POST['sch_category'] ?? 'admin'));
+    $color   = trim((string)($_POST['sch_color'] ?? '#3b82f6'));
+    $startAt = trim((string)($_POST['sch_start_at'] ?? date('Y-m-d 09:00:00')));
+    $allDay  = (int)($_POST['sch_all_day'] ?? 0);
+
+    DB->insert('fsl_schedules', array(
+      'sch_source'         => 1,
+      'sch_category'       => $cate,
+      'sch_title'          => $title,
+      'sch_color'          => $color,
+      'sch_start_at'       => $startAt,
+      'sch_all_day'        => $allDay,
+      'sch_trigger_enable' => ($cate === 'remind' || $cate === 'marketing') ? 1 : 0,
+      'sch_trigger_at'     => $startAt,
+      'sch_target_type'    => 1,
+      'sch_channels'       => 'noti,email',
+      'sch_exec_status'    => 0
+    ));
+
+    echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => "已於日曆建立「{$title}」，點擊事件可編輯細部通知對象！"]);
+    exit();
+  break;
+
+  // =========================================================================
+  // 3. 日曆拖曳改期或拉長時段 (func_sch_moveDate)
+  // =========================================================================
+  case 'func_sch_moveDate':
+    $startAt = trim((string)($_POST['sch_start_at'] ?? ''));
+    $endAt   = trim((string)($_POST['sch_end_at'] ?? ''));
+    $allDay  = (int)($_POST['sch_all_day'] ?? 0);
+
+    if ($schID <= 0 || $startAt === '') {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的排程參數！']);
+      exit();
+    }
+
+    $upd = array(
+      'sch_start_at' => $startAt,
+      'sch_end_at'   => ($endAt !== '') ? $endAt : null,
+      'sch_all_day'  => $allDay
+    );
+    // 若尚未執行觸發，同步更新預定觸發時間為事件開始前 24 小時（或開始當下）
+    $old = DB->row("SELECT sch_exec_status, sch_trigger_enable FROM fsl_schedules WHERE sch_id = ?", array($schID));
+    if ($old && (int)$old['sch_exec_status'] === 0 && (int)$old['sch_trigger_enable'] === 1) {
+      $upd['sch_trigger_at'] = $startAt;
+    }
+
+    DB->update('fsl_schedules', $upd, ['sch_id' => $schID]);
+    echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '排程時間已同步更新！']);
+    exit();
+  break;
+
+  // =========================================================================
+  // 4. 自動從 fsl_course_sessions 提取未來開課梯次時間 (func_sch_syncCourses)
+  // =========================================================================
+  case 'func_sch_syncCourses':
+    $sessions = DB->query("
+      SELECT s.cses_id, s.course_id, s.cses_title, s.cses_start_date, s.cses_end_date, s.cses_time_range,
+             c.course_title
+      FROM fsl_course_sessions s
+      INNER JOIN fsl_courses c ON s.course_id = c.course_id
+      WHERE s.cses_status IN (1, 2) AND s.cses_start_date >= CURDATE()
+      ORDER BY s.cses_start_date ASC
+    ");
+
+    $syncCnt = 0;
+    if (is_array($sessions)) {
+      foreach ($sessions as $ss) {
+        $csesId = (int)$ss['cses_id'];
+        $exists = (int)DB->single("SELECT COUNT(*) FROM fsl_schedules WHERE sch_source = 2 AND cses_id = ?", array($csesId));
+        if ($exists > 0) continue;
+
+        $startDt   = $ss['cses_start_date'] . ' 09:00:00';
+        $endDt     = !empty($ss['cses_end_date']) ? ($ss['cses_end_date'] . ' 17:00:00') : ($ss['cses_start_date'] . ' 17:00:00');
+        // 預設於開課前 1 天早上 10:00 自動觸發課前提醒通知給該課程學員
+        $triggerDt = date('Y-m-d 10:00:00', strtotime($ss['cses_start_date'] . ' -1 day'));
+        $label     = '【開課】' . $ss['course_title'] . ' - ' . $ss['cses_title'];
+
+        DB->insert('fsl_schedules', array(
+          'sch_source'         => 2,
+          'course_id'          => (int)$ss['course_id'],
+          'cses_id'            => $csesId,
+          'sch_category'       => 'course',
+          'sch_title'          => $label,
+          'sch_color'          => '#3b82f6',
+          'sch_start_at'       => $startDt,
+          'sch_end_at'         => $endDt,
+          'sch_all_day'        => 0,
+          'sch_trigger_enable' => 1,
+          'sch_trigger_at'     => $triggerDt,
+          'sch_target_type'    => 2, // 2-依群組(課程學員)發送
+          'sch_target_ids'     => (string)$ss['course_id'],
+          'sch_channels'       => 'noti,email',
+          'arti_keycode'       => 'NOTI_COURSE_START',
+          'sch_msg_title'      => "【開課提醒】{{member_name}} 您好，《{$ss['course_title']}》將於 {$ss['cses_start_date']} 開課！",
+          'sch_msg_body'       => "親愛的 {{member_name}} 您好，您報名的《{$ss['course_title']}》（{$ss['cses_title']}）將於 {$ss['cses_start_date']} 正式開課，請準時登入會員中心查看教室資訊！",
+          'sch_exec_status'    => 0
+        ));
+        $syncCnt++;
+      }
+    }
+
+    echo json_encode([
+      'RTN'     => 1,
+      'msgType' => ($syncCnt > 0) ? 'success' : 'info',
+      'msgStr'  => ($syncCnt > 0) ? "已成功從課程梯次自動提取並建立 {$syncCnt} 筆排程與課前提醒！" : '所有未來課程梯次皆已同步完成，無新增項目。'
+    ]);
+    exit();
+  break;
+
+  // =========================================================================
+  // 5. 新增 / 更新排程設定 (func_sch_addnew / func_sch_infoUpdate)
+  // =========================================================================
+  case 'func_sch_addnew':
+  case 'func_sch_infoUpdate':
+    $acc     = ($formAcce === 'func_sch_addnew') ? 'add' : 'up';
+    $title   = trim((string)($formData['sch_title'] ?? ''));
+    $startAt = trim((string)($formData['sch_start_at'] ?? ''));
+
+    if ($title === '' || $startAt === '') {
+      echo json_encode(['RTN' => 0, 'msgType' => 'warning', 'msgStr' => '請填寫排程事件標題與開始時間！']);
+      exit();
+    }
+
+    $dataArr = array(
+      'sch_category'       => trim((string)($formData['sch_category'] ?? 'course')),
+      'sch_title'          => $title,
+      'sch_color'          => trim((string)($formData['sch_color'] ?? '#3b82f6')),
+      'sch_start_at'       => $startAt,
+      'sch_end_at'         => !empty($formData['sch_end_at']) ? trim((string)$formData['sch_end_at']) : null,
+      'sch_all_day'        => (int)($formData['sch_all_day'] ?? 0),
+      'course_id'          => !empty($formData['course_id']) ? (int)$formData['course_id'] : null,
+      'sch_trigger_enable' => (int)($formData['sch_trigger_enable'] ?? 0),
+      'sch_trigger_at'     => !empty($formData['sch_trigger_at']) ? trim((string)$formData['sch_trigger_at']) : null,
+      'sch_target_type'    => (int)($formData['sch_target_type'] ?? 1),
+      'sch_target_ids'     => trim((string)($formData['sch_target_ids'] ?? '')) ?: null,
+      'sch_channels'       => trim((string)($formData['sch_channels'] ?? 'noti')) ?: 'noti',
+      'arti_keycode'       => trim((string)($formData['arti_keycode'] ?? '')) ?: null,
+      'sch_msg_title'      => trim((string)($formData['sch_msg_title'] ?? '')) ?: null,
+      'sch_msg_body'       => (string)($formData['sch_msg_body'] ?? '')
+    );
+
+    if ($acc === 'add') {
+      $dataArr['sch_source']      = 1;
+      $dataArr['sch_exec_status'] = 0;
+      DB->insert('fsl_schedules', $dataArr);
+      $newID = (int)DB->lastInsertId();
+      echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '排程任務已成功建立！', 'newID' => $newID]);
+    } else {
+      if ($schID <= 0) {
+        echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的排程 ID！']);
+        exit();
+      }
+      DB->update('fsl_schedules', $dataArr, ['sch_id' => $schID]);
+      echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '排程與通知設定已儲存更新！']);
+    }
+    exit();
+  break;
+
+  // =========================================================================
+  // 6. 後台手動立即觸發執行單一排程 (func_sch_triggerNow)
+  // =========================================================================
+  case 'func_sch_triggerNow':
+    if ($schID <= 0) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的排程 ID！']);
+      exit();
+    }
+    $cronFile = __DIR__ . '/../../cron_dispatch.php';
+    if (!file_exists($cronFile)) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '找不到根目錄的 cron_dispatch.php 檔案，請確認檔案位置！']);
+      exit();
+    }
+    require_once($cronFile);
+    $resMsg = _fn_execute_single_schedule($schID);
+    echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => $resMsg]);
+    exit();
+  break;
+  // =========================================================================
+  // 7. 軟刪除作廢排程 (func_sch_delete)
+  // =========================================================================
+  case 'func_sch_delete':
+    if ($schID <= 0) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的排程 ID！']);
+      exit();
+    }
+    DB->update('fsl_schedules', ['sch_exec_status' => 9], ['sch_id' => $schID]);
+    echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '該筆排程已刪除作廢！']);
+    exit();
+  break;
+
+  default:
+    echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '未知的操作指令！']);
+    exit();
+  break;
+}

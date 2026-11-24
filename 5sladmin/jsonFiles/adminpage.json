@@ -77,8 +77,8 @@
         },
         {
           "title": "系統圖庫管理",
-          "pagecode": "PG_SYSIMG",
-          "url": "sys_images.php",
+          "pagecode": "PG_MEDIA",
+          "url": "media_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
@@ -152,25 +152,77 @@
           "default": "1000"
         },
         {
-          "title": "課程梯次與課堂管理",
-          "pagecode": "PG_SESSION",
-          "url": "course_sesslist.php",
+          "title": "梯次與課堂管理",
+          "pagecode": "PG_SESS",
+          "url": "sess_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
         },
         {
           "title": "講座課程報名紀錄",
-          "pagecode": "PG_SIGNUP",
-          "url": "course_signuplist.php",
+          "pagecode": "PG_ENROLL",
+          "url": "enr_list.php",
+          "badgeClass": "",
+          "badgeNum": "",
+          "default": "1000"
+        }
+      ]
+    },
+    {
+      "title": "商品銷售管理",
+      "pagecode": "ITEM_MERCH",
+      "url": "#",
+      "badgeClass": "",
+      "badgeNum": "",
+      "icon": "bi-file-earmark-richtext",
+      "subgroup": [
+        {
+          "title": "商品&贈品管理",
+          "pagecode": "PG_MERCH",
+          "url": "merch_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
         },
         {
-          "title": "商品&贈品管理",
-          "pagecode": "PG_MERCH",
-          "url": "merch_list.php",
+          "title": "優惠與派發管理",
+          "pagecode": "PG_GIFT",
+          "url": "gift_list.php",
+          "badgeClass": "",
+          "badgeNum": "",
+          "default": "1000"
+        },
+        {
+          "title": "訂單發票與售後管理",
+          "pagecode": "PG_ORDER",
+          "url": "ord_list.php",
+          "badgeClass": "",
+          "badgeNum": "",
+          "default": "1000"
+        }
+      ]
+    },
+    {
+      "title": "活動與事件管理",
+      "pagecode": "ITEM_ACT",
+      "url": "#",
+      "badgeClass": "",
+      "badgeNum": "",
+      "icon": "bi-file-earmark-richtext",
+      "subgroup": [
+        {
+          "title": "輪盤與抽獎管理",
+          "pagecode": "PG_LOTTERY",
+          "url": "lot_list.php",
+          "badgeClass": "",
+          "badgeNum": "",
+          "default": "1000"
+        },
+        {
+          "title": "每日與成長任務系統",
+          "pagecode": "PG_QUEST",
+          "url": "quest_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
@@ -188,7 +240,7 @@
         {
           "title": "圖文模板紀錄",
           "pagecode": "PG_ARTI",
-          "url": "arti_list.php",
+          "url": "art_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
@@ -239,16 +291,24 @@
     },
     {
       "title": "工作服務排程管理",
-      "pagecode": "ITEM_SCHE",
+      "pagecode": "ITEM_SCH",
       "url": "#",
       "badgeClass": "",
       "badgeNum": "",
       "icon": "bi-calendar2-week",
       "subgroup": [
         {
-          "title": "工作排程紀錄",
-          "pagecode": "PG_SCHE",
-          "url": "serv_schelist.php",
+          "title": "排程與自動化通知",
+          "pagecode": "PG_SCH_LIST",
+          "url": "sch_list.php",
+          "badgeClass": "",
+          "badgeNum": "",
+          "default": "1000"
+        },
+        {
+          "title": "排程與通知日曆",
+          "pagecode": "PG_SCH_CAL",
+          "url": "sch_cal_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"

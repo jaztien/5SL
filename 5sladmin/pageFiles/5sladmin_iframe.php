@@ -34,7 +34,7 @@ while($ii<count($sidebar)){
 }
 // 圖文模版相關待辦案件數量 index: 4
 $sIDX = $sideBarIDX['ITEM_ARTI'];
-$getNum = DB->single("SELECT COUNT(arti_id) FROM articles WHERE arti_status=?",array(6));
+$getNum = DB->single("SELECT COUNT(arti_id) FROM fsl_articles WHERE arti_status=?",array(6));
 $getSum = $getNum;
 $sidebar[$sIDX]['badgeClass']='text-bg-warning';
 $sidebar[$sIDX]['badgeNum']=$getSum;
