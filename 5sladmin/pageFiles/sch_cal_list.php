@@ -1,3 +1,10 @@
+<?php
+require_once('../includeFiles/init.inc.php');
+require_once('../includeFiles/db.inc.php');
+require_once('../includeFiles/common.lib.php');
+if (empty($_SESSION['SESS_AD_ID'])) { header('Location: ../5sladmin.php'); exit(); }
+$csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['token'] ?? '');
+?>
 <!doctype html>
 <html lang="en" data-bs-theme="dark">
 <head>
@@ -233,6 +240,18 @@
                         <label class="form-check-label" for="appointmentOverlap">allow overlap (stack)</label>
                     </div>
                 </div>
+                <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+                    <select class="form-select form-select-sm w-auto" name="calendarId" id="appointmentCalendarId">
+                        <option value="course">課程梯次 (course)</option>
+                        <option value="remind">課前提醒 (remind)</option>
+                        <option value="marketing">行銷推播 (marketing)</option>
+                        <option value="admin">內部工作 (admin)</option>
+                    </select>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" name="trigger_enable" role="switch" id="appointmentTriggerEnable">
+                        <label class="form-check-label" for="appointmentTriggerEnable">🔔 啟用定時自動通知</label>
+                    </div>
+                </div>
 
                 <div class="event-row mb-3">
                     <i class="bi bi-arrow-repeat event-icon" aria-hidden="true"></i>
@@ -327,13 +346,19 @@
                 </div>
 
             </div>
-
+            
             <div class="modal-footer modal-footer-actions d-flex flex-wrap justify-content-end align-items-center gap-2">
 <!--                    <div class="small text-body-secondary me-auto">-->
 <!--                        Color picker powered by-->
 <!--                        <a href="https://github.webcito.de/?bootswatch=bootstrap&plugin=bs-color-picker" target="_blank"-->
 <!--                           rel="noopener noreferrer">ThomasDev-de/bs-colorpicker</a>.-->
 <!--                    </div>-->
+
+                    <div class="small text-body-secondary me-auto">
+                        <a href="#" id="btnGoDetail" class="btn btn-outline-info me-auto d-none" target="_self">
+                        <i class="bi bi-sliders"></i> 進階通知對象設定
+                        </a>
+                    </div>
                     <div class="me-2">
                         <label for="appointmentColor" class="d-none">Color</label>
                         <input type="color" name="color" class="form-control me-2" id="appointmentColor">
@@ -355,11 +380,50 @@
 <script src="../pluginFiles/bstoast/bs-toast.min.js?v=dev"></script>
 <!--suppress JSUnresolvedReference -->
 <script>
+
     $(function () {
+
         const $calendar = $('#calendar');
         const $modal = $('#appointmentModal');
         const $colorpicker = $('#appointmentColor');
         const $dateRange = $('#appointmentDateRange');
+
+        //JazNOTE: start
+        // 因安全過濾限制，完整變數與 fetch/ajax 設定請參考系統模組結構，或使用原生 fetch 取代 $.ajax 呼叫。
+        const ACT_URL = '../funcFiles/sch_act_func.php';
+        const CSRF_TOKEN = '<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>';
+        const FSL_CALENDARS = [
+        { id: 'course', title: '課程梯次', color: 'primary', active: true },
+        { id: 'remind', title: '課前提醒', color: 'warning', active: true },
+        { id: 'marketing', title: '行銷推播', color: 'success', active: true },
+        { id: 'admin', title: '內部工作', color: 'secondary', active: true }
+        ];
+
+        async function callSchApi(actionName, payload = {}) {
+        const body = new URLSearchParams();
+        body.append('token', CSRF_TOKEN);
+        body.append('formAcce', actionName);
+        Object.entries(payload).forEach(([k, v]) => {
+            if (Array.isArray(v)) v.forEach(item => body.append(`${k}[]`, item));
+            else if (v !== null && v !== undefined) body.append(k, typeof v === 'object' ? JSON.stringify(v) : v);
+        });
+        const res = await fetch(ACT_URL, { method: 'POST', body });
+        return res.json();
+        }
+
+        function loadAppointments(query) { return callSchApi('func_bs_cal_load', query); }
+
+        const cleanTitle = String(appointment.title || '').replace(/^🔔\s*/, '');
+        $modal.find('input[name="title"]').val(cleanTitle);
+        $modal.find('#appointmentCalendarId').val(appointment.calendarId || 'course');
+        $modal.find('#appointmentTriggerEnable').prop('checked', Number(appointment.triggerEn) === 1);
+        const $goBtn = $('#btnGoDetail');
+        if (mode === 'edit' && appointment.id) {
+        $goBtn.attr('href', `sch_detail.php?currID=${appointment.id}&fromCal=1`).removeClass('d-none');
+        } else {
+        $goBtn.addClass('d-none');
+        }
+        //JazNOTE: End
 
         $colorpicker.bsColorPicker({
             btnClass: 'btn btn-lg btn-outline-secondary',
@@ -449,13 +513,15 @@
 
         function initCalendar() {
             let eventCounter = 1;
-
+            /*//JazNOTE: delete
             $calendar.on('init.bs.calendar', function () {
                 applyDemoText();
             });
+            */
             $calendar.bsCalendar({
                 title: '<span class="h4 mb-0">My awesome calendar</span>',
-                locale: demoText.locale,
+                locale: 'zh-TW', //JazNOTE:
+                //locale: demoText.locale,
                 startView: '4day',
                 views: ['year', 'month', 'monthCompact', 'agenda', 'week', 'workweek', '4day', 'day', 'timeline'],
                 startWeekOnSunday: false,
@@ -465,10 +531,13 @@
                 storeState: false,
                 debug: false,
                 url: loadAppointments,
+                holidays: null,//JazNOTE:
+                /*
                 holidays: {
                     country: demoText.holidays.country,
                     federalState: demoText.holidays.federalState
                 },
+                */
                 hourSlots: {
                     start: '06:30',
                     end: '20:30',
@@ -476,58 +545,8 @@
                     timeLabelIntervalMinutes: $('#switchQuarterHourLabels').is(':checked') ? 15 : null
                 },
                 // Dated availability ranges repeat through the shared recurrence format.
-                availabilityRules: [
-                    {
-                        id: 'weekday-hours',
-                        start: '2026-01-05 09:00:00',
-                        end: '2026-01-05 17:00:00',
-                        mode: 'available',
-                        color: 'rgba(25, 135, 84, 0.12)',
-                        recurrence: {
-                            frequency: 'weekly',
-                            interval: 1,
-                            daysOfWeek: [1, 2, 3]
-                        }
-                    },
-                    {
-                        id: 'early-hours',
-                        start: '2026-01-01 07:00:00',
-                        end: '2026-01-01 09:00:00',
-                        mode: 'available',
-                        color: 'rgba(25, 135, 84, 0.12)',
-                        recurrence: {
-                            frequency: 'weekly',
-                            interval: 1,
-                            daysOfWeek: [4, 5]
-                        }
-                    },
-                    {
-                        id: 'saturday-preferred',
-                        start: '2026-01-03 10:00:00',
-                        end: '2026-01-03 14:00:00',
-                        mode: 'preferred',
-                        color: 'rgba(13, 110, 253, 0.10)',
-                        recurrence: {
-                            frequency: 'weekly',
-                            interval: 1,
-                            daysOfWeek: [6]
-                        }
-                    },
-                    {
-                        id: 'sunday-off',
-                        start: '2026-01-04',
-                        end: '2026-01-04',
-                        allDay: true,
-                        mode: 'blocked',
-                        color: 'rgba(220, 53, 69, 0.22)',
-                        recurrence: {
-                            frequency: 'weekly',
-                            interval: 1,
-                            daysOfWeek: [0]
-                        }
-                    }
-                ],
-                calendars: demoText.calendars,
+                availabilityRules: null,//JazNOTE:
+                calendars: FSL_CALENDARS,//JazNOTE:
                 onDuplicate(appointment) {
                     appointment.id = 'copy_of_' + appointment.id;
                     upsertAppointmentInStore(appointment);
@@ -633,11 +652,28 @@
                         task: sourceAppointment.task || null
                     });
                 })
-                .on('delete.bs.calendar', function (event, appointment) {
+                //JazNOTE: start
+                .on('delete.bs.calendar', async function (event, appointment) {
+                    // 刪除事件處理邏輯
                     event.preventDefault();
-                    const appointmentId = appointment.recurringId || appointment.id;
-                    removeAppointmentFromStore(appointmentId);
-                    $calendar.bsCalendar('deleteAppointment', appointmentId);
+                    if (!confirm('確定要作廢刪除此排程？')) return;
+                    const targetId = appointment.recurringId || appointment.id;
+                    const res = await callSchApi('func_sch_delete', { schID: targetId });
+                    if (res.RTN === 1) {
+                        $calendar.bsCalendar('refresh');
+                        if ($.bsToast) $.bsToast({ title: '已刪除', message: res.msgStr });
+                    } else {
+                        alert(res.msgStr || '刪除失敗');
+                    }
+
+                }).on(['task', 'status', 'changed.bs.calendar'].join('-'), async function (event, appointment) {
+                    // 下一則貼內部邏輯
+                    const targetId = appointment.recurringId || appointment.id;
+                    const isDone   = !!(appointment.task && appointment.task.checked);
+                    const res      = await callSchApi('func_bs_cal_toggleTask', { id: targetId, checked: isDone });
+                    if (res.RTN === 1 && $.bsToast) {
+                        $.bsToast({ title: '任務狀態已更新', message: res.msgStr });
+                    }
                 });
         }
 
@@ -777,14 +813,17 @@
                 .on('change', 'input[name="isTask"]', function () {
                     $modal.find('.js-priority-fields').toggle($(this).prop('checked'));
                 })
-                .on('click', '[data-save-appointment]', function () {
-                    const appointment = readAppointmentModal();
-                    const method = modalState.mode === 'edit' ? 'editAppointment' : 'addAppointment';
-
-                    upsertAppointmentInStore(appointment);
-                    $calendar.bsCalendar(method, appointment);
+                //JazNOTE: start
+                .on('click', '[data-save-appointment]', async function () {
+                const appt = readAppointmentModal();
+                const res = await callSchApi('func_bs_cal_save', appt);
+                if (res.RTN === 1) {
                     $modal.modal('hide');
+                    $calendar.bsCalendar('refresh');
+                    if ($.bsToast) $.bsToast({ title: '成功', message: res.msgStr });
+                } else { alert(res.msgStr || '儲存失敗'); }
                 });
+                //JazNOTE: end
         }
 
         function initModalTimepickers() {
@@ -904,7 +943,8 @@
                     priority: $modal.find('input[name="priority"]:checked').val(),
                     due: $modal.find('input[name="due"]').val() ? $modal.find('input[name="due"]').val().replace('T', ' ') + ':00' : null
                 } : null,
-                calendarId: 'personal',
+                calendarId: $('#appointmentCalendarId').val() || 'course', //JazNOTE:
+                trigger_enable: $('#appointmentTriggerEnable').is(':checked') ? 1 : 0, //JazNOTE:
                 description: $modal.find('textarea[name="description"]').val(),
                 location: parseLocationValue($modal.find('textarea[name="location"]').val()),
                 color: $modal.find('input[name="color"]').val(),
@@ -1009,409 +1049,6 @@
 
         function resolveModalTime(preferredTime, fallbackDateTime) {
             return normalizeTimeInputValue(preferredTime) || extractTimeFromDateTime(fallbackDateTime);
-        }
-
-        async function loadAppointments(query) {
-            await sleep(100);
-
-            const showTasks = query.showTasks !== false;
-
-            if (query.search) {
-                return searchAppointments(query.search, query.limit, query.offset, query.calendarIds, showTasks);
-            }
-
-            if (query.view === 'year') {
-                const year = Number(query.year) || new Date().getFullYear();
-                ensureYearAppointments(year);
-                return generateYearBuckets(year, query.calendarIds, showTasks);
-            }
-
-            const fromYear = getYearFromDateString(query.fromDate);
-            const toYear = getYearFromDateString(query.toDate);
-
-            for (let year = fromYear; year <= toYear; year++) {
-                ensureYearAppointments(year);
-            }
-
-            let appointments = getAppointmentsBetween(query.fromDate, query.toDate);
-
-            if (!showTasks) {
-                appointments = appointments.filter(a => !a.task);
-            }
-
-            return filterByCalendarIds(appointments, query.calendarIds);
-        }
-
-        function ensureYearAppointments(year) {
-            year = Number(year) || new Date().getFullYear();
-
-            if (!appointmentStore[year]) {
-                appointmentStore[year] = createFixedYearAppointments(year);
-            }
-
-            return appointmentStore[year];
-        }
-
-        const APPOINTMENTS_PER_YEAR = 700;
-
-        function createSeededRandom(seed) {
-            let value = seed % 2147483647;
-
-            if (value <= 0) {
-                value += 2147483646;
-            }
-
-            return function () {
-                value = value * 16807 % 2147483647;
-                return (value - 1) / 2147483646;
-            };
-        }
-
-        function createFixedYearAppointments(year) {
-            const appointments = [];
-            const random = createSeededRandom(year);
-            const calendars = ['personal', 'work', 'sports'];
-            const colors = {
-                personal: 'primary opacity-75 gradient',
-                work: 'danger opacity-75 gradient',
-                sports: 'success opacity-75 gradient'
-            };
-            const locations = demoLocations;
-
-            for (let index = 0; index < 200; index++) {
-                const month = Math.floor(random() * 12);
-                const day = Math.floor(random() * 28) + 1;
-                const hour = Math.floor(random() * 10) + 8;
-                const minute = [0, 15, 30, 45][Math.floor(random() * 4)];
-                const durationMinutes = [45, 60, 90, 120][Math.floor(random() * 4)];
-
-                const start = new Date(year, month, day, hour, minute, 0, 0);
-                const end = new Date(start.getTime() + durationMinutes * 60000);
-
-                const calendarId = calendars[Math.floor(random() * calendars.length)];
-                const isTask = random() < 0.2;
-
-                const appointment = {
-                    id: `${year}-generated-${index + 1}`,
-                    calendarId: calendarId,
-                    title: isTask ? `Task ${index + 1}` : `Appointment ${index + 1}`,
-                    description: `Automatically generated appointment ${index + 1} for ${year}`,
-                    start: formatDateTime(start),
-                    end: formatDateTime(end),
-                    allDay: false,
-                    overlap: random() < 0.15,
-                    color: colors[calendarId],
-                    link: 'https://github.webcito.de/?bootswatch=bootstrap&plugin=bs-calendar'
-                };
-
-                if (isTask) {
-                    appointment.task = {
-                        checked: random() < 0.5,
-                        priority: ['low', 'normal', 'high'][Math.floor(random() * 3)],
-                        due: formatDateTime(end)
-                    };
-                } else {
-                    appointment.location = locations[index % locations.length];
-                }
-
-                appointments.push(appointment);
-            }
-
-            appointments.push({
-                id: `${year}-recurring-weekly-training`,
-                calendarId: 'sports',
-                title: 'Weekly training',
-                description: 'Demo recurring appointment',
-                start: formatDateTime(new Date(year, 0, 6, 18, 0, 0, 0)),
-                end: formatDateTime(new Date(year, 0, 6, 19, 0, 0, 0)),
-                allDay: false,
-                overlap: false,
-                color: colors.sports,
-                location: locations[0],
-                recurrence: {
-                    frequency: 'weekly',
-                    interval: 1,
-                    daysOfWeek: [2],
-                    until: `${year}-12-31`
-                },
-                link: 'https://github.webcito.de/?bootswatch=bootstrap&plugin=bs-calendar'
-            });
-
-            return appointments;
-        }
-
-        function createStoredAppointment(year, item, fallbackId, t) {
-            const start = buildDateFromParts(year, item.month, item.day, item.start);
-            const end = buildDateFromParts(year, item.month, item.day, item.end);
-            const appointment = {
-                id: `${year}-${item.id || fallbackId}`,
-                calendarId: item.calendarId || 'personal',
-                title: item.title || `${t.appointmentPrefix} ${fallbackId}`,
-                description: item.description || `${t.appointmentDescriptionPrefix} ${fallbackId}`,
-                start: formatDateTime(start),
-                end: formatDateTime(end),
-                allDay: !!item.allDay,
-                overlap: !!item.overlap,
-                color: item.color || 'primary opacity-75 gradient',
-                location: item.location || null,
-                link: item.link || 'https://github.webcito.de/?bootswatch=bootstrap&plugin=bs-calendar'
-            };
-
-            if (item.task) {
-                appointment.task = {
-                    checked: !!item.task.checked,
-                    priority: item.task.priority || 'normal',
-                    due: formatDateTime(buildDateFromParts(year, item.month, item.day, item.task.due || item.end))
-                };
-            }
-
-            return appointment;
-        }
-
-        function buildDateFromParts(year, month, day, time) {
-            const parts = String(time || '00:00').split(':');
-            const hours = Number(parts[0] || 0);
-            const minutes = Number(parts[1] || 0);
-            return new Date(year, month, day, hours, minutes, 0, 0);
-        }
-
-        function getAppointmentsBetween(fromDate, toDate) {
-            const from = new Date(`${fromDate}T00:00:00`);
-            const to = new Date(`${toDate}T23:59:59`);
-
-            return Object.values(appointmentStore)
-                .flat()
-                .filter(function (appointment) {
-                    const start = parseDateTimeString(appointment.start);
-                    const end = parseDateTimeString(appointment.end);
-
-                    if (!start || !end) {
-                        return false;
-                    }
-
-                    if (appointment.recurrence) {
-                        return recurringMasterCanAppearBetween(appointment, from, to);
-                    }
-
-                    return start <= to && end >= from;
-                });
-        }
-
-        function searchAppointments(search, limit, offset, calendarIds, showTasks) {
-            const searchLower = String(search || '').toLowerCase();
-            const currentYear = new Date().getFullYear();
-            ensureYearAppointments(currentYear);
-
-            const rows = Object.values(appointmentStore)
-                .flat()
-                .filter(a => showTasks || !a.task)
-                .filter(appointment => shouldShowCalendar(appointment, calendarIds))
-                .filter(appointment => String(appointment.title || '').toLowerCase().includes(searchLower));
-
-            const start = offset || 0;
-            const end = limit ? start + limit : rows.length;
-
-            return {
-                rows: rows.slice(start, end),
-                total: rows.length
-            };
-        }
-
-        function generateYearBuckets(year, calendarIds, showTasks) {
-            const t = demoText;
-            const grouped = ensureYearAppointments(year)
-                .filter(a => showTasks || !a.task)
-                .filter(appointment => shouldShowCalendar(appointment, calendarIds))
-                .reduce(function (acc, appointment) {
-                    getYearBucketDates(appointment, year).forEach(function (date) {
-                        acc[date] = (acc[date] || 0) + 1;
-                    });
-                    return acc;
-                }, {});
-
-            return Object.keys(grouped).sort().map(function (date) {
-                const total = grouped[date];
-
-                return {
-                    date: date,
-                    total: total,
-                    content: `<strong>${total} ${t.yearAppointments}</strong><br><small>${date}</small>`
-                };
-            });
-        }
-
-        function getYearBucketDates(appointment, year) {
-            const start = parseDateTimeString(appointment.start);
-            if (!start) {
-                return [];
-            }
-
-            if (!appointment.recurrence) {
-                return [formatDate(start)];
-            }
-
-            const from = new Date(year, 0, 1, 0, 0, 0, 0);
-            const to = new Date(year, 11, 31, 23, 59, 59, 999);
-            if (!recurringMasterCanAppearBetween(appointment, from, to)) {
-                return [];
-            }
-
-            const until = appointment.recurrence.until
-                ? parseDateTimeString(appointment.recurrence.until)
-                : null;
-            const loopEnd = new Date(Math.min(until ? until.getTime() : to.getTime(), to.getTime()));
-            loopEnd.setHours(0, 0, 0, 0);
-
-            const exceptions = Array.isArray(appointment.recurrence.exceptions)
-                ? new Set(appointment.recurrence.exceptions.map(String))
-                : new Set();
-            const dates = [];
-            const cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-            let safety = 0;
-
-            while (cursor <= loopEnd && safety < 20000) {
-                const date = formatDate(cursor);
-                if (cursor >= from && recurringDateMatches(cursor, start, appointment.recurrence) && !exceptions.has(date)) {
-                    dates.push(date);
-                }
-                cursor.setDate(cursor.getDate() + 1);
-                safety++;
-            }
-
-            return dates;
-        }
-
-        function recurringDateMatches(date, seriesStart, recurrence) {
-            const frequency = String(recurrence.frequency || recurrence.freq || '').toLowerCase();
-            const interval = Math.max(1, Math.floor(Number(recurrence.interval) || 1));
-            const diffDays = dateOnlyIndex(date) - dateOnlyIndex(seriesStart);
-
-            if (frequency === 'daily' || frequency === 'day') {
-                return diffDays % interval === 0;
-            }
-
-            if (frequency === 'weekly' || frequency === 'week') {
-                const daysOfWeek = Array.isArray(recurrence.daysOfWeek) && recurrence.daysOfWeek.length
-                    ? recurrence.daysOfWeek.map(Number)
-                    : [seriesStart.getDay()];
-                return Math.floor(diffDays / 7) % interval === 0 && daysOfWeek.includes(date.getDay());
-            }
-
-            if (frequency === 'monthly' || frequency === 'month') {
-                const monthIndex = ((date.getFullYear() - seriesStart.getFullYear()) * 12) + (date.getMonth() - seriesStart.getMonth());
-                return monthIndex >= 0 && monthIndex % interval === 0 && date.getDate() === seriesStart.getDate();
-            }
-
-            if (frequency === 'yearly' || frequency === 'year') {
-                const yearIndex = date.getFullYear() - seriesStart.getFullYear();
-                return yearIndex >= 0 &&
-                    yearIndex % interval === 0 &&
-                    date.getMonth() === seriesStart.getMonth() &&
-                    date.getDate() === seriesStart.getDate();
-            }
-
-            return false;
-        }
-
-        function dateOnlyIndex(date) {
-            return Math.round(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000);
-        }
-
-        function filterByCalendarIds(appointments, calendarIds) {
-            return appointments.filter(appointment => shouldShowCalendar(appointment, calendarIds));
-        }
-
-        function shouldShowCalendar(appointment, calendarIds) {
-            if (!Array.isArray(calendarIds)) {
-                return true;
-            }
-            return calendarIds.includes(appointment.calendarId);
-        }
-
-        function recurringMasterCanAppearBetween(appointment, from, to) {
-            const start = parseDateTimeString(appointment.start);
-            if (!start || start > to) {
-                return false;
-            }
-
-            const until = appointment.recurrence?.until
-                ? parseDateTimeString(appointment.recurrence.until)
-                : null;
-
-            return !until || until >= from;
-        }
-
-        function findAppointmentInStore(appointmentId) {
-            if (!appointmentId) {
-                return null;
-            }
-
-            for (const appointments of Object.values(appointmentStore)) {
-                const found = appointments.find(function (appointment) {
-                    return appointment.id === appointmentId;
-                });
-                if (found) {
-                    return found;
-                }
-            }
-
-            return null;
-        }
-
-        function upsertAppointmentInStore(appointment) {
-            if (!appointment.id) {
-                appointment.id = createAppointmentId();
-            }
-
-            removeAppointmentFromStore(appointment.id);
-
-            const year = getAppointmentYear(appointment);
-            ensureYearAppointments(year);
-            appointmentStore[year].push(appointment);
-        }
-
-        function removeAppointmentFromStore(appointmentId) {
-            if (!appointmentId) {
-                return;
-            }
-
-            Object.keys(appointmentStore).forEach(function (year) {
-                appointmentStore[year] = appointmentStore[year].filter(function (appointment) {
-                    return appointment.id !== appointmentId;
-                });
-            });
-        }
-
-        function getAppointmentYear(appointment) {
-            const date = parseDateTimeString(appointment.start);
-            return date ? date.getFullYear() : new Date().getFullYear();
-        }
-
-        function getYearFromDateString(dateString) {
-            const match = String(dateString || '').match(/^(\d{4})-/);
-            return match ? Number(match[1]) : new Date().getFullYear();
-        }
-
-        function createAppointmentId() {
-            const id = `custom-${Date.now()}-${appointmentIdCounter}`;
-            appointmentIdCounter++;
-            return id;
-        }
-
-        function formatDateTime(date) {
-            const yyyy = date.getFullYear();
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const dd = String(date.getDate()).padStart(2, '0');
-            const hh = String(date.getHours()).padStart(2, '0');
-            const ii = String(date.getMinutes()).padStart(2, '0');
-            return `${yyyy}-${mm}-${dd} ${hh}:${ii}:00`;
-        }
-
-        function formatDate(date) {
-            const yyyy = date.getFullYear();
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const dd = String(date.getDate()).padStart(2, '0');
-            return `${yyyy}-${mm}-${dd}`;
         }
 
         function sleep(ms) {

@@ -20,6 +20,53 @@ if (function_exists('_fn_chkToken') && !_fn_chkToken($token)) {
   exit();
 }
 
+
+//確保請求進來時函式已完成定義，之後再抽離至 common.lib.php
+function _fn_format_bscal_rows($rows) {
+  $list = [];
+  if (!is_array($rows)) return $list;
+  foreach ($rows as $r) {
+    $rawBody = (string)($r['sch_msg_body'] ?? '');
+    $meta    = [];
+    if (preg_match('/<!--BSCAL_META:(.*?)-->/s', $rawBody, $m)) {
+      $meta    = json_decode($m[1], true) ?: [];
+      $rawBody = trim(preg_replace('/<!--BSCAL_META:.*?-->/s', '', $rawBody));
+    }
+    $id     = (int)$r['sch_id'];
+    //目前列表顯示時為了辨識自動通知排程，會在 title 前加上 '🔔 '；等下前端 openAppointmentModal 
+    //開啟編輯視窗時，記得把開頭的 '🔔 ' 濾掉（title.replace(/^🔔\s*/, '')），否則每次編輯儲存都
+    //會多一顆鈴鐺！
+    $prefix = ((int)$r['sch_trigger_enable'] === 1) ? '🔔 ' : '';
+    $item   = [
+      'id'          => $id,
+      'title'       => $prefix . $r['sch_title'],
+      'start'       => $r['sch_start_at'],
+      'end'         => !empty($r['sch_end_at']) ? $r['sch_end_at'] : $r['sch_start_at'],
+      'allDay'      => ((int)$r['sch_all_day'] === 1),
+      'calendarId'  => $r['sch_category'] ?: 'course',
+      'color'       => $r['sch_color'] ?: '#3b82f6',
+      'description' => nl2br(htmlspecialchars($rawBody, ENT_QUOTES, 'UTF-8')),
+      'rawDesc'     => $rawBody,
+      'triggerEn'   => (int)$r['sch_trigger_enable'],
+      'link'        => !empty($meta['link']) ? $meta['link'] : [
+        'href' => "sch_detail.php?currID={$id}&fromCal=1", 'text' => '⚙️ 詳細排程與通知對象設定', 'target' => '_self'
+      ]
+    ];
+    if (!empty($meta['recurrence'])) $item['recurrence'] = $meta['recurrence'];
+    if (!empty($meta['task'])) $item['task'] = [
+      'checked'  => !empty($meta['task']['checked']),
+      'priority' => $meta['task']['priority'] ?? 'normal',
+      'due'      => $meta['task']['due'] ?? null
+    ];
+    if (!empty($meta['location'])) $item['location'] = $meta['location'];
+    if (!empty($meta['overlap'])) $item['overlap'] = true;
+    $list[] = $item;
+  }
+  return $list;
+}
+
+
+
 switch ($formAcce) {
 
   // =========================================================================
@@ -251,6 +298,196 @@ switch ($formAcce) {
     echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '該筆排程已刪除作廢！']);
     exit();
   break;
+
+  // =========================================================================
+  // 8. bs-calendar 載入排程與搜尋端點 (func_bs_cal_load)
+  // =========================================================================
+  case 'func_bs_cal_load':
+    // 處理日/週/月、年度摘要與關鍵字搜尋載入邏輯（詳見原始碼檔案 5sladmin/funcFiles/sch_act_func.php）
+    // 1. 自動同步未來未建檔之課程梯次 (對齊 fsl_course_sessions 實際欄位)
+    $sessions = DB->query("
+      SELECT s.sess_id, s.course_id, s.sess_altname, s.sess_batch, s.sess_startdate, s.sess_starttime,
+             s.sess_onweek, s.sess_duration, s.sess_lesson, c.course_title
+      FROM fsl_course_sessions s
+      INNER JOIN fsl_courses c ON s.course_id = c.course_id
+      WHERE s.sess_status IN (1, 2) AND s.sess_startdate IS NOT NULL
+    ");
+    if (is_array($sessions)) {
+      foreach ($sessions as $ss) {
+        $sessId = (int)$ss['sess_id'];
+        if ((int)DB->single("SELECT COUNT(*) FROM fsl_schedules WHERE sch_source = 2 AND cses_id = ?", [$sessId]) > 0) continue;
+        $tStr    = !empty($ss['sess_starttime']) ? substr($ss['sess_starttime'], 0, 5) . ':00' : '09:00:00';
+        $startDt = $ss['sess_startdate'] . ' ' . $tStr;
+        $durMin  = max(15, (int)($ss['sess_duration'] ?: 60));
+        $endDt   = date('Y-m-d H:i:s', strtotime($startDt . " +{$durMin} minutes"));
+        $trigDt  = date('Y-m-d H:i:s', strtotime($startDt . ' -1 day'));
+        $subName = $ss['sess_altname'] ?: ('第' . $ss['sess_batch'] . '梯次');
+        $label   = '【課堂】' . $ss['course_title'] . ' (' . $subName . ')';
+        DB->insert('fsl_schedules', [
+          'sch_source' => 2, 'course_id' => (int)$ss['course_id'], 'cses_id' => $sessId,
+          'sch_category' => 'course', 'sch_title' => $label, 'sch_color' => '#3b82f6',
+          'sch_start_at' => $startDt, 'sch_end_at' => $endDt, 'sch_all_day' => 0,
+          'sch_trigger_enable' => 1, 'sch_trigger_at' => $trigDt, 'sch_target_type' => 2,
+          'sch_target_ids' => (string)$ss['course_id'], 'sch_channels' => 'noti,email',
+          'arti_keycode' => 'NOTI_COURSE_START', 'sch_exec_status' => 0
+        ]);
+      }
+    }
+
+    // 2. 接收 bs-calendar 查詢參數 (view, fromDate, toDate, year, search, limit, offset 等)
+    $view      = trim((string)($_POST['view'] ?? 'month'));
+    $fromDate  = trim((string)($_POST['fromDate'] ?? ''));
+    // ...其餘參數接收與初始化
+    $toDate    = trim((string)($_POST['toDate'] ?? ''));
+    $year      = (int)($_POST['year'] ?? date('Y'));
+    $search    = trim((string)($_POST['search'] ?? ''));
+    $limit     = max(1, (int)($_POST['limit'] ?? 10));
+    $offset    = max(0, (int)($_POST['offset'] ?? 0));
+    $showTasks = filter_var($_POST['showTasks'] ?? true, FILTER_VALIDATE_BOOLEAN);
+    $calIds    = is_array($_POST['calendarIds'] ?? null) ? $_POST['calendarIds'] : [];
+
+    $conds = ["sch_exec_status != 9"];
+    $binds = [];
+    if (!empty($calIds)) {
+      $ph = implode(',', array_fill(0, count($calIds), '?'));
+      $conds[] = "sch_category IN ({$ph})";
+      foreach ($calIds as $cid) $binds[] = trim((string)$cid);
+    }
+    if (!$showTasks) {
+      $conds[] = "sch_category != 'admin'";
+    }
+    $whereSql = ' WHERE ' . implode(' AND ', $conds);
+
+    // 搜尋模式
+    if ($search !== '') {
+      $sWhere = $whereSql . " AND (sch_title LIKE ? OR sch_msg_body LIKE ?)";
+      $sBinds = array_merge($binds, ["%{$search}%", "%{$search}%"]);
+      $total  = (int)DB->single("SELECT COUNT(*) FROM fsl_schedules {$sWhere}", $sBinds);
+      $rows   = DB->query("SELECT * FROM fsl_schedules {$sWhere} ORDER BY sch_start_at DESC LIMIT {$offset}, {$limit}", $sBinds);
+      echo json_encode(['rows' => _fn_format_bscal_rows($rows), 'total' => $total], JSON_UNESCAPED_UNICODE);
+      exit();
+    }
+
+    if ($view === 'year') {
+      $yWhere = $whereSql . " AND YEAR(sch_start_at) = ?";
+      $yRows  = DB->query("SELECT DATE(sch_start_at) AS d, COUNT(*) AS cnt FROM fsl_schedules {$yWhere} GROUP BY DATE(sch_start_at)", array_merge($binds, [$year]));
+      $out    = [];
+      foreach ((array)$yRows as $yr) {
+        $out[] = ['date' => $yr['d'], 'total' => (int)$yr['cnt'], 'content' => "<strong>{$yr['cnt']} 筆排程</strong>"];
+      }
+      echo json_encode($out, JSON_UNESCAPED_UNICODE);
+      exit();
+    }
+
+    // 一般視圖區間查詢 (含跨日與週期排程)
+    if ($fromDate !== '' && $toDate !== '') {
+      $whereSql .= " AND sch_start_at <= ? AND (sch_end_at >= ? OR sch_end_at IS NULL OR sch_msg_body LIKE '%\"recurrence\"%')";
+      $binds[]   = substr($toDate, 0, 10) . ' 23:59:59';
+      $binds[]   = substr($fromDate, 0, 10) . ' 00:00:00';
+    }
+    $rows = DB->query("SELECT * FROM fsl_schedules {$whereSql} ORDER BY sch_start_at ASC", $binds);
+    echo json_encode(_fn_format_bscal_rows($rows), JSON_UNESCAPED_UNICODE);
+    exit();
+  break;
+
+  // =========================================================================
+  // 9. bs-calendar Modal 快速新增 / 拖曳改期儲存 (func_bs_cal_save)
+  // =========================================================================
+  case 'func_bs_cal_save':
+    // 處理日曆排程建立與編輯更新邏輯（詳見原始碼檔案 5sladmin/funcFiles/sch_act_func.php）
+    $id      = (int)($_POST['id'] ?? 0);
+    $title   = trim((string)($_POST['title'] ?? ''));
+    $start   = trim((string)($_POST['start'] ?? ''));
+    $end     = trim((string)($_POST['end'] ?? ''));
+    $allDay  = filter_var($_POST['allDay'] ?? false, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
+    $catId   = trim((string)($_POST['calendarId'] ?? 'admin')) ?: 'admin';
+    $color   = trim((string)($_POST['color'] ?? '#3b82f6')) ?: '#3b82f6';
+    $desc    = (string)($_POST['description'] ?? '');
+    $trigEn  = isset($_POST['trigger_enable']) ? (int)$_POST['trigger_enable'] : null;
+    $recRaw  = $_POST['recurrence'] ?? null;
+    $taskRaw = $_POST['task'] ?? null;
+    $recVal  = is_string($recRaw) ? json_decode($recRaw, true) : $recRaw;
+    $taskVal = is_string($taskRaw) ? json_decode($taskRaw, true) : $taskRaw;
+    //(小提醒：若前端 Modal 的「地點 (location)」輸入多行文字時，readAppointmentModal 會轉成陣列並
+    //由 callSchApi 轉成 JSON 字串，若需要支援多行陣列地點，也可以比照加上 
+    // $locRaw = $_POST['location'] ?? null; 
+    // $locVal = is_string($locRaw) && str_starts_with($locRaw, '[') ? json_decode($locRaw, true) : $locRaw;)
+
+    if ($title === '' || $start === '') {
+      echo json_encode(['RTN' => 0, 'msgType' => 'warning', 'msgStr' => '請填寫標題與開始時間！']);
+      exit();
+    }
+
+    $meta = array_filter([
+      'recurrence' => $recVal,
+      'task'       => $taskVal,
+      'location'   => $_POST['location'] ?? null,
+      'link'       => $_POST['link'] ?? null,
+      'overlap'    => filter_var($_POST['overlap'] ?? false, FILTER_VALIDATE_BOOLEAN)
+    ], fn($v) => $v !== null && $v !== '');
+    $bodyPayload = $desc . (!empty($meta) ? "\n<!--BSCAL_META:" . json_encode($meta, JSON_UNESCAPED_UNICODE) . "-->" : '');
+
+    $dataArr = [
+      'sch_category' => $catId, 'sch_title' => $title, 'sch_color' => $color,
+      'sch_start_at' => $start, 'sch_end_at' => ($end !== '' ? $end : null),
+      'sch_all_day'  => $allDay, 'sch_msg_body' => $bodyPayload
+    ];
+    if ($trigEn !== null) {
+      $dataArr['sch_trigger_enable'] = $trigEn;
+      if ($trigEn === 1) $dataArr['sch_trigger_at'] = $start;
+    }
+
+    if (!isset($_POST['description'])) unset($dataArr['sch_msg_body']);
+
+    if ($id > 0) {
+      DB->update('fsl_schedules', $dataArr, ['sch_id' => $id]);
+      echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '排程已更新！', 'id' => $id], JSON_UNESCAPED_UNICODE);
+    } else {
+      $dataArr['sch_source'] = 1;
+      $dataArr['sch_exec_status'] = 0;
+      DB->insert('fsl_schedules', $dataArr);
+      echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '新排程已建立！', 'id' => (int)DB->lastInsertId()], JSON_UNESCAPED_UNICODE);
+    }
+    exit();
+  break;
+
+
+
+  // =========================================================================
+  // 10. bs-calendar 切換任務完成狀態 (func_bs_cal_toggleTask)
+  // =========================================================================
+  case 'func_bs_cal_toggleTask':
+    // 切換排程執行狀態邏輯（詳見原始碼檔案 5sladmin/funcFiles/sch_act_func.php）
+    $id      = (int)($_POST['id'] ?? 0);
+    $checked = filter_var($_POST['checked'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    $row     = DB->row("SELECT sch_msg_body FROM fsl_schedules WHERE sch_id = ?", [$id]);
+    if (!$row) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '找不到指定排程！']);
+      exit();
+    }
+    $rawBody = (string)$row['sch_msg_body'];
+    $meta    = [];
+    if (preg_match('/<!--BSCAL_META:(.*?)-->/s', $rawBody, $m)) {
+      $meta    = json_decode($m[1], true) ?: [];
+      $rawBody = trim(preg_replace('/<!--BSCAL_META:.*?-->/s', '', $rawBody));
+    }
+    $meta['task']['checked'] = $checked;
+    $newBody = $rawBody . "\n<!--BSCAL_META:" . json_encode($meta, JSON_UNESCAPED_UNICODE) . "-->";
+    DB->update('fsl_schedules', ['sch_msg_body' => $newBody], ['sch_id' => $id]);
+    echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '任務狀態已更新！'], JSON_UNESCAPED_UNICODE);
+    exit();
+  break;
+
+
+
+
+
+
+
+
+
+
+
 
   default:
     echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '未知的操作指令！']);
