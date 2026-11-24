@@ -1,1423 +1,350 @@
 <!doctype html>
-<html lang="en" data-bs-theme="dark">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap Calendar Demo</title>
-    <link rel="stylesheet" href="../pluginFiles/googleapis/fonts.googleapis.css" rel="stylesheet">
-    <link rel="stylesheet" href="../pluginFiles/bootstrap5/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../pluginFiles/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>AdminLTE 4 | Calendar</title>
+
+    <!--begin::Theme Init (prevents flash of incorrect theme on load, #6043)-->
+    <script>
+      (() => {
+        'use strict';
+        const root = document.documentElement;
+
+        // Applications with their own theming opt out of AdminLTE's color mode
+        // entirely, here as well as in the bundle.
+        if (root.getAttribute('data-lte-color-mode') === 'off') {
+          return;
+        }
+
+        const STORAGE_KEY = 'lte-theme';
+        let stored = null;
+        try {
+          stored = localStorage.getItem(STORAGE_KEY);
+        } catch {
+          // localStorage may be unavailable (private mode, sandboxed iframe).
+        }
+        // Mirror the precedence in color-mode.ts: the visitor's stored choice
+        // wins, then a theme this page declared itself, then the OS preference.
+        const authored = root.getAttribute('data-bs-theme');
+        let resolved = 'light';
+        if (stored === 'dark' || stored === 'light') {
+          resolved = stored;
+        } else if (authored === 'dark' || authored === 'light') {
+          resolved = authored;
+        } else if (globalThis.matchMedia('(prefers-color-scheme: dark)').matches) {
+          resolved = 'dark';
+        }
+        root.setAttribute('data-bs-theme', resolved);
+        root.style.colorScheme = resolved;
+        // Flag values computed here, so the bundle does not mistake them for a
+        // theme the page declared and stop following the OS preference.
+        if (resolved !== authored) {
+          root.setAttribute('data-lte-theme-resolved', '');
+        }
+      })();
+    </script>
+    <!--end::Theme Init-->
+
+    <!--begin::Accessibility Meta Tags-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+    <!--end::Accessibility Meta Tags-->
+    <!--begin::Primary Meta Tags-->
+    <meta name="title" content="AdminLTE 4 | Calendar" />
+    <meta name="author" content="ColorlibHQ" />
+    <meta name="description" content="AdminLTE is a free Bootstrap 5 admin dashboard template with almost 50 example pages, built with vanilla JS and designed with accessibility in mind."/>
+    <meta name="keywords" content="bootstrap 5, bootstrap, bootstrap 5 admin dashboard, bootstrap 5 dashboard, bootstrap 5 charts, bootstrap 5 calendar, bootstrap 5 datepicker, bootstrap 5 tables, bootstrap 5 datatable, vanilla js datatable, colorlibhq, colorlibhq dashboard, colorlibhq admin dashboard, accessible admin panel"/>
+    <!--end::Primary Meta Tags-->
+
+    <!--begin::Accessibility Features-->
+    <!-- Skip links will be dynamically added by accessibility.js -->
+    <meta name="supported-color-schemes" content="light dark" />
+    <link rel="preload" href="../cssFiles/adminlte.css" as="style" />
+    <!--Fonts
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.3.1/index.css"
+      integrity="sha256-VzMk9RVNVApO0cXfOO7il3dD8OPyu0aDyyLDd8EEGk8="
+      crossorigin="anonymous"
+      media="print"
+      onload="this.media = 'all'"
+    />-->
+    <!--end::Fonts-->
+
+    <!--(OverlayScrollbars)-->
+    <link rel="stylesheet" href="../pluginFiles/overlayscrollbars/overlayscrollbars.min.css" crossorigin="anonymous"/>
+    <!--googleapis-->
+    <link rel="stylesheet" href="../pluginFiles/googleapis/fonts.googleapis.css">
+    <!--(Bootstrap 5)-->
+    <link rel="stylesheet" href="../pluginFiles/bootstrap5/bootstrap.min.css">
+    <!--(Bootstrap Icons)-->
+    <link rel="stylesheet" href="../pluginFiles/bootstrap-icons/bootstrap-icons.min.css">
+    <!--AdminLTE-->
+    <link rel="stylesheet" href="../cssFiles/adminlte.css">
+    <!--fullcalendar-->
+    <link rel="stylesheet" href="../pluginFiles/fullcalendar/skeleton.css" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="../pluginFiles/fullcalendar/theme.css" crossorigin="anonymous"/>
     <style>
-        #calendar{
-            z-index: 1600;
-        }
-        #appointmentModal .modal-content {
-            border: 0;
-            border-radius: 1rem;
-            box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, .32);
-        }
-
-        #appointmentModal .form-control,
-        #appointmentModal .form-select {
-            border-radius: .65rem;
-        }
-
-        #appointmentModal .form-floating > label {
-            color: var(--bs-secondary-color);
-        }
-
-        #appointmentModal .modal-title {
-            font-size: 1.25rem;
-            font-weight: 500;
-        }
-
-        #appointmentModal #appointmentTitle {
-            height: 3.5rem;
-            padding: .5rem 0;
-            border: 0;
-            border-bottom: 1px solid var(--bs-border-color);
-            border-radius: 0;
-            background: transparent;
-            font-size: 1.35rem;
-            box-shadow: none;
-        }
-
-        #appointmentModal #appointmentTitle:focus {
-            border-bottom: 2px solid var(--bs-primary);
-        }
-
-        #appointmentModal #appointmentTitle + label {
-            display: none;
-        }
-
-        #appointmentModal .editor-section {
-            padding: 0;
-            border: 0;
-            background: transparent;
-        }
-
-        #appointmentModal .editor-section .form-label {
-            color: var(--bs-secondary-color);
-            font-size: .8rem;
-            font-weight: 600;
-            letter-spacing: .02em;
-            text-transform: uppercase;
-        }
-
-        #appointmentModal .editor-section .form-control,
-        #appointmentModal .editor-section .form-select {
-            background: var(--bs-tertiary-bg);
-        }
-
-        #appointmentModal .event-row {
-            display: grid;
-            grid-template-columns: 2rem minmax(0, 1fr);
-            gap: .75rem;
-            align-items: start;
-        }
-
-        #appointmentModal .event-icon {
-            width: 2rem;
-            padding-top: .65rem;
-            color: var(--bs-secondary-color);
-            font-size: 1.1rem;
-            text-align: center;
-        }
-
-        #appointmentModal .js-priority-fields .btn-group {
-            display: inline-flex;
-            width: auto !important;
-            gap: .25rem;
-        }
-
-        #appointmentModal .js-priority-fields .btn-group .btn {
-            min-width: 5rem;
-            border: 1px solid var(--bs-border-color) !important;
-            border-radius: 999px !important;
-            color: var(--bs-secondary-color);
-            background: transparent;
-        }
-
-        #appointmentModal .js-priority-fields .btn-group .btn:hover,
-        #appointmentModal .js-priority-fields .btn-group .btn-check:checked + .btn {
-            color: var(--bs-primary);
-            background: var(--bs-primary-bg-subtle);
-            border-color: var(--bs-primary) !important;
-        }
-
-        #appointmentModal .powered-by {
-            display: none;
-        }
-
-        #appointmentModal .modal-footer-actions {
-            padding: 1rem 1.5rem;
-            background: var(--bs-secondary-bg);
-            border-radius: 0 0 1rem 1rem;
-        }
-
-        @media (min-width: 992px) {
-            #appointmentModal .modal-footer-actions {
-                padding-inline: 3rem;
-            }
-        }
+      /* Keep adjacent-month dates readable in both Bootstrap color modes. */
+      #calendar .text-body-tertiary {
+        color: var(--bs-secondary-color) !important;
+      }
+      .draggable-event {
+        cursor: grab;
+        user-select: none;
+      }
     </style>
-</head>
-<body class="p-1 p-lg-5">
-
-
-<div id="calendar" data-sidebar-addons="#sidebarAddons"></div>
-
-<div class="visually-hidden">
-    <div id="sidebarAddons">
-        <h5 class="text-uppercase">Sidebar-Addons</h5>
-        <div class="card-body d-flex flex-column overflow-visible">
-            <div class="mb-3">
-
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" id="switchToggleDraggable">
-                    <label class="form-check-label" for="switchToggleDraggable">draggable</label>
-                </div>
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" id="switchTriggeredEvents">
-                    <label class="form-check-label" for="switchTriggeredEvents">Show triggered events.</label>
-                </div>
-                <div class="form-check form-switch mt-2">
-                    <input class="form-check-input" type="checkbox" role="switch" id="switchQuarterHourLabels" checked>
-                    <label class="form-check-label" for="switchQuarterHourLabels">Quarter-hour labels</label>
-                </div>
-                <label class="form-label mt-3 mb-1" for="selectClickSnapMode">Click-to-add rounding</label>
-                <select class="form-select form-select-sm mb-2" id="selectClickSnapMode">
-                    <option value="nearest">Nearest quarter hour</option>
-                    <option value="previous">Previous quarter hour</option>
-                    <option value="next">Next quarter hour</option>
-                </select>
-                <label class="form-label mt-3 mb-1" for="selectAppointmentRule">Appointment duration</label>
-                <select class="form-select form-select-sm mb-2" id="selectAppointmentRule">
-                    <option value="none">No duration rule</option>
-                    <option value="coaching45">45-minute coaching blocks</option>
-                    <option value="fixed60">Exactly 60 minutes</option>
-                </select>
-                <div class="small text-body-secondary mb-3" data-appointment-rule-help>
-                    Drag-create and drag-resize respect the selected duration rule.
-                </div>
-<!--                <div class="small text-body-secondary mb-3">-->
-<!--                    BS-Toast powered by<br>-->
-<!--                    <a href="https://github.webcito.de/?bootswatch=bootstrap&plugin=bs-toast" target="_blank"-->
-<!--                       rel="noopener noreferrer">ThomasDev-de/bs-toast</a>.-->
-<!--                </div>-->
+  </head>
+  <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+    <div class="app-wrapper">
+      <main class="app-main">
+        <div class="app-content-header">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-sm-6">
+                <h1 class="mb-0 fs-3">Calendar</h1>
+              </div>
+              <div class="col-sm-6">
+                <nav aria-label="breadcrumb">
+                  <ol class="breadcrumb float-sm-end">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Calendar</li>
+                  </ol>
+                </nav>
+              </div>
             </div>
-
-            <button type="button" class="btn btn-primary btn-sm mb-1 rounded-pill" data-method="setToday" data-view="week">setToday
-                ('week')
-            </button>
-            <button type="button" class="btn btn-primary btn-sm mb-1 rounded-pill" data-method="setToday" data-view="4day">
-                setToday('4day')
-            </button>
-            <button type="button" class="btn btn-primary btn-sm mb-1 rounded-pill" data-method="setLocale" data-locale="en-US">
-                setLocale('en-US')
-            </button>
-            <button type="button" class="btn btn-primary btn-sm mb-1 rounded-pill" data-method="render">Render</button>
-            <button type="button" class="btn btn-primary btn-sm mb-1 rounded-pill" data-method="refresh">Refresh</button>
-            <button type="button" class="btn btn-primary btn-sm mb-1 rounded-pill" data-method="clear">Clear</button>
+          </div>
         </div>
-    </div>
-</div>
-
-
-<div class="modal fade" id="appointmentModal" tabindex="-1" aria-labelledby="appointmentModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header px-4 px-lg-5 py-3">
-                <div>
-                    <div class="small text-uppercase text-body-secondary fw-semibold">Calendar</div>
-                    <h5 class="modal-title mb-0" id="appointmentModalLabel">Appointment</h5>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <div class="modal-body p-4 p-lg-5">
-
-                <div class="form-floating mb-4">
-                    <input name="title" type="text" class="form-control" id="appointmentTitle"
-                           placeholder="appointment title">
-                    <label for="appointmentTitle">Title</label>
-                </div>
-
-                <div class="event-row mb-3">
-                    <i class="bi bi-calendar-event event-icon" aria-hidden="true"></i>
-                    <div class="editor-section">
-                        <div id="appointmentDateRange">
-                            <input name="from_date" type="hidden" id="appointmentFromDate">
-                            <input name="to_date" type="hidden" id="appointmentToDate">
-                        </div>
-<!--                        <div class="powered-by small text-body-secondary mt-1">-->
-<!--                        Date selection powered by-->
-<!--                        <a href="https://github.webcito.de/?bootswatch=bootstrap&plugin=bs-datepicker" target="_blank"-->
-<!--                           rel="noopener noreferrer">ThomasDev-de/bs-datepicker</a>.-->
-<!--                        </div>-->
+        <div class="app-content">
+          <div class="container-fluid">
+            <div class="row g-3">
+              <!-- Sidebar: draggable events -->
+              <div class="col-lg-3">
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">Draggable events</h3>
+                  </div>
+                  <div class="card-body">
+                    <p class="text-body-secondary small mb-3">
+                      Drag an event to the calendar to schedule it.
+                    </p>
+                    <div id="external-events">
+                      <div
+                        class="draggable-event badge text-bg-primary p-2 mb-2 d-block text-start"
+                        data-color="#0d6efd"
+                      >
+                        <i class="bi bi-grip-vertical me-1" aria-hidden="true"></i>
+                        Team standup
+                      </div>
+                      <div
+                        class="draggable-event badge text-bg-success p-2 mb-2 d-block text-start"
+                        data-color="#198754"
+                      >
+                        <i class="bi bi-grip-vertical me-1" aria-hidden="true"></i>
+                        Customer call
+                      </div>
+                      <div
+                        class="draggable-event badge text-bg-warning p-2 mb-2 d-block text-start"
+                        data-color="#ffc107"
+                      >
+                        <i class="bi bi-grip-vertical me-1" aria-hidden="true"></i>
+                        Design review
+                      </div>
+                      <div
+                        class="draggable-event badge text-bg-info p-2 mb-2 d-block text-start"
+                        data-color="#0dcaf0"
+                      >
+                        <i class="bi bi-grip-vertical me-1" aria-hidden="true"></i>
+                        1:1 with manager
+                      </div>
+                      <div
+                        class="draggable-event badge text-bg-danger p-2 d-block text-start"
+                        data-color="#dc3545"
+                      >
+                        <i class="bi bi-grip-vertical me-1" aria-hidden="true"></i>
+                        Release window
+                      </div>
                     </div>
-                </div>
-
-                <div class="d-flex flex-wrap gap-4 mb-4">
+                    <hr />
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" name="allDay" role="switch"
-                               id="appointmentAllDay">
-                        <label class="form-check-label" for="appointmentAllDay">all day</label>
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        id="remove-after-drop"
+                      />
+                      <label class="form-check-label small" for="remove-after-drop">
+                        Remove from list after dropping
+                      </label>
                     </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" name="overlap" role="switch"
-                               id="appointmentOverlap">
-                        <label class="form-check-label" for="appointmentOverlap">allow overlap (stack)</label>
-                    </div>
+                  </div>
                 </div>
-
-                <div class="event-row mb-3">
-                    <i class="bi bi-arrow-repeat event-icon" aria-hidden="true"></i>
-                    <div class="editor-section">
-                    <div class="row g-2">
-                    <div class="col-7">
-                        <label class="form-label mb-1" for="appointmentRecurrenceFrequency">Repeat</label>
-                        <select class="form-select" name="recurrence_frequency" id="appointmentRecurrenceFrequency">
-                            <option value="none">Does not repeat</option>
-                            <option value="daily">Daily</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="monthly">Monthly</option>
-                            <option value="yearly">Yearly</option>
-                        </select>
-                    </div>
-                    <div class="col-5">
-                        <label class="form-label mb-1" for="appointmentRecurrenceUntil">Until</label>
-                        <input class="form-control" type="date" name="recurrence_until" id="appointmentRecurrenceUntil">
-                    </div>
-                    </div>
-                    </div>
+              </div>
+              <!-- Calendar -->
+              <div class="col-lg-9">
+                <div class="card">
+                  <div class="card-body">
+                    <div id="calendar"></div>
+                  </div>
+                  <div class="card-footer bg-body text-body-secondary small">
+                    Powered by
+                    <a href="https://fullcalendar.io/" target="_blank" rel="noopener"
+                      >FullCalendar 7</a
+                    >
+                    &mdash; MIT licensed, jQuery-free.
+                  </div>
                 </div>
-
-                <div class="form-check form-switch mb-1">
-                    <input class="form-check-input" type="checkbox" name="isTask" role="switch"
-                           id="appointmentIsTask">
-                    <label class="form-check-label" for="appointmentIsTask">task</label>
-                </div>
-
-                <div class="js-priority-fields mb-3" style="display: none;">
-                    <div class="btn-group w-100 mb-3" role="group" aria-label="Priority">
-                        <input type="radio" class="btn-check" name="priority" id="priorityLow" value="low" autocomplete="off">
-                        <label class="btn btn-outline-success" for="priorityLow">Low</label>
-
-                        <input type="radio" class="btn-check" name="priority" id="priorityMedium" value="normal" autocomplete="off" checked>
-                        <label class="btn btn-outline-warning" for="priorityMedium">Medium</label>
-
-                        <input type="radio" class="btn-check" name="priority" id="priorityHigh" value="high" autocomplete="off">
-                        <label class="btn btn-outline-danger" for="priorityHigh">High</label>
-                    </div>
-
-                    <div class="form-floating">
-                        <input name="due" type="datetime-local" class="form-control" id="appointmentDue"
-                               placeholder="due date">
-                        <label for="appointmentDue">Due date</label>
-                    </div>
-                </div>
-
-                <div class="event-row mb-3 js-time-fields">
-                    <i class="bi bi-clock event-icon" aria-hidden="true"></i>
-                    <div class="editor-section">
-                    <div class="d-flex justify-content-start align-items-center flex-nowrap mb-3 gap-2">
-                        <div class="flex-fill">
-                            <label for="appointmentFromTimePicker" class="form-label mb-1">From time</label>
-                            <div id="appointmentFromTimePicker"></div>
-                        </div>
-                        <div class="flex-fill">
-                            <label for="appointmentToTimePicker" class="form-label mb-1">To time</label>
-                            <div id="appointmentToTimePicker"></div>
-                        </div>
-                    </div>
-<!--                    <div class="powered-by small text-body-secondary mb-3">-->
-<!--                        Time selection powered by-->
-<!--                        <a href="https://github.webcito.de/?bootswatch=bootstrap&plugin=bs-timepicker" target="_blank"-->
-<!--                           rel="noopener noreferrer">ThomasDev-de/bs-timepicker</a>.-->
-<!--                    </div>-->
-                    </div>
-                </div>
-
-                <div class="row g-3 mb-4">
-                    <div class="col-md-5">
-                        <div class="form-floating editor-section p-0">
-                            <textarea class="form-control" style="height: 110px" name="location"
-                                      placeholder="Location" id="appointmentLocation"></textarea>
-                            <label for="appointmentLocation">Location</label>
-                        </div>
-                        <div class="form-text">Use one location per line.</div>
-                    </div>
-                    <div class="col-md-7">
-                        <div class="form-floating editor-section p-0">
-                            <textarea class="form-control" style="height: 110px" name="description"
-                                      placeholder="Description" id="appointmentDescription"></textarea>
-                            <label for="appointmentDescription">Description</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-floating mb-4">
-                    <input name="link" type="text" class="form-control" id="appointmentLink"
-                           placeholder="appointment link">
-                    <label for="appointmentLink">Link</label>
-                </div>
-
+              </div>
             </div>
-
-            <div class="modal-footer modal-footer-actions d-flex flex-wrap justify-content-end align-items-center gap-2">
-<!--                    <div class="small text-body-secondary me-auto">-->
-<!--                        Color picker powered by-->
-<!--                        <a href="https://github.webcito.de/?bootswatch=bootstrap&plugin=bs-color-picker" target="_blank"-->
-<!--                           rel="noopener noreferrer">ThomasDev-de/bs-colorpicker</a>.-->
-<!--                    </div>-->
-                    <div class="me-2">
-                        <label for="appointmentColor" class="d-none">Color</label>
-                        <input type="color" name="color" class="form-control me-2" id="appointmentColor">
-                    </div>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary ms-2" data-save-appointment>Save</button>
-            </div>
-            </div>
+          </div>
         </div>
+      </main>
     </div>
-</div>
-<div id="myCalendar"></div>
+    <!--(OverlayScrollbars)-->
+    <script src="../pluginFiles/overlayscrollbars/overlayscrollbars.browser.es6.min.js" crossorigin="anonymous"></script>
+    <!-- popperjs -->
+    <script src="../pluginFiles/popperjs/popper.min.js" crossorigin="anonymous"></script>
+    <!--(Bootstrap 5)-->
+    <script src="../pluginFiles/bootstrap5/bootstrap.bundle.min.js"></script>
+    <!--(AdminLTE)-->
+    <script src="../scriptFiles/adminlte.js"></script>
+    <!--fullcalendar-->
+    <script src="../pluginFiles/fullcalendar/fullcalendar.global.js" crossorigin="anonymous"></script>
+    <script src="../pluginFiles/fullcalendar/bootstrap5.global.js" crossorigin="anonymous"></script>
+    <script>
+      const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
+      const Default = {
+        scrollbarTheme: 'os-theme-light',
+        scrollbarAutoHide: 'leave',
+        scrollbarClickScroll: true,
+      };
+      document.addEventListener('DOMContentLoaded', function () {
+        const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
 
-<script src="../pluginFiles/jquery/jquery-4.0.0.min.js"></script>
-<script src="../pluginFiles/bootstrap5/bootstrap.bundle.min.js"></script>
-<script src="../pluginFiles/bscalendar/bs-calendar.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/ThomasDev-de/bs-timepicker@main/dist/bs-timepicker.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/ThomasDev-de/bs-color-picker@main/dist/bs-color-picker.js?v=dev"></script>
-<script src="https://cdn.jsdelivr.net/gh/ThomasDev-de/bs-datepicker@main/dist/bs-datepicker.min.js?v=dev"></script>
-<script src="https://cdn.jsdelivr.net/gh/ThomasDev-de/bs-toast@main/dist/bs-toast.min.js?v=dev"></script>
-<!--suppress JSUnresolvedReference -->
-<script>
-    $(function () {
-        const $calendar = $('#calendar');
-        const $modal = $('#appointmentModal');
-        const $colorpicker = $('#appointmentColor');
-        const $dateRange = $('#appointmentDateRange');
+        // Disable OverlayScrollbars on mobile devices to prevent touch interference
+        const isMobile = window.innerWidth <= 992;
 
-        $colorpicker.bsColorPicker({
-            btnClass: 'btn btn-lg btn-outline-secondary',
-        });
-
-        $dateRange.bsDatepicker({
-            months: 1,
-            range: true
-        });
-
-        const modalState = {
-            mode: 'add',
-            appointmentId: null,
-            taskChecked: false
-        };
-        const demoText = {
-            locale: 'en-US',
-            holidays: {
-                country: 'IE',
-                federalState: null
+        if (
+          sidebarWrapper &&
+          globalThis.OverlayScrollbarsGlobal?.OverlayScrollbars !== undefined &&
+          !isMobile
+        ) {
+          OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
+            scrollbars: {
+              theme: Default.scrollbarTheme,
+              autoHide: Default.scrollbarAutoHide,
+              clickScroll: Default.scrollbarClickScroll,
             },
-            calendars: [
-                {id: 'personal', title: 'Personal', color: 'primary', active: true},
-                {id: 'work', title: 'Work', color: 'danger', active: true},
-                {id: 'sports', title: 'Sports', color: 'success', active: true}
-            ],
-            btnRefresh: 'Refresh',
-            btnClear: 'Clear',
-            modalTitle: 'Appointment',
-            inputTitlePlaceholder: 'appointment title',
-            labelTitle: 'Title',
-            labelFromDate: 'From date',
-            labelToDate: 'To date',
-            labelAllDay: 'all day',
-            labelOverlap: 'allow overlap (stack)',
-            labelRecurrenceFrequency: 'Repeat',
-            labelRecurrenceUntil: 'Until',
-            recurrenceNone: 'Does not repeat',
-            recurrenceDaily: 'Daily',
-            recurrenceWeekly: 'Weekly',
-            recurrenceMonthly: 'Monthly',
-            recurrenceYearly: 'Yearly',
-            labelIsTask: 'task',
-            labelPriorityLow: 'Low',
-            labelPriorityMedium: 'Medium',
-            labelPriorityHigh: 'High',
-            labelDue: 'Due date',
-            labelFromTime: 'From time',
-            labelToTime: 'To time',
-            inputDescriptionPlaceholder: 'Description',
-            labelDescription: 'Description',
-            inputLinkPlaceholder: 'appointment link',
-            labelLink: 'Link',
-            labelAppointmentRule: 'Appointment duration',
-            appointmentRuleNone: 'No duration rule',
-            appointmentRuleCoaching45: '45-minute coaching blocks',
-            appointmentRuleFixed60: 'Exactly 60 minutes',
-            appointmentRuleHelp: 'Drag-create and drag-resize respect the selected duration rule.',
-            btnCancel: 'Cancel',
-            btnSave: 'Save',
-            modalAddTitle: 'Add appointment',
-            modalEditTitle: 'Edit appointment',
-            modalCreate: 'Create',
-            modalUpdate: 'Update',
-            untitled: 'Untitled appointment',
-            yearAppointments: 'appointments',
-            appointmentPrefix: 'Appointment',
-            appointmentDescriptionPrefix: 'Demo appointment'
+          });
+        }
+      });
+    </script>
+    <!--end::OverlayScrollbars Configure-->
+
+    <!--begin::Color Mode Toggle-->
+    <!-- The light/dark/auto switcher ships in adminlte.js as the ColorMode
+     module (since 4.1) — no page script needed. Only the no-flash snippet
+     in <head> stays inline, because it must run before first paint. -->
+    <!--end::Color Mode Toggle-->
+
+    <script>
+      // Keep all-day dates local; UTC conversion can shift them by a day.
+      const isoDate = (d) =>
+        [
+          d.getFullYear(),
+          String(d.getMonth() + 1).padStart(2, '0'),
+          String(d.getDate()).padStart(2, '0'),
+        ].join('-');
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const cellObservers = new WeakMap();
+        const calendarEl = document.getElementById('calendar');
+        const externalEl = document.getElementById('external-events');
+        const removeAfterDrop = document.getElementById('remove-after-drop');
+
+        new FullCalendar.Interaction.Draggable(externalEl, {
+          itemSelector: '.draggable-event',
+          eventData: (el) => ({
+            title: el.textContent.trim(),
+            color: el.dataset.color,
+          }),
+        });
+
+        const today = new Date();
+        const offsetDay = (n) => {
+          const d = new Date(today);
+          d.setDate(today.getDate() + n);
+          return isoDate(d);
         };
-        const demoLocations = [
-            'Room 1',
-            ['Room 2', 'Building A'],
-            'Meeting room',
-            ['Studio 3', '2nd floor'],
-            'Online'
-        ];
 
-        // Temporary in-memory store. Each year is generated once and then reused.
-        // Example: appointmentStore[2026] = [{...}, {...}]
-        const appointmentStore = {};
-        let appointmentIdCounter = 1;
-
-        initAppointmentModal();
-        initCalendar();
-        bindCalendarEvents();
-        bindSidebarActions();
-
-        function initCalendar() {
-            let eventCounter = 1;
-
-            $calendar.on('init.bs.calendar', function () {
-                applyDemoText();
-            });
-            $calendar.bsCalendar({
-                title: '<span class="h4 mb-0">My awesome calendar</span>',
-                locale: demoText.locale,
-                startView: '4day',
-                views: ['year', 'month', 'monthCompact', 'agenda', 'week', 'workweek', '4day', 'day', 'timeline'],
-                startWeekOnSunday: false,
-                navigateOnWheel: false,
-                draggable: $('#switchToggleDraggable').is(':checked'),
-                clickSnapMode: $('#selectClickSnapMode').val(),
-                storeState: false,
-                debug: false,
-                url: loadAppointments,
-                holidays: {
-                    country: demoText.holidays.country,
-                    federalState: demoText.holidays.federalState
-                },
-                hourSlots: {
-                    start: '06:30',
-                    end: '20:30',
-                    height: 100,
-                    timeLabelIntervalMinutes: $('#switchQuarterHourLabels').is(':checked') ? 15 : null
-                },
-                // Dated availability ranges repeat through the shared recurrence format.
-                availabilityRules: [
-                    {
-                        id: 'weekday-hours',
-                        start: '2026-01-05 09:00:00',
-                        end: '2026-01-05 17:00:00',
-                        mode: 'available',
-                        color: 'rgba(25, 135, 84, 0.12)',
-                        recurrence: {
-                            frequency: 'weekly',
-                            interval: 1,
-                            daysOfWeek: [1, 2, 3]
-                        }
-                    },
-                    {
-                        id: 'early-hours',
-                        start: '2026-01-01 07:00:00',
-                        end: '2026-01-01 09:00:00',
-                        mode: 'available',
-                        color: 'rgba(25, 135, 84, 0.12)',
-                        recurrence: {
-                            frequency: 'weekly',
-                            interval: 1,
-                            daysOfWeek: [4, 5]
-                        }
-                    },
-                    {
-                        id: 'saturday-preferred',
-                        start: '2026-01-03 10:00:00',
-                        end: '2026-01-03 14:00:00',
-                        mode: 'preferred',
-                        color: 'rgba(13, 110, 253, 0.10)',
-                        recurrence: {
-                            frequency: 'weekly',
-                            interval: 1,
-                            daysOfWeek: [6]
-                        }
-                    },
-                    {
-                        id: 'sunday-off',
-                        start: '2026-01-04',
-                        end: '2026-01-04',
-                        allDay: true,
-                        mode: 'blocked',
-                        color: 'rgba(220, 53, 69, 0.22)',
-                        recurrence: {
-                            frequency: 'weekly',
-                            interval: 1,
-                            daysOfWeek: [0]
-                        }
-                    }
-                ],
-                calendars: demoText.calendars,
-                onDuplicate(appointment) {
-                    appointment.id = 'copy_of_' + appointment.id;
-                    upsertAppointmentInStore(appointment);
-                    $calendar.bsCalendar('addAppointment', appointment);
-                },
-                onAll(eventName, ...args) {
-                    if (eventName.startsWith('init.')) {
-                        $('#temp_loading').remove();
-                    }
-                    if ($('#switchTriggeredEvents').is(':checked')) {
-                        $.bsToast({
-                            title: 'Event ' + eventCounter,
-                            message: [
-                                eventName + ' (' + args.length + ' args)',
-                                `<i class="small text-muted">For more details see the console</i>`
-                            ].join('<br>')
-                        });
-                        console.log(eventCounter, eventName, ...args);
-                        eventCounter++;
-                    } else {
-                        $.bsToast.closeAll();
-                    }
-                }
-            });
-        }
-
-        function bindCalendarEvents() {
-            $calendar
-                .on('change', '#switchTriggeredEvents', function () {
-                    $calendar.bsCalendar('refresh');
-                })
-                .on('change', '#switchToggleDraggable', function () {
-                    $calendar.bsCalendar('updateOptions', {draggable: $(this).is(':checked')});
-                })
-                .on('change', '#switchQuarterHourLabels', function () {
-                    $calendar.bsCalendar('updateOptions', {
-                        hourSlots: {
-                            timeLabelIntervalMinutes: $(this).is(':checked') ? 15 : null
-                        }
-                    });
-                })
-                .on('change', '#selectClickSnapMode', function () {
-                    $calendar.bsCalendar('updateOptions', {
-                        clickSnapMode: $(this).val()
-                    });
-                })
-                .on('change', '#selectAppointmentRule', function () {
-                    $calendar.bsCalendar('updateOptions', {
-                        appointmentRules: getDemoAppointmentRules($(this).val())
-                    });
-                    $calendar.bsCalendar('render');
-                })
-                .on('add.bs.calendar', function (event, data, dragExtras) {
-                    const start = dragExtras?.start || data.start;
-                    const end = dragExtras?.end || data.end;
-                    const isAllDay = !start.time && !end.time;
-
-                    openAppointmentModal('add', {
-                        title: '',
-                        startDate: start.date,
-                        endDate: end.date,
-                        startTime: resolveModalTime(start.time, null),
-                        endTime: resolveModalTime(end.time, null),
-                        allDay: isAllDay,
-                        overlap: false,
-                        description: '',
-                        location: '',
-                        color: getRandomAppointmentColor(),
-                        link: ''
-                    });
-                })
-                .on('edit.bs.calendar', function (event, appointment, extras, dragExtras) {
-                    event.preventDefault();
-
-                    const sourceAppointment = appointment.recurringId
-                        ? findAppointmentInStore(appointment.recurringId) || appointment
-                        : appointment;
-                    const eventExtras = dragExtras || extras;
-                    const sourceStart = parseDateTimeString(sourceAppointment.start);
-                    const sourceEnd = parseDateTimeString(sourceAppointment.end);
-                    const isAllDay = !!sourceAppointment.allDay;
-                    const startDateCandidate = dragExtras?.start?.date || (sourceStart ? formatDate(sourceStart) : eventExtras.start.date);
-                    const endDateCandidate = dragExtras?.end?.date || (sourceEnd ? formatDate(sourceEnd) : eventExtras.end.date);
-                    const startTimeCandidate = dragExtras?.start?.time || (sourceStart ? formatDateTime(sourceStart) : sourceAppointment?.start);
-                    const endTimeCandidate = dragExtras?.end?.time || (sourceEnd ? formatDateTime(sourceEnd) : sourceAppointment?.end);
-
-                    console.log('Editing appointment extras:', extras.colors);
-
-                    openAppointmentModal('edit', {
-                        id: sourceAppointment.id,
-                        title: sourceAppointment.title,
-                        startDate: startDateCandidate,
-                        endDate: endDateCandidate,
-                        startTime: isAllDay ? '' : resolveModalTime(startTimeCandidate, sourceAppointment.start),
-                        endTime: isAllDay ? '' : resolveModalTime(endTimeCandidate, sourceAppointment.end),
-                        allDay: isAllDay,
-                        overlap: !!sourceAppointment.overlap,
-                        recurrence: sourceAppointment.recurrence || null,
-                        description: sourceAppointment.description || '',
-                        location: sourceAppointment.location || '',
-                        color: extras.colors.hex || '#0d6efd',
-                        link: sourceAppointment.link || '',
-                        task: sourceAppointment.task || null
-                    });
-                })
-                .on('delete.bs.calendar', function (event, appointment) {
-                    event.preventDefault();
-                    const appointmentId = appointment.recurringId || appointment.id;
-                    removeAppointmentFromStore(appointmentId);
-                    $calendar.bsCalendar('deleteAppointment', appointmentId);
-                });
-        }
-
-        function getRandomAppointmentColor() {
-            if ($.bsColorPicker?.utils?.getRandomColor) {
-                return $.bsColorPicker.utils.getRandomColor('rgba', .7);
-            }
-            return '#0d6efd';
-        }
-
-        function bindSidebarActions() {
-            $calendar.on('click', '[data-method]', function (event) {
-                event.preventDefault();
-
-                switch ($(this).data('method')) {
-                    case 'clear':
-                        $calendar.bsCalendar('clear');
-                        break;
-                    case 'refresh':
-                        $calendar.bsCalendar('refresh');
-                        break;
-                    case 'render':
-                        $calendar.bsCalendar('render');
-                        break;
-                    case 'setToday':
-                        $calendar.bsCalendar('setToday', $(this).data('view') || 'week');
-                        break;
-                    case 'setView':
-                        $calendar.bsCalendar('setView', $(this).data('view') || 'month');
-                        break;
-                    case 'setLocale':
-                        $calendar.bsCalendar('setLocale', $(this).data('locale') || 'month');
-                        break;
-                    default:
-                        break;
-                }
-            });
-        }
-
-        function applyDemoText() {
-            const t = demoText;
-
-            $('[data-method="refresh"]').text(t.btnRefresh);
-            $('[data-method="clear"]').text(t.btnClear);
-            $('#appointmentModalLabel').text(t.modalTitle);
-
-            $('input[name="title"]').attr('placeholder', t.inputTitlePlaceholder);
-            $('label[for="appointmentTitle"]').text(t.labelTitle);
-            $('label[for="appointmentFromDate"]').text(t.labelFromDate);
-            $('label[for="appointmentToDate"]').text(t.labelToDate);
-            $('label[for="appointmentAllDay"]').text(t.labelAllDay);
-            $('label[for="appointmentOverlap"]').text(t.labelOverlap);
-            $('label[for="appointmentRecurrenceFrequency"]').text(t.labelRecurrenceFrequency);
-            $('label[for="appointmentRecurrenceUntil"]').text(t.labelRecurrenceUntil);
-            $('#appointmentRecurrenceFrequency option[value="none"]').text(t.recurrenceNone);
-            $('#appointmentRecurrenceFrequency option[value="daily"]').text(t.recurrenceDaily);
-            $('#appointmentRecurrenceFrequency option[value="weekly"]').text(t.recurrenceWeekly);
-            $('#appointmentRecurrenceFrequency option[value="monthly"]').text(t.recurrenceMonthly);
-            $('#appointmentRecurrenceFrequency option[value="yearly"]').text(t.recurrenceYearly);
-            $('label[for="appointmentIsTask"]').text(t.labelIsTask);
-            $('label[for="priorityLow"]').text(t.labelPriorityLow);
-            $('label[for="priorityMedium"]').text(t.labelPriorityMedium);
-            $('label[for="priorityHigh"]').text(t.labelPriorityHigh);
-            $('label[for="appointmentDue"]').text(t.labelDue);
-            $('label[for="appointmentFromTimePicker"]').text(t.labelFromTime);
-            $('label[for="appointmentToTimePicker"]').text(t.labelToTime);
-            $('textarea[name="description"]').attr('placeholder', t.inputDescriptionPlaceholder);
-            $('label[for="appointmentDescription"]').text(t.labelDescription);
-            $('input[name="link"]').attr('placeholder', t.inputLinkPlaceholder);
-            $('label[for="appointmentLink"]').text(t.labelLink);
-            $('label[for="selectAppointmentRule"]').text(t.labelAppointmentRule);
-            $('#selectAppointmentRule option[value="none"]').text(t.appointmentRuleNone);
-            $('#selectAppointmentRule option[value="coaching45"]').text(t.appointmentRuleCoaching45);
-            $('#selectAppointmentRule option[value="fixed60"]').text(t.appointmentRuleFixed60);
-            $('[data-appointment-rule-help]').text(t.appointmentRuleHelp);
-            $('[data-bs-dismiss="modal"].btn.btn-secondary').text(t.btnCancel);
-            $('[data-save-appointment]').text(t.btnSave);
-
-            if (typeof $.fn.bsDatepicker === 'function') {
-                $dateRange.bsDatepicker('setLocale', t.locale);
-            }
-            applyCalendarLabels(t.calendars);
-        }
-
-        function applyCalendarLabels(calendars) {
-            if (!Array.isArray(calendars)) {
-                return;
-            }
-            const titleById = calendars.reduce(function (acc, calendar) {
-                if (calendar && calendar.id) {
-                    acc[calendar.id] = calendar.title;
-                }
-                return acc;
-            }, {});
-
-            $calendar.find('[data-calendar-toggle]').each(function () {
-                const id = $(this).data('calendar-toggle');
-                if (!id || !titleById[id]) {
-                    return;
-                }
-                $(this).find('span').first().text(titleById[id]);
-            });
-        }
-
-        function getDemoAppointmentRules(rule) {
-            switch (rule) {
-                case 'coaching45':
-                    return {
-                        durationStepMinutes: 45,
-                        minDurationMinutes: 45
-                    };
-                case 'fixed60':
-                    return {
-                        durationMinutes: 60
-                    };
-                case 'none':
-                default:
-                    return {
-                        durationMinutes: null,
-                        durationStepMinutes: null,
-                        minDurationMinutes: null,
-                        maxDurationMinutes: null
-                    };
-            }
-        }
-
-        function initAppointmentModal() {
-            initModalTimepickers();
-
-            $modal
-                .on('hide.bs.modal', function () {
-                    $calendar.bsCalendar('render');
-                })
-                .on('change', 'input[name="allDay"]', function () {
-                    $modal.find('.js-time-fields').toggle(!$(this).prop('checked'));
-                })
-                .on('change', 'input[name="isTask"]', function () {
-                    $modal.find('.js-priority-fields').toggle($(this).prop('checked'));
-                })
-                .on('click', '[data-save-appointment]', function () {
-                    const appointment = readAppointmentModal();
-                    const method = modalState.mode === 'edit' ? 'editAppointment' : 'addAppointment';
-
-                    upsertAppointmentInStore(appointment);
-                    $calendar.bsCalendar(method, appointment);
-                    $modal.modal('hide');
-                });
-        }
-
-        function initModalTimepickers() {
-            if (typeof $.fn.bsTimepicker !== 'function') {
-                return;
-            }
-
-            $modal.find('#appointmentFromTimePicker, #appointmentToTimePicker').each(function () {
-                ensureTimepickerInitialized($(this));
-            });
-        }
-
-        function ensureTimepickerInitialized($input) {
-            if (typeof $.fn.bsTimepicker !== 'function' || !$input || !$input.length) {
-                return false;
-            }
-            if ($input.data('bsTimepicker')) {
-                return true;
-            }
-            $input.bsTimepicker({
-                format: '24h',
-                minuteInterval: 1,
-                btnClass: 'btn btn-outline-secondary w-100 text-start',
-                nameField: null,
-                btnEmptyText: '--:--'
-            });
-            return !!$input.data('bsTimepicker');
-        }
-
-        function openAppointmentModal(mode, appointment) {
-            const t = demoText;
-            modalState.mode = mode;
-            modalState.appointmentId = appointment.id || null;
-            modalState.taskChecked = !!appointment.task?.checked;
-
-            $modal.find('.modal-title').text(mode === 'edit' ? t.modalEditTitle : t.modalAddTitle);
-            $modal.find('[data-save-appointment]').text(mode === 'edit' ? t.modalUpdate : t.modalCreate);
-            $modal.find('input[name="title"]').val(appointment.title || '');
-
-            // console.log(mode, appointment);
-            if (typeof $.fn.bsDatepicker === 'function') {
-                $dateRange.bsDatepicker('val', [appointment.startDate, appointment.endDate]);
-            } else {
-                $modal.find('input[name="from_date"]').val(appointment.startDate);
-                $modal.find('input[name="to_date"]').val(appointment.endDate);
-            }
-
-            setModalTimeValue('from_time', appointment.startTime || '');
-            setModalTimeValue('to_time', appointment.endTime || '');
-            $modal.find('input[name="allDay"]').prop('checked', !!appointment.allDay).trigger('change');
-            $modal.find('input[name="overlap"]').prop('checked', !!appointment.overlap);
-            $modal.find('select[name="recurrence_frequency"]').val(appointment.recurrence?.frequency || 'none');
-            $modal.find('input[name="recurrence_until"]').val(appointment.recurrence?.until || '');
-
-            const isTask = !!appointment.task;
-            const priority = isTask ? appointment.task.priority : 'normal';
-            const due = isTask ? appointment.task.due : '';
-
-            $modal.find('input[name="isTask"]').prop('checked', isTask).trigger('change');
-            $modal.find(`input[name="priority"][value="${priority || 'normal'}"]`).prop('checked', true);
-            $modal.find('input[name="due"]').val(due ? due.substring(0, 16).replace(' ', 'T') : '');
-
-            $modal.find('textarea[name="description"]').val(appointment.description || '');
-            $modal.find('textarea[name="location"]').val(formatLocationValue(appointment.location));
-            $colorpicker.bsColorPicker('val', appointment.color);
-            // $modal.find('input[name="color"]').val(normalizeColorInput(appointment.color));
-            $modal.find('input[name="link"]').val(appointment.link || '');
-            $modal.modal('show');
-        }
-
-        function setModalTimeValue(fieldName, value) {
-            const selector = fieldName === 'from_time' ? '#appointmentFromTimePicker' : '#appointmentToTimePicker';
-            const $input = $modal.find(selector);
-            const normalized = normalizeTimeInputValue(value);
-            if (ensureTimepickerInitialized($input)) {
-                if (normalized) {
-                    $input.bsTimepicker('setTime', normalized);
-                } else {
-                    $input.bsTimepicker('clear');
-                }
-                return;
-            }
-            $input.val(normalized);
-        }
-
-        function getModalTimeValue(fieldName) {
-            const selector = fieldName === 'from_time' ? '#appointmentFromTimePicker' : '#appointmentToTimePicker';
-            const $input = $modal.find(selector);
-            if (ensureTimepickerInitialized($input)) {
-                return normalizeTimeInputValue($input.bsTimepicker('val'));
-            }
-            return normalizeTimeInputValue($input.val());
-        }
-
-        function readAppointmentModal() {
-            const t = demoText;
-            const allDay = $modal.find('input[name="allDay"]').prop('checked');
-            const isTask = $modal.find('input[name="isTask"]').is(':checked');
-
-            const appointment = {
-                title: $modal.find('input[name="title"]').val() || t.untitled,
-                start: buildDateTime(
-                    $modal.find('input[name="from_date"]').val(),
-                    getModalTimeValue('from_time'),
-                    allDay
-                ),
-                end: buildDateTime(
-                    $modal.find('input[name="to_date"]').val(),
-                    getModalTimeValue('to_time'),
-                    allDay,
-                    true
-                ),
-                allDay: allDay,
-                overlap: $modal.find('input[name="overlap"]').is(':checked'),
-                task: isTask ? {
-                    checked: modalState.mode === 'edit' ? modalState.taskChecked : false,
-                    priority: $modal.find('input[name="priority"]:checked').val(),
-                    due: $modal.find('input[name="due"]').val() ? $modal.find('input[name="due"]').val().replace('T', ' ') + ':00' : null
-                } : null,
-                calendarId: 'personal',
-                description: $modal.find('textarea[name="description"]').val(),
-                location: parseLocationValue($modal.find('textarea[name="location"]').val()),
-                color: $modal.find('input[name="color"]').val(),
-                link: $modal.find('input[name="link"]').val()
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          buttons: { today: { hint: 'Today' } },
+          // Date cells also contain event titles. Include that visible text in
+          // their accessible names, including after drag, edit, or navigation.
+          dayCellDidMount: ({ el }) => {
+            const dateLabel = el.getAttribute('aria-label') || '';
+            const syncLabel = () => {
+              const visibleText = el.textContent.replace(/\s+/g, ' ').trim();
+              el.setAttribute('aria-label', `${dateLabel} ${visibleText}`.trim());
             };
-
-            const recurrenceFrequency = $modal.find('select[name="recurrence_frequency"]').val();
-            if (recurrenceFrequency && recurrenceFrequency !== 'none') {
-                const recurrenceStart = parseDateTimeString(appointment.start);
-                appointment.recurrence = {
-                    frequency: recurrenceFrequency,
-                    interval: 1
-                };
-                if (recurrenceFrequency === 'weekly' && recurrenceStart) {
-                    appointment.recurrence.daysOfWeek = [recurrenceStart.getDay()];
-                }
-                const recurrenceUntil = $modal.find('input[name="recurrence_until"]').val();
-                if (recurrenceUntil) {
-                    appointment.recurrence.until = recurrenceUntil;
-                }
+            const observer = new MutationObserver(syncLabel);
+            observer.observe(el, { childList: true, subtree: true, characterData: true });
+            cellObservers.set(el, observer);
+            syncLabel();
+          },
+          dayCellWillUnmount: ({ el }) => {
+            cellObservers.get(el)?.disconnect();
+            cellObservers.delete(el);
+          },
+          headerToolbar: {
+            start: 'prev,next today',
+            center: 'title',
+            end: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
+          },
+          height: 700,
+          editable: true,
+          droppable: true,
+          dayMaxEvents: 3,
+          drop: (info) => {
+            if (removeAfterDrop.checked) {
+              info.draggedEl.remove();
             }
-
-            if (modalState.appointmentId) {
-                appointment.id = modalState.appointmentId;
+          },
+          dateClick: (info) => {
+            const title = prompt('Event title:');
+            if (title) {
+              calendar.addEvent({
+                title: title,
+                start: info.dateStr,
+                allDay: info.allDay,
+              });
             }
-
-            return appointment;
-        }
-
-        function formatLocationValue(location) {
-            if (Array.isArray(location)) {
-                return location.join('\n');
+          },
+          eventClick: (info) => {
+            if (confirm(`Delete "${info.event.title}"?`)) {
+              info.event.remove();
             }
-            return location || '';
-        }
-
-        function parseLocationValue(value) {
-            const locations = String(value || '')
-                .split(/\r?\n/)
-                .map(location => location.trim())
-                .filter(Boolean);
-            if (locations.length > 1) {
-                return locations;
-            }
-            return locations[0] || '';
-        }
-
-        function buildDateTime(date, time, allDay, isEnd = false) {
-            if (allDay) {
-                return `${date} ${isEnd ? '23:59:59' : '00:00:00'}`;
-            }
-            return `${date} ${time || (isEnd ? '23:59' : '00:00')}:00`;
-        }
-
-        function normalizeColorInput(color) {
-            return /^#[0-9a-f]{6}$/i.test(color || '') ? color : '#0d6efd';
-        }
-
-        function normalizeTimeInputValue(time) {
-            const match = String(time || '').match(/(?:^|\s|T)(\d{1,2}):(\d{2})(?::\d{2})?/);
-            if (!match) {
-                return '';
-            }
-            return `${match[1].padStart(2, '0')}:${match[2]}`;
-        }
-
-        function parseDateTimeString(str) {
-            const match = String(str || '').match(
-                /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/
-            );
-            if (!match) {
-                return null;
-            }
-            const year = Number(match[1]);
-            const month = Number(match[2]) - 1;
-            const day = Number(match[3]);
-            const hours = Number(match[4] || 0);
-            const minutes = Number(match[5] || 0);
-            const seconds = Number(match[6] || 0);
-            const date = new Date(year, month, day, hours, minutes, seconds, 0);
-            return isNaN(date.getTime()) ? null : date;
-        }
-
-        function extractTimeFromDateTime(value) {
-            if (!value) {
-                return '';
-            }
-            if (value instanceof Date && !isNaN(value.getTime())) {
-                return `${String(value.getHours()).padStart(2, '0')}:${String(value.getMinutes()).padStart(2, '0')}`;
-            }
-            const str = String(value);
-            const direct = normalizeTimeInputValue(str);
-            if (direct) {
-                return direct;
-            }
-            const date = parseDateTimeString(str) || new Date(str);
-            if (!isNaN(date.getTime())) {
-                return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-            }
-            return '';
-        }
-
-        function resolveModalTime(preferredTime, fallbackDateTime) {
-            return normalizeTimeInputValue(preferredTime) || extractTimeFromDateTime(fallbackDateTime);
-        }
-
-        async function loadAppointments(query) {
-            await sleep(100);
-
-            const showTasks = query.showTasks !== false;
-
-            if (query.search) {
-                return searchAppointments(query.search, query.limit, query.offset, query.calendarIds, showTasks);
-            }
-
-            if (query.view === 'year') {
-                const year = Number(query.year) || new Date().getFullYear();
-                ensureYearAppointments(year);
-                return generateYearBuckets(year, query.calendarIds, showTasks);
-            }
-
-            const fromYear = getYearFromDateString(query.fromDate);
-            const toYear = getYearFromDateString(query.toDate);
-
-            for (let year = fromYear; year <= toYear; year++) {
-                ensureYearAppointments(year);
-            }
-
-            let appointments = getAppointmentsBetween(query.fromDate, query.toDate);
-
-            if (!showTasks) {
-                appointments = appointments.filter(a => !a.task);
-            }
-
-            return filterByCalendarIds(appointments, query.calendarIds);
-        }
-
-        function ensureYearAppointments(year) {
-            year = Number(year) || new Date().getFullYear();
-
-            if (!appointmentStore[year]) {
-                appointmentStore[year] = createFixedYearAppointments(year);
-            }
-
-            return appointmentStore[year];
-        }
-
-        const APPOINTMENTS_PER_YEAR = 700;
-
-        function createSeededRandom(seed) {
-            let value = seed % 2147483647;
-
-            if (value <= 0) {
-                value += 2147483646;
-            }
-
-            return function () {
-                value = value * 16807 % 2147483647;
-                return (value - 1) / 2147483646;
-            };
-        }
-
-        function createFixedYearAppointments(year) {
-            const appointments = [];
-            const random = createSeededRandom(year);
-            const calendars = ['personal', 'work', 'sports'];
-            const colors = {
-                personal: 'primary opacity-75 gradient',
-                work: 'danger opacity-75 gradient',
-                sports: 'success opacity-75 gradient'
-            };
-            const locations = demoLocations;
-
-            for (let index = 0; index < 200; index++) {
-                const month = Math.floor(random() * 12);
-                const day = Math.floor(random() * 28) + 1;
-                const hour = Math.floor(random() * 10) + 8;
-                const minute = [0, 15, 30, 45][Math.floor(random() * 4)];
-                const durationMinutes = [45, 60, 90, 120][Math.floor(random() * 4)];
-
-                const start = new Date(year, month, day, hour, minute, 0, 0);
-                const end = new Date(start.getTime() + durationMinutes * 60000);
-
-                const calendarId = calendars[Math.floor(random() * calendars.length)];
-                const isTask = random() < 0.2;
-
-                const appointment = {
-                    id: `${year}-generated-${index + 1}`,
-                    calendarId: calendarId,
-                    title: isTask ? `Task ${index + 1}` : `Appointment ${index + 1}`,
-                    description: `Automatically generated appointment ${index + 1} for ${year}`,
-                    start: formatDateTime(start),
-                    end: formatDateTime(end),
-                    allDay: false,
-                    overlap: random() < 0.15,
-                    color: colors[calendarId],
-                    link: 'https://github.webcito.de/?bootswatch=bootstrap&plugin=bs-calendar'
-                };
-
-                if (isTask) {
-                    appointment.task = {
-                        checked: random() < 0.5,
-                        priority: ['low', 'normal', 'high'][Math.floor(random() * 3)],
-                        due: formatDateTime(end)
-                    };
-                } else {
-                    appointment.location = locations[index % locations.length];
-                }
-
-                appointments.push(appointment);
-            }
-
-            appointments.push({
-                id: `${year}-recurring-weekly-training`,
-                calendarId: 'sports',
-                title: 'Weekly training',
-                description: 'Demo recurring appointment',
-                start: formatDateTime(new Date(year, 0, 6, 18, 0, 0, 0)),
-                end: formatDateTime(new Date(year, 0, 6, 19, 0, 0, 0)),
-                allDay: false,
-                overlap: false,
-                color: colors.sports,
-                location: locations[0],
-                recurrence: {
-                    frequency: 'weekly',
-                    interval: 1,
-                    daysOfWeek: [2],
-                    until: `${year}-12-31`
-                },
-                link: 'https://github.webcito.de/?bootswatch=bootstrap&plugin=bs-calendar'
-            });
-
-            return appointments;
-        }
-
-        function createStoredAppointment(year, item, fallbackId, t) {
-            const start = buildDateFromParts(year, item.month, item.day, item.start);
-            const end = buildDateFromParts(year, item.month, item.day, item.end);
-            const appointment = {
-                id: `${year}-${item.id || fallbackId}`,
-                calendarId: item.calendarId || 'personal',
-                title: item.title || `${t.appointmentPrefix} ${fallbackId}`,
-                description: item.description || `${t.appointmentDescriptionPrefix} ${fallbackId}`,
-                start: formatDateTime(start),
-                end: formatDateTime(end),
-                allDay: !!item.allDay,
-                overlap: !!item.overlap,
-                color: item.color || 'primary opacity-75 gradient',
-                location: item.location || null,
-                link: item.link || 'https://github.webcito.de/?bootswatch=bootstrap&plugin=bs-calendar'
-            };
-
-            if (item.task) {
-                appointment.task = {
-                    checked: !!item.task.checked,
-                    priority: item.task.priority || 'normal',
-                    due: formatDateTime(buildDateFromParts(year, item.month, item.day, item.task.due || item.end))
-                };
-            }
-
-            return appointment;
-        }
-
-        function buildDateFromParts(year, month, day, time) {
-            const parts = String(time || '00:00').split(':');
-            const hours = Number(parts[0] || 0);
-            const minutes = Number(parts[1] || 0);
-            return new Date(year, month, day, hours, minutes, 0, 0);
-        }
-
-        function getAppointmentsBetween(fromDate, toDate) {
-            const from = new Date(`${fromDate}T00:00:00`);
-            const to = new Date(`${toDate}T23:59:59`);
-
-            return Object.values(appointmentStore)
-                .flat()
-                .filter(function (appointment) {
-                    const start = parseDateTimeString(appointment.start);
-                    const end = parseDateTimeString(appointment.end);
-
-                    if (!start || !end) {
-                        return false;
-                    }
-
-                    if (appointment.recurrence) {
-                        return recurringMasterCanAppearBetween(appointment, from, to);
-                    }
-
-                    return start <= to && end >= from;
-                });
-        }
-
-        function searchAppointments(search, limit, offset, calendarIds, showTasks) {
-            const searchLower = String(search || '').toLowerCase();
-            const currentYear = new Date().getFullYear();
-            ensureYearAppointments(currentYear);
-
-            const rows = Object.values(appointmentStore)
-                .flat()
-                .filter(a => showTasks || !a.task)
-                .filter(appointment => shouldShowCalendar(appointment, calendarIds))
-                .filter(appointment => String(appointment.title || '').toLowerCase().includes(searchLower));
-
-            const start = offset || 0;
-            const end = limit ? start + limit : rows.length;
-
-            return {
-                rows: rows.slice(start, end),
-                total: rows.length
-            };
-        }
-
-        function generateYearBuckets(year, calendarIds, showTasks) {
-            const t = demoText;
-            const grouped = ensureYearAppointments(year)
-                .filter(a => showTasks || !a.task)
-                .filter(appointment => shouldShowCalendar(appointment, calendarIds))
-                .reduce(function (acc, appointment) {
-                    getYearBucketDates(appointment, year).forEach(function (date) {
-                        acc[date] = (acc[date] || 0) + 1;
-                    });
-                    return acc;
-                }, {});
-
-            return Object.keys(grouped).sort().map(function (date) {
-                const total = grouped[date];
-
-                return {
-                    date: date,
-                    total: total,
-                    content: `<strong>${total} ${t.yearAppointments}</strong><br><small>${date}</small>`
-                };
-            });
-        }
-
-        function getYearBucketDates(appointment, year) {
-            const start = parseDateTimeString(appointment.start);
-            if (!start) {
-                return [];
-            }
-
-            if (!appointment.recurrence) {
-                return [formatDate(start)];
-            }
-
-            const from = new Date(year, 0, 1, 0, 0, 0, 0);
-            const to = new Date(year, 11, 31, 23, 59, 59, 999);
-            if (!recurringMasterCanAppearBetween(appointment, from, to)) {
-                return [];
-            }
-
-            const until = appointment.recurrence.until
-                ? parseDateTimeString(appointment.recurrence.until)
-                : null;
-            const loopEnd = new Date(Math.min(until ? until.getTime() : to.getTime(), to.getTime()));
-            loopEnd.setHours(0, 0, 0, 0);
-
-            const exceptions = Array.isArray(appointment.recurrence.exceptions)
-                ? new Set(appointment.recurrence.exceptions.map(String))
-                : new Set();
-            const dates = [];
-            const cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-            let safety = 0;
-
-            while (cursor <= loopEnd && safety < 20000) {
-                const date = formatDate(cursor);
-                if (cursor >= from && recurringDateMatches(cursor, start, appointment.recurrence) && !exceptions.has(date)) {
-                    dates.push(date);
-                }
-                cursor.setDate(cursor.getDate() + 1);
-                safety++;
-            }
-
-            return dates;
-        }
-
-        function recurringDateMatches(date, seriesStart, recurrence) {
-            const frequency = String(recurrence.frequency || recurrence.freq || '').toLowerCase();
-            const interval = Math.max(1, Math.floor(Number(recurrence.interval) || 1));
-            const diffDays = dateOnlyIndex(date) - dateOnlyIndex(seriesStart);
-
-            if (frequency === 'daily' || frequency === 'day') {
-                return diffDays % interval === 0;
-            }
-
-            if (frequency === 'weekly' || frequency === 'week') {
-                const daysOfWeek = Array.isArray(recurrence.daysOfWeek) && recurrence.daysOfWeek.length
-                    ? recurrence.daysOfWeek.map(Number)
-                    : [seriesStart.getDay()];
-                return Math.floor(diffDays / 7) % interval === 0 && daysOfWeek.includes(date.getDay());
-            }
-
-            if (frequency === 'monthly' || frequency === 'month') {
-                const monthIndex = ((date.getFullYear() - seriesStart.getFullYear()) * 12) + (date.getMonth() - seriesStart.getMonth());
-                return monthIndex >= 0 && monthIndex % interval === 0 && date.getDate() === seriesStart.getDate();
-            }
-
-            if (frequency === 'yearly' || frequency === 'year') {
-                const yearIndex = date.getFullYear() - seriesStart.getFullYear();
-                return yearIndex >= 0 &&
-                    yearIndex % interval === 0 &&
-                    date.getMonth() === seriesStart.getMonth() &&
-                    date.getDate() === seriesStart.getDate();
-            }
-
-            return false;
-        }
-
-        function dateOnlyIndex(date) {
-            return Math.round(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000);
-        }
-
-        function filterByCalendarIds(appointments, calendarIds) {
-            return appointments.filter(appointment => shouldShowCalendar(appointment, calendarIds));
-        }
-
-        function shouldShowCalendar(appointment, calendarIds) {
-            if (!Array.isArray(calendarIds)) {
-                return true;
-            }
-            return calendarIds.includes(appointment.calendarId);
-        }
-
-        function recurringMasterCanAppearBetween(appointment, from, to) {
-            const start = parseDateTimeString(appointment.start);
-            if (!start || start > to) {
-                return false;
-            }
-
-            const until = appointment.recurrence?.until
-                ? parseDateTimeString(appointment.recurrence.until)
-                : null;
-
-            return !until || until >= from;
-        }
-
-        function findAppointmentInStore(appointmentId) {
-            if (!appointmentId) {
-                return null;
-            }
-
-            for (const appointments of Object.values(appointmentStore)) {
-                const found = appointments.find(function (appointment) {
-                    return appointment.id === appointmentId;
-                });
-                if (found) {
-                    return found;
-                }
-            }
-
-            return null;
-        }
-
-        function upsertAppointmentInStore(appointment) {
-            if (!appointment.id) {
-                appointment.id = createAppointmentId();
-            }
-
-            removeAppointmentFromStore(appointment.id);
-
-            const year = getAppointmentYear(appointment);
-            ensureYearAppointments(year);
-            appointmentStore[year].push(appointment);
-        }
-
-        function removeAppointmentFromStore(appointmentId) {
-            if (!appointmentId) {
-                return;
-            }
-
-            Object.keys(appointmentStore).forEach(function (year) {
-                appointmentStore[year] = appointmentStore[year].filter(function (appointment) {
-                    return appointment.id !== appointmentId;
-                });
-            });
-        }
-
-        function getAppointmentYear(appointment) {
-            const date = parseDateTimeString(appointment.start);
-            return date ? date.getFullYear() : new Date().getFullYear();
-        }
-
-        function getYearFromDateString(dateString) {
-            const match = String(dateString || '').match(/^(\d{4})-/);
-            return match ? Number(match[1]) : new Date().getFullYear();
-        }
-
-        function createAppointmentId() {
-            const id = `custom-${Date.now()}-${appointmentIdCounter}`;
-            appointmentIdCounter++;
-            return id;
-        }
-
-        function formatDateTime(date) {
-            const yyyy = date.getFullYear();
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const dd = String(date.getDate()).padStart(2, '0');
-            const hh = String(date.getHours()).padStart(2, '0');
-            const ii = String(date.getMinutes()).padStart(2, '0');
-            return `${yyyy}-${mm}-${dd} ${hh}:${ii}:00`;
-        }
-
-        function formatDate(date) {
-            const yyyy = date.getFullYear();
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const dd = String(date.getDate()).padStart(2, '0');
-            return `${yyyy}-${mm}-${dd}`;
-        }
-
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-    });
-</script>
-</body>
+          },
+          events: [
+            { title: 'Quarterly planning', start: offsetDay(-2), color: '#0d6efd' },
+            { title: 'Onboarding session', start: offsetDay(1), color: '#198754' },
+            {
+              title: 'Design review',
+              start: offsetDay(3),
+              end: offsetDay(4),
+              color: '#ffc107',
+              contrastColor: '#000',
+            },
+            { title: 'Release v2.5', start: offsetDay(7), color: '#dc3545' },
+            { title: 'All-hands', start: offsetDay(10), color: '#6f42c1' },
+          ],
+        });
+
+        calendar.render();
+      });
+    </script>
+  </body>
 </html>

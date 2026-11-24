@@ -316,7 +316,7 @@
         {
           "title": "預約排程申請審核",
           "pagecode": "PG_LECTURE",
-          "url": "serv_lectures.php",
+          "url": "sch_cal_list2.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
