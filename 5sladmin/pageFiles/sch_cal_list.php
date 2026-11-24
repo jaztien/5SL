@@ -1,8 +1,15 @@
 <?php
 require_once('../includeFiles/init.inc.php');
 require_once('../includeFiles/db.inc.php');
+// 定義本頁面代碼（排程列表目錄）
+define('PAGE_MARK', 'PG_SCH_CAL');
+define('PAGE_ITEM', 'ITEM_SCH');
+define('PAGE_OPANEL', 1); // 1-新增
+define('SEARCH_OPANEL', !empty($searchURI) ? 2 : 1);
+define('CAL_OPANEL', 1);
+require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
-if (empty($_SESSION['SESS_AD_ID'])) { header('Location: ../5sladmin.php'); exit(); }
+
 $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['token'] ?? '');
 ?>
 <!doctype html>
@@ -141,7 +148,6 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
         <h5 class="text-uppercase">Sidebar-Addons</h5>
         <div class="card-body d-flex flex-column overflow-visible">
             <div class="mb-3">
-
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" role="switch" id="switchToggleDraggable">
                     <label class="form-check-label" for="switchToggleDraggable">draggable</label>
@@ -388,7 +394,6 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
         const $colorpicker = $('#appointmentColor');
         const $dateRange = $('#appointmentDateRange');
 
-        //JazNOTE: start
         // 因安全過濾限制，完整變數與 fetch/ajax 設定請參考系統模組結構，或使用原生 fetch 取代 $.ajax 呼叫。
         const ACT_URL = '../funcFiles/sch_act_func.php';
         const CSRF_TOKEN = '<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>';
@@ -413,17 +418,6 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
 
         function loadAppointments(query) { return callSchApi('func_bs_cal_load', query); }
 
-        const cleanTitle = String(appointment.title || '').replace(/^🔔\s*/, '');
-        $modal.find('input[name="title"]').val(cleanTitle);
-        $modal.find('#appointmentCalendarId').val(appointment.calendarId || 'course');
-        $modal.find('#appointmentTriggerEnable').prop('checked', Number(appointment.triggerEn) === 1);
-        const $goBtn = $('#btnGoDetail');
-        if (mode === 'edit' && appointment.id) {
-        $goBtn.attr('href', `sch_detail.php?currID=${appointment.id}&fromCal=1`).removeClass('d-none');
-        } else {
-        $goBtn.addClass('d-none');
-        }
-        //JazNOTE: End
 
         $colorpicker.bsColorPicker({
             btnClass: 'btn btn-lg btn-outline-secondary',
@@ -513,15 +507,9 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
 
         function initCalendar() {
             let eventCounter = 1;
-            /*//JazNOTE: delete
-            $calendar.on('init.bs.calendar', function () {
-                applyDemoText();
-            });
-            */
             $calendar.bsCalendar({
-                title: '<span class="h4 mb-0">My awesome calendar</span>',
-                locale: 'zh-TW', //JazNOTE:
-                //locale: demoText.locale,
+                title: '<span class="h4 mb-0">全站排程與通知日曆</span>',
+                locale: 'zh-TW',
                 startView: '4day',
                 views: ['year', 'month', 'monthCompact', 'agenda', 'week', 'workweek', '4day', 'day', 'timeline'],
                 startWeekOnSunday: false,
@@ -531,13 +519,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 storeState: false,
                 debug: false,
                 url: loadAppointments,
-                holidays: null,//JazNOTE:
-                /*
-                holidays: {
-                    country: demoText.holidays.country,
-                    federalState: demoText.holidays.federalState
-                },
-                */
+                holidays: null,
                 hourSlots: {
                     start: '06:30',
                     end: '20:30',
@@ -545,8 +527,8 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                     timeLabelIntervalMinutes: $('#switchQuarterHourLabels').is(':checked') ? 15 : null
                 },
                 // Dated availability ranges repeat through the shared recurrence format.
-                availabilityRules: null,//JazNOTE:
-                calendars: FSL_CALENDARS,//JazNOTE:
+                availabilityRules: null,
+                calendars: FSL_CALENDARS,
                 onDuplicate(appointment) {
                     appointment.id = 'copy_of_' + appointment.id;
                     upsertAppointmentInStore(appointment);
@@ -813,7 +795,6 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 .on('change', 'input[name="isTask"]', function () {
                     $modal.find('.js-priority-fields').toggle($(this).prop('checked'));
                 })
-                //JazNOTE: start
                 .on('click', '[data-save-appointment]', async function () {
                 const appt = readAppointmentModal();
                 const res = await callSchApi('func_bs_cal_save', appt);
@@ -823,7 +804,6 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                     if ($.bsToast) $.bsToast({ title: '成功', message: res.msgStr });
                 } else { alert(res.msgStr || '儲存失敗'); }
                 });
-                //JazNOTE: end
         }
 
         function initModalTimepickers() {
@@ -858,11 +838,18 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
             modalState.mode = mode;
             modalState.appointmentId = appointment.id || null;
             modalState.taskChecked = !!appointment.task?.checked;
-
             $modal.find('.modal-title').text(mode === 'edit' ? t.modalEditTitle : t.modalAddTitle);
             $modal.find('[data-save-appointment]').text(mode === 'edit' ? t.modalUpdate : t.modalCreate);
-            $modal.find('input[name="title"]').val(appointment.title || '');
-
+            const cleanTitle = String(appointment.title || '').replace(/^🔔\s*/, '');
+            $modal.find('input[name="title"]').val(cleanTitle);
+            $modal.find('#appointmentCalendarId').val(appointment.calendarId || 'course');
+            $modal.find('#appointmentTriggerEnable').prop('checked', Number(appointment.triggerEn) === 1);
+            const $goBtn = $('#btnGoDetail');
+            if (mode === 'edit' && appointment.id) {
+            $goBtn.attr('href', `sch_detail.php?currID=${appointment.id}&fromCal=1`).removeClass('d-none');
+            } else {
+            $goBtn.addClass('d-none');
+            }
             // console.log(mode, appointment);
             if (typeof $.fn.bsDatepicker === 'function') {
                 $dateRange.bsDatepicker('val', [appointment.startDate, appointment.endDate]);
@@ -886,7 +873,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
             $modal.find(`input[name="priority"][value="${priority || 'normal'}"]`).prop('checked', true);
             $modal.find('input[name="due"]').val(due ? due.substring(0, 16).replace(' ', 'T') : '');
 
-            $modal.find('textarea[name="description"]').val(appointment.description || '');
+            $modal.find('textarea[name="description"]').val(appointment.rawDesc || appointment.description || '');
             $modal.find('textarea[name="location"]').val(formatLocationValue(appointment.location));
             $colorpicker.bsColorPicker('val', appointment.color);
             // $modal.find('input[name="color"]').val(normalizeColorInput(appointment.color));
@@ -943,8 +930,8 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                     priority: $modal.find('input[name="priority"]:checked').val(),
                     due: $modal.find('input[name="due"]').val() ? $modal.find('input[name="due"]').val().replace('T', ' ') + ':00' : null
                 } : null,
-                calendarId: $('#appointmentCalendarId').val() || 'course', //JazNOTE:
-                trigger_enable: $('#appointmentTriggerEnable').is(':checked') ? 1 : 0, //JazNOTE:
+                calendarId: $('#appointmentCalendarId').val() || 'course', 
+                trigger_enable: $('#appointmentTriggerEnable').is(':checked') ? 1 : 0, 
                 description: $modal.find('textarea[name="description"]').val(),
                 location: parseLocationValue($modal.find('textarea[name="location"]').val()),
                 color: $modal.find('input[name="color"]').val(),
@@ -1054,6 +1041,13 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
+
+        $('#flexSwitchCheckTheme').prop('checked', false)
+            .on('change', function () {
+                const htmlElement = $('html');
+                const theme = htmlElement.attr('data-bs-theme') === 'light' ? 'dark' : 'light';
+                htmlElement.attr('data-bs-theme', theme);
+        });
 
     });
 </script>
