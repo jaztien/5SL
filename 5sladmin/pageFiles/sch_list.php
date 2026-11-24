@@ -275,6 +275,15 @@ $execMap = array(
   <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
 
   <script type="text/javascript">
+  ////////////////////////////////////////////////////////////////
+  // ---------------- JAVASCRIPTS 全域調用參數設置 --------------- //
+  ////////////////////////////////////////////////////////////////
+
+  ////////////////////////////////////////////////////////////////
+  // -------------- JAVASCRIPTS FUNCTIONs 全域調用 -------------- //
+  // -------------- 可接收include檔案要求後自定義動作 -------------- //
+  ////////////////////////////////////////////////////////////////
+
   function doButAdd() { window.location.href = 'sch_detail.php?currID=0'; }
   function doButReset() { window.location.replace('sch_list.php'); }
   function doButSerach() {
@@ -284,7 +293,13 @@ $execMap = array(
   function doButExcel() { $('.buttons-excel').click(); }
   function doButPrint() { $('.buttons-print').click(); }
 
+  ////////////////////////////////////////////////////////////////
+  // ---------------- jQuery FUNCTIONs 區域調用 ---------------- //
+  // ---------------------------------------------------------- //
+  ////////////////////////////////////////////////////////////////
+
   $(document).ready(function() {
+    
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
 
