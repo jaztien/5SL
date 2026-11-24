@@ -13,7 +13,7 @@ require_once('../includeFiles/common.lib.php');
 $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['token'] ?? '');
 ?>
 <!doctype html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en" data-bs-theme="light">
 
 <head>
     <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
@@ -139,6 +139,52 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 padding-inline: 3rem;
             }
         }
+
+#appointmentModal .form-switch .form-check-input {
+    position: relative !important;
+    background-image: none !important;
+    background-color: transparent !important;
+    border: 1px solid #6c757d !important;
+    box-shadow: none !important;
+}
+#appointmentModal .form-switch .form-check-input::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: calc(1em - 4px);
+    height: calc(1em - 4px);
+    border-radius: 50%;
+    background-color: #adb5bd;
+    transition: transform .15s ease-in-out, background-color .15s ease-in-out;
+}
+#appointmentModal .form-switch .form-check-input:focus {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+}
+#appointmentModal .form-switch .form-check-input::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 2px;
+    width: calc(1em - 5px);
+    height: calc(1em - 5px);
+    border-radius: 50%;
+    background-color: #adb5bd;
+    transform: translateY(-50%);
+    transition: transform .15s ease-in-out, background-color .15s ease-in-out;
+}
+#appointmentModal .form-switch .form-check-input:checked {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+#appointmentModal .form-switch .form-check-input:checked::after {
+    background-color: #ffffff;
+    transform: translate(1em, -50%);
+}
+
+
+
     </style>
 </head>
 
@@ -157,55 +203,31 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
 
             <div class="visually-hidden">
                 <div id="sidebarAddons">
-                    <h5 class="text-uppercase">Sidebar-Addons</h5>
-                    <div class="card-body d-flex flex-column overflow-visible">
-                        <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" id="switchToggleDraggable">
-                                <label class="form-check-label" for="switchToggleDraggable">draggable</label>
-                            </div>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" id="switchTriggeredEvents">
-                                <label class="form-check-label" for="switchTriggeredEvents">Show triggered events.</label>
-                            </div>
-                            <div class="form-check form-switch mt-2">
-                                <input class="form-check-input" type="checkbox" role="switch" id="switchQuarterHourLabels" checked>
-                                <label class="form-check-label" for="switchQuarterHourLabels">Quarter-hour labels</label>
-                            </div>
-                            <label class="form-label mt-3 mb-1" for="selectClickSnapMode">Click-to-add rounding</label>
-                            <select class="form-select form-select-sm mb-2" id="selectClickSnapMode">
-                                <option value="nearest">Nearest quarter hour</option>
-                                <option value="previous">Previous quarter hour</option>
-                                <option value="next">Next quarter hour</option>
-                            </select>
-                            <label class="form-label mt-3 mb-1" for="selectAppointmentRule">Appointment duration</label>
-                            <select class="form-select form-select-sm mb-2" id="selectAppointmentRule">
-                                <option value="none">No duration rule</option>
-                                <option value="coaching45">45-minute coaching blocks</option>
-                                <option value="fixed60">Exactly 60 minutes</option>
-                            </select>
-                            <div class="small text-body-secondary mb-3" data-appointment-rule-help>
-                                Drag-create and drag-resize respect the selected duration rule.
-                            </div>
-                            <!--                <div class="small text-body-secondary mb-3">-->
-                            <!--                    BS-Toast powered by<br>-->
-                            <!--                    <a href="https://github.webcito.de/?bootswatch=bootstrap&plugin=bs-toast" target="_blank"-->
-                            <!--                       rel="noopener noreferrer">ThomasDev-de/bs-toast</a>.-->
-                            <!--                </div>-->
+                    <h6 class="text-uppercase text-body-secondary fw-semibold mb-2">日曆操作與檢視</h6>
+                    <div class="d-flex flex-column gap-2 mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckTheme" checked>
+                            <label class="form-check-label" for="flexSwitchCheckTheme">深色模式主題</label>
                         </div>
-
-                        <button type="button" class="btn btn-primary btn-sm mb-1 rounded-pill" data-method="setToday" data-view="week">setToday
-                            ('week')
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="switchToggleDraggable">
+                            <label class="form-check-label" for="switchToggleDraggable">啟用拖曳改期</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="switchQuarterHourLabels" checked>
+                            <label class="form-check-label" for="switchQuarterHourLabels">顯示 15 分鐘刻度</label>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a href="sch_list.php" class="btn btn-outline-secondary btn-sm rounded-pill">
+                            <i class="bi bi-list-ul me-1"></i> 切換列表檢視
+                        </a>
+                        <a href="sch_detail.php?currID=0&fromCal=1" class="btn btn-primary btn-sm rounded-pill">
+                            <i class="bi bi-plus-lg me-1"></i> 建立完整通知排程
+                        </a>
+                        <button type="button" class="btn btn-outline-info btn-sm rounded-pill" data-method="refresh">
+                            <i class="bi bi-arrow-clockwise me-1"></i> 重新同步資料
                         </button>
-                        <button type="button" class="btn btn-primary btn-sm mb-1 rounded-pill" data-method="setToday" data-view="4day">
-                            setToday('4day')
-                        </button>
-                        <button type="button" class="btn btn-primary btn-sm mb-1 rounded-pill" data-method="setLocale" data-locale="en-US">
-                            setLocale('en-US')
-                        </button>
-                        <button type="button" class="btn btn-primary btn-sm mb-1 rounded-pill" data-method="render">Render</button>
-                        <button type="button" class="btn btn-primary btn-sm mb-1 rounded-pill" data-method="refresh">Refresh</button>
-                        <button type="button" class="btn btn-primary btn-sm mb-1 rounded-pill" data-method="clear">Clear</button>
                     </div>
                 </div>
             </div>
@@ -396,6 +418,32 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
             </div>
             <div class="offcanvas-body">
 
+                <div class="mb-3">
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" role="switch" id="switchTriggeredEvents">
+                        <label class="form-check-label" for="switchTriggeredEvents">顯示觸發事件通知 (Toast)</label>
+                    </div>
+                    <label class="form-label small text-secondary mb-1" for="selectClickSnapMode">點擊新增時間對齊</label>
+                    <select class="form-select form-select-sm mb-2" id="selectClickSnapMode">
+                        <option value="nearest">最近 15 分鐘刻度</option>
+                        <option value="previous">向下對齊 15 分鐘</option>
+                        <option value="next">向上對齊 15 分鐘</option>
+                    </select>
+                    <label class="form-label small text-secondary mb-1" for="selectAppointmentRule">預設時長規則</label>
+                    <select class="form-select form-select-sm mb-2" id="selectAppointmentRule">
+                        <option value="none">不限制時長</option>
+                        <option value="coaching45">45 分鐘課程區塊</option>
+                        <option value="fixed60">固定 60 分鐘</option>
+                    </select>
+                </div>
+                <hr class="border-secondary">
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-outline-light btn-sm" data-cal-cmd="setToday" data-view="week">回到本週 (Week)</button>
+                    <button type="button" class="btn btn-outline-light btn-sm" data-cal-cmd="setToday" data-view="4day">回到今日 4 日檢視</button>
+                    <button type="button" class="btn btn-outline-light btn-sm" data-cal-cmd="render">重新繪製畫面 (Render)</button>
+                    <button type="button" class="btn btn-outline-warning btn-sm" data-cal-cmd="clear">暫時清空畫面 (Clear)</button>
+                </div>
+
             </div>
         </div>
 
@@ -422,13 +470,13 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
         // -------------- JAVASCRIPTS FUNCTIONs 全域調用 -------------- //
         // -------------- 可接收include檔案要求後自定義動作 -------------- //
         ////////////////////////////////////////////////////////////////
-
+        /** 頂部工具列「新增」按鈕：前往完整排程設定頁 */
         function doButAdd() {
-            window.location.href = 'sess_detail.php?currID=0';
+            window.location.href = 'sch_detail.php?currID=0&fromCal=1';
         }
-
+        /** 頂部工具列「重整」按鈕：重新載入日曆頁 */
         function doButReset() {
-            window.location.replace('sess_list.php');
+            window.location.replace('sch_cal_list.php');
         }
 
         function doButSerach() {
@@ -476,7 +524,12 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                     active: true
                 }
             ];
-
+            /** bs-calendar 繁體中文介面翻譯詞庫常數 */
+            const FSL_TRANSLATIONS = {
+                today: '今天', day: '日', week: '週', month: '月',
+                agenda: '議程清單', allDay: '全天', search: '搜尋...'
+            };
+            /** 統一封裝後端 AJAX 請求（自動夾帶 CSRF Token 與 formAcce 操作代碼） */
             async function callSchApi(actionName, payload = {}) {
                 const body = new URLSearchParams();
                 body.append('token', CSRF_TOKEN);
@@ -491,7 +544,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 });
                 return res.json();
             }
-
+            /** bs-calendar 遠端資料載入器：向後端請求指定區間、年視圖或關鍵字搜尋的排程清單 */
             function loadAppointments(query) {
                 return callSchApi('func_bs_cal_load', query);
             }
@@ -511,6 +564,14 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 appointmentId: null,
                 taskChecked: false
             };
+            const demoText = {
+                modalAddTitle: '新增排程事件',
+                modalEditTitle: '編輯排程事件',
+                modalCreate: '建立排程',
+                modalUpdate: '儲存變更',
+                untitled: '未命名排程'
+            };
+            /*
             const demoText = {
                 locale: 'en-US',
                 holidays: {
@@ -586,23 +647,25 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 ['Studio 3', '2nd floor'],
                 'Online'
             ];
+            */
 
             // Temporary in-memory store. Each year is generated once and then reused.
             // Example: appointmentStore[2026] = [{...}, {...}]
-            const appointmentStore = {};
-            let appointmentIdCounter = 1;
+            //const appointmentStore = {};
+            //let appointmentIdCounter = 1;
 
             initAppointmentModal();
             initCalendar();
             bindCalendarEvents();
             bindSidebarActions();
-
+            /** 初始化 bs-calendar 主元件、語系翻譯、分類篩選與複製排程回呼 */
             function initCalendar() {
                 let eventCounter = 1;
                 $calendar.bsCalendar({
                     title: '<span class="h4 mb-0">全站排程與通知日曆</span>',
                     locale: 'zh-TW',
-                    startView: '4day',
+                    translations: FSL_TRANSLATIONS,
+                    startView: 'month',
                     views: ['year', 'month', 'monthCompact', 'agenda', 'week', 'workweek', '4day', 'day', 'timeline'],
                     startWeekOnSunday: false,
                     navigateOnWheel: false,
@@ -621,10 +684,16 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                     // Dated availability ranges repeat through the shared recurrence format.
                     availabilityRules: null,
                     calendars: FSL_CALENDARS,
-                    onDuplicate(appointment) {
-                        appointment.id = 'copy_of_' + appointment.id;
-                        upsertAppointmentInStore(appointment);
-                        $calendar.bsCalendar('addAppointment', appointment);
+                    /** 點擊資訊窗「複製」按鈕：自動複製一筆新排程寫入資料庫並重整 */
+                    async onDuplicate(appointment) {
+                        const copyData = { ...appointment, title: '[複製] ' + String(appointment.title || '').replace(/^🔔\s*/, '') };
+                        delete copyData.id;
+                        delete copyData.recurringId;
+                        const res = await callSchApi('func_bs_cal_save', copyData);
+                        if (res.RTN === 1) {
+                            $calendar.bsCalendar('refresh');
+                            if ($.bsToast) $.bsToast({ title: '已複製排程', message: res.msgStr });
+                        }
                     },
                     onAll(eventName, ...args) {
                         if (eventName.startsWith('init.')) {
@@ -646,12 +715,9 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                     }
                 });
             }
-
+            /** 綁定日曆核心互動事件（點擊/拖曳新增、編輯改期、作廢刪除、任務核取切換） */
             function bindCalendarEvents() {
                 $calendar
-                    .on('change', '#switchTriggeredEvents', function() {
-                        $calendar.bsCalendar('refresh');
-                    })
                     .on('change', '#switchToggleDraggable', function() {
                         $calendar.bsCalendar('updateOptions', {
                             draggable: $(this).is(':checked')
@@ -663,17 +729,6 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                                 timeLabelIntervalMinutes: $(this).is(':checked') ? 15 : null
                             }
                         });
-                    })
-                    .on('change', '#selectClickSnapMode', function() {
-                        $calendar.bsCalendar('updateOptions', {
-                            clickSnapMode: $(this).val()
-                        });
-                    })
-                    .on('change', '#selectAppointmentRule', function() {
-                        $calendar.bsCalendar('updateOptions', {
-                            appointmentRules: getDemoAppointmentRules($(this).val())
-                        });
-                        $calendar.bsCalendar('render');
                     })
                     .on('add.bs.calendar', function(event, data, dragExtras) {
                         const start = dragExtras?.start || data.start;
@@ -696,10 +751,10 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                     })
                     .on('edit.bs.calendar', function(event, appointment, extras, dragExtras) {
                         event.preventDefault();
-
-                        const sourceAppointment = appointment.recurringId ?
-                            findAppointmentInStore(appointment.recurringId) || appointment :
-                            appointment;
+                        /** 若為週期展開的子項目，取 recurringId 作為主排程 ID 並還原原始起始結束時間 */
+                        const sourceAppointment = appointment.recurringId
+                            ? { ...appointment, id: appointment.recurringId, start: appointment.extras?.recurrence?.sourceStart || appointment.start }
+                            : appointment;
                         const eventExtras = dragExtras || extras;
                         const sourceStart = parseDateTimeString(sourceAppointment.start);
                         const sourceEnd = parseDateTimeString(sourceAppointment.end);
@@ -721,6 +776,8 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                             allDay: isAllDay,
                             overlap: !!sourceAppointment.overlap,
                             recurrence: sourceAppointment.recurrence || null,
+                            calendarId: sourceAppointment.calendarId || 'course',
+                            triggerEn: sourceAppointment.triggerEn ?? 0,
                             description: sourceAppointment.description || '',
                             location: sourceAppointment.location || '',
                             color: extras.colors.hex || '#0d6efd',
@@ -762,14 +819,44 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                         }
                     });
             }
-
+            /** 取得新增排程時的預設隨機色碼（優先使用 bsColorPicker 工具，否則回傳藍色） */
             function getRandomAppointmentColor() {
                 if ($.bsColorPicker?.utils?.getRandomColor) {
                     return $.bsColorPicker.utils.getRandomColor('rgba', .7);
                 }
                 return '#0d6efd';
             }
+            /** 綁定左側控制面板與右側 Offcanvas 測試按鈕事件 */
+            function bindSidebarActions() {
+                // 1. 深色/淺色模式切換與 2. 重新同步資料按鈕事件
+                $calendar.on('change', '#flexSwitchCheckTheme', function () {
+                    $('html').attr('data-bs-theme', $(this).is(':checked') ? 'dark' : 'light');
+                    $calendar.bsCalendar('render');
+                }).on('click', '[data-method="refresh"]', function (e) {
+                    e.preventDefault();
+                    $calendar.bsCalendar('refresh');
+                });
+                $(document).on('click', '[data-cal-cmd]', function (e) {
+                    e.preventDefault();
+                    const cmd = $(this).data('cal-cmd');
+                    const view = $(this).data('view');
+                    if (cmd === 'setToday') $calendar.bsCalendar('setToday', view || 'week');
+                    else $calendar.bsCalendar(cmd);
+                });
+                $(document).on('change', '#switchTriggeredEvents', function () {
+                    $calendar.bsCalendar('refresh');
+                }).on('change', '#selectClickSnapMode', function () {
+                    $calendar.bsCalendar('updateOptions', { clickSnapMode: $(this).val() });
+                });
+                $(document).on('change', '#selectAppointmentRule', function () {
+                    $calendar.bsCalendar('updateOptions', {
+                        appointmentRules: getDemoAppointmentRules($(this).val())
+                    });
+                    $calendar.bsCalendar('render');
+                });
+            }
 
+            /*
             function bindSidebarActions() {
                 $calendar.on('click', '[data-method]', function(event) {
                     event.preventDefault();
@@ -798,7 +885,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                     }
                 });
             }
-
+            
             function applyDemoText() {
                 const t = demoText;
 
@@ -841,9 +928,9 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 if (typeof $.fn.bsDatepicker === 'function') {
                     $dateRange.bsDatepicker('setLocale', t.locale);
                 }
-                applyCalendarLabels(t.calendars);
+                //applyCalendarLabels(t.calendars);
             }
-
+            
             function applyCalendarLabels(calendars) {
                 if (!Array.isArray(calendars)) {
                     return;
@@ -863,7 +950,8 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                     $(this).find('span').first().text(titleById[id]);
                 });
             }
-
+            */
+            /** 依下拉選單代碼回傳對應的排程時長限制規則（如固定 60 分鐘或 45 分鐘倍數） */
             function getDemoAppointmentRules(rule) {
                 switch (rule) {
                     case 'coaching45':
@@ -885,7 +973,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                         };
                 }
             }
-
+            /** 初始化新增/編輯排程彈窗內的時間選擇器與「全天 / 任務 / 儲存」表單事件 */
             function initAppointmentModal() {
                 initModalTimepickers();
 
@@ -914,7 +1002,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                         }
                     });
             }
-
+            /** 批次初始化彈窗內的開始時間與結束時間選擇器（bsTimepicker） */
             function initModalTimepickers() {
                 if (typeof $.fn.bsTimepicker !== 'function') {
                     return;
@@ -924,7 +1012,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                     ensureTimepickerInitialized($(this));
                 });
             }
-
+            /** 確保單一時間選擇器已完成實例化（避免重複初始化） */
             function ensureTimepickerInitialized($input) {
                 if (typeof $.fn.bsTimepicker !== 'function' || !$input || !$input.length) {
                     return false;
@@ -941,7 +1029,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 });
                 return !!$input.data('bsTimepicker');
             }
-
+            /** 開啟新增或編輯排程彈窗，並將排程資料填入表單欄位與設定詳細頁面跳轉連結 */
             function openAppointmentModal(mode, appointment) {
                 const t = demoText;
                 modalState.mode = mode;
@@ -989,7 +1077,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 $modal.find('input[name="link"]').val(appointment.link || '');
                 $modal.modal('show');
             }
-
+            /** 設定彈窗內開始或結束時間選擇器的值（自動標準化為 HH:mm 格式） */
             function setModalTimeValue(fieldName, value) {
                 const selector = fieldName === 'from_time' ? '#appointmentFromTimePicker' : '#appointmentToTimePicker';
                 const $input = $modal.find(selector);
@@ -1004,7 +1092,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 }
                 $input.val(normalized);
             }
-
+            /** 讀取彈窗內開始或結束時間選擇器的目前時間字串 */
             function getModalTimeValue(fieldName) {
                 const selector = fieldName === 'from_time' ? '#appointmentFromTimePicker' : '#appointmentToTimePicker';
                 const $input = $modal.find(selector);
@@ -1013,12 +1101,11 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 }
                 return normalizeTimeInputValue($input.val());
             }
-
+            /** 讀取彈窗內所有表單欄位值，組裝為符合後端與 bs-calendar 格式的排程物件 */
             function readAppointmentModal() {
                 const t = demoText;
                 const allDay = $modal.find('input[name="allDay"]').prop('checked');
                 const isTask = $modal.find('input[name="isTask"]').is(':checked');
-
                 const appointment = {
                     title: $modal.find('input[name="title"]').val() || t.untitled,
                     start: buildDateTime(
@@ -1043,7 +1130,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                     trigger_enable: $('#appointmentTriggerEnable').is(':checked') ? 1 : 0,
                     description: $modal.find('textarea[name="description"]').val(),
                     location: parseLocationValue($modal.find('textarea[name="location"]').val()),
-                    color: $modal.find('input[name="color"]').val(),
+                    color: $.bsCalendar?.utils?.toHex ? $.bsCalendar.utils.toHex($modal.find('input[name="color"]').val()) : '#3b82f6',
                     link: $modal.find('input[name="link"]').val()
                 };
 
@@ -1069,14 +1156,14 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
 
                 return appointment;
             }
-
+            /** 將地點資料（字串或陣列）轉換為多行換行文字，供 textarea 顯示 */
             function formatLocationValue(location) {
                 if (Array.isArray(location)) {
                     return location.join('\n');
                 }
                 return location || '';
             }
-
+            /** 將 textarea 多行地點文字拆解為單一字串或字串陣列 */
             function parseLocationValue(value) {
                 const locations = String(value || '')
                     .split(/\r?\n/)
@@ -1087,18 +1174,18 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 }
                 return locations[0] || '';
             }
-
+            /** 組合日期與時間為標準資料庫格式（YYYY-MM-DD HH:mm:ss），全天事件自動補 00:00:00 或 23:59:59 */
             function buildDateTime(date, time, allDay, isEnd = false) {
                 if (allDay) {
                     return `${date} ${isEnd ? '23:59:59' : '00:00:00'}`;
                 }
                 return `${date} ${time || (isEnd ? '23:59' : '00:00')}:00`;
             }
-
+            /** 驗證並標準化 Hex 色彩代碼（無效色碼時回傳預設藍色 #0d6efd） */
             function normalizeColorInput(color) {
                 return /^#[0-9a-f]{6}$/i.test(color || '') ? color : '#0d6efd';
             }
-
+            /** 將各種時間字串格式正規化為兩位數的 HH:mm 格式 */
             function normalizeTimeInputValue(time) {
                 const match = String(time || '').match(/(?:^|\s|T)(\d{1,2}):(\d{2})(?::\d{2})?/);
                 if (!match) {
@@ -1106,7 +1193,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 }
                 return `${match[1].padStart(2, '0')}:${match[2]}`;
             }
-
+            /** 將 YYYY-MM-DD HH:mm:ss 字串安全解析為 JavaScript Date 物件 */
             function parseDateTimeString(str) {
                 const match = String(str || '').match(
                     /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/
@@ -1123,7 +1210,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 const date = new Date(year, month, day, hours, minutes, seconds, 0);
                 return isNaN(date.getTime()) ? null : date;
             }
-
+            /** 從 Date 物件或日期時間字串中提取 HH:mm 時間部分 */
             function extractTimeFromDateTime(value) {
                 if (!value) {
                     return '';
@@ -1142,22 +1229,31 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 }
                 return '';
             }
-
+            /** 優先採用指定時間，若無則從備援日期時間字串中提取時間 */
             function resolveModalTime(preferredTime, fallbackDateTime) {
                 return normalizeTimeInputValue(preferredTime) || extractTimeFromDateTime(fallbackDateTime);
             }
+            
+            
+            function formatDateTime(date) {
+                const yyyy = date.getFullYear();
+                const mm = String(date.getMonth() + 1).padStart(2, '0');
+                const dd = String(date.getDate()).padStart(2, '0');
+                const hh = String(date.getHours()).padStart(2, '0');
+                const ii = String(date.getMinutes()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd} ${hh}:${ii}:00`;
+            }
 
+            function formatDate(date) {
+                const yyyy = date.getFullYear();
+                const mm = String(date.getMonth() + 1).padStart(2, '0');
+                const dd = String(date.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            }
+            /** 非同步延遲等待輔助函式（毫秒） */
             function sleep(ms) {
                 return new Promise(resolve => setTimeout(resolve, ms));
             }
-
-            $('#flexSwitchCheckTheme').prop('checked', false)
-                .on('change', function() {
-                    const htmlElement = $('html');
-                    const theme = htmlElement.attr('data-bs-theme') === 'light' ? 'dark' : 'light';
-                    htmlElement.attr('data-bs-theme', theme);
-                });
-
 
             //---------------------------- 頁面必備基本函式 -------------------------------//
             const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');

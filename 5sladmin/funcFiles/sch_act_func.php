@@ -402,6 +402,10 @@ switch ($formAcce) {
     $allDay  = filter_var($_POST['allDay'] ?? false, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
     $catId   = trim((string)($_POST['calendarId'] ?? 'admin')) ?: 'admin';
     $color   = trim((string)($_POST['color'] ?? '#3b82f6')) ?: '#3b82f6';
+    if (preg_match('/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i', $color, $cm)) {
+      $color = sprintf('#%02x%02x%02x', $cm[1], $cm[2], $cm[3]);
+    }
+    $color = substr($color, 0, 20);
     $desc    = (string)($_POST['description'] ?? '');
     $trigEn  = isset($_POST['trigger_enable']) ? (int)$_POST['trigger_enable'] : null;
     $recRaw  = $_POST['recurrence'] ?? null;
