@@ -780,7 +780,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                             triggerEn: sourceAppointment.triggerEn ?? 0,
                             description: sourceAppointment.description || '',
                             location: sourceAppointment.location || '',
-                            color: extras.colors.hex || '#0d6efd',
+                            color: extras?.colors?.hex || sourceAppointment.color || '#0d6efd',
                             link: sourceAppointment.link || '',
                             task: sourceAppointment.task || null
                         });
@@ -1042,11 +1042,17 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 $modal.find('#appointmentCalendarId').val(appointment.calendarId || 'course');
                 $modal.find('#appointmentTriggerEnable').prop('checked', Number(appointment.triggerEn) === 1);
                 const $goBtn = $('#btnGoDetail');
-                if (mode === 'edit' && appointment.id) {
-                    $goBtn.attr('href', `sch_detail.php?currID=${appointment.id}&fromCal=1`).removeClass('d-none');
+                const rawIdStr = String(appointment.id || '');
+                if (mode === 'edit' && rawIdStr.startsWith('less_')) {
+                    const targetHref = (appointment.link && appointment.link.href) ? appointment.link.href : 'cs_list.php';
+                    $goBtn.attr('href', targetHref).html('<i class="bi bi-mortarboard"></i> 前往所屬課程管理').removeClass('d-none');
+                } else if (mode === 'edit' && rawIdStr.startsWith('sch_')) {
+                    const realSchId = rawIdStr.replace('sch_', '');
+                    $goBtn.attr('href', `sch_detail.php?currID=${realSchId}&fromCal=1`).html('<i class="bi bi-sliders"></i> 進階通知對象設定').removeClass('d-none');
                 } else {
                     $goBtn.addClass('d-none');
                 }
+
                 // console.log(mode, appointment);
                 if (typeof $.fn.bsDatepicker === 'function') {
                     $dateRange.bsDatepicker('val', [appointment.startDate, appointment.endDate]);

@@ -56,6 +56,28 @@ switch ($formAcce) {
       $res   = DB->insert('fsl_courses', $formData);
       $newID = (int)DB->lastInsertId();
       $targetID = $newID;
+
+      $parentId  = (int)($formData['parent_id'] ?? 0);
+      $startDate = trim((string)($formData['course_startdate'] ?? ''));
+      if ($parentId === 0 && $newID > 0 && $startDate !== '' && function_exists('_fn_generate_course_lessons')) {
+        $insFirstSess = array(
+          'course_id'      => $newID,
+          'sess_batch'     => 1,
+          'sess_startdate' => $startDate,
+          'sess_starttime' => !empty($formData['course_starttime']) ? $formData['course_starttime'] : '14:00:00',
+          'sess_location'  => !empty($formData['course_location']) ? $formData['course_location'] : '線上視訊會議室',
+          'sess_enrollee'  => 0,
+          'sess_status'    => 1
+        );
+        DB->insert('fsl_course_sessions', $insFirstSess);
+        $firstSessId = (int)DB->lastInsertId();
+
+        $insFirstSess['sess_lesson']   = max(1, (int)($formData['course_lesson'] ?? 1));
+        $insFirstSess['sess_duration'] = max(15, (int)($formData['course_duration'] ?? 60));
+        $insFirstSess['sess_onweek']   = $formData['course_onweek'] ?? '';
+        _fn_generate_course_lessons($newID, $firstSessId, $formData['course_title'], $insFirstSess);
+      }
+      
     } else {
       if ($csID <= 0) {
         echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的課程 ID！']);
@@ -68,6 +90,22 @@ switch ($formAcce) {
       $formData['course_updated'] = $upTime;
       $res      = DB->update('fsl_courses', $formData, ['course_id' => $csID]);
       $targetID = $csID;
+
+      // 若為主課程且有開啟同步重算，同步更新旗下進行中梯次的日曆排程
+      if ((int)($formData['parent_id'] ?? 0) === 0 && function_exists('_fn_sync_session_schedules')) {
+        $activeSessList = DB->query(
+          "SELECT * FROM fsl_course_sessions WHERE course_id = ? AND sess_status IN (1, 2)",
+          array($csID)
+        );
+        if (is_array($activeSessList)) {
+          foreach ($activeSessList as $asRow) {
+            $asRow['sess_lesson']   = max(1, (int)($asRow['sess_lesson'] ?? $formData['course_lesson'] ?? 1));
+            $asRow['sess_duration'] = max(15, (int)($asRow['sess_duration'] ?? $formData['course_duration'] ?? 60));
+            _fn_sync_session_schedules($csID, (int)$asRow['sess_id'], $formData['course_title'], $asRow);
+          }
+        }
+      }
+
     }
 
     // 處理課程封面裁切圖上傳
@@ -135,7 +173,69 @@ switch ($formAcce) {
       'sess_status'    => 1
     );
     DB->insert('fsl_course_sessions', $insSess);
-    echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => "第 {$batch} 梯次已成功新增！"]);
+    $newSessId = (int)DB->lastInsertId();
+
+    $lessCnt = 0;
+    if ($newSessId > 0 && function_exists('_fn_generate_course_lessons')) {
+      $mCourse = DB->row("SELECT course_title, course_lesson, course_duration FROM fsl_courses WHERE course_id = ?", array($masterID));
+      if ($mCourse) {
+        $insSess['sess_lesson']   = max(1, (int)($_POST['sess_lesson'] ?? $mCourse['course_lesson'] ?? 1));
+        $insSess['sess_duration'] = max(15, (int)($_POST['sess_duration'] ?? $mCourse['course_duration'] ?? 60));
+        $insSess['sess_onweek']   = trim((string)($_POST['sess_onweek'] ?? ''));
+        $lessCnt = _fn_generate_course_lessons($masterID, $newSessId, $mCourse['course_title'], $insSess);
+      }
+    }
+
+    $tip = ($lessCnt > 0) ? "並自動展開 {$lessCnt} 堂課次與課前提醒！" : '';
+    echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => "第 {$batch} 梯次已成功新增！{$tip}"]);
+
+    exit();
+  break;
+
+  case 'func_sess_update':
+    $sessID    = (int)($_POST['sessID'] ?? 0);
+    $batch     = max(1, (int)($_POST['sess_batch'] ?? 1));
+    $startDate = trim((string)($_POST['sess_startdate'] ?? ''));
+    $startTime = trim((string)($_POST['sess_starttime'] ?? '14:00:00'));
+    $location  = trim((string)($_POST['sess_location'] ?? ''));
+
+    if ($sessID <= 0 || $startDate === '') {
+      echo json_encode(['RTN' => 0, 'msgType' => 'warning', 'msgStr' => '請完整填寫梯次 ID 與開課日期！']);
+      exit();
+    }
+
+    $oldSess = DB->row("SELECT * FROM fsl_course_sessions WHERE sess_id = ?", array($sessID));
+    if (!$oldSess) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '找不到指定梯次資料！']);
+      exit();
+    }
+
+    $masterID = (int)$oldSess['course_id'];
+    $updSess  = array(
+      'sess_batch'     => $batch,
+      'sess_startdate' => $startDate,
+      'sess_starttime' => $startTime,
+      'sess_location'  => ($location !== '' ? $location : '線上視訊會議室')
+    );
+    if (isset($_POST['sess_altname']))  $updSess['sess_altname']  = trim((string)$_POST['sess_altname']);
+    if (isset($_POST['sess_onweek']))   $updSess['sess_onweek']   = trim((string)$_POST['sess_onweek']);
+    if (isset($_POST['sess_lesson']))   $updSess['sess_lesson']   = max(1, (int)$_POST['sess_lesson']);
+    if (isset($_POST['sess_duration'])) $updSess['sess_duration'] = max(15, (int)$_POST['sess_duration']);
+
+    DB->update('fsl_course_sessions', $updSess, ['sess_id' => $sessID]);
+
+    $schCnt = 0;
+    if (function_exists('_fn_sync_session_schedules')) {
+      $mCourse = DB->row("SELECT course_title, course_lesson, course_duration FROM fsl_courses WHERE course_id = ?", array($masterID));
+      if ($mCourse) {
+        $mergedSess = array_merge($oldSess, $updSess);
+        $mergedSess['sess_lesson']   = max(1, (int)($mergedSess['sess_lesson'] ?? $mCourse['course_lesson'] ?? 1));
+        $mergedSess['sess_duration'] = max(15, (int)($mergedSess['sess_duration'] ?? $mCourse['course_duration'] ?? 60));
+        $schCnt = _fn_sync_session_schedules($masterID, $sessID, $mCourse['course_title'], $mergedSess);
+      }
+    }
+
+    echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => "第 {$batch} 梯次已更新，並同步重整 {$schCnt} 堂日曆排程！"]);
     exit();
   break;
 
@@ -147,9 +247,21 @@ switch ($formAcce) {
       exit();
     }
     DB->update('fsl_course_sessions', ['sess_status' => $status], ['sess_id' => $sessID]);
-    echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '梯次開放狀態已更新！']);
+    $sRow = DB->row(
+      "SELECT s.*, c.course_title, c.course_lesson, c.course_duration FROM fsl_course_sessions s INNER JOIN fsl_courses c ON s.course_id = c.course_id WHERE s.sess_id = ?",
+      array($sessID)
+    );
+    if ($sRow && function_exists('_fn_sync_course_lessons')) {
+      $sRow['sess_status']   = $status;
+      $sRow['sess_lesson']   = max(1, (int)($sRow['sess_lesson'] ?? $sRow['course_lesson'] ?? 1));
+      $sRow['sess_duration'] = max(15, (int)($sRow['sess_duration'] ?? $sRow['course_duration'] ?? 60));
+      _fn_sync_course_lessons((int)$sRow['course_id'], $sessID, $sRow['course_title'], $sRow);
+    }
+
+    echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '梯次開放狀態與日曆排程已同步更新！']);
     exit();
   break;
+
 
   case 'func_sess_delete':
     $sessID = (int)($_POST['sessID'] ?? 0);
@@ -163,6 +275,13 @@ switch ($formAcce) {
       exit();
     }
     DB->update('fsl_course_sessions', ['sess_status' => 9], ['sess_id' => $sessID]);
+    $delLessons = DB->query("SELECT less_id FROM fsl_course_lessons WHERE sess_id = ? AND less_status = 1", array($sessID));
+    if (is_array($delLessons) && !empty($delLessons)) {
+      $inList = implode(',', array_map('intval', array_column($delLessons, 'less_id')));
+      DB->query("DELETE FROM fsl_schedules WHERE sch_source = 2 AND cses_id IN ({$inList}) AND sch_exec_status = 0");
+      DB->query("UPDATE fsl_course_lessons SET less_status = 9 WHERE less_id IN ({$inList})");
+    }
+
     echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '開課梯次已刪除！']);
     exit();
   break;

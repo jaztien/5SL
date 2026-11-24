@@ -42,6 +42,8 @@ function _fn_format_bscal_rows($rows) {
       'title'       => $prefix . $r['sch_title'],
       'start'       => $r['sch_start_at'],
       'end'         => !empty($r['sch_end_at']) ? $r['sch_end_at'] : $r['sch_start_at'],
+      //'origStart'   => $r['sch_start_at'], // 保留資料庫原始開始時間
+      //'origEnd'     => !empty($r['sch_end_at']) ? $r['sch_end_at'] : $r['sch_start_at'], // 保留資料庫原始結束時間
       'allDay'      => ((int)$r['sch_all_day'] === 1),
       'calendarId'  => $r['sch_category'] ?: 'course',
       'color'       => $r['sch_color'] ?: '#3b82f6',
@@ -61,6 +63,37 @@ function _fn_format_bscal_rows($rows) {
     if (!empty($meta['location'])) $item['location'] = $meta['location'];
     if (!empty($meta['overlap'])) $item['overlap'] = true;
     $list[] = $item;
+  }
+  return $list;
+}
+function _fn_format_lesson_rows($rows) {
+  $list = [];
+  if (!is_array($rows)) return $list;
+  $staText = [1 => '待上課', 2 => '上課中', 3 => '已完課', 4 => '已延期改期'];
+  foreach ($rows as $r) {
+    $lid   = (int)$r['less_id'];
+    $sta   = (int)($r['less_status'] ?? 1);
+    $color = ($sta === 3) ? '#10b981' : (($sta === 4) ? '#f97316' : '#3b82f6');
+    $badge = $staText[$sta] ?? '待上課';
+
+    $list[] = [
+      'id'          => 'less_' . $lid,
+      'title'       => "📚 [{$badge}] " . $r['less_title'],
+      'start'       => $r['less_start_at'],
+      'end'         => $r['less_end_at'],
+      'allDay'      => false,
+      'calendarId'  => 'course',
+      'color'       => $color,
+      'location'    => $r['less_location'] ?? '',
+      'description' => nl2br(htmlspecialchars((string)($r['less_note'] ?? ''), ENT_QUOTES, 'UTF-8')),
+      'rawDesc'     => (string)($r['less_note'] ?? ''),
+      'triggerEn'   => 0,
+      'link'        => [
+        'href'   => 'cs_detail.php?currID=' . (int)$r['course_id'],
+        'text'   => '🎓 前往所屬課程管理',
+        'target' => '_self'
+      ]
+    ];
   }
   return $list;
 }
@@ -166,31 +199,31 @@ switch ($formAcce) {
   // =========================================================================
   case 'func_sch_syncCourses':
     $sessions = DB->query("
-      SELECT s.cses_id, s.course_id, s.cses_title, s.cses_start_date, s.cses_end_date, s.cses_time_range,
+      SELECT s.sess_id, s.course_id, s.sess_title, s.sess_start_date, s.sess_end_date, s.sess_time_range,
              c.course_title
       FROM fsl_course_sessions s
       INNER JOIN fsl_courses c ON s.course_id = c.course_id
-      WHERE s.cses_status IN (1, 2) AND s.cses_start_date >= CURDATE()
-      ORDER BY s.cses_start_date ASC
+      WHERE s.sess_status IN (1, 2) AND s.sess_start_date >= CURDATE()
+      ORDER BY s.sess_start_date ASC
     ");
 
     $syncCnt = 0;
     if (is_array($sessions)) {
       foreach ($sessions as $ss) {
-        $csesId = (int)$ss['cses_id'];
-        $exists = (int)DB->single("SELECT COUNT(*) FROM fsl_schedules WHERE sch_source = 2 AND cses_id = ?", array($csesId));
+        $csesId = (int)$ss['sess_id'];
+        $exists = (int)DB->single("SELECT COUNT(*) FROM fsl_schedules WHERE sch_source = 2 AND sess_id = ?", array($csesId));
         if ($exists > 0) continue;
 
-        $startDt   = $ss['cses_start_date'] . ' 09:00:00';
-        $endDt     = !empty($ss['cses_end_date']) ? ($ss['cses_end_date'] . ' 17:00:00') : ($ss['cses_start_date'] . ' 17:00:00');
+        $startDt   = $ss['sess_start_date'] . ' 09:00:00';
+        $endDt     = !empty($ss['sess_end_date']) ? ($ss['sess_end_date'] . ' 17:00:00') : ($ss['sess_start_date'] . ' 17:00:00');
         // 預設於開課前 1 天早上 10:00 自動觸發課前提醒通知給該課程學員
-        $triggerDt = date('Y-m-d 10:00:00', strtotime($ss['cses_start_date'] . ' -1 day'));
-        $label     = '【開課】' . $ss['course_title'] . ' - ' . $ss['cses_title'];
+        $triggerDt = date('Y-m-d 10:00:00', strtotime($ss['sess_start_date'] . ' -1 day'));
+        $label     = '【開課】' . $ss['course_title'] . ' - ' . $ss['sess_title'];
 
         DB->insert('fsl_schedules', array(
           'sch_source'         => 2,
           'course_id'          => (int)$ss['course_id'],
-          'cses_id'            => $csesId,
+          'sess_id'            => $csesId,
           'sch_category'       => 'course',
           'sch_title'          => $label,
           'sch_color'          => '#3b82f6',
@@ -203,8 +236,8 @@ switch ($formAcce) {
           'sch_target_ids'     => (string)$ss['course_id'],
           'sch_channels'       => 'noti,email',
           'arti_keycode'       => 'NOTI_COURSE_START',
-          'sch_msg_title'      => "【開課提醒】{{member_name}} 您好，《{$ss['course_title']}》將於 {$ss['cses_start_date']} 開課！",
-          'sch_msg_body'       => "親愛的 {{member_name}} 您好，您報名的《{$ss['course_title']}》（{$ss['cses_title']}）將於 {$ss['cses_start_date']} 正式開課，請準時登入會員中心查看教室資訊！",
+          'sch_msg_title'      => "【開課提醒】{{member_name}} 您好，《{$ss['course_title']}》將於 {$ss['sess_start_date']} 開課！",
+          'sch_msg_body'       => "親愛的 {{member_name}} 您好，您報名的《{$ss['course_title']}》（{$ss['sess_title']}）將於 {$ss['sess_start_date']} 正式開課，請準時登入會員中心查看教室資訊！",
           'sch_exec_status'    => 0
         ));
         $syncCnt++;
@@ -290,11 +323,25 @@ switch ($formAcce) {
   // 7. 軟刪除作廢排程 (func_sch_delete)
   // =========================================================================
   case 'func_sch_delete':
-    if ($schID <= 0) {
+    $rawId = trim((string)($_POST['schID'] ?? ''));
+
+    // 情況 A：刪除的是「單堂課次 (less_15)」
+    if (str_starts_with($rawId, 'less_')) {
+      $lessId = (int)substr($rawId, 5);
+      DB->update('fsl_course_lessons', ['less_status' => 9], ['less_id' => $lessId]);
+      // 同步作廢該堂課尚未發送的課前提醒
+      DB->query("UPDATE fsl_schedules SET sch_exec_status = 9 WHERE sch_source = 2 AND cses_id = ? AND sch_exec_status = 0", [$lessId]);
+      echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '該堂課次與課前提醒已作廢！']);
+      exit();
+    }
+
+    // 情況 B：刪除的是「一般排程 (sch_28 或純數字)」
+    $realSchId = (int)str_replace('sch_', '', $rawId);
+    if ($realSchId <= 0) {
       echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的排程 ID！']);
       exit();
     }
-    DB->update('fsl_schedules', ['sch_exec_status' => 9], ['sch_id' => $schID]);
+    DB->update('fsl_schedules', ['sch_exec_status' => 9], ['sch_id' => $realSchId]);
     echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '該筆排程已刪除作廢！']);
     exit();
   break;
@@ -303,41 +350,9 @@ switch ($formAcce) {
   // 8. bs-calendar 載入排程與搜尋端點 (func_bs_cal_load)
   // =========================================================================
   case 'func_bs_cal_load':
-    // 處理日/週/月、年度摘要與關鍵字搜尋載入邏輯（詳見原始碼檔案 5sladmin/funcFiles/sch_act_func.php）
-    // 1. 自動同步未來未建檔之課程梯次 (對齊 fsl_course_sessions 實際欄位)
-    $sessions = DB->query("
-      SELECT s.sess_id, s.course_id, s.sess_altname, s.sess_batch, s.sess_startdate, s.sess_starttime,
-             s.sess_onweek, s.sess_duration, s.sess_lesson, c.course_title
-      FROM fsl_course_sessions s
-      INNER JOIN fsl_courses c ON s.course_id = c.course_id
-      WHERE s.sess_status IN (1, 2) AND s.sess_startdate IS NOT NULL
-    ");
-    if (is_array($sessions)) {
-      foreach ($sessions as $ss) {
-        $sessId = (int)$ss['sess_id'];
-        if ((int)DB->single("SELECT COUNT(*) FROM fsl_schedules WHERE sch_source = 2 AND cses_id = ?", [$sessId]) > 0) continue;
-        $tStr    = !empty($ss['sess_starttime']) ? substr($ss['sess_starttime'], 0, 5) . ':00' : '09:00:00';
-        $startDt = $ss['sess_startdate'] . ' ' . $tStr;
-        $durMin  = max(15, (int)($ss['sess_duration'] ?: 60));
-        $endDt   = date('Y-m-d H:i:s', strtotime($startDt . " +{$durMin} minutes"));
-        $trigDt  = date('Y-m-d H:i:s', strtotime($startDt . ' -1 day'));
-        $subName = $ss['sess_altname'] ?: ('第' . $ss['sess_batch'] . '梯次');
-        $label   = '【課堂】' . $ss['course_title'] . ' (' . $subName . ')';
-        DB->insert('fsl_schedules', [
-          'sch_source' => 2, 'course_id' => (int)$ss['course_id'], 'cses_id' => $sessId,
-          'sch_category' => 'course', 'sch_title' => $label, 'sch_color' => '#3b82f6',
-          'sch_start_at' => $startDt, 'sch_end_at' => $endDt, 'sch_all_day' => 0,
-          'sch_trigger_enable' => 1, 'sch_trigger_at' => $trigDt, 'sch_target_type' => 2,
-          'sch_target_ids' => (string)$ss['course_id'], 'sch_channels' => 'noti,email',
-          'arti_keycode' => 'NOTI_COURSE_START', 'sch_exec_status' => 0
-        ]);
-      }
-    }
-
-    // 2. 接收 bs-calendar 查詢參數 (view, fromDate, toDate, year, search, limit, offset 等)
+    // 1. 接收 bs-calendar 查詢參數 (view, fromDate, toDate, year, search, limit, offset 等)
     $view      = trim((string)($_POST['view'] ?? 'month'));
     $fromDate  = trim((string)($_POST['fromDate'] ?? ''));
-    // ...其餘參數接收與初始化
     $toDate    = trim((string)($_POST['toDate'] ?? ''));
     $year      = (int)($_POST['year'] ?? date('Y'));
     $search    = trim((string)($_POST['search'] ?? ''));
@@ -368,6 +383,7 @@ switch ($formAcce) {
       exit();
     }
 
+    // 年視圖統計模式
     if ($view === 'year') {
       $yWhere = $whereSql . " AND YEAR(sch_start_at) = ?";
       $yRows  = DB->query("SELECT DATE(sch_start_at) AS d, COUNT(*) AS cnt FROM fsl_schedules {$yWhere} GROUP BY DATE(sch_start_at)", array_merge($binds, [$year]));
@@ -379,24 +395,37 @@ switch ($formAcce) {
       exit();
     }
 
-    // 一般視圖區間查詢 (含跨日與週期排程)
+    // 一般視圖區間查詢 (合併 fsl_schedules 與 fsl_course_lessons)
     if ($fromDate !== '' && $toDate !== '') {
       $whereSql .= " AND sch_start_at <= ? AND (sch_end_at >= ? OR sch_end_at IS NULL OR sch_msg_body LIKE '%\"recurrence\"%')";
       $binds[]   = substr($toDate, 0, 10) . ' 23:59:59';
       $binds[]   = substr($fromDate, 0, 10) . ' 00:00:00';
     }
-    $rows = DB->query("SELECT * FROM fsl_schedules {$whereSql} ORDER BY sch_start_at ASC", $binds);
-    echo json_encode(_fn_format_bscal_rows($rows), JSON_UNESCAPED_UNICODE);
+    $rows   = DB->query("SELECT * FROM fsl_schedules {$whereSql} ORDER BY sch_start_at ASC", $binds);
+    $merged = _fn_format_bscal_rows($rows);
+
+    if (empty($calIds) || in_array('course', $calIds, true)) {
+      $lWhere = " WHERE less_status != 9 ";
+      $lBinds = [];
+      if ($fromDate !== '' && $toDate !== '') {
+        $lWhere .= " AND less_start_at <= ? AND less_end_at >= ? ";
+        $lBinds[] = substr($toDate, 0, 10) . ' 23:59:59';
+        $lBinds[] = substr($fromDate, 0, 10) . ' 00:00:00';
+      }
+      $lRows  = DB->query("SELECT * FROM fsl_course_lessons {$lWhere} ORDER BY less_start_at ASC", $lBinds);
+      $merged = array_merge($merged, _fn_format_lesson_rows($lRows));
+    }
+    echo json_encode($merged, JSON_UNESCAPED_UNICODE);
     exit();
   break;
-
   // =========================================================================
   // 9. bs-calendar Modal 快速新增 / 拖曳改期儲存 (func_bs_cal_save)
   // =========================================================================
   case 'func_bs_cal_save':
     // 處理日曆排程建立與編輯更新邏輯（詳見原始碼檔案 5sladmin/funcFiles/sch_act_func.php）
     $id      = (int)($_POST['id'] ?? 0);
-    $title   = trim((string)($_POST['title'] ?? ''));
+    //$title   = trim((string)($_POST['title'] ?? ''));
+    $title   = preg_replace('/^🔔\s*/u', '', trim((string)($_POST['title'] ?? '')));
     $start   = trim((string)($_POST['start'] ?? ''));
     $end     = trim((string)($_POST['end'] ?? ''));
     $allDay  = filter_var($_POST['allDay'] ?? false, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
@@ -414,8 +443,8 @@ switch ($formAcce) {
     $taskVal = is_string($taskRaw) ? json_decode($taskRaw, true) : $taskRaw;
     //(小提醒：若前端 Modal 的「地點 (location)」輸入多行文字時，readAppointmentModal 會轉成陣列並
     //由 callSchApi 轉成 JSON 字串，若需要支援多行陣列地點，也可以比照加上 
-    // $locRaw = $_POST['location'] ?? null; 
-    // $locVal = is_string($locRaw) && str_starts_with($locRaw, '[') ? json_decode($locRaw, true) : $locRaw;)
+    $locRaw = $_POST['location'] ?? null;
+    $locVal = (is_string($locRaw) && str_starts_with($locRaw, '[')) ? (json_decode($locRaw, true) ?: $locRaw) : $locRaw;
 
     if ($title === '' || $start === '') {
       echo json_encode(['RTN' => 0, 'msgType' => 'warning', 'msgStr' => '請填寫標題與開始時間！']);
@@ -425,7 +454,7 @@ switch ($formAcce) {
     $meta = array_filter([
       'recurrence' => $recVal,
       'task'       => $taskVal,
-      'location'   => $_POST['location'] ?? null,
+      'location'   => $locVal, //$_POST['location'] ?? null,
       'link'       => $_POST['link'] ?? null,
       'overlap'    => filter_var($_POST['overlap'] ?? false, FILTER_VALIDATE_BOOLEAN)
     ], fn($v) => $v !== null && $v !== '');
