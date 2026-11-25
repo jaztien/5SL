@@ -1,0 +1,349 @@
+<?php
+require_once('../includeFiles/init.inc.php');
+require_once('../includeFiles/db.inc.php');
+
+// 架構搜尋條件
+$searchText  = isset($_REQUEST['searchText']) ? trim(rawurldecode($_REQUEST['searchText'])) : '';
+$searchCat   = isset($_REQUEST['searchCat']) ? trim($_REQUEST['searchCat']) : '';
+$searchScope = isset($_REQUEST['searchScope']) ? trim($_REQUEST['searchScope']) : '';
+
+$searchURI = "";
+if ($searchText !== '')  { $searchURI .= "&searchText=" . rawurlencode($searchText); }
+if ($searchCat !== '')   { $searchURI .= "&searchCat=" . rawurlencode($searchCat); }
+if ($searchScope !== '') { $searchURI .= "&searchScope=" . rawurlencode($searchScope); }
+if (!empty($searchURI)) {
+  $searchURI = substr($searchURI, 1);
+}
+
+$maxResult = (!empty($searchURI)) ? 300 : 150;
+
+// 定義本頁面代碼
+define('PAGE_MARK', 'PG_NOTIFY');
+define('PAGE_ITEM', 'ITEM_MSG');
+define('PAGE_OPANEL', 1); // 1-新增(手動發送站內通知)
+define('SEARCH_OPANEL', !empty($searchURI) ? 2 : 1);
+define('EXPORT_OPANEL', 3); // 3-Excel+Print
+
+require_once('../includeFiles/page.basic.inc.php');
+require_once('../includeFiles/common.lib.php');
+
+// 統計看板數據
+$cntTotal     = (int)DB->single("SELECT COUNT(*) FROM fsl_notifications");
+$cntBroadcast = (int)DB->single("SELECT COUNT(*) FROM fsl_notifications WHERE mb_id IS NULL");
+$cntPersonal  = (int)DB->single("SELECT COUNT(*) FROM fsl_notifications WHERE mb_id IS NOT NULL");
+
+// 組合查詢條件
+$whereSql = " WHERE 1=1 ";
+$params   = array();
+
+if ($searchText !== '') {
+  $nameHash  = _fn_hash_hmac(_fn_secure_crypto($searchText, 'en'));
+  $emailHash = _fn_hash_hmac(_fn_secure_crypto(strtolower($searchText), 'en'));
+  $likeStr   = '%' . $searchText . '%';
+
+  $whereSql .= " AND (n.no_title LIKE ? OR n.no_content LIKE ? OR m.mb_name_hash = ? OR m.mb_email_hash = ?) ";
+  array_push($params, $likeStr, $likeStr, $nameHash, $emailHash);
+}
+if ($searchCat !== '') {
+  $whereSql .= " AND n.no_category = ? ";
+  $params[] = (int)$searchCat;
+}
+if ($searchScope === 'global') {
+  $whereSql .= " AND n.mb_id IS NULL ";
+} elseif ($searchScope === 'personal') {
+  $whereSql .= " AND n.mb_id IS NOT NULL ";
+}
+
+$totalNum = (int)DB->single("
+  SELECT COUNT(n.no_id)
+  FROM fsl_notifications n
+  LEFT JOIN fsl_members m ON n.mb_id = m.mb_id
+  {$whereSql}
+", $params);
+
+$sqlList = "
+  SELECT n.*, m.mb_name, m.mb_email
+  FROM fsl_notifications n
+  LEFT JOIN fsl_members m ON n.mb_id = m.mb_id
+  {$whereSql}
+  ORDER BY n.no_id DESC
+  LIMIT {$maxResult}
+";
+$notiList = DB->query($sqlList, $params);
+if (!is_array($notiList)) $notiList = array();
+
+$catMap = array(
+  1 => '<span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle">1 - 系統公告 (system)</span>',
+  2 => '<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">2 - 訂單與課程 (order)</span>',
+  3 => '<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">3 - 客服與支援 (support)</span>',
+  4 => '<span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">4 - 優惠與活動 (promo)</span>'
+);
+$lvlMap = array(
+  0 => '全員可見',
+  1 => 'Lv.1 一般以上',
+  2 => 'Lv.2 進階以上',
+  3 => 'Lv.3 黃金VIP以上',
+  4 => 'Lv.4 黑鑽VIP限定'
+);
+?>
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="../imageFiles/favicon.ico" type="image/ico" />
+  <title>Fifth Season Life 人生第五季 | 站內通知管理</title>
+
+  <link rel="stylesheet" href="../pluginFiles/googleapis/fonts.googleapis.css">
+  <link rel="stylesheet" href="../pluginFiles/bootstrap5/bootstrap.min.css">
+  <link rel="stylesheet" href="../pluginFiles/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../pluginFiles/datatables3/datatables.min.css">
+  <link rel="stylesheet" href="../cssFiles/adminlte.css">
+  <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
+  <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
+</head>
+<body class="bg-body-tertiary theme-indigo">
+  <div class="app-wrapper">
+    <main class="app-main">
+      <!-- 頁頭導覽條 -->
+      <div class="app-content-header">
+        <div class="container-fluid">
+          <div class="row mb-2 align-items-center">
+            <div class="col-sm-6">
+              <h4 class="m-0">
+                站內通知管理
+                <i class="bi bi-question-circle-fill fs-6 text-secondary" data-bs-toggle="tooltip" title="管理全站等級公告（mb_id=NULL）與指定會員通知（fsl_notifications）"></i>
+                <span class="text-muted small ms-2">noti_list.php</span>
+              </h4>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb float-sm-end small mb-0">
+                <li class="breadcrumb-item"><a href="ad_home.php">首頁</a></li>
+                <li class="breadcrumb-item">訊息管理系統</li>
+                <li class="breadcrumb-item active">站內通知管理</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 主要內容區域 -->
+      <div class="app-content">
+        <div class="container-fluid">
+          <!-- 統計卡片 -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <a href="noti_list.php" class="text-decoration-none">
+                <div class="card border-start border-primary border-4 shadow-sm h-100">
+                  <div class="card-body py-2 px-3 d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="text-muted small">累計通知紀錄總數</div>
+                      <div class="fs-4 fw-bold text-primary"><?php echo number_format($cntTotal); ?></div>
+                    </div>
+                    <i class="bi bi-bell-fill fs-2 text-primary opacity-50"></i>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="col-md-4">
+              <a href="noti_list.php?searchScope=global" class="text-decoration-none">
+                <div class="card border-start border-success border-4 shadow-sm h-100">
+                  <div class="card-body py-2 px-3 d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="text-muted small">全站 / 等級公告 (mb_id = NULL)</div>
+                      <div class="fs-4 fw-bold text-success"><?php echo number_format($cntBroadcast); ?></div>
+                    </div>
+                    <i class="bi bi-broadcast fs-2 text-success opacity-50"></i>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="col-md-4">
+              <a href="noti_list.php?searchScope=personal" class="text-decoration-none">
+                <div class="card border-start border-info border-4 shadow-sm h-100">
+                  <div class="card-body py-2 px-3 d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="text-muted small">指定會員個人通知</div>
+                      <div class="fs-4 fw-bold text-info-emphasis"><?php echo number_format($cntPersonal); ?></div>
+                    </div>
+                    <i class="bi bi-person-check-fill fs-2 text-info opacity-50"></i>
+                  </div>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- 通知紀錄清單 -->
+          <div class="row">
+            <div class="col-12">
+              <div class="card card-outline shadow-sm">
+                <div class="card-header d-flex flex-wrap align-items-center gap-2">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="fw-bold"><i class="bi bi-megaphone-fill me-1 text-primary"></i>站內通知發送紀錄清單</span>
+                    <span class="badge text-bg-light border">共 <span id="resultCount"><?php echo $totalNum > $maxResult ? $totalNum . " 筆符合，表列 " . $maxResult : $totalNum; ?></span> 筆</span>
+                  </div>
+                  <div class="input-group input-group-sm w-auto flex-grow-1 flex-md-grow-0 ms-md-auto">
+                    <span class="input-group-text bg-white"><i class="bi bi-funnel"></i></span>
+                    <input type="text" id="dataSearch" class="form-control" placeholder="表格內即時快篩...">
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table id="dataTable_notilist" class="table table-striped table-hover table-bordered align-middle w-100 small" data-search="1">
+                      <thead class="table-light text-nowrap">
+                        <tr>
+                          <th class="text-center" style="width: 65px;">ID</th>
+                          <th>接收對象 / 可見等級</th>
+                          <th>分類 / 通知標題與內文摘要</th>
+                          <th class="text-center" style="width: 90px;">跳轉連結</th>
+                          <th class="text-center" style="width: 145px;">發送時間</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <?php foreach ($notiList as $row):
+                          $nid      = (int)$row['no_id'];
+                          $isGlobal = is_null($row['mb_id']);
+                          $mid      = (int)($row['mb_id'] ?? 0);
+                          $minLvl   = (int)($row['no_minlvl'] ?? 0);
+                          $briefTxt = mb_strimwidth(strip_tags((string)$row['no_content']), 0, 80, '...', 'UTF-8');
+                        ?>
+                        <tr style="cursor: pointer;" onclick="window.location.href='noti_detail.php?currID=<?php echo $nid; ?>';">
+                          <td class="text-center fw-bold">#<?php echo $nid; ?></td>
+                          <td>
+                            <?php if ($isGlobal): ?>
+                              <span class="badge text-bg-success"><i class="bi bi-broadcast me-1"></i>全站公告</span>
+                              <div class="text-muted mt-1" style="font-size: 0.74rem;"><?php echo $lvlMap[$minLvl] ?? "Lv.{$minLvl} 以上"; ?></div>
+                            <?php else:
+                              $decName  = !empty($row['mb_name']) ? _fn_secure_crypto($row['mb_name'], 'de') : '會員 #' . $mid;
+                              $decEmail = !empty($row['mb_email']) ? _fn_secure_crypto($row['mb_email'], 'de') : '';
+                            ?>
+                              <div class="fw-bold text-dark"><?php echo htmlspecialchars($decName); ?> <span class="text-muted fw-normal">(#<?php echo $mid; ?>)</span></div>
+                              <?php if ($decEmail !== ''): ?>
+                                <div class="text-muted" style="font-size: 0.74rem;"><?php echo htmlspecialchars($decEmail); ?></div>
+                              <?php endif; ?>
+                            <?php endif; ?>
+                          </td>
+                          <td>
+                            <div class="mb-1">
+                              <?php echo $catMap[(int)$row['no_category']] ?? $catMap; ?>
+                              <span class="fw-bold text-dark ms-1"><?php echo htmlspecialchars($row['no_title']); ?></span>
+                            </div>
+                            <div class="text-muted" style="font-size: 0.76rem;"><?php echo htmlspecialchars($briefTxt); ?></div>
+                          </td>
+                          <td class="text-center">
+                            <?php if (!empty($row['no_link'])): ?>
+                              <span class="badge bg-light text-primary border" title="<?php echo htmlspecialchars($row['no_link']); ?>"><i class="bi bi-link-45deg"></i>有連結</span>
+                            <?php else: ?>
+                              <span class="text-muted">-</span>
+                            <?php endif; ?>
+                          </td>
+                          <td class="text-center text-muted" style="font-size: 0.78rem;">
+                            <?php echo !empty($row['no_created']) ? date('Y-m-d H:i', strtotime($row['no_created'])) : '-'; ?>
+                          </td>
+                        </tr>
+                        <?php endforeach; ?>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 右側進階搜尋 Offcanvas -->
+    <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasSearch" aria-labelledby="offcanvasSearchLabel">
+      <div class="offcanvas-header border-bottom border-secondary">
+        <h5 class="offcanvas-title" id="offcanvasSearchLabel"><i class="bi bi-funnel-fill me-2 text-warning"></i>站內通知進階篩選</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <form id="form_search" method="get" action="noti_list.php">
+          <div class="mb-3">
+            <label class="form-label small text-white-50">關鍵字（通知標題 / 內文 / 完整姓名或信箱）</label>
+            <input type="text" class="form-control form-control-sm" name="searchText" value="<?php echo htmlspecialchars($searchText); ?>" placeholder="輸入搜尋關鍵字...">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small text-white-50">通知分類</label>
+            <select class="form-select form-select-sm" name="searchCat">
+              <option value="">-- 全部分類 --</option>
+              <option value="1" <?php echo ($searchCat === '1') ? 'selected' : ''; ?>>1 - 系統公告 (system)</option>
+              <option value="2" <?php echo ($searchCat === '2') ? 'selected' : ''; ?>>2 - 訂單與課程 (order)</option>
+              <option value="3" <?php echo ($searchCat === '3') ? 'selected' : ''; ?>>3 - 客服與支援 (support)</option>
+              <option value="4" <?php echo ($searchCat === '4') ? 'selected' : ''; ?>>4 - 優惠與活動 (promo)</option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="form-label small text-white-50">通知範圍類型</label>
+            <select class="form-select form-select-sm" name="searchScope">
+              <option value="">-- 全部類型 --</option>
+              <option value="global" <?php echo ($searchScope === 'global') ? 'selected' : ''; ?>>全站 / 等級公告 (mb_id IS NULL)</option>
+              <option value="personal" <?php echo ($searchScope === 'personal') ? 'selected' : ''; ?>>指定會員個人通知</option>
+            </select>
+          </div>
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-warning btn-sm fw-bold"><i class="bi bi-search me-1"></i>執行條件搜尋</button>
+            <button type="button" id="searchReset" class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-counterclockwise me-1"></i>清除所有條件</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../pluginFiles/jquery/jquery-4.0.0.min.js"></script>
+  <script src="../pluginFiles/bootstrap5/bootstrap.bundle.min.js"></script>
+  <script src="../pluginFiles/datatables3/datatables.min.js"></script>
+  <script src="../scriptFiles/adminlte.js"></script>
+  <script src="../scriptFiles/page.basic.js"></script>
+  <script src="../scriptFiles/iframe-state-keeper.js"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+
+  <script type="text/javascript">
+  function doButAdd() { window.location.href = 'noti_detail.php?currID=0'; }
+  function doButReset() { window.location.replace('noti_list.php'); }
+  function doButSerach() {
+    const offcanvasEl = document.getElementById('offcanvasSearch');
+    if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+  }
+  function doButExcel() { $('.buttons-excel').click(); }
+  function doButPrint() { $('.buttons-print').click(); }
+
+  $(document).ready(function() {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+
+    $('body').on('keypress click', function() {
+      let timerElm = window.parent.$('#timer_on_exhausted');
+      if (timerElm.length) timerElm.backward_timer('reset');
+    });
+
+    var notilistTB = datatableCreate('dataTable_notilist');
+
+    $('#dataSearch').on('keyup search input paste cut', function() {
+      if ($(this).is(':focus') || this.value !== '') {
+        notilistTB.search(this.value).draw();
+      }
+    });
+
+    $('#searchReset').click(function() {
+      if ($('#dataSearch').val() !== '') {
+        $('#dataSearch').val('');
+        notilistTB.search('').draw();
+      } else {
+        window.location.replace('noti_list.php');
+      }
+    });
+
+    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+    }
+  });
+  </script>
+</body>
+</html>

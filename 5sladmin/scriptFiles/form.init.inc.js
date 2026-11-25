@@ -217,13 +217,22 @@ function getFormObjects(frm){
   
   frm.find(":input").not(".notSubmit").each(function(index) {
     var itype = $(this).attr('type');
-    var ikey = $(this).attr('id');
+    var ikey = $(this).attr('id') || $(this).attr('name');
     
     if (itype == 'radio' || itype == 'checkbox') {
-      ikey = $(this).attr('name');
+      ikey = $(this).attr('name') || $(this).attr('id');
     }
     
     if(!ikey || ikey == ''){ return; }
+    var itype = $(this).attr('type');
+    var ikey = $(this).attr('id') || $(this).attr('name');
+    
+    if (itype == 'radio' || itype == 'checkbox') {
+      ikey = $(this).attr('name') || $(this).attr('id');
+    }
+    
+    if(!ikey || ikey == ''){ return; }
+
     
     var isGroup = ikey.indexOf('[]') !== -1;
     if (isGroup) {

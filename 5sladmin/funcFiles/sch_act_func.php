@@ -38,7 +38,7 @@ function _fn_format_bscal_rows($rows) {
     //會多一顆鈴鐺！
     $prefix = ((int)$r['sch_trigger_enable'] === 1) ? '🔔 ' : '';
     $item   = [
-      'id'          => $id,
+      'id'          => 'sch_' . $id,
       'title'       => $prefix . $r['sch_title'],
       'start'       => $r['sch_start_at'],
       'end'         => !empty($r['sch_end_at']) ? $r['sch_end_at'] : $r['sch_start_at'],
@@ -199,55 +199,30 @@ switch ($formAcce) {
   // =========================================================================
   case 'func_sch_syncCourses':
     $sessions = DB->query("
-      SELECT s.sess_id, s.course_id, s.sess_title, s.sess_start_date, s.sess_end_date, s.sess_time_range,
-             c.course_title
+      SELECT s.*, c.course_title, c.course_lesson, c.course_duration
       FROM fsl_course_sessions s
       INNER JOIN fsl_courses c ON s.course_id = c.course_id
-      WHERE s.sess_status IN (1, 2) AND s.sess_start_date >= CURDATE()
-      ORDER BY s.sess_start_date ASC
+      WHERE s.sess_status IN (1, 2) AND s.sess_startdate >= CURDATE()
+      ORDER BY s.sess_startdate ASC
     ");
 
     $syncCnt = 0;
-    if (is_array($sessions)) {
+    if (is_array($sessions) && function_exists('_fn_generate_course_lessons')) {
       foreach ($sessions as $ss) {
-        $csesId = (int)$ss['sess_id'];
-        $exists = (int)DB->single("SELECT COUNT(*) FROM fsl_schedules WHERE sch_source = 2 AND sess_id = ?", array($csesId));
+        $sessId = (int)$ss['sess_id'];
+        $exists = (int)DB->single("SELECT COUNT(*) FROM fsl_course_lessons WHERE sess_id = ?", array($sessId));
         if ($exists > 0) continue;
 
-        $startDt   = $ss['sess_start_date'] . ' 09:00:00';
-        $endDt     = !empty($ss['sess_end_date']) ? ($ss['sess_end_date'] . ' 17:00:00') : ($ss['sess_start_date'] . ' 17:00:00');
-        // 預設於開課前 1 天早上 10:00 自動觸發課前提醒通知給該課程學員
-        $triggerDt = date('Y-m-d 10:00:00', strtotime($ss['sess_start_date'] . ' -1 day'));
-        $label     = '【開課】' . $ss['course_title'] . ' - ' . $ss['sess_title'];
-
-        DB->insert('fsl_schedules', array(
-          'sch_source'         => 2,
-          'course_id'          => (int)$ss['course_id'],
-          'sess_id'            => $csesId,
-          'sch_category'       => 'course',
-          'sch_title'          => $label,
-          'sch_color'          => '#3b82f6',
-          'sch_start_at'       => $startDt,
-          'sch_end_at'         => $endDt,
-          'sch_all_day'        => 0,
-          'sch_trigger_enable' => 1,
-          'sch_trigger_at'     => $triggerDt,
-          'sch_target_type'    => 2, // 2-依群組(課程學員)發送
-          'sch_target_ids'     => (string)$ss['course_id'],
-          'sch_channels'       => 'noti,email',
-          'arti_keycode'       => 'NOTI_COURSE_START',
-          'sch_msg_title'      => "【開課提醒】{{member_name}} 您好，《{$ss['course_title']}》將於 {$ss['sess_start_date']} 開課！",
-          'sch_msg_body'       => "親愛的 {{member_name}} 您好，您報名的《{$ss['course_title']}》（{$ss['sess_title']}）將於 {$ss['sess_start_date']} 正式開課，請準時登入會員中心查看教室資訊！",
-          'sch_exec_status'    => 0
-        ));
-        $syncCnt++;
+        $ss['sess_lesson']   = max(1, (int)($ss['sess_lesson'] ?? $ss['course_lesson'] ?? 1));
+        $ss['sess_duration'] = max(15, (int)($ss['sess_duration'] ?? $ss['course_duration'] ?? 60));
+        $syncCnt += _fn_generate_course_lessons((int)$ss['course_id'], $sessId, $ss['course_title'], $ss);
       }
     }
 
     echo json_encode([
       'RTN'     => 1,
       'msgType' => ($syncCnt > 0) ? 'success' : 'info',
-      'msgStr'  => ($syncCnt > 0) ? "已成功從課程梯次自動提取並建立 {$syncCnt} 筆排程與課前提醒！" : '所有未來課程梯次皆已同步完成，無新增項目。'
+      'msgStr'  => ($syncCnt > 0) ? "已成功補齊並展開 {$syncCnt} 堂課次與課前提醒！" : '所有未來課程梯次皆已同步完成，無新增項目。'
     ]);
     exit();
   break;
@@ -423,9 +398,31 @@ switch ($formAcce) {
   // =========================================================================
   case 'func_bs_cal_save':
     // 處理日曆排程建立與編輯更新邏輯（詳見原始碼檔案 5sladmin/funcFiles/sch_act_func.php）
-    $id      = (int)($_POST['id'] ?? 0);
-    //$title   = trim((string)($_POST['title'] ?? ''));
-    $title   = preg_replace('/^🔔\s*/u', '', trim((string)($_POST['title'] ?? '')));
+    $rawId = trim((string)($_POST['id'] ?? ''));
+    $title = preg_replace('/^(?:🔔|📚\s*\[[^\]]+\])\s*/u', '', trim((string)($_POST['title'] ?? '')));
+    $start = trim((string)($_POST['start'] ?? ''));
+    $end   = trim((string)($_POST['end'] ?? ''));
+
+    // 若編輯或拖曳改期的是「課堂 (less_15)」-> 同步更新 fsl_course_lessons 與對應課前提醒
+    if (str_starts_with($rawId, 'less_')) {
+      $lessId = (int)substr($rawId, 5);
+      $updLess = [
+        'less_title'    => $title,
+        'less_start_at' => $start,
+        'less_end_at'   => ($end !== '' ? $end : $start)
+      ];
+      DB->update('fsl_course_lessons', $updLess, ['less_id' => $lessId]);
+
+      $newTrig = date('Y-m-d H:i:s', strtotime($start . ' -1 day'));
+      DB->query(
+        "UPDATE fsl_schedules SET sch_title = ?, sch_start_at = ?, sch_end_at = ?, sch_trigger_at = ? WHERE sch_source = 2 AND cses_id = ? AND sch_exec_status = 0",
+        ["【課前提醒】{$title}", $newTrig, $start, $newTrig, $lessId]
+      );
+      echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '課堂時間與課前提醒已同步更新！', 'id' => $rawId], JSON_UNESCAPED_UNICODE);
+      exit();
+    }
+
+    $id = (int)str_replace('sch_', '', $rawId);
     $start   = trim((string)($_POST['start'] ?? ''));
     $end     = trim((string)($_POST['end'] ?? ''));
     $allDay  = filter_var($_POST['allDay'] ?? false, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
@@ -489,7 +486,8 @@ switch ($formAcce) {
   // =========================================================================
   case 'func_bs_cal_toggleTask':
     // 切換排程執行狀態邏輯（詳見原始碼檔案 5sladmin/funcFiles/sch_act_func.php）
-    $id      = (int)($_POST['id'] ?? 0);
+    $rawId   = trim((string)($_POST['id'] ?? ''));
+    $id      = (int)str_replace('sch_', '', $rawId);
     $checked = filter_var($_POST['checked'] ?? false, FILTER_VALIDATE_BOOLEAN);
     $row     = DB->row("SELECT sch_msg_body FROM fsl_schedules WHERE sch_id = ?", [$id]);
     if (!$row) {

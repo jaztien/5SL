@@ -37,7 +37,7 @@ switch ($formAcce) {
       exit();
     }
 
-    // 檢查同一主課程下梯次編號是否重複 (UNIQUE KEY course_id + sess_batch)
+    // 檢查同一主課程下梯次編號是否重複
     $dupId = (int)DB->single(
       "SELECT sess_id FROM fsl_course_sessions WHERE course_id = ? AND sess_batch = ? AND sess_id != ? AND sess_status != 9",
       array($courseId, $batch, $sessID)
@@ -66,10 +66,16 @@ switch ($formAcce) {
       $formData['sess_enrollee'] = 0;
       DB->insert('fsl_course_sessions', $formData);
       $newID = (int)DB->lastInsertId();
+
+      // 連動自動展開單堂課次與課前提醒排程
+      if ($newID > 0 && function_exists('_fn_sync_course_lessons')) {
+        _fn_sync_course_lessons($newID);
+      }
+
       echo json_encode([
         'RTN'     => 1,
         'msgType' => 'success',
-        'msgStr'  => "第 {$batch} 梯次與 Zoom 會議間設定已成功建立！",
+        'msgStr'  => "第 {$batch} 梯次與單堂課次排程已成功建立！",
         'newID'   => $newID,
         'upTime'  => $upTime
       ]);
@@ -80,10 +86,16 @@ switch ($formAcce) {
       }
       $formData['sess_updated'] = $upTime;
       DB->update('fsl_course_sessions', $formData, ['sess_id' => $sessID]);
+
+      // 同步更新單堂課次與課前提醒排程
+      if (function_exists('_fn_sync_course_lessons')) {
+        _fn_sync_course_lessons($sessID);
+      }
+
       echo json_encode([
         'RTN'     => 1,
         'msgType' => 'success',
-        'msgStr'  => '梯次排程與 Zoom 會議室設定已儲存更新！',
+        'msgStr'  => '梯次排程與 Zoom 會議室設定已儲存並同步課次！',
         'upTime'  => $upTime
       ]);
     }
@@ -101,7 +113,6 @@ switch ($formAcce) {
     }
     DB->update('fsl_course_sessions', ['sess_live_status' => $liveStatus, 'sess_updated' => date('Y-m-d H:i:s')], ['sess_id' => $sessID]);
 
-    // 若切換為「已結課 (2)」，同步將本梯次修課中(2)的學員狀態推進為已完課(3)或累計已完成堂數
     if ($liveStatus === 2) {
       DB->query("UPDATE fsl_course_enrolls SET enr_done_lessons = enr_done_lessons + 1, enr_last_watched = NOW() WHERE sess_id = ? AND enr_attend_status IN (1, 2)", array($sessID));
     }
@@ -116,10 +127,286 @@ switch ($formAcce) {
   break;
 
   // =========================================================================
-  // 3. 單發或群發 Zoom 專屬授權連結 (func_sess_sendZoomLink)
+  // 3. 單堂課次上課狀態直接切換 (func_sess_lessonStatus: 0=待上課/1=上課中/2=已完課/3=已延期)
+  // =========================================================================
+  case 'func_sess_lessonStatus':
+    $lessID     = (int)($_POST['lessID'] ?? 0);
+    $lessStatus = (int)($_POST['lessStatus'] ?? 0);
+    if ($sessID <= 0 || $lessID <= 0) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的課堂參數！']);
+      exit();
+    }
+    DB->update('fsl_course_lessons', ['less_status' => $lessStatus], ['less_id' => $lessID, 'sess_id' => $sessID]);
+
+    // 若標記為「3 - 已延期」，將尚未執行的課前提醒排程暫停 (sch_status = 0)
+    if ($lessStatus === 3) {
+      DB->query("UPDATE fsl_schedules SET sch_status = 0 WHERE cses_id = ? AND less_id = ? AND sch_status = 1", array($sessID, $lessID));
+    } elseif ($lessStatus === 0) {
+      DB->query("UPDATE fsl_schedules SET sch_status = 1 WHERE cses_id = ? AND less_id = ? AND sch_status = 0 AND sch_exec_at > NOW()", array($sessID, $lessID));
+    }
+
+    $stNames = array(0 => '待上課', 1 => '上課中', 2 => '已完課', 3 => '已延期');
+    echo json_encode([
+      'RTN'     => 1,
+      'msgType' => 'success',
+      'msgStr'  => '單堂上課狀態已更新為【' . ($stNames[$lessStatus] ?? '已更新') . '】！'
+    ]);
+    exit();
+  break;
+
+  // =========================================================================
+  // 4. 儲存單堂課次編輯並連動順延課前提醒排程 (func_sess_lessonSave)
+  // =========================================================================
+  case 'func_sess_lessonSave':
+    $lessID  = (int)($formData['less_id'] ?? 0);
+    $title   = trim((string)($formData['less_title'] ?? ''));
+    $startAt = trim((string)($formData['less_start_at'] ?? ''));
+    $endAt   = trim((string)($formData['less_end_at'] ?? ''));
+
+    if ($sessID <= 0 || $lessID <= 0 || $title === '' || $startAt === '' || $endAt === '') {
+      echo json_encode(['RTN' => 0, 'msgType' => 'warning', 'msgStr' => '請完整填寫單堂主題與起訖時間！']);
+      exit();
+    }
+
+    $oldLesson = DB->row("SELECT less_no, less_start_at FROM fsl_course_lessons WHERE less_id = ? AND sess_id = ?", array($lessID, $sessID));
+    if (!$oldLesson) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '找不到指定的單堂課次資料！']);
+      exit();
+    }
+
+    $lessStatus = (int)($formData['less_status'] ?? 0);
+    $updLesson  = array(
+      'less_title'     => $title,
+      'less_start_at'  => $startAt,
+      'less_end_at'    => $endAt,
+      'less_location'  => trim((string)($formData['less_location'] ?? '')),
+      'less_status'    => $lessStatus,
+      'less_zoom_id'   => trim((string)($formData['less_zoom_id'] ?? '')),
+      'less_zoom_pass' => trim((string)($formData['less_zoom_pass'] ?? '')),
+      'less_zoom_url'  => trim((string)($formData['less_zoom_url'] ?? '')),
+      'less_note'      => trim((string)($formData['less_note'] ?? ''))
+    );
+    DB->update('fsl_course_lessons', $updLesson, ['less_id' => $lessID, 'sess_id' => $sessID]);
+
+    // 連動順延 fsl_schedules 中對應本堂次的課前自動提醒時間（保持原本提前分鐘數差）
+    $oldStartTs = strtotime((string)$oldLesson['less_start_at']);
+    $newStartTs = strtotime($startAt);
+    $syncedSch  = 0;
+
+    if ($oldStartTs && $newStartTs && $oldStartTs !== $newStartTs) {
+      $diffSec = $newStartTs - $oldStartTs;
+      $schRows = DB->query("SELECT sch_id, sch_exec_at FROM fsl_schedules WHERE cses_id = ? AND less_id = ? AND sch_status IN (0, 1)", array($sessID, $lessID));
+      if (is_array($schRows)) {
+        foreach ($schRows as $sr) {
+          $oldExecTs = strtotime((string)$sr['sch_exec_at']);
+          if ($oldExecTs) {
+            $newExecAt = date('Y-m-d H:i:s', $oldExecTs + $diffSec);
+            $newSchSt  = ($lessStatus === 3) ? 0 : 1;
+            DB->update('fsl_schedules', [
+              'sch_exec_at' => $newExecAt,
+              'sch_status'  => $newSchSt
+            ], ['sch_id' => (int)$sr['sch_id']]);
+            $syncedSch++;
+          }
+        }
+      }
+    }
+
+    $extraMsg = ($syncedSch > 0) ? "（已同步順延 {$syncedSch} 筆課前提醒排程）" : '';
+    echo json_encode([
+      'RTN'     => 1,
+      'msgType' => 'success',
+      'msgStr'  => "第 {$oldLesson['less_no']} 堂課次資料已儲存更新！{$extraMsg}"
+    ]);
+    exit();
+  break;
+
+  // =========================================================================
+  // 5. 儲存 Zoom 會議終結報告 (func_sess_zoomReportSave)
+  // =========================================================================
+  case 'func_sess_zoomReportSave':
+    $lessID     = (int)($_POST['lessID'] ?? 0);
+    $zoomReport = trim((string)($_POST['zoomReport'] ?? ''));
+
+    if ($sessID <= 0 || $lessID <= 0) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的課堂參數！']);
+      exit();
+    }
+
+    DB->update('fsl_course_lessons', ['less_zoom_report' => $zoomReport], ['less_id' => $lessID, 'sess_id' => $sessID]);
+    echo json_encode([
+      'RTN'     => 1,
+      'msgType' => 'success',
+      'msgStr'  => 'Zoom 會議終結報告已成功儲存歸檔！'
+    ]);
+    exit();
+  break;
+
+  // =========================================================================
+  // 6. 預留：同步 Zoom 雲端會議報告 API (func_sess_zoomReportSync)
+  // =========================================================================
+  case 'func_sess_zoomReportSync':
+    $lessID = (int)($_POST['lessID'] ?? 0);
+    if ($sessID <= 0 || $lessID <= 0) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的課堂參數！']);
+      exit();
+    }
+
+    $lessInfo = DB->row("
+      SELECT l.*, s.sess_meetingid, s.sess_batch, c.course_title
+      FROM fsl_course_lessons l
+      LEFT JOIN fsl_course_sessions s ON l.sess_id = s.sess_id
+      LEFT JOIN fsl_courses c ON s.course_id = c.course_id
+      WHERE l.less_id = ? AND l.sess_id = ?
+    ", array($lessID, $sessID));
+
+    $meetId = trim((string)($lessInfo['less_zoom_id'] ?: ($lessInfo['sess_meetingid'] ?? '')));
+    if ($meetId === '') {
+      echo json_encode(['RTN' => 0, 'msgType' => 'warning', 'msgStr' => '本堂課尚未設定 Zoom 會議室 ID，無法向 Zoom 雲端拉取報告！']);
+      exit();
+    }
+
+    // 統計目前後台點名人數，生成標準報告範本（未來接入 Zoom Server-to-Server OAuth GET /report/meetings/{meetingId}/participants 後可直接替換此區塊）
+    $totalEnr = (int)DB->single("SELECT COUNT(*) FROM fsl_course_enrolls WHERE sess_id = ? AND enr_status IN (1, 2, 3)", array($sessID));
+    $attEnr   = (int)DB->single("SELECT COUNT(*) FROM fsl_course_enrolls WHERE sess_id = ? AND enr_attend_status IN (1, 2)", array($sessID));
+
+    $tplReport  = "【Zoom 會議終結報告摘要】\n";
+    $tplReport .= "課程梯次：{$lessInfo['course_title']}（第 {$lessInfo['sess_batch']} 梯 - 第 {$lessInfo['less_no']} 堂）\n";
+    $tplReport .= "會議室 ID：{$meetId}\n";
+    $tplReport .= "排定時段：{$lessInfo['less_start_at']} ~ {$lessInfo['less_end_at']}\n";
+    $tplReport .= "應到學員：{$totalEnr} 人｜系統簽到出席：{$attEnr} 人\n";
+    $tplReport .= "同步時間：" . date('Y-m-d H:i:s') . "\n";
+    $tplReport .= "--------------------------------------------------\n";
+    $tplReport .= "※ 尚待串接 Zoom API 金鑰以自動帶入精確分鐘數與進出明細，您可先於下方補充課堂紀實。\n";
+
+    echo json_encode([
+      'RTN'        => 1,
+      'msgType'    => 'info',
+      'msgStr'     => '已帶入本堂課基礎出席統計範本（Zoom API 串接端點已預留），請確認後點擊儲存！',
+      'reportText' => $tplReport
+    ]);
+    exit();
+  break;
+
+  // =========================================================================
+  // 7. 依梯次規則重新展開單堂課次 (func_sess_regenLessons)
+  // =========================================================================
+  case 'func_sess_regenLessons':
+    if ($sessID <= 0) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的梯次 ID！']);
+      exit();
+    }
+    if (function_exists('_fn_sync_course_lessons')) {
+      _fn_sync_course_lessons($sessID);
+      echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '已依目前梯次排程規則重新同步單堂課次與提醒！']);
+    } else {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '找不到 _fn_sync_course_lessons 共用函式！']);
+    }
+    exit();
+  break;
+
+  // =========================================================================
+  // 8. Tab 4：新增多筆錄影或講義至 fsl_media (func_sess_mediaAdd)
+  // =========================================================================
+  case 'func_sess_mediaAdd':
+    if ($sessID <= 0) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的梯次 ID！']);
+      exit();
+    }
+    $target = trim((string)($formData['med_target'] ?? ''));
+    $mType  = (int)($formData['med_type'] ?? 2);
+    $mTitle = trim((string)($formData['med_title'] ?? ''));
+    $mUrl   = trim((string)($formData['med_url'] ?? ''));
+    $mSort  = (int)($formData['med_sort'] ?? 100);
+    $mBrief = trim((string)($formData['med_brief'] ?? ''));
+
+    if ($mTitle === '' || $mUrl === '') {
+      echo json_encode(['RTN' => 0, 'msgType' => 'warning', 'msgStr' => '請輸入資源標題與雲端連結網址！']);
+      exit();
+    }
+
+    // 解析 target 格式 ("session:12" 或 "lesson:45")
+    $medFor   = 'session';
+    $medForId = $sessID;
+    if (strpos($target, ':') !== false) {
+      list($tScope, $tId) = explode(':', $target, 2);
+      if (in_array($tScope, array('session', 'lesson'), true) && (int)$tId > 0) {
+        $medFor   = $tScope;
+        $medForId = (int)$tId;
+      }
+    }
+
+    // 判斷副檔名標示
+    $medExt = 'URL';
+    if ($mType === 2) $medExt = (stripos($mUrl, 'youtu') !== false) ? 'YT' : 'VIDEO';
+    elseif ($mType === 3) $medExt = 'AUDIO';
+    elseif ($mType === 4) $medExt = 'PDF';
+
+    $sessDate = DB->single("SELECT sess_startdate FROM fsl_course_sessions WHERE sess_id = ?", array($sessID));
+    $eventDate = !empty($sessDate) ? $sessDate : date('Y-m-d');
+
+    DB->insert('fsl_media', array(
+      'med_event_date'     => $eventDate,
+      'med_category'       => 'workshop',
+      'med_type'           => $mType,
+      'med_source'         => 2, // 2 = 雲端外部連結
+      'med_title'          => $mTitle,
+      'med_brief'          => ($mBrief !== '') ? $mBrief : null,
+      'med_url'            => $mUrl,
+      'med_ext'            => $medExt,
+      'med_filesize'       => 0,
+      'med_allow_download' => 3, // 3 = 僅限已購關聯課程會員觀看/下載
+      'med_for'            => $medFor,
+      'med_forid'          => $medForId,
+      'med_is_featured'    => 0,
+      'med_in_gallery'     => 0, // 不混入公開文章圖庫
+      'med_sort'           => $mSort,
+      'med_status'         => 1
+    ));
+
+    echo json_encode([
+      'RTN'     => 1,
+      'msgType' => 'success',
+      'msgStr'  => '已成功掛載至本梯次課後資源檔案庫！'
+    ]);
+    exit();
+  break;
+
+  // =========================================================================
+  // 9. Tab 4：即時更新 fsl_media 排序 (func_sess_mediaSort)
+  // =========================================================================
+  case 'func_sess_mediaSort':
+    $medID   = (int)($_POST['medID'] ?? 0);
+    $medSort = (int)($_POST['medSort'] ?? 100);
+    if ($medID <= 0) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的媒體 ID！']);
+      exit();
+    }
+    DB->update('fsl_media', ['med_sort' => $medSort], ['med_id' => $medID]);
+    echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '檔案排序權重已更新！']);
+    exit();
+  break;
+
+  // =========================================================================
+  // 10. Tab 4：移除 fsl_media 掛載項目 (func_sess_mediaDelete)
+  // =========================================================================
+  case 'func_sess_mediaDelete':
+    $medID = (int)($_POST['medID'] ?? 0);
+    if ($medID <= 0) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的媒體 ID！']);
+      exit();
+    }
+    // 軟刪除（避免誤刪與保留下載統計紀錄）
+    DB->update('fsl_media', ['med_status' => 9], ['med_id' => $medID]);
+    echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '已移除該筆課後錄影/講義檔案！']);
+    exit();
+  break;
+
+  // =========================================================================
+  // 11. 單發或群發 Zoom 專屬授權連結 (func_sess_sendZoomLink)
   // =========================================================================
   case 'func_sess_sendZoomLink':
-    $enrID = (int)($_POST['enrID'] ?? 0); // 0 = 群發全體學員；> 0 = 單發指定報名ID
+    $enrID = (int)($_POST['enrID'] ?? 0);
     if ($sessID <= 0) {
       echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的梯次 ID！']);
       exit();
@@ -165,17 +452,15 @@ switch ($formAcce) {
       $mid     = (int)$t['mb_id'];
       $lastCnt = (int)$t['enr_link_sent_cnt'] + 1;
 
-      // 為每位學員產生專屬授權參數連結
       $authSig = substr(hash_hmac('sha256', $sessID . '_' . $eid . '_' . $mid, 'FSL_ZOOM_AUTH'), 0, 12);
       $authUrl = $baseJoin . $sep . "fsl_enr={$eid}&auth={$authSig}";
 
       DB->update('fsl_course_enrolls', array(
-        'enr_zoom_url'     => $authUrl,
-        'enr_link_sent_at' => $nowStr,
+        'enr_zoom_url'      => $authUrl,
+        'enr_link_sent_at'  => $nowStr,
         'enr_link_sent_cnt' => $lastCnt
       ), ['enr_id' => $eid]);
 
-      // 寫入會員通知中心 (fsl_notifications)
       $notiTitle = "【上課通知】《{$cTitle}》第 {$batchNo} 梯 Zoom 教室專屬連結";
       $notiBody  = "親愛的學員您好，您報名的《{$cTitle}》（第 {$batchNo} 梯，開課時間：{$startTime}）Zoom 線上會議室已備妥。\n"
                  . "會議室 ID：{$meetId}｜密碼：{$meetPwd}\n"
@@ -201,7 +486,7 @@ switch ($formAcce) {
   break;
 
   // =========================================================================
-  // 4. 課間點名簽到 / 簽退 / 請假 / 缺席 (func_sess_attend)
+  // 12. 課間點名簽到 / 簽退 / 請假 / 缺席 (func_sess_attend)
   // =========================================================================
   case 'func_sess_attend':
     $enrID     = (int)($_POST['enrID'] ?? 0);
@@ -219,11 +504,10 @@ switch ($formAcce) {
       $upd['enr_attend_status'] = 1;
       $upd['enr_checkin_at']    = $nowStr;
       $upd['enr_last_watched']  = $nowStr;
-      $upd['enr_status']        = 2; // 同步更新修課狀態為 2-修課進行中
+      $upd['enr_status']        = 2;
     } elseif ($attendAct === 'checkout') {
       $upd['enr_attend_status'] = 2;
       $upd['enr_checkout_at']   = $nowStr;
-      // 若尚未簽到就直接按簽退，補上簽到時間
       $hasIn = DB->single("SELECT enr_checkin_at FROM fsl_course_enrolls WHERE enr_id = ?", array($enrID));
       if (empty($hasIn)) {
         $upd['enr_checkin_at'] = $nowStr;
@@ -256,7 +540,7 @@ switch ($formAcce) {
       'RTN'           => 1,
       'msgType'       => 'success',
       'msgStr'        => '學員課間點名紀錄已更新！',
-      'badgeHtml'     => $badges[$attSt] ?? $badges,
+      'badgeHtml'     => $badges[$attSt] ?? $badges[0],
       'checkinShort'  => !empty($rowNow['enr_checkin_at']) ? substr($rowNow['enr_checkin_at'], 5, 11) : '-',
       'checkoutShort' => !empty($rowNow['enr_checkout_at']) ? substr($rowNow['enr_checkout_at'], 5, 11) : '-',
       'checkinCnt'    => $checkinCnt,
@@ -266,7 +550,7 @@ switch ($formAcce) {
   break;
 
   // =========================================================================
-  // 5. 已簽到學員一鍵全體簽退 (func_sess_batchCheckout)
+  // 13. 已簽到學員一鍵全體簽退 (func_sess_batchCheckout)
   // =========================================================================
   case 'func_sess_batchCheckout':
     if ($sessID <= 0) {
@@ -283,7 +567,7 @@ switch ($formAcce) {
   break;
 
   // =========================================================================
-  // 6. 課後雲端錄影回放與講義歸檔更新 (func_sess_recordingUpdate)
+  // 14. 梯次課後總結重點摘要更新 (func_sess_recordingUpdate)
   // =========================================================================
   case 'func_sess_recordingUpdate':
     if ($sessID <= 0) {
@@ -292,25 +576,22 @@ switch ($formAcce) {
     }
     $upTime = date('Y-m-d H:i:s');
     $updRec = array(
-      'sess_rec_url'      => trim((string)($formData['sess_rec_url'] ?? '')),
-      'sess_rec_passcode' => trim((string)($formData['sess_rec_passcode'] ?? '')),
-      'sess_handout_url'  => trim((string)($formData['sess_handout_url'] ?? '')),
-      'sess_brief'        => trim((string)($formData['sess_brief'] ?? '')),
-      'sess_updated'      => $upTime
+      'sess_brief'   => trim((string)($formData['sess_brief'] ?? '')),
+      'sess_updated' => $upTime
     );
     DB->update('fsl_course_sessions', $updRec, ['sess_id' => $sessID]);
 
     echo json_encode([
       'RTN'     => 1,
       'msgType' => 'success',
-      'msgStr'  => '課後錄影回放與講義歸檔資料已成功更新！',
+      'msgStr'  => '梯次課後總結重點摘要已成功更新！',
       'upTime'  => $upTime
     ]);
     exit();
   break;
 
   // =========================================================================
-  // 7. 軟刪除課程梯次 (func_sess_delete)
+  // 15. 軟刪除課程梯次與連動停用課次/排程 (func_sess_delete)
   // =========================================================================
   case 'func_sess_delete':
     if ($sessID <= 0) {
@@ -323,7 +604,10 @@ switch ($formAcce) {
       exit();
     }
     DB->update('fsl_course_sessions', ['sess_status' => 9], ['sess_id' => $sessID]);
-    echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '開課梯次已成功刪除！']);
+    DB->update('fsl_course_lessons', ['less_status' => 9], ['sess_id' => $sessID]);
+    DB->update('fsl_schedules', ['sch_status' => 9], ['cses_id' => $sessID]);
+
+    echo json_encode(['RTN' => 1, 'msgType' => 'success', 'msgStr' => '開課梯次及關聯單堂課次、排程提醒已成功刪除！']);
     exit();
   break;
 

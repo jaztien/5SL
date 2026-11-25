@@ -72,7 +72,8 @@ $sqlList = "
   SELECT e.*,
          m.mb_name, m.mb_email, m.mb_cellphone,
          c.course_title, c.course_type, c.course_lesson,
-         s.sess_batch, s.sess_startdate, s.sess_starttime,
+         s.sess_batch, s.sess_startdate, s.sess_starttime, s.sess_lesson,
+         (SELECT COUNT(*) FROM fsl_course_lessons l WHERE l.sess_id = e.sess_id AND l.less_status != 9) AS actual_lessons,
          o.ord_no, o.ord_total,
          i.inv_no, i.inv_status
   FROM fsl_course_enrolls e
@@ -187,7 +188,8 @@ $statusMap = array(
                           $paySta   = (int)($row['enr_pay_status'] ?? 0);
                           $enrSta   = (int)($row['enr_status'] ?? 1);
                           $doneLsn  = (int)($row['enr_done_lessons'] ?? 0);
-                          $totLsn   = max(1, (int)($row['course_lesson'] ?? 1));
+                          $actLsn   = (int)($row['actual_lessons'] ?? 0);
+                          $totLsn   = ($actLsn > 0) ? $actLsn : max(1, (int)($row['sess_lesson'] ?? $row['course_lesson'] ?? 1));
                           $pct      = min(100, round(($doneLsn / $totLsn) * 100));
                         ?>
                         <tr style="cursor: pointer;" onclick="window.location.href='enr_detail.php?currID=<?php echo $eid; ?>';">

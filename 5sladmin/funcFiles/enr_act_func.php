@@ -105,6 +105,12 @@ switch ($formAcce) {
       $wasActive = in_array($oldStatus, array(1, 2, 3), true);
       $nowActive = in_array($enrStatus, array(1, 2, 3), true);
 
+      $isBatchChanged = ($oldSessId !== $newSessId);
+      if ($isBatchChanged) {
+        // 更換梯次後清空舊梯次的專屬 Zoom 連結，避免學員點進舊會議室
+        $zoomUrl = '';
+      }
+
       $updData = array(
         'sess_id'          => $newSessId,
         'enr_quota_type'   => $quotaType,
@@ -134,11 +140,13 @@ switch ($formAcce) {
         }
       }
 
+      $msgTip = $isBatchChanged ? '學員已調度至新梯次（舊 Zoom 連結已清除，請點擊左側按鈕重新派發新梯次連結）！' : '學員報名進度與梯次調度已儲存更新！';
       echo json_encode([
         'RTN'     => 1,
         'msgType' => 'success',
-        'msgStr'  => '學員報名進度與梯次調度已儲存更新！'
+        'msgStr'  => $msgTip
       ]);
+
     }
     exit();
   break;
@@ -207,7 +215,8 @@ switch ($formAcce) {
     }
 
     $info = DB->row("
-      SELECT e.mb_id, c.course_title, c.course_lesson
+      SELECT e.mb_id, e.sess_id, c.course_title, c.course_lesson,
+             (SELECT COUNT(*) FROM fsl_course_lessons l WHERE l.sess_id = e.sess_id AND l.less_status != 9) AS actual_lessons
       FROM fsl_course_enrolls e
       LEFT JOIN fsl_courses c ON e.course_id = c.course_id
       WHERE e.enr_id = ?
@@ -218,10 +227,12 @@ switch ($formAcce) {
       exit();
     }
 
+    $finalLessons = ((int)$info['actual_lessons'] > 0) ? (int)$info['actual_lessons'] : max(1, (int)$info['course_lesson']);
     DB->update('fsl_course_enrolls', array(
       'enr_status'       => 3, // 3-已完課結業
-      'enr_done_lessons' => max(1, (int)$info['course_lesson'])
+      'enr_done_lessons' => $finalLessons
     ), ['enr_id' => $enrID]);
+
 
     $cTitle = $info['course_title'] ?? '專屬課程';
     DB->insert('fsl_notifications', array(

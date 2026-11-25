@@ -249,7 +249,7 @@
     },
     {
       "title": "訊息與分析管理",
-      "pagecode": "ITEM_MESS",
+      "pagecode": "ITEM_MSG",
       "url": "#",
       "badgeClass": "",
       "badgeNum": "",
@@ -257,8 +257,8 @@
       "subgroup": [
         {
           "title": "留言紀錄列表",
-          "pagecode": "PG_MESSBOARD",
-          "url": "mess_board.php",
+          "pagecode": "PG_MSG",
+          "url": "msg_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
@@ -266,7 +266,7 @@
         {
           "title": "自動應答分析管理",
           "pagecode": "PG_ROBOT",
-          "url": "mess_resplist.php",
+          "url": "robot_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
@@ -274,7 +274,7 @@
         {
           "title": "站內通知管理",
           "pagecode": "PG_NOTIFY",
-          "url": "mess_notifylist.php",
+          "url": "noti_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
