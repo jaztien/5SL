@@ -18,7 +18,7 @@ $maxResult = (!empty($searchURI)) ? 200 : 50;
 define('PAGE_MARK','PG_SYSADMIN');
 define('PAGE_ITEM','ITEM_SYS');
 define('PAGE_OPANEL',1);//1-新增；2-編輯；3-上傳；4-編輯/刪除；9-[空]。
-define('SEARCH_OPANEL',!empty($searchURI)?2:1);
+define('DRAWER_OPANEL',!empty($searchURI)?2:1);
 define('EXPORT_OPANEL',3);//1-Excel；2-PDF；3-Excel+Print；
 //頁面基本功能檔案(必須放置於 PAGE_MARK 定義之後)
 require_once('../includeFiles/page.basic.inc.php');

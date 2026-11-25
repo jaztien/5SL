@@ -10,8 +10,8 @@ define('currID', isset($_REQUEST['currID']) ? intval($_REQUEST['currID']) : 0);
 if (!defined('PAGE_OPANEL')) {
     define('PAGE_OPANEL', currID > 0 ? 4 : 5);
 }
-if (!defined('SEARCH_OPANEL')) {
-    define('SEARCH_OPANEL', 0);
+if (!defined('DRAWER_OPANEL')) {
+    define('DRAWER_OPANEL', 0);
 }
 if (!defined('EXPORT_OPANEL')) {
     define('EXPORT_OPANEL', 0);
@@ -70,7 +70,7 @@ $topNavConfig = [
         'delete' => auDELETE > 0,
     ],
     'opanel' => intval(PAGE_OPANEL),
-    'search' => intval(SEARCH_OPANEL),
+    'drawer' => intval(DRAWER_OPANEL),
     'export' => intval(EXPORT_OPANEL),
     'bkRedir'=> intval(bkRedir),
 ];
@@ -86,7 +86,7 @@ $topNavConfig = [
 
         const authPanel  = pDoc.querySelector('.nav-item.nav-authpanel');
         const topPanel   = pDoc.querySelector('.nav-item.nav-toppanel');
-        const topSearch  = pDoc.querySelector('.nav-item.nav-topsearch');
+        const topDrawer  = pDoc.querySelector('.nav-item.nav-topdrawer');
         const topExport  = pDoc.querySelector('.nav-item.nav-topexport');
         const topBKredir = pDoc.querySelector('.nav-item.nav-topbkredir');
 
@@ -95,7 +95,7 @@ $topNavConfig = [
         // 1. 全面重置所有面板與圖示的 active 狀態
         authPanel.querySelectorAll('i').forEach(el => el.classList.remove('active'));
         if (topPanel)   topPanel.querySelectorAll('i').forEach(el => { el.classList.remove('active'); el.style.display = 'none'; });
-        if (topSearch)  topSearch.querySelectorAll('i').forEach(el => { el.classList.remove('active'); el.style.display = 'none'; });
+        if (topDrawer)  topDrawer.querySelectorAll('i').forEach(el => { el.classList.remove('active'); el.style.display = 'none'; });
         if (topExport)  topExport.querySelectorAll('i').forEach(el => { el.classList.remove('active'); el.style.display = 'none'; });
         if (topBKredir) topBKredir.querySelectorAll('i').forEach(el => { el.classList.remove('active'); el.style.display = 'none'; });
 
@@ -160,20 +160,20 @@ $topNavConfig = [
         }
 
         // 4. 搜尋按鈕框控制
-        if (cfg.search > 0 && topSearch) {
-            topSearch.style.display = 'flex';
-            const leftbarIcon = topSearch.querySelector('#topBut_leftside');
-            const searchIcon = topSearch.querySelector('#topBut_search');
+        if (cfg.drawer > 0 && topDrawer) {
+            topDrawer.style.display = 'flex';
+            const leftbarIcon = topDrawer.querySelector('#topBut_SideBarL');
+            const rightbarIcon = topDrawer.querySelector('#topBut_SideBarR');
             if (leftbarIcon) {
                 leftbarIcon.style.display = 'inline-flex';
                 leftbarIcon.classList.add('active');
             }
-            if (searchIcon) {
-                searchIcon.style.display = 'inline-flex';
-                searchIcon.classList.add('active');
+            if (rightbarIcon) {
+                rightbarIcon.style.display = 'inline-flex';
+                rightbarIcon.classList.add('active');
             }
-        } else if (topSearch) {
-            topSearch.style.display = 'none';
+        } else if (topDrawer) {
+            topDrawer.style.display = 'none';
         }
 
         // 5. 匯出按鈕框控制

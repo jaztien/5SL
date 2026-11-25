@@ -5,66 +5,21 @@
   width: 100%;
   text-align: center;
 }
-.fliptimer {  
-  font: 13px/1.4 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
-  color: #77C69E;
+.fliptimer {
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
   font-size: 30px;
   font-weight: 100;
   line-height: 1;
+  color: #77C69E;
   text-align: center;
 }
 
-/* ==================== 2. 頂部功能操作按鈕列 ==================== */
-#topBut_save {
-  color: #D6DAE1;
-}
-#topBut_add.active,
-#topBut_save.active,
-#topBut_upload.active,
-#topBut_reset.active,
-#topBut_delete.active,
-#topBut_bkurl.active,
-#topBut_search.active,
-#topBut_excel.active,
-#topBut_pdf.active,
-#topBut_print.active {
-  color: #2C333E;
-  cursor: pointer;
-}
-#topBut_bkurl.active:hover,
-#topBut_search.active:hover,
-#topBut_excel.active:hover,
-#topBut_pdf.active:hover,
-#topBut_print.active:hover {
-  color: #5F6E86;
-}
-#topBut_save.active:hover {
-  color: #44a273;
-}
-#topBut_upload.active:hover,
-#topBut_add.active:hover {
-  color: #236FB7;
-}
-#topBut_reset.active:hover {
-  color: #ECC244;
-}
-#topBut_delete.active:hover {
-  color: #C35050;
-}
-
-/* 頂部功能面板外框 */
-/* ==================== 頂部功能操作與權限面板（統一外框視覺） ==================== */
-/* 1. 統一所有群組外框的高度、內距、邊框與垂直水平置中 */
-/* ==================== 頂部功能操作與權限面板（高對比狀態區分版） ==================== */
-/* ==========================================================================
-   頂部功能操作與權限面板（完整整合版：統一外框 + 絕對置中 + 高對比 Hover）
-   ========================================================================== */
-
-/* 1. 外層群組底盤：統一高度 36px 與淺灰底色 */
+/* ==================== 2. 頂部功能操作與權限面板 ==================== */
+/* 2-1. 外層群組底盤 */
 .nav-item.nav-authpanel,
 .nav-item.nav-toppanel,
 .nav-item.nav-topbkredir,
-.nav-item.nav-topsearch,
+.nav-item.nav-topdrawer,
 .nav-item.nav-topexport {
   display: none;
   align-items: center !important;
@@ -77,11 +32,11 @@
   border-radius: 0.4rem;
 }
 
-/* 2. 基礎圖示方塊：強制使用 inline-flex !important 蓋過 jQuery .show()，確保永遠正中央 */
+/* 2-2. 基礎圖示方塊 */
 .nav-item.nav-authpanel i,
 .nav-item.nav-toppanel i,
 .nav-item.nav-topbkredir i,
-.nav-item.nav-topsearch i,
+.nav-item.nav-topdrawer i,
 .nav-item.nav-topexport i {
   width: 26px !important;
   height: 26px !important;
@@ -100,12 +55,12 @@
 /* 確保 jQuery .hide() 設定的 display:none 依然生效 */
 .nav-item.nav-toppanel i[style*="display: none"],
 .nav-item.nav-topbkredir i[style*="display: none"],
-.nav-item.nav-topsearch i[style*="display: none"],
+.nav-item.nav-topdrawer i[style*="display: none"],
 .nav-item.nav-topexport i[style*="display: none"] {
   display: none !important;
 }
 
-/* 3. 未啟用 / 無權限狀態 (Muted) */
+/* 2-3. 未啟用 / 無權限狀態 (Muted) */
 .nav-item.nav-authpanel i:not(.active),
 .nav-item.nav-toppanel i:not(.active) {
   background-color: transparent !important;
@@ -115,7 +70,7 @@
   border: 1px solid transparent !important;
 }
 
-/* 4. 權限指示燈 (已授權狀態) */
+/* 2-4. 權限指示燈 (已授權狀態) */
 .nav-item.nav-authpanel i.active {
   background-color: #343a40 !important;
   color: #ffffff !important;
@@ -124,14 +79,14 @@
   cursor: default !important;
 }
 
-/* 5. 可點擊的操作按鈕 (通用基礎) */
+/* 2-5. 可點擊的操作按鈕 (通用基礎與按壓回饋) */
 #topBut_add.active,
 #topBut_save.active,
 #topBut_upload.active,
 #topBut_reset.active,
 #topBut_delete.active,
 #topBut_bkurl.active,
-#topBut_search.active,
+#topBut_SideBarR.active,
 #topBut_excel.active,
 #topBut_pdf.active,
 #topBut_print.active {
@@ -140,8 +95,15 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
-/* 6. 各按鈕專屬常駐色彩與明確 Hover 反白效果 */
-/* 儲存按鈕：亮起時為翠綠底白字，Hover 變深綠並微浮起 */
+.nav-item.nav-toppanel i.active:active,
+.nav-item.nav-topbkredir i.active:active,
+.nav-item.nav-topdrawer i.active:active,
+.nav-item.nav-topexport i.active:active {
+  transform: scale(0.92) !important;
+}
+
+/* 2-6. 各按鈕專屬常駐色彩與明確 Hover 反白效果 */
+/* 儲存 */
 #topBut_save.active {
   background-color: #198754 !important;
   border: 1px solid #198754 !important;
@@ -156,7 +118,7 @@
   box-shadow: 0 4px 8px rgba(25, 135, 84, 0.45);
 }
 
-/* 新增 / 上傳按鈕：經典藍色字，Hover 轉實心藍底白字 */
+/* 新增 / 上傳 */
 #topBut_add.active,
 #topBut_upload.active {
   background-color: #ffffff !important;
@@ -172,7 +134,7 @@
   box-shadow: 0 3px 6px rgba(13, 110, 253, 0.3);
 }
 
-/* 刪除按鈕：警戒紅色字，Hover 轉實心紅底白字 */
+/* 刪除 */
 #topBut_delete.active {
   background-color: #ffffff !important;
   color: #dc3545 !important;
@@ -186,7 +148,7 @@
   box-shadow: 0 3px 6px rgba(220, 53, 69, 0.3);
 }
 
-/* 重置按鈕：琥珀橘色字，Hover 轉實心橘底白字 */
+/* 重置 */
 #topBut_reset.active {
   background-color: #ffffff !important;
   color: #d97706 !important;
@@ -200,8 +162,8 @@
   box-shadow: 0 3px 6px rgba(245, 158, 11, 0.3);
 }
 
-/* 搜尋 / 匯出 / 列印 / 返回前頁：深石板灰，Hover 轉實心深灰底白字 */
-#topBut_search.active,
+/* 搜尋 / 匯出 / 列印 / 返回前頁 */
+#topBut_SideBarR.active,
 #topBut_excel.active,
 #topBut_pdf.active,
 #topBut_print.active,
@@ -210,7 +172,7 @@
   color: #343a40 !important;
   border: 1px solid #adb5bd !important;
 }
-#topBut_search.active:hover,
+#topBut_SideBarR.active:hover,
 #topBut_excel.active:hover,
 #topBut_pdf.active:hover,
 #topBut_print.active:hover,
@@ -222,22 +184,14 @@
   box-shadow: 0 3px 6px rgba(52, 58, 64, 0.25);
 }
 
-/* 7. 點擊按壓回饋 */
-.nav-item.nav-toppanel i.active:active,
-.nav-item.nav-topbkredir i.active:active,
-.nav-item.nav-topsearch i.active:active,
-.nav-item.nav-topexport i.active:active {
-  transform: scale(0.92) !important;
-}
-
-/* ==================== 3. AdminLTE 4 側邊欄選單樣式覆寫 ==================== */
-/* 第一層展開時的主分類高亮 (綠色) */
+/* ==================== 3. AdminLTE 4 側邊欄選單樣式 ==================== */
+/* 第一層展開主分類高亮 (綠色) */
 #sidebarL > ul > li.menu-open > a.nav-link {
   background-color: #44a273 !important;
   color: #ffffff !important;
 }
 
-/* 第二層展開時、以及第二/三層選中項目高亮 (淺灰底深字) */
+/* 第二層展開、以及第二/三層選中項目高亮 (淺灰底深字) */
 #sidebarL > ul > li > ul > li.menu-open > a.nav-link,
 #sidebarL > ul > li > ul > li a.nav-link.active {
   background-color: #BAC3CD !important;
@@ -245,12 +199,12 @@
   font-weight: 600;
 }
 
-/* 防止點擊 <p> 標籤干擾事件冒泡 (AdminLTE 4 建議保留) */
+/* 防止點擊 <p> 標籤干擾事件冒泡 */
 #sidebarL .nav-link p {
-  pointer-events: none; 
+  pointer-events: none;
 }
 
-/* [關鍵修正] 改用 Bootstrap Icons (bootstrap-icons) 的右三角形 Unicode (\f231 = bi-caret-right-fill) */
+/* 選中項目的 Bootstrap Icons 右三角形指示 (\f231 = bi-caret-right-fill) */
 .nav-treeview > .nav-item > .nav-link.active i.activeicon::before {
   font-family: "bootstrap-icons" !important;
   content: "\f231";
@@ -260,12 +214,42 @@
   vertical-align: -0.125em;
 }
 
-/* 樹狀子層加強透明度 */
+/* 樹狀選單層級縮排 */
+#sidebarL > ul > li > a.nav-link {
+  padding-left: 0.85rem;
+}
+#sidebarL > ul > li > ul.nav-treeview > li > a.nav-link {
+  padding-left: 1.75rem !important;
+}
+#sidebarL > ul > li > ul.nav-treeview > li > ul.nav-treeview > li > a.nav-link {
+  padding-left: 2.65rem !important;
+}
+
+/* 子層左側垂直樹狀連接線 */
+#sidebarL ul.nav-treeview {
+  position: relative;
+}
+#sidebarL > ul > li > ul.nav-treeview::before,
+#sidebarL > ul > li > ul.nav-treeview > li > ul.nav-treeview::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+}
+#sidebarL > ul > li > ul.nav-treeview::before {
+  left: 1.35rem;
+}
+#sidebarL > ul > li > ul.nav-treeview > li > ul.nav-treeview::before {
+  left: 2.25rem;
+}
+
+/* 子層透明度與徽章顯示控制 */
 .nav-layer2 {
   opacity: 0.8;
 }
-
-/* 徽章顯示控制 */
 .badgeShow {
   visibility: visible;
 }
@@ -283,16 +267,11 @@
   background-color: #91bd09;
 }
 #ind_websocket.socketalert {
-  height: 12px;
-  width: 12px;
-  border: none;
-  border-radius: 50%;
-  margin-top: 10px;
   background-color: #e33100;
   animation: indFlash 1s ease-in infinite;
 }
 @keyframes indFlash {
-  0% {
+  0%, 100% {
     background-color: #ccc;
     box-shadow: 0 0 4px #333;
   }
@@ -300,48 +279,4 @@
     background-color: #e33100;
     box-shadow: 0 0 8px #e33100;
   }
-  100% {
-    background-color: #ccc;
-    box-shadow: 0 0 4px #333;
-  }
-}
-/* ==================== 樹狀選單層級縮排與視覺引導 ==================== */
-/* 第一層（主分類）預設左內距 */
-#sidebarL > ul > li > a.nav-link {
-  padding-left: 0.85rem;
-}
-
-/* 第二層（子分類 / 子資料夾）向右縮排 */
-#sidebarL > ul > li > ul.nav-treeview > li > a.nav-link {
-  padding-left: 1.75rem !important;
-}
-
-/* 第三層（子資料夾內的項目）再向右縮排 */
-#sidebarL > ul > li > ul.nav-treeview > li > ul.nav-treeview > li > a.nav-link {
-  padding-left: 2.65rem !important;
-}
-
-/* [選用增強] 為子層選單加上細微的左側垂直樹狀連接線，層級更明確 */
-#sidebarL ul.nav-treeview {
-  position: relative;
-}
-#sidebarL > ul > li > ul.nav-treeview::before {
-  content: "";
-  position: absolute;
-  left: 1.35rem;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background-color: rgba(255, 255, 255, 0.15);
-  pointer-events: none;
-}
-#sidebarL > ul > li > ul.nav-treeview > li > ul.nav-treeview::before {
-  content: "";
-  position: absolute;
-  left: 2.25rem;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background-color: rgba(255, 255, 255, 0.15);
-  pointer-events: none;
 }

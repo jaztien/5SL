@@ -23,7 +23,7 @@ $maxResult = (!empty($searchURI)) ? 300 : 160;
 define('PAGE_MARK', 'PG_MEDIA');
 define('PAGE_ITEM', 'ITEM_SYS');
 define('PAGE_OPANEL', 1); // 1-新增
-define('SEARCH_OPANEL', !empty($searchURI) ? 2 : 1);
+define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
 define('EXPORT_OPANEL', 0);
 
 require_once('../includeFiles/page.basic.inc.php');

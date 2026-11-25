@@ -5,7 +5,7 @@ require_once('../includeFiles/db.inc.php');
 define('PAGE_MARK', 'PG_SCH_CAL');
 define('PAGE_ITEM', 'ITEM_SCH');
 define('PAGE_OPANEL', 1); // 1-新增
-define('SEARCH_OPANEL', !empty($searchURI) ? 2 : 1);
+define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
 define('COLL_OPANEL', 1);
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');

@@ -21,7 +21,7 @@ $maxResult = (!empty($searchURI)) ? 300 : 150;
 define('PAGE_MARK', 'PG_NOTIFY');
 define('PAGE_ITEM', 'ITEM_MSG');
 define('PAGE_OPANEL', 1); // 1-新增(手動發送站內通知)
-define('SEARCH_OPANEL', !empty($searchURI) ? 2 : 1);
+define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
 define('EXPORT_OPANEL', 3); // 3-Excel+Print
 
 require_once('../includeFiles/page.basic.inc.php');

@@ -261,7 +261,7 @@ $(document).ready(function() {
         backIframe();
     });
 
-    $('#topBut_search').click(function(e){
+    $('#topBut_SideBarR').click(function(e){
         e.preventDefault();
         const win = $("#iFrame_main")[0].contentWindow;
         if (win && typeof win.doButSerach === 'function') win.doButSerach();

@@ -188,8 +188,8 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
           </li>
 
           <!-- 搜尋按鈕 -->
-          <li class="nav-item nav-topsearch">
-            <i id="topBut_search" name="topBut_search" class="bi bi-search active" title="開啟搜尋視窗"></i>
+          <li class="nav-item nav-topdrawer">
+            <i id="topBut_SideBarR" name="topBut_SideBarR" class="bi bi-layout-sidebar-inset-reverse active" title="開啟搜尋視窗"></i>
           </li>
 
           <!-- 匯出與列印按鈕 -->
@@ -918,7 +918,7 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
             backIframe();
         });
 
-        $('#topBut_search').click(function(e){
+        $('#topBut_SideBarR').click(function(e){
             e.preventDefault();
             const win = $("#iFrame_main")[0].contentWindow;
             if (win && typeof win.doButSerach === 'function') win.doButSerach();
