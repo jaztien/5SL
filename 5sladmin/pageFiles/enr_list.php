@@ -123,6 +123,7 @@ $statusMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-purple">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -133,7 +134,6 @@ $statusMap = array(
               <h4 class="m-0">
                 講座與課程報名紀錄
                 <i class="bi bi-question-circle-fill fs-6 text-secondary" data-bs-toggle="tooltip" title="以預約報名學員為核心，統籌追蹤支付發票、課前通訊、修課進度、完課結業與課後關懷服務"></i>
-                <span class="text-muted small ms-2">enr_list.php</span>
               </h4>
             </div>
             <div class="col-sm-6">

@@ -219,6 +219,7 @@ $usedLabel  = ($totalBytes >= 1048576) ? (round($totalBytes / 1048576, 1) . ' MB
 </style>
 </head>
 <body class="bg-body-tertiary theme-indigo">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -228,8 +229,8 @@ $usedLabel  = ($totalBytes >= 1048576) ? (round($totalBytes / 1048576, 1) . ' MB
             <div class="col-sm-6">
               <h4 class="m-0">
                 系統檔案庫與活動花絮總管
-                <span class="text-muted small ms-2">File Manager</span>
               </h4>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 lh-xs mb-n2"><i class="bi bi-arrow-return-right"></i> File Manager</h6>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-end small mb-0">

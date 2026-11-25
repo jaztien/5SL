@@ -285,6 +285,28 @@ html, body {
   min-height: 100vh;
 }
 
+.fs-7 {
+  font-size: 0.8rem !important; /* 約 12px */
+}
+
+.fs-8 {
+  font-size: 0.75rem !important;
+}
+
+.lh-ms {
+  line-height: 0.9 !important;
+}
+.lh-xs {
+  line-height: 0.8 !important;
+}
+.lh-xxs {
+  line-height: 0.5 !important;
+}
+
+.pt-6 {
+  padding-top: 4.5rem !important; /* 約 72px，可依需求調整數值 */
+}
+
 .app-wrapper,
 .app-main {
   min-height: 100vh;

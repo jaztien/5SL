@@ -54,6 +54,7 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
 <!-- -------------------------- /CSS Link -------------------------- -->
 </head>
 <body class="bg-body-tertiary">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     
     <main class="app-main">
@@ -64,8 +65,8 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
               <h4 class="m-0">
                 {{頁面名稱}}
                 <i class="bi bi-question-circle-fill fs-6 text-secondary" data-bs-toggle="tooltip" title="{{說明彈框}}"></i>
-                <span class="text-muted small ms-2">{{檔案名稱}}</span>
               </h4>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 lh-xs mb-n2"><i class="bi bi-arrow-return-right"></i> {{簡述}}</h6>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-end small mb-0">

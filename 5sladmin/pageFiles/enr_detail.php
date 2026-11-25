@@ -105,6 +105,7 @@ $attendLabels = array(0 => '未簽到', 1 => '已簽到上課中', 2 => '已完�
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-purple">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -114,9 +115,9 @@ $attendLabels = array(0 => '未簽到', 1 => '已簽到上課中', 2 => '已完�
             <div class="col-sm-6">
               <h4 class="m-0">
                 <?php echo ($enrID > 0) ? "學員報名與服務全景中控" : "手動補登課程報名"; ?>
-                <span class="fs-5 text-primary">【報名ID: #<?php echo $enrID; ?>】</span>
+                <span class="fs-7">【ID: #<?php echo $enrID; ?>】</span>
               </h4>
-              <h6 class="m-0 fw-light text-muted">支付發票對帳、梯次調度、專屬訊息通訊、課間出席與課後結業追蹤</h6>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 lh-xs mb-n2"><i class="bi bi-arrow-return-right"></i> 支付發票對帳、梯次調度、專屬訊息通訊、課間出席與課後結業追蹤</h6>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-end small mb-0">

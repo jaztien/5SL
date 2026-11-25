@@ -130,6 +130,7 @@ $currLive = (int)($res['sess_live_status'] ?? 0);
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-cyan">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -141,7 +142,7 @@ $currLive = (int)($res['sess_live_status'] ?? 0);
                 <?php echo !empty($sessID) ? "課堂中控與梯次管理" : "新增開課梯次"; ?>
                 <span class="fs-5 text-info">【ID: <?php echo $sessID; ?>】</span>
               </h4>
-              <h6 class="m-0 fw-light text-muted">Zoom 會議間建立與即時狀態、單堂課次排程與報告、學員授權連結派發與課後影音講義</h6>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 lh-xs mb-n2"><i class="bi bi-arrow-return-right"></i> Zoom 會議間建立與即時狀態、單堂課次排程與報告、學員授權連結派發與課後影音講義</h6>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-end small mb-0">

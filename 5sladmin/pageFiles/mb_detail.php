@@ -108,6 +108,7 @@ $locJS = _fn_getCachedJsonData("../jsonFiles/locations.json");
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-blue">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -117,9 +118,9 @@ $locJS = _fn_getCachedJsonData("../jsonFiles/locations.json");
             <div class="col-sm-6">
               <h4 class="m-0">
                 <?php echo !empty($mbID) ? "編輯" : "新增"; ?>會員資料
-                <span class="fs-5 text-primary">【ID: <?php echo $mbID; ?>】</span>
+                <span class="fs-7">【ID: <?php echo $mbID; ?>】</span>
               </h4>
-              <h6 class="m-0 fw-light text-muted">會員帳號身份、點數調帳、修課與訂單全覽</h6>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 mb-n2"><i class="bi bi-arrow-return-right"></i> 會員帳號身份、點數調帳、修課與訂單全覽</h6>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-end small mb-0">

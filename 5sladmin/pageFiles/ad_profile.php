@@ -83,6 +83,7 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
 </head>
 <!-- [變更1] 移除舊版 layout-navbar-fixed hold-transition sidebar-mini，改用 bg-body-tertiary -->
 <body class="bg-body-tertiary theme-green">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <!-- 全頁框：[變更2] .wrapper 改為 .app-wrapper -->
   <div class="app-wrapper">
     <!-- 頁內全頁內容：[變更3] .content-wrapper 改為 .app-main -->
@@ -92,8 +93,8 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
         <div class="container-fluid">
           <div class="row mb-2 align-items-center">
             <div class="col-sm-6">
-              <h4 class="m-0"><?php echo !empty($adID) ? "編輯" : "新增"; ?><?php echo (!empty($adID) && $adID==$_SESSION['SESS_AD_ID']) ? "我的個人資料" : "管理人員資料"; ?><span class="fs-5">【ID: <?php echo $adID; ?>】</span></h4>
-              <h6 class="m-0 fw-light text-muted">管理者資料編輯</h6>
+              <h4 class="m-0"><?php echo !empty($adID) ? "編輯" : "新增"; ?><?php echo (!empty($adID) && $adID==$_SESSION['SESS_AD_ID']) ? "我的個人資料" : "管理人員資料"; ?><span class="fs-7">【ID: <?php echo $adID; ?>】</span></h4>
+              <h6 class="m-0 fw-light text-muted fs-7 lh-ms">管理者資料編輯</h6>
             </div>
             <div class="col-sm-6">
               <!-- [變更5] float-sm-right 改為 float-sm-end -->

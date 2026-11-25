@@ -54,6 +54,7 @@ while($i<count($sr)){
 </head>
 <!-- [變更1] 套用 AdminLTE 4 基礎背景與 theme-green 主題 -->
 <body class="bg-body-tertiary theme-green">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <!-- 全頁框：[變更2] .wrapper 改為 .app-wrapper -->
   <div class="app-wrapper">
     <!-- 頁內全頁內容：[變更3] .content-wrapper 改為 .app-main -->

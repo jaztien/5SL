@@ -55,6 +55,7 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
 </head>
 <!-- [變更1] 移除舊版 hold-transition sidebar-mini 等多餘類別，改用 bg-body-tertiary -->
 <body class="bg-body-tertiary">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <!-- 全頁框：[變更2] .wrapper 改為 .app-wrapper -->
   <div class="app-wrapper">
     
@@ -70,13 +71,11 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
             <div class="col-sm-6">
               <h4 class="m-0">
                 管理人員列表
-                <!-- [變更6] 圖示改為 bi-question-circle-fill，屬性改為 data-bs-toggle="tooltip" -->
                 <i class="bi bi-question-circle-fill fs-6 text-secondary" data-bs-toggle="tooltip" title="人生第五季系統內的管理人員帳號清單，包含工程人員、網站管理人員、網站客服人員等。"></i>
-                <span class="text-muted small ms-2">ad_list.php</span>
               </h4>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 mb-n2"><i class="bi bi-arrow-return-right"></i> 人生第五季管理人員操作系統</h6>
             </div>
             <div class="col-sm-6">
-              <!-- [變更7] float-sm-right 改為 float-sm-end -->
               <ol class="breadcrumb float-sm-end small mb-0">
                 <li class="breadcrumb-item">首頁</li>
                 <li class="breadcrumb-item">系統設定管理</li>
@@ -286,7 +285,11 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
   //***************** jQuery FUNCTIONs 區域調用 ******************//
   //*************************** *********************************//
   $(document).ready(function() {
-
+$('#offcanvasSearch').on('shown.bs.offcanvas hidden.bs.offcanvas', function (e) {
+  const isExpanded = (e.type === 'shown');
+  alert(isExpanded);
+  // 建議將 '*' 替換為外層網頁的實際網址（例如 'https://example.com'）以確保安全
+});
       //------------------------- [變更14] Bootstrap 5 Tooltips 初始化 -----------------------------//
       const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
       [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));

@@ -49,6 +49,7 @@ if (empty($repliesArr)) {
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-indigo">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -58,9 +59,9 @@ if (empty($repliesArr)) {
             <div class="col-sm-6">
               <h4 class="m-0">
                 <?php echo ($robID > 0) ? '編輯自動應答規則' : '新增自動應答規則'; ?>
-                <span class="fs-5 text-primary">【ID: #<?php echo $robID; ?>】</span>
+                <span class="fs-7">【ID: #<?php echo $robID; ?>】</span>
               </h4>
-              <h6 class="m-0 fw-light text-muted">設定關鍵字觸發條件，並建立多組不同口吻與語氣的應答內容依權重隨機回覆</h6>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 lh-xs mb-n2"><i class="bi bi-arrow-return-right"></i> 設定關鍵字觸發條件，並建立多組不同口吻與語氣的應答內容依權重隨機回覆</h6>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-end small mb-0">

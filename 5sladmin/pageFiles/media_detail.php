@@ -58,6 +58,7 @@ $safeDlUrl = ($medID > 0) ? ("5sl_download.php?id=" . $medID) : "";
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-indigo">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -67,9 +68,9 @@ $safeDlUrl = ($medID > 0) ? ("5sl_download.php?id=" . $medID) : "";
             <div class="col-sm-6">
               <h4 class="m-0">
                 <?php echo !empty($medID) ? "編輯" : "新增"; ?>多媒體與檔案庫資料
-                <span class="fs-5 text-primary">【ID: <?php echo $medID; ?>】</span>
+                <span class="fs-7">【ID: <?php echo $medID; ?>】</span>
               </h4>
-              <h6 class="m-0 fw-light text-muted">支援本地上傳與雲端連結、YouTube Embed 預覽、下載權限與隱藏檔名下載</h6>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 lh-xs mb-n2"><i class="bi bi-arrow-return-right"></i> 支援本地上傳與雲端連結、YouTube Embed 預覽、下載權限與隱藏檔名下載</h6>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-end small mb-0">

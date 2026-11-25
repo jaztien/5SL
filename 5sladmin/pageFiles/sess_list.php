@@ -90,6 +90,7 @@ $weekNames = array('0' => '日', '1' => '一', '2' => '二', '3' => '三', '4' =
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-cyan">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -100,7 +101,6 @@ $weekNames = array('0' => '日', '1' => '一', '2' => '二', '3' => '三', '4' =
               <h4 class="m-0">
                 課程梯次與課堂管理
                 <i class="bi bi-question-circle-fill fs-6 text-secondary" data-bs-toggle="tooltip" title="管理開課梯次、Zoom 會議間建立與安全設定、學員授權連結派發、課間點名簽退與課後錄影"></i>
-                <span class="text-muted small ms-2">sess_list.php</span>
               </h4>
             </div>
             <div class="col-sm-6">

@@ -96,6 +96,7 @@ $statusMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-purple">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -106,7 +107,6 @@ $statusMap = array(
               <h4 class="m-0">
                 每日與成長任務系統管理
                 <i class="bi bi-question-circle-fill fs-6 text-secondary" data-bs-toggle="tooltip" title="管理各會員等級階段任務、全通關終極寶箱大禮、關聯禮品包與會員達成進度"></i>
-                <span class="text-muted small ms-2">quest_list.php</span>
               </h4>
             </div>
             <div class="col-sm-6">

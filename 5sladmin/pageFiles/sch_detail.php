@@ -76,6 +76,7 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-teal">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -85,9 +86,9 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
             <div class="col-sm-6">
               <h4 class="m-0">
                 <?php echo !empty($schID) ? "編輯" : "新增"; ?>排程與自動化通知任務
-                <span class="fs-5 text-primary">【ID: <?php echo $schID; ?>】</span>
+                <span class="fs-7">【ID: <?php echo $schID; ?>】</span>
               </h4>
-              <h6 class="m-0 fw-light text-muted">設定日曆時段、定時觸發通知、發送對象模式（個別/課程群組/自選/講師）與多通路發送</h6>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 lh-xs mb-n2"><i class="bi bi-arrow-return-right"></i> 設定日曆時段、定時觸發通知、發送對象模式（個別/課程群組/自選/講師）與多通路發送</h6>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-end small mb-0">

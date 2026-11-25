@@ -92,6 +92,7 @@ $statusMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-red">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -102,7 +103,6 @@ $statusMap = array(
               <h4 class="m-0">
                 禮品優惠券與派發管理
                 <i class="bi bi-question-circle-fill fs-6 text-secondary" data-bs-toggle="tooltip" title="管理紅利點數禮包、課程折價券、關聯實體/數位商品贈品、對象規則與會員領收物流追蹤"></i>
-                <span class="text-muted small ms-2">gift_list.php</span>
               </h4>
             </div>
             <div class="col-sm-6">

@@ -87,6 +87,7 @@ $currOrdSta = (int)($res['ord_status'] ?? 1);
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-gray">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -96,9 +97,9 @@ $currOrdSta = (int)($res['ord_status'] ?? 1);
             <div class="col-sm-6">
               <h4 class="m-0">
                 訂單、發票與售後審核詳情
-                <span class="fs-5 text-primary">【<?php echo htmlspecialchars($res['ord_no']); ?>】</span>
+                <span class="fs-7">【<?php echo $ordID; ?>】</span>
               </h4>
-              <h6 class="m-0 fw-light text-muted">訂單品項明細、物流出貨單號、電子發票開立作廢與退換貨審核退款</h6>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 lh-xs mb-n2"><i class="bi bi-arrow-return-right"></i> 訂單品項明細、物流出貨單號、電子發票開立作廢與退換貨審核退款</h6>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-end small mb-0">

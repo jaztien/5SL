@@ -118,6 +118,7 @@ $typeLabels = array(1 => '純紅利點數', 2 => '商品贈品 (實體/數位)',
 </style>
 </head>
 <body class="bg-body-tertiary theme-red">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -127,9 +128,9 @@ $typeLabels = array(1 => '純紅利點數', 2 => '商品贈品 (實體/數位)',
             <div class="col-sm-6">
               <h4 class="m-0">
                 <?php echo !empty($giftID) ? "編輯" : "新增"; ?>禮品與優惠券方案
-                <span class="fs-5 text-danger">【ID: <?php echo $giftID; ?>】</span>
+                <span class="fs-7">【ID: <?php echo $giftID; ?>】</span>
               </h4>
-              <h6 class="m-0 fw-light text-muted">設定點數獎勵、課程折抵券、關聯商品禮包、對象限制與派發寄送追蹤</h6>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 lh-xs mb-n2"><i class="bi bi-arrow-return-right"></i> 設定點數獎勵、課程折抵券、關聯商品禮包、對象限制與派發寄送追蹤</h6>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-end small mb-0">

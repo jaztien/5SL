@@ -175,6 +175,7 @@ $statusLabels = array(0 => '下架停用', 1 => '上架啟用', 2 => '預購或�
 </style>
 </head>
 <body class="bg-body-tertiary theme-orange">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -186,7 +187,7 @@ $statusLabels = array(0 => '下架停用', 1 => '上架啟用', 2 => '預購或�
                 <?php echo !empty($merchID) ? "編輯" : "新增"; ?>商品與贈品資料
                 <span class="fs-5 text-warning-emphasis">【ID: <?php echo $merchID; ?>】</span>
               </h4>
-              <h6 class="m-0 fw-light text-muted">商品上下架、雙幣定價、庫存管理、6張主圖庫與 SunEditor 詳細圖文</h6>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 lh-xs mb-n2"><i class="bi bi-arrow-return-right"></i> 商品上下架、雙幣定價、庫存管理、6張主圖庫與 SunEditor 詳細圖文</h6>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-end small mb-0">

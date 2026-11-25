@@ -109,7 +109,6 @@ $statusMap = array(
               <h4 class="m-0">
                 知識專欄文章與動態模板管理
                 <i class="bi bi-question-circle-fill fs-6 text-secondary" data-bs-toggle="tooltip" title="管理知識專欄文章、PTS解鎖閱讀，以及支援 {{變數}} 動態替換的系統通知、Email 與 EDM 模板"></i>
-                <span class="text-muted small ms-2">art_list.php</span>
               </h4>
             </div>
             <div class="col-sm-6">

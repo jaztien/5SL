@@ -92,6 +92,7 @@ $statusMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-orange">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -102,7 +103,6 @@ $statusMap = array(
               <h4 class="m-0">
                 商品贈品管理
                 <i class="bi bi-question-circle-fill fs-6 text-secondary" data-bs-toggle="tooltip" title="管理周邊實體商品、數位下載物件、專屬贈品、6張主圖庫、定價與庫存水位"></i>
-                <span class="text-muted small ms-2">merch_list.php</span>
               </h4>
             </div>
             <div class="col-sm-6">

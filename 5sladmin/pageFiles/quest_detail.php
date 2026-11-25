@@ -86,6 +86,7 @@ $tierLabels = array(1 => 'Lv.1 一般會員', 2 => 'Lv.2 進階會員', 3 => 'Lv
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-purple">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -95,9 +96,9 @@ $tierLabels = array(1 => 'Lv.1 一般會員', 2 => 'Lv.2 進階會員', 3 => 'Lv
             <div class="col-sm-6">
               <h4 class="m-0">
                 <?php echo !empty($questID) ? "編輯" : "新增"; ?>成長任務與關聯獎勵
-                <span class="fs-5 text-primary">【ID: <?php echo $questID; ?>】</span>
+                <span class="fs-7">【ID: <?php echo $questID; ?>】</span>
               </h4>
-              <h6 class="m-0 fw-light text-muted">設定會員等級任務群、系統識別碼、目標門檻、關聯禮品包與人工補發進度</h6>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 lh-xs mb-n2"><i class="bi bi-arrow-return-right"></i> 設定會員等級任務群、系統識別碼、目標門檻、關聯禮品包與人工補發進度</h6>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-end small mb-0">

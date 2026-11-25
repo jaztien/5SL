@@ -93,6 +93,7 @@ $periodLabels = array(0 => '活動期間總計', 1 => '每日重置', 2 => '每�
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-pink">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -102,9 +103,9 @@ $periodLabels = array(0 => '活動期間總計', 1 => '每日重置', 2 => '每�
             <div class="col-sm-6">
               <h4 class="m-0">
                 <?php echo !empty($lotID) ? "編輯" : "新增"; ?>幸運輪盤與抽獎活動
-                <span class="fs-5 text-danger">【ID: <?php echo $lotID; ?>】</span>
+                <span class="fs-7">【ID: <?php echo $lotID; ?>】</span>
               </h4>
-              <h6 class="m-0 fw-light text-muted">活動呼叫代碼、消耗點數與次數週期、輪盤格位權重機率與資格規則</h6>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 lh-xs mb-n2"><i class="bi bi-arrow-return-right"></i> 活動呼叫代碼、消耗點數與次數週期、輪盤格位權重機率與資格規則</h6>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-end small mb-0">

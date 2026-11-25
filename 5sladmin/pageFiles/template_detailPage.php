@@ -82,6 +82,7 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
 </style>
 </head>
 <body class="bg-body-tertiary theme-green">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <!-- 全頁框 -->
   <div class="app-wrapper">
     <!-- 頁內全頁內容 -->

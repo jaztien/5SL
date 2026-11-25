@@ -565,7 +565,6 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
       };
 
 
-
       // 1. 呼叫 IFrame 內頁的全域函式 (如 doButSave, doButAdd, doButDelete)
       function callFrameFunc(funcName) {
         const frameWin = document.getElementById('iFrame_main').contentWindow;
@@ -843,6 +842,7 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
     //**************************** ********************************//
 
       $(document).ready(function() {
+
         //---------------------------------------------------------//
         // 3. 點擊側邊欄連結時即時切換 Active 樣式
         //---------------------------------------------------------//

@@ -74,6 +74,7 @@ $topNavConfig = [
     'export' => intval(EXPORT_OPANEL),
     'bkRedir'=> intval(bkRedir),
 ];
+
 ?>
 <script>
 (function() {
@@ -161,7 +162,12 @@ $topNavConfig = [
         // 4. 搜尋按鈕框控制
         if (cfg.search > 0 && topSearch) {
             topSearch.style.display = 'flex';
+            const leftbarIcon = topSearch.querySelector('#topBut_leftside');
             const searchIcon = topSearch.querySelector('#topBut_search');
+            if (leftbarIcon) {
+                leftbarIcon.style.display = 'inline-flex';
+                leftbarIcon.classList.add('active');
+            }
             if (searchIcon) {
                 searchIcon.style.display = 'inline-flex';
                 searchIcon.classList.add('active');

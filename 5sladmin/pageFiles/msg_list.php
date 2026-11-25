@@ -117,6 +117,7 @@ $targetModeMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-indigo">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -127,7 +128,6 @@ $targetModeMap = array(
               <h4 class="m-0">
                 雙向訊息與自動應答管理
                 <i class="bi bi-question-circle-fill fs-6 text-secondary" data-bs-toggle="tooltip" title="管理前後台雙向客服對話、單人/多人/條件篩選分眾發信，以及 AI 自動應答知識庫"></i>
-                <span class="text-muted small ms-2">msg_list.php</span>
               </h4>
             </div>
             <div class="col-sm-6">

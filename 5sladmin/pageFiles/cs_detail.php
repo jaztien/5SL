@@ -144,10 +144,9 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
           <div class="row mb-2 align-items-center">
             <div class="col-sm-6">
               <h4 class="m-0">
-                <?php echo !empty($csID) ? "編輯" : "新增"; ?>課程與價格方案
-                <span class="fs-5 text-success">【ID: <?php echo $csID; ?>】</span>
+                <?php echo !empty($csID) ? "編輯" : "新增"; ?>課程與價格方案<span class="fs-7">【ID: <?php echo $csID; ?>】</span>
               </h4>
-              <h6 class="m-0 fw-light text-muted">價格卡片設定、開課梯次排程、參與學員名單與優惠資格規則</h6>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 lh-xs mb-n2"><i class="bi bi-arrow-return-right"></i> 價格卡片設定、開課梯次排程、參與學員名單與優惠資格規則</h6>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-end small mb-0">

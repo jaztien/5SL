@@ -83,6 +83,7 @@ $matchMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-indigo">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -93,7 +94,6 @@ $matchMap = array(
               <h4 class="m-0">
                 自動應答知識庫管理
                 <i class="bi bi-question-circle-fill fs-6 text-secondary" data-bs-toggle="tooltip" title="設定關鍵字比對規則與多組不同口吻語氣變體，會員發問時自動依權重隨機挑選回覆"></i>
-                <span class="text-muted small ms-2">robot_list.php</span>
               </h4>
             </div>
             <div class="col-sm-6">

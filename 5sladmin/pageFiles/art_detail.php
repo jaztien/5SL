@@ -90,10 +90,9 @@ $statusLabels = array(0 => '下架停用', 1 => '上架啟用', 2 => '草稿待�
           <div class="row mb-2 align-items-center">
             <div class="col-sm-6">
               <h4 class="m-0">
-                <?php echo !empty($artiID) ? "編輯" : "新增"; ?>知識專欄與動態模板
-                <span class="fs-5 text-primary">【ID: <?php echo $artiID; ?>】</span>
+                <?php echo !empty($artiID) ? "編輯" : "新增"; ?>知識專欄與動態模板<span class="fs-7">【ID: <?php echo $artiID; ?>】</span>
               </h4>
-              <h6 class="m-0 fw-light text-muted">支援 SunEditor 圖庫串接、{{變數}} 動態字串替換、PTS 點數解鎖與排程上下架</h6>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 lh-xs mb-n2"><i class="bi bi-arrow-return-right"></i> 支援 SunEditor 圖庫串接、{{變數}} 動態字串替換、PTS 點數解鎖與排程上下架</h6>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-end small mb-0">

@@ -122,6 +122,7 @@ $currReplySta = (int)($res['msg_reply_status'] ?? 0);
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-indigo">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -131,9 +132,9 @@ $currReplySta = (int)($res['msg_reply_status'] ?? 0);
             <div class="col-sm-6">
               <h4 class="m-0">
                 <?php echo ($msgID > 0) ? '雙向訊息對話串與狀態管理' : '撰寫並發送新訊息至前台'; ?>
-                <span class="fs-5 text-primary">【ID: #<?php echo $msgID; ?>】</span>
+                <span class="fs-7">【ID: #<?php echo $msgID; ?>】</span>
               </h4>
-              <h6 class="m-0 fw-light text-muted">支援單一會員、多選名單與條件篩選分眾發送，並完整留存前後台往來對話</h6>
+              <h6 class="m-0 fw-light text-muted fs-7 mt-1 lh-xs mb-n2"><i class="bi bi-arrow-return-right"></i> 支援單一會員、多選名單與條件篩選分眾發送，並完整留存前後台往來對話</h6>
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-end small mb-0">

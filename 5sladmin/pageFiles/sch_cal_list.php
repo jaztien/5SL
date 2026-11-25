@@ -6,7 +6,7 @@ define('PAGE_MARK', 'PG_SCH_CAL');
 define('PAGE_ITEM', 'ITEM_SCH');
 define('PAGE_OPANEL', 1); // 1-新增
 define('SEARCH_OPANEL', !empty($searchURI) ? 2 : 1);
-define('CAL_OPANEL', 1);
+define('COLL_OPANEL', 1);
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
 
@@ -189,7 +189,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
 </head>
 
 <body class="bg-body-tertiary theme-cyan p-1">
-
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
     <div class="app-wrapper">
         <main class="app-main">
 
@@ -477,6 +477,10 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
         /** 頂部工具列「重整」按鈕：重新載入日曆頁 */
         function doButReset() {
             window.location.replace('sch_cal_list.php');
+        }
+
+        function doButLeftSide() {
+            alert('doButLeftSide');
         }
 
         function doButSerach() {

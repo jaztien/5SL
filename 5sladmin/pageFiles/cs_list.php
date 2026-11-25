@@ -102,7 +102,6 @@ $statusMap = array(
               <h4 class="m-0">
                 課程與價格方案管理
                 <i class="bi bi-question-circle-fill fs-6 text-secondary" data-bs-toggle="tooltip" title="管理主課程、特惠子方案、開課梯次與報名學員名單"></i>
-                <span class="text-muted small ms-2">cs_list.php</span>
               </h4>
             </div>
             <div class="col-sm-6">

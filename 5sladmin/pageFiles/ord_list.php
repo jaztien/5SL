@@ -118,6 +118,7 @@ $refStatusMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
 <body class="bg-body-tertiary theme-gray">
+  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
     <main class="app-main">
       <!-- 頁頭導覽條 -->
@@ -128,7 +129,6 @@ $refStatusMap = array(
               <h4 class="m-0">
                 訂單、發票與售後退換貨管理
                 <i class="bi bi-question-circle-fill fs-6 text-secondary" data-bs-toggle="tooltip" title="管理全站消費訂單、物流出貨追蹤、電子發票開立與作廢、以及售後退換貨審核退款"></i>
-                <span class="text-muted small ms-2">ord_list.php</span>
               </h4>
             </div>
             <div class="col-sm-6">
