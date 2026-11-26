@@ -134,12 +134,13 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
                             <tr style="cursor:pointer;" onclick="window.location.href='ad_profile.php?currID=<?php echo $sr[$i]['ad_id']; ?>';" data-currid="<?php echo $sr[$i]['ad_id']; ?>">
                               <td>
                                 <!-- [注意] 請確認 administrator.json 中的 badge 欄位已更新為 BS5 的 text-bg-* 類別 -->
-                                <span class="badge <?php echo trim($adJS['badge'][$sr[$i]['ad_status']]); ?>"><?php echo $adJS['status'][$sr[$i]['ad_status']]; ?></span>
+                                <span class="badge <?php echo trim($adJS['badge'][$sr[$i]['ad_status']]); ?>"><?php echo get_json_value($adJS['status']??'', $sr[$i]['ad_status']??'', true); ?></span>
                               </td>
                               <td><?php echo $sr[$i]['ad_id']; ?></td>
                               <td><?php echo $sr[$i]['ad_name']; ?></td>
                               <td><?php echo $sr[$i]['ad_title']; ?></td>
-                              <td><?php echo $adJS['authlevel'][$sr[$i]['ad_authlevel']] ?? '未定權限'; ?></td>
+                              <!-- <td><?php echo $adJS['authlevel'][$sr[$i]['ad_authlevel']] ?? '未定權限'; ?></td> -->
+                              <td><?php echo get_json_value($adJS['authlevel']??'', $sr[$i]['ad_authlevel']??'', true); ?></td>
                               <td><?php echo $sr[$i]['ad_published']; ?></td>
                               <td><?php echo $sr[$i]['ad_onboard']; ?></td>
                             </tr>
@@ -285,11 +286,6 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
   //***************** jQuery FUNCTIONs 區域調用 ******************//
   //*************************** *********************************//
   $(document).ready(function() {
-$('#offcanvasSearch').on('shown.bs.offcanvas hidden.bs.offcanvas', function (e) {
-  const isExpanded = (e.type === 'shown');
-  alert(isExpanded);
-  // 建議將 '*' 替換為外層網頁的實際網址（例如 'https://example.com'）以確保安全
-});
       //------------------------- [變更14] Bootstrap 5 Tooltips 初始化 -----------------------------//
       const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
       [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));

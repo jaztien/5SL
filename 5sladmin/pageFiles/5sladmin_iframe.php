@@ -2,82 +2,52 @@
 require_once('../includeFiles/init.inc.php');
 require_once('../includeFiles/db.inc.php');
 require_once('../includeFiles/common.lib.php');
-//iFrame內部網頁解析
+
+// iFrame內部網頁解析
 $iFrameURI = isset($_GET['backURI']) ? $_GET['backURI'] : '';
-$currURI = "5sladmin_startpage.html";
-if(!empty($iFrameURI) && strlen($iFrameURI) % 2 === 0){
+$currURI   = "5sladmin_startpage.html";
+if (!empty($iFrameURI) && strlen($iFrameURI) % 2 === 0) {
   $currURI = hex2bin($iFrameURI);
 }
-//
-$chatType = !empty($_REQUEST['chatType'])?intval($_REQUEST['chatType']):1;
-$joinID = !empty($_REQUEST['joinID'])?intval($_REQUEST['joinID']):0;
-$inchargeID = !empty($_REQUEST['inchargeID'])?intval($_REQUEST['inchargeID']):0;
-$podCast = !empty($_REQUEST['podCast'])?intval($_REQUEST['podCast']):0;
-if(!empty($podCast)){
-  $chatType = 0;
-  $joinID = 0;
-  $inchargeID = 0;
-}
-$sendActive = (empty($chatType)&&!empty($podCast))||(!empty($chatType)&&!empty($joinID)) ? 1 : 0;
-$onChatter = '';
-$robotStatus = DB->getConfigVal("mess_robot");
-$robotStatus = intval($robotStatus['config_value']);
+
+// 統計待後台人工回覆之雙向訊息數
+$pendingMsgCount = (int)DB->single("SELECT COUNT(*) FROM fsl_messages WHERE parent_id = 0 AND msg_status = 1 AND msg_reply_status = 0");
 
 /* [*] TreeMenu 左側選單佈局，包含 Badge 計數框 ------------ */
-$admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
-$sidebar = $admJS['sidebar'];
+$admJS      = _fn_getCachedJsonData("../jsonFiles/adminpage.json");
+$sidebar    = $admJS['sidebar'];
 $sideBarIDX = array();
-$ii = 0;
-while($ii<count($sidebar)){
-  $sideBarIDX[$sidebar[$ii]['pagecode']]=$ii;
+$ii         = 0;
+while ($ii < count($sidebar)) {
+  $sideBarIDX[$sidebar[$ii]['pagecode']] = $ii;
   $ii++;
 }
-// 圖文模版相關待辦案件數量 index: 4
-$sIDX = $sideBarIDX['ITEM_ARTI'];
-$getNum = DB->single("SELECT COUNT(arti_id) FROM fsl_articles WHERE arti_status=?",array(6));
-$getSum = $getNum;
-$sidebar[$sIDX]['badgeClass']='text-bg-warning';
-$sidebar[$sIDX]['badgeNum']=$getSum;
-$sidebar[$sIDX]['subgroup'][0]['badgeClass']='text-bg-warning';
-$sidebar[$sIDX]['subgroup'][0]['badgeNum']=$getNum;
-// 未讀訊息數量 index: 5
-/*
-$sIDX = $sideBarIDX['ITEM_MESS'];
-$toTime   = (new DateTime())->modify('-180 days')->format('Y-m-d H:i:s');//保留至N日前
-$getNum = DB->single("SELECT COUNT(chat_id) FROM data_chats WHERE chat_type = ? AND chat_posttype=? AND chat_published > ? AND chat_status=?",array(1,2,$toTime,2));
-$getSum = $getNum;
-$sidebar[$sIDX]['badgeClass']='badge-success';
-$sidebar[$sIDX]['badgeNum']=$getSum;
-$unreadBadge = $getNum;
-$sidebar[$sIDX]['subgroup'][0]['badgeClass']='badge-success';
-$sidebar[$sIDX]['subgroup'][0]['badgeNum']=$getNum;
-*/
-// 服務相關待辦案件數量 index: 6
-/*
-$sIDX = $sideBarIDX['ITEM_SERV'];
-$getNum = DB->single("SELECT COUNT(sv_id) FROM sv_service WHERE sv_status IN (?,?,?)",array(6,7,8));
-$getSum = $getNum;
-$sidebar[$sIDX]['badgeClass']='badge-danger';
-$sidebar[$sIDX]['badgeNum']=$getSum;
-$sidebar[$sIDX]['subgroup'][0]['badgeClass']='badge-danger';
-$sidebar[$sIDX]['subgroup'][0]['badgeNum']=$getNum;
-*/
-// 廣告相關待辦案件數量 index: 7
-/*
-$sIDX = $sideBarIDX['ITEM_AD'];
-$getNum = DB->single("SELECT COUNT(advp_id) FROM advi_pack WHERE advp_status=?",array(6));
-$getNum1 = DB->single("SELECT COUNT(advi_id) FROM advitising WHERE advi_status=?",array(6));
-$getSum = $getNum + $getNum1;
-$sidebar[$sIDX]['badgeClass']='text-bg-warning';
-$sidebar[$sIDX]['badgeNum']=$getSum;
-$sidebar[$sIDX]['subgroup'][0]['badgeClass']='text-bg-warning';
-$sidebar[$sIDX]['subgroup'][0]['badgeNum']=$getNum;
-$sidebar[$sIDX]['subgroup'][1]['badgeClass']='text-bg-warning';
-$sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
-*/
+
+// 圖文模版相關待辦案件數量
+if (isset($sideBarIDX['ITEM_ARTI'])) {
+  $sIDX   = $sideBarIDX['ITEM_ARTI'];
+  $getNum = (int)DB->single("SELECT COUNT(arti_id) FROM fsl_articles WHERE arti_status = ?", array(6));
+  if ($getNum > 0) {
+    $sidebar[$sIDX]['badgeClass'] = 'text-bg-warning';
+    $sidebar[$sIDX]['badgeNum']   = $getNum;
+    if (isset($sidebar[$sIDX]['subgroup'][0])) {
+      $sidebar[$sIDX]['subgroup'][0]['badgeClass'] = 'text-bg-warning';
+      $sidebar[$sIDX]['subgroup'][0]['badgeNum']   = $getNum;
+    }
+  }
+}
+
+// 雙向訊息待回覆數量徽章
+if (isset($sideBarIDX['ITEM_MSG']) && $pendingMsgCount > 0) {
+  $mIDX = $sideBarIDX['ITEM_MSG'];
+  $sidebar[$mIDX]['badgeClass'] = 'text-bg-danger';
+  $sidebar[$mIDX]['badgeNum']   = $pendingMsgCount;
+  if (isset($sidebar[$mIDX]['subgroup'][0])) {
+    $sidebar[$mIDX]['subgroup'][0]['badgeClass'] = 'text-bg-danger';
+    $sidebar[$mIDX]['subgroup'][0]['badgeNum']   = $pendingMsgCount;
+  }
+}
 ?>
-
-
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
 <head>
@@ -88,34 +58,14 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
   <link rel="icon" href="../imageFiles/favicon.ico" type="image/ico" />
   <title>Fifth Season Life 人生第五季 | 後台管理系統</title>
 
-  <!-- Google Font: Source Sans Pro 
-  <link rel="stylesheet" href="https://googleapis.com">-->
-  <!--end::Accessibility Features-->
-  <!--begin::Fonts
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.3.1/index.css" integrity="sha256-VzMk9RVNVApO0cXfOO7il3dD8OPyu0aDyyLDd8EEGk8=" crossorigin="anonymous" media="print" onload="this.media = 'all'"/> -->
-  <!--end::Fonts-->
-  <!--end::Third Party Plugin(OverlayScrollbars)-->
-  <!--begin::Third Party Plugin(Bootstrap Icons)
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" crossorigin="anonymous"/>-->
-  <!--end::Third Party Plugin(Bootstrap Icons)-->
-  <!--end::Required Plugin(AdminLTE)-->
-    
-    <!-- 本地端外掛載入 -->
-    <link href="../pluginFiles/bootstrap5/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../pluginFiles/googleapis/fonts.googleapis.css">
-    <!-- 💡 核心新增：本地端 Bootstrap 圖示字型檔 -->
-    <link rel="stylesheet" href="../pluginFiles/bootstrap-icons/bootstrap-icons.min.css">
-    <!-- flatpickr -->
-    <link rel="stylesheet" href="../pluginFiles/flatpickr/flatpickr.min.css">
-    <!--begin::Required Plugin(AdminLTE)-->
-    <link rel="stylesheet" href="../cssFiles/adminlte.css" />
-    <link rel="stylesheet" href="../cssFiles/5sl.mainiframe.css" />
-    <!--begin::Third Party Plugin(OverlayScrollbars)
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.17.0/styles/overlayscrollbars.min.css" crossorigin="anonymous"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.5/skeleton.css" crossorigin="anonymous"/>
-    --> 
+  <link href="../pluginFiles/bootstrap5/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../pluginFiles/googleapis/fonts.googleapis.css">
+  <link rel="stylesheet" href="../pluginFiles/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../pluginFiles/flatpickr/flatpickr.min.css">
+  <link rel="stylesheet" href="../cssFiles/adminlte.css" />
+  <link rel="stylesheet" href="../cssFiles/5sl.mainiframe.css?t=<?php echo time(); ?>" />
+
   <style>
-    /* 確保滿版 IFrame 架構下外層視窗不產生多餘捲軸 */
     html, body {
       height: 100%;
       overflow: hidden;
@@ -126,7 +76,7 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
     .app-main {
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 57px - 45px); /* 扣除 Header 與 Footer 高度，或由 Flexbox 自動撐滿 */
+      height: calc(100vh - 57px - 45px);
       flex: 1 1 auto;
       overflow: hidden;
     }
@@ -140,45 +90,39 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
   </style>
 </head>
 
-<!-- AdminLTE 4 固定側邊欄與固定頁首標準 Class -->
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
-  <!-- 最外層容器 -->
   <div class="app-wrapper">
 
-    <!-- [變更1] .main-header 改為 .app-header；navbar-white navbar-light 改為 bg-body border-bottom；text-sm 改為 small -->
+    <!-- ==================== 1. 頂部導覽列 (.app-header) ==================== -->
     <nav class="app-header navbar navbar-expand small bg-body border-bottom">
-      <!-- [變更2] AdminLTE 4 頂部導覽列內部「必須」包含 .container-fluid 才能正確撐開左右兩側排版 -->
       <div class="container-fluid">
-        
-        <!-- --------------------- 轉移 Focus 目標 --------------------- -->
+
         <input type="text" id="searchURI" name="searchURI" class="visually-hidden" value="">
-        
-        <!-- --------------------- 左側功能連結區 --------------------- -->
-        <!-- [變更3] data-widget="pushmenu" 改為 data-lte-toggle="sidebar"，圖示改為 bi-list -->
+
+        <!-- 側邊欄展開/收合按鈕 -->
         <a class="nav-link" style="width:20px;height:52px;background-color:#2C333E;border-radius: 0px 8px 8px 0px;position:absolute;top:0;left:0;color:#FFFFFF;cursor:pointer;display:flex;align-items:center;padding-left:2px;" data-lte-toggle="sidebar" href="#" role="button">
           <i class="bi bi-list"></i>
         </a>
 
+        <!-- 左側功能連結區 -->
         <ul class="navbar-nav align-items-center" style="height:32px;gap:10px;padding-left:16px;">
-          <!-- 全螢幕按鈕：[變更4] data-widget="fullscreen" 改為 data-lte-toggle="fullscreen" -->
+          <!-- 全螢幕按鈕 -->
           <li class="nav-item">
             <a class="nav-link ps-0 pe-2" data-lte-toggle="fullscreen" href="#" role="button">
               <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
               <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none;"></i>
             </a>
           </li>
-          <!-- /全螢幕按鈕 -->
 
-          <!-- 頁面權限圖示顯示 (全部轉為 Bootstrap Icons) -->
+          <!-- 頁面權限圖示顯示 -->
           <li class="nav-item nav-authpanel">
             <i id="topAuth_browser" name="topAuth_browser" class="bi bi-eye" title="瀏覽"></i>
             <i id="topAuth_addnew" name="topAuth_addnew" class="bi bi-file-earmark-plus" title="新增"></i>
             <i id="topAuth_edit" name="topAuth_edit" class="bi bi-pencil-square" title="編輯"></i>
             <i id="topAuth_delete" name="topAuth_delete" class="bi bi-trash" title="刪除"></i>
           </li>
-          <!-- /頁面權限圖示顯示 -->
 
-          <!-- 操作功能按鈕列 (全部轉為 Bootstrap Icons) -->
+          <!-- 操作功能按鈕列 -->
           <li class="nav-item nav-toppanel">
             <i id="topBut_upload" name="topBut_upload" class="bi bi-upload" title="上傳"></i>
             <i id="topBut_add" name="topBut_add" class="bi bi-plus-circle" title="新增"></i>
@@ -187,9 +131,10 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
             <i id="topBut_delete" name="topBut_delete" class="bi bi-trash3" title="刪除"></i>
           </li>
 
-          <!-- 搜尋按鈕 -->
+          <!-- 雙向抽屜控制按鈕（自動偵測子頁面 #offcanvasLeft 與 #offcanvasSearch） -->
           <li class="nav-item nav-topdrawer">
-            <i id="topBut_SideBarR" name="topBut_SideBarR" class="bi bi-layout-sidebar-inset-reverse active" title="開啟搜尋視窗"></i>
+            <i id="topBut_SideBarL" name="topBut_SideBarL" class="bi bi-layout-sidebar-inset" title="切換左側輔助抽屜"></i>
+            <i id="topBut_SideBarR" name="topBut_SideBarR" class="bi bi-layout-sidebar-inset-reverse" title="切換右側搜尋抽屜"></i>
           </li>
 
           <!-- 匯出與列印按鈕 -->
@@ -203,43 +148,35 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
             <i id="topBut_bkurl" name="topBut_bkurl" class="bi bi-reply-all active" title="返回關聯前頁"></i>
           </li>
         </ul>
-        <!-- -------------------- /左側功能連結區 -------------------- -->
 
-        <!-- -------------------- 右側功能連結區 --------------------- -->
-        <!-- [變更5] ml-auto 改為 ms-auto -->
+        <!-- 右側功能連結區 -->
         <ul class="navbar-nav ms-auto align-items-center" style="height:32px;">
-          
-          <!-- 個人&公共訊息下拉選單：[變更6] data-toggle="dropdown" 改為 data-bs-toggle="dropdown" -->
+
+          <!-- 雙向訊息下拉選單 -->
           <li class="nav-item dropdown">
-            <a class="nav-link" data-bs-toggle="dropdown" href="#">
+            <a class="nav-link" data-bs-toggle="dropdown" href="#" title="雙向訊息管理">
               <i class="bi bi-chat-dots"></i>
-              <!-- [變更7] badge-danger 改為 text-bg-danger -->
-              <span id="badge_NAVBAR_MESS" class="badge text-bg-danger navbar-badge" style="margin-top:-5px;margin-right:-3px;"><?php //echo $unreadBadge; ?></span>
+              <span id="badge_NAVBAR_MESS" class="badge text-bg-danger navbar-badge" style="margin-top:-5px;margin-right:-3px;"><?php echo $pendingMsgCount > 0 ? $pendingMsgCount : ''; ?></span>
             </a>
-            <!-- [變更8] dropdown-menu-right 改為 dropdown-menu-end -->
             <div id="messDropdown" class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-              <a href="mess_board.php" target="iFrame_main" class="dropdown-item dropdown-footer">瀏覽所有個人及公共訊息</a>
+              <a href="msg_list.php" target="iFrame_main" class="dropdown-item dropdown-footer">瀏覽所有前後台雙向訊息</a>
             </div>
           </li>
-          <!-- /個人&公共訊息下拉選單 -->
 
-          <!-- 系統通知下拉選單 -->
+          <!-- 站內通知下拉選單 -->
           <li class="nav-item dropdown">
-            <a class="nav-link" data-bs-toggle="dropdown" href="#">
+            <a class="nav-link" data-bs-toggle="dropdown" href="#" title="站內通知管理">
               <i class="bi bi-bell"></i>
-              <!-- badge-warning 改為 text-bg-warning -->
               <span id="badge_notify" class="badge text-bg-warning navbar-badge" style="margin-top:-5px;margin-right:-3px;"></span>
             </a>
             <div id="notifyDropdown" class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-              <a href="mess_notifylist.php" target="iFrame_main" class="dropdown-item dropdown-footer">瀏覽所有的系統通知訊息</a>
+              <a href="noti_list.php" target="iFrame_main" class="dropdown-item dropdown-footer">瀏覽所有站內通知紀錄</a>
             </div>
           </li>
-          <!-- /系統通知下拉選單 -->
 
           <!-- 管理者功能選單 -->
           <li class="nav-item dropdown">
             <a class="nav-link" data-bs-toggle="dropdown" href="#">
-              <!-- [變更9] img-circle 改為 rounded-circle -->
               <img src="<?php echo DOC_PATH_LAYER.$_SESSION['SESS_AD_THUMB'].'?t='.time(); ?>" width="30" height="30" class="rounded-circle shadow-sm adTopNaviPhoto" style="margin-top: -6px;">
             </a>
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
@@ -249,7 +186,6 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
               </div>
               <span class="dropdown-header text-center d-block"><?php echo $_SESSION['SESS_AD_NICK']; ?></span>
               <div class="dropdown-divider"></div>
-              <!-- [變更10] mr-1 fa-pull-right 改為 float-end mt-1 -->
               <a href="ad_profile.php?currID=<?php echo $_SESSION['SESS_AD_ID']; ?>" target="iFrame_main" class="dropdown-item" style="cursor:pointer;">
                 <i class="bi bi-person float-end mt-1"></i> 編輯個人資料
               </a>
@@ -264,20 +200,13 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
             </div>
           </li>
           <li class="nav-item">&nbsp;&nbsp;&nbsp;&nbsp;</li>
-          <!-- /管理者功能選單 -->
 
         </ul>
       </div>
     </nav>
 
-    <!-- ==================== /頂部導覽列 ==================== -->
-
     <!-- ==================== 2. 左側選單欄 (.app-sidebar) ==================== -->
-    <!-- AdminLTE 4 改用 data-bs-theme="dark" 控制深色主題 -->
-      <!--begin::Sidebar-->
-    <!-- [變更1] .main-sidebar 與 .sidebar-dark-primary 改為 .app-sidebar 與 data-bs-theme="dark" -->
     <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
-      <!-- 左上方主圖標示 Logo -->
       <div class="sidebar-brand" style="height: 53px;">
         <a href="5sladmin_startpage.html" target="iFrame_main" class="brand-link">
           <img src="../imageFiles/5slLOGO_sW.png" alt="5 Season Life Logo" class="brand-image shadow" style="vertical-align:baseline;margin-top:-4px;">
@@ -286,9 +215,7 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
           </span>
         </a>
       </div>
-      <!-- /左上方主圖標示 Logo -->
 
-      <!-- 功能區塊 -->
       <div class="sidebar-wrapper">
         <!-- 安全停滯倒數 -->
         <div class="user-panel mt-3 pb-3 mb-3 border-bottom border-secondary" style="height:50px;background-color:#30363b;">
@@ -298,105 +225,91 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
             </div>
           </div>
         </div>
-        <!-- /安全停滯倒數 -->
 
         <!-- 樹狀導航列 -->
         <nav id="sidebarL" name="sidebarL" class="mt-2">
           <ul class="nav sidebar-menu flex-column small nav-child-indent nav-compact" data-lte-toggle="treeview" role="menu" data-accordion="true">
             <?php
               $i = 0;
-              while($i < count($sidebar)){ // 樹狀首層「功能主分類」
+              while ($i < count($sidebar)) {
                   $sidebar2 = $sidebar[$i]['subgroup'] ?? array();
-                  $subnum2 = count($sidebar2);
-                  
-                  // [變更1] 改用 Bootstrap Icons (bi)，若 JSON 裡原本寫 "fa-xxx" 則自動轉成 "bi-xxx"，或直接吃 "bi-xxx"
+                  $subnum2  = count($sidebar2);
+
                   $rawIcon1 = $sidebar[$i]['icon'] ?? '';
-                  $topIcon = !empty($rawIcon1) ? ' '.str_replace('fa-', 'bi-', $rawIcon1) : ' bi-folder';
-                  
+                  $topIcon  = !empty($rawIcon1) ? ' '.str_replace('fa-', 'bi-', $rawIcon1) : ' bi-folder';
+
                   echo '<li data-pagecode="'.$sidebar[$i]['pagecode'].'" class="nav-item">';
-                  // 1. 第一層選單的 <a> 標籤
                   $target1 = ($sidebar[$i]['url'] != '#' && !empty($sidebar[$i]['url'])) ? ' target="iFrame_main"' : '';
                   echo '<a href="'.$sidebar[$i]['url'].'"'.$target1.' class="nav-link">';
                   echo '<i class="nav-icon bi'.$topIcon.'"></i>';
                   echo '<p>';
                   echo $sidebar[$i]['title'];
-                  
-                  // 徽章
-                  if(!empty($sidebar[$i]['badgeNum']) || !empty($sidebar[$i]['badgeClass'])){
+
+                  if (!empty($sidebar[$i]['badgeNum']) || !empty($sidebar[$i]['badgeClass'])) {
                       echo '<span id="badge_'.$sidebar[$i]['pagecode'].'" name="badge_'.$sidebar[$i]['pagecode'].'" class="badge float-end me-3';
-                      if(!empty($sidebar[$i]['badgeClass'])) { echo ' '.$sidebar[$i]['badgeClass']; }
+                      if (!empty($sidebar[$i]['badgeClass'])) { echo ' '.$sidebar[$i]['badgeClass']; }
                       echo '">';
-                      if(!empty($sidebar[$i]['badgeNum'])) { echo $sidebar[$i]['badgeNum']; }
+                      if (!empty($sidebar[$i]['badgeNum'])) { echo $sidebar[$i]['badgeNum']; }
                       echo '</span>';
                   }
 
-                  // [變更2] 樹狀展開箭頭改用 Bootstrap Icons 的 bi-chevron-right
-                  if($subnum2 > 0){
+                  if ($subnum2 > 0) {
                       echo '<i class="nav-arrow bi bi-chevron-right"></i>';
                   }
                   echo '</p>';
                   echo '</a>';
 
-                  // 第二層選單
-                  if($subnum2 > 0){
+                  if ($subnum2 > 0) {
                       echo '<ul class="nav nav-treeview">';
                       $si = 0;
-                      while($si < $subnum2){
+                      while ($si < $subnum2) {
                           $sidebar3 = $sidebar2[$si]['subgroup'] ?? array();
-                          $subnum3 = count($sidebar3);
-                          
-                          // [變更3] 第二層預設改用 bi-record-circle (對應原本的 far fa-dot-circle)
+                          $subnum3  = count($sidebar3);
+
                           $subIcon2 = ' bi bi-record-circle';
-                          if($subnum3 > 0 && !empty($sidebar2[$si]['icon'])){
+                          if ($subnum3 > 0 && !empty($sidebar2[$si]['icon'])) {
                               $subIcon2 = ' bi '.str_replace('fa-', 'bi-', $sidebar2[$si]['icon']);
                           }
 
                           echo '<li data-pagecode="'.$sidebar2[$si]['pagecode'].'" class="nav-item">';
-                          // 2. 第二層選單的 <a> 標籤
                           $target2 = ($sidebar2[$si]['url'] != '#' && !empty($sidebar2[$si]['url'])) ? ' target="iFrame_main"' : '';
                           echo '<a href="'.$sidebar2[$si]['url'].'"'.$target2.' class="nav-link">';
                           echo '<i class="nav-icon'.$subIcon2.'"></i>';
                           echo '<p>';
                           echo $sidebar2[$si]['title'];
 
-                          // 第二層徽章
-                          if(!empty($sidebar2[$si]['badgeNum']) || !empty($sidebar2[$si]['badgeClass'])){
+                          if (!empty($sidebar2[$si]['badgeNum']) || !empty($sidebar2[$si]['badgeClass'])) {
                               echo '<span id="badge_'.$sidebar2[$si]['pagecode'].'" name="badge_'.$sidebar2[$si]['pagecode'].'" class="badge float-end'.($subnum3 > 0 ? ' me-3' : '');
-                              if(!empty($sidebar2[$si]['badgeClass'])) { echo ' '.$sidebar2[$si]['badgeClass']; }
+                              if (!empty($sidebar2[$si]['badgeClass'])) { echo ' '.$sidebar2[$si]['badgeClass']; }
                               echo '">';
-                              if(!empty($sidebar2[$si]['badgeNum'])) { echo $sidebar2[$si]['badgeNum']; }
+                              if (!empty($sidebar2[$si]['badgeNum'])) { echo $sidebar2[$si]['badgeNum']; }
                               echo '</span>';
                           }
 
-                          // 第二層箭頭或啟用狀態圖示
-                          if($subnum3 > 0) { 
-                              echo '<i class="nav-arrow bi bi-chevron-right"></i>'; 
-                          } else { 
-                              echo '<i class="bi activeicon float-end"></i>'; 
+                          if ($subnum3 > 0) {
+                              echo '<i class="nav-arrow bi bi-chevron-right"></i>';
+                          } else {
+                              echo '<i class="bi activeicon float-end"></i>';
                           }
                           echo '</p>';
                           echo '</a>';
 
-                          // 第三層選單
-                          if($subnum3 > 0){
+                          if ($subnum3 > 0) {
                               echo '<ul class="nav nav-treeview">';
                               $ti = 0;
-                              while($ti < $subnum3){
+                              while ($ti < $subnum3) {
                                   echo '<li data-pagecode="'.$sidebar3[$ti]['pagecode'].'" class="nav-item">';
-                                  // 3. 第三層選單的 <a> 標籤
                                   $target3 = ($sidebar3[$ti]['url'] != '#' && !empty($sidebar3[$ti]['url'])) ? ' target="iFrame_main"' : '';
                                   echo '<a href="'.$sidebar3[$ti]['url'].'"'.$target3.' class="nav-link">';
-                                  // [變更4] 第三層改用 bi-circle (對應原本的 far fa-circle)
                                   echo '<i class="nav-icon bi bi-circle"></i>';
                                   echo '<p>';
                                   echo $sidebar3[$ti]['title'];
 
-                                  // 第三層徽章
-                                  if(!empty($sidebar3[$ti]['badgeNum']) || !empty($sidebar3[$ti]['badgeClass'])){
+                                  if (!empty($sidebar3[$ti]['badgeNum']) || !empty($sidebar3[$ti]['badgeClass'])) {
                                       echo '<span id="badge_'.$sidebar3[$ti]['pagecode'].'" name="badge_'.$sidebar3[$ti]['pagecode'].'" class="badge float-end';
-                                      if(!empty($sidebar3[$ti]['badgeClass'])) { echo ' '.$sidebar3[$ti]['badgeClass']; }
+                                      if (!empty($sidebar3[$ti]['badgeClass'])) { echo ' '.$sidebar3[$ti]['badgeClass']; }
                                       echo '">';
-                                      if(!empty($sidebar3[$ti]['badgeNum'])) { echo $sidebar3[$ti]['badgeNum']; }
+                                      if (!empty($sidebar3[$ti]['badgeNum'])) { echo $sidebar3[$ti]['badgeNum']; }
                                       echo '</span>';
                                   }
 
@@ -419,571 +332,44 @@ $sidebar[$sIDX]['subgroup'][1]['badgeNum']=$getNum1;
             ?>
           </ul>
         </nav>
-        <!-- /樹狀導航列 -->
       </div>
-      <!-- /功能區塊 -->
     </aside>
-
-      <!--end::Sidebar-->
-
-    <!-- ==================== /左側選單欄 ==================== -->
 
     <!-- ==================== 3. 主要內容區 (.app-main + IFrame) ==================== -->
     <main class="app-main p-0">
-      <iframe name="iFrame_main" id="iFrame_main" src="./5sladmin_startpage.html"></iframe>
+      <iframe name="iFrame_main" id="iFrame_main" src="<?php echo htmlspecialchars($currURI); ?>"></iframe>
     </main>
-    <!-- ==================== /主要內容區 ==================== -->
 
     <!-- ==================== 4. 頁尾 (.app-footer) ==================== -->
     <footer class="app-footer small py-2">
-      <!-- [變更2] AdminLTE 4 建議將右側區塊放在前面或使用 .float-end (取代原本的 float-right) -->
       <div class="float-end d-none d-sm-inline-flex align-items-center">
         <span style="font-size:0.85em;" class="fw-bold me-2">WebSocket:</span>
-        <!-- 加上 title 提示與 aria-label，並保留原本的 id 與 socketalert 類別 -->
         <button type="button" id="ind_websocket" class="socketalert" title="WebSocket 連線狀態" aria-label="WebSocket Status"></button>
       </div>
 
-      <!-- 左側版本與版權資訊：[修正] 補上 $DB 的 $ 符號 -->
       <span style="font-size:0.85em;">
-        <b>Version</b> 
+        <b>Version</b>
         <span style="color:#C35050;"><?php $getVersion = DB->getConfigVal('sys_version'); echo $getVersion['config_value']; ?></span>
-        &nbsp;&nbsp;&nbsp;&nbsp;Copyright &copy; 2023-<?php echo date('Y'); ?> 
+        &nbsp;&nbsp;&nbsp;&nbsp;Copyright &copy; 2023-<?php echo date('Y'); ?>
         <strong><?php $getENname = DB->getConfigVal('comp_enname'); echo $getENname['config_value']; ?></strong> All rights reserved.
       </span>
     </footer>
-    <!-- /下方訊息區 -->
-    <!-- ==================== /頁尾 ==================== -->
 
   </div>
-  <!-- /最外層容器 -->
-    <!--begin::Third Party Plugin(OverlayScrollbars)
-    <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.17.0/browser/overlayscrollbars.browser.es6.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.9/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
-    <script src="../scriptFiles/adminlte.js"></script> -->
-    <!--end::Required Plugin(AdminLTE)-->
-  <!-- Scripts 
-  <script src="../pluginFiles/jquery/jquery.min.js"></script>
+
+  <!-- Bootstrap 5 原生 Toast 通知容器 -->
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 10900;" id="bs5ToastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="../pluginFiles/jquery/jquery-4.0.0.min.js"></script>
   <script src="../pluginFiles/bootstrap5/bootstrap.bundle.min.js"></script>
-  <script src="../pluginFiles/overlayscrollbars/browser/overlayscrollbars.browser.es6.min.js"></script>
-  <script src="../pluginFiles/toastr/toastr.min.js"></script>
-  <script src="../scriptFiles/5sladmin.js"></script>
-  -->
-    //**************************** ********************************//
-    //************************ 本地端外掛載入 ***********************//
-    //**************************** ********************************//
-    <script src="../pluginFiles/jquery/jquery-4.0.0.min.js"></script>
-    <script src="../pluginFiles/bootstrap5/bootstrap.bundle.min.js"></script>
-    <script src="../pluginFiles/flatpickr/flatpickr.min.js"></script>
-    <script src="../pluginFiles/flatpickr/location/zh_tw.js"></script>
-    <script src="../scriptFiles/adminlte.js"></script>
-    <script src="../scriptFiles/fliptimer/lib/jquery-backward-timer.src.js"></script>
-    <!--begin::Third Party Plugin(OverlayScrollbars)-->
+  <script src="../pluginFiles/flatpickr/flatpickr.min.js"></script>
+  <script src="../pluginFiles/flatpickr/location/zh_tw.js"></script>
+  <script src="../scriptFiles/adminlte.js"></script>
+  <script src="../scriptFiles/fliptimer/lib/jquery-backward-timer.src.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.17.0/browser/overlayscrollbars.browser.es6.min.js" crossorigin="anonymous"></script>
-    <!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
-    <!-- ==================== Bootstrap 5 原生 Toast 通知系統 ==================== -->
-    <!-- 固定於右上角，z-index 設為 10900 確保覆蓋於導覽列與 Modal 之上 -->
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 10900;" id="bs5ToastContainer"></div>
-
-
-    <!-- ------------------------ /Scripts Link ------------------------ -->
-    <script type="text/javascript">
-    //**************************** ********************************//
-    //***************** JAVASCRIPTS 全域調用參數設置 *****************//
-    //**************************** ********************************//
-
-
-
-
-
-    //**************************** ********************************//
-    //*************** JAVASCRIPTS FUNCTIONs 全域調用 ***************//
-    //*************** 可接收include檔案要求後自定義動作 ***************//
-    //**************************** ********************************//
-
-      /**
-       * 1. 全域原生 Bootstrap 5 Toast 顯示函式
-       * @param {string} type  - 訊息類型: 'success' | 'error' (或 'danger') | 'warning' | 'info'
-       * @param {string} msg   - 訊息內容 (支援純文字或簡單 HTML)
-       * @param {string} title - 選填標題
-       * @param {number} delay - 自動關閉毫秒數 (預設 3500ms，傳入 0 則不自動關閉)
-       */
-      window.showBS5Toast = function(type, msg, title = '', delay = 2500) {
-        const container = document.getElementById('bs5ToastContainer');
-        if (!container || typeof bootstrap === 'undefined') return;
-
-        // 類型視覺設定 (對應 Bootstrap 5 色彩與 Bootstrap Icons)
-        const typeConfig = {
-          success: { bg: 'text-bg-success', icon: 'bi-check-circle-fill',        closeBtn: 'btn-close-white' },
-          error:   { bg: 'text-bg-danger',  icon: 'bi-x-circle-fill',            closeBtn: 'btn-close-white' },
-          danger:  { bg: 'text-bg-danger',  icon: 'bi-x-circle-fill',            closeBtn: 'btn-close-white' },
-          warning: { bg: 'text-bg-warning', icon: 'bi-exclamation-triangle-fill',closeBtn: '' },
-          info:    { bg: 'text-bg-info',    icon: 'bi-info-circle-fill',         closeBtn: '' }
-        };
-
-        const cfg = typeConfig[type] || typeConfig.info;
-        const toastId = 'bs5_toast_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-        const autoHideAttr = delay > 0 ? `data-bs-autohide="true" data-bs-delay="${delay}"` : `data-bs-autohide="false"`;
-
-        const toastHtml = `
-          <div id="${toastId}" class="toast align-items-center ${cfg.bg} border-0 shadow-lg mb-2" role="alert" aria-live="assertive" aria-atomic="true" ${autoHideAttr}>
-            <div class="d-flex">
-              <div class="toast-body d-flex align-items-center gap-2 py-2 px-3">
-                <i class="bi ${cfg.icon} fs-5 flex-shrink-0"></i>
-                <div class="small">
-                  ${title ? `<strong class="d-block mb-1">${title}</strong>` : ''}
-                  <span>${msg}</span>
-                </div>
-              </div>
-              <button type="button" class="btn-close ${cfg.closeBtn} me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-          </div>
-        `;
-
-        container.insertAdjacentHTML('beforeend', toastHtml);
-        const toastEl = document.getElementById(toastId);
-        const bsToast = new bootstrap.Toast(toastEl);
-        bsToast.show();
-
-        // 動畫結束隱藏後自動清理 DOM 節點
-        toastEl.addEventListener('hidden.bs.toast', function() {
-          toastEl.remove();
-        });
-      };
-
-      /**
-       * 2. 向下相容橋接器：自動接管舊版 window.parent.toastr['success' / 'error' / 'warning' / 'info']
-       * 讓全站既有的內頁與後端回傳的 msgType 無需逐一修改即可無痛運作！
-       * window.parent.showBS5Toast('info', '報表已匯出完成', '系統通知', 5000);
-       */
-      window.toastr = {
-        success: (msg, title = '') => window.showBS5Toast('success', msg, title),
-        error:   (msg, title = '') => window.showBS5Toast('error',   msg, title),
-        warning: (msg, title = '') => window.showBS5Toast('warning', msg, title),
-        info:    (msg, title = '') => window.showBS5Toast('info',    msg, title)
-      };
-
-
-      // 1. 呼叫 IFrame 內頁的全域函式 (如 doButSave, doButAdd, doButDelete)
-      function callFrameFunc(funcName) {
-        const frameWin = document.getElementById('iFrame_main').contentWindow;
-        if (frameWin && typeof frameWin[funcName] === 'function') {
-          frameWin[funcName]();
-        } else {
-          toastr.warning('目前頁面不支援此操作功能');
-        }
-      }
-      //---------------------------------------------------------//
-      // 2. 供內頁加載完成後觸發自動展開對應側邊欄選單 (樹狀選單狀態同步)
-      //---------------------------------------------------------//
-      /**
-       * 供 IFrame 內頁載入完成後同步展開並高亮側邊欄選單 (支援兩層與三層結構)
-       * @param {string} itemCode - 第一層分類代碼 (例如 'ITEM_SYS')
-       * @param {string} markCode - 目標頁面代碼 (例如 'PG_SYSADMIN')
-       * @param {string} subItemCode - 第二層子目錄代碼 (選填，若有三層結構時傳入)
-       */
-      function treeviewCheck(itemCode, markCode, subItemCode) {
-        const $sidebar = $('#sidebarL');
-        if (!$sidebar.length) return;
-
-        // 1. 清除所有現有的 active 與展開狀態
-        $sidebar.find('.nav-link').removeClass('active');
-        $sidebar.find('.nav-item').removeClass('menu-open');
-        $sidebar.find('.nav-treeview').hide(); // 確保未選中的子選單收合
-
-        // 2. 找出目標頁面節點 (透過 data-pagecode 屬性精準定位)
-        const $targetLi = markCode ? $sidebar.find('li[data-pagecode="' + markCode + '"]') : $();
-
-        if ($targetLi.length) {
-          // 為目標頁面本身加上 active (觸發淺灰底深字與右側小三角)
-          $targetLi.children('a.nav-link').addClass('active');
-
-          // 往上尋找所有父層的 .nav-item (自動支援 2 層與 3 層目錄！)
-          $targetLi.parents('li.nav-item').each(function() {
-            $(this).addClass('menu-open');
-            $(this).children('ul.nav-treeview').show(); // 確保子選單保持展開可見
-            $(this).children('a.nav-link').addClass('active');
-          });
-        } else if (itemCode) {
-          // 備援：若找不到 markCode，至少展開指定的父層分類
-          const $itemLi = $sidebar.find('li[data-pagecode="' + itemCode + '"]');
-          $itemLi.addClass('menu-open');
-          $itemLi.children('ul.nav-treeview').show();
-          $itemLi.children('a.nav-link').addClass('active');
-        }
-      }
-
-      /**
-       * 供 Start Page 載入時重置所有選單狀態
-       */
-      function treeviewReset() {
-        const $sidebar = $('#sidebarL');
-        $sidebar.find('.nav-link').removeClass('active');
-        $sidebar.find('.nav-item').removeClass('menu-open');
-        $sidebar.find('.nav-treeview').slideUp(200);
-      }
-
-    // 1. 每當內頁發生網址切換，即時更新外框的 F5 記憶
-    window.updateCurrentIframeUrl = function(url) {
-        sessionStorage.setItem('Current_Iframe_URL', url);
-    };
-
-    // 2. 手動精準清除函數 (特定前綴清除法)
-    window.clearIframeCache = function() {
-        console.log("【外框】執行精準清除快取...");
-        var targetPrefixes = ['DT_State_', 'Tab_State_', 'Last_List_URL', 'Last_Detail_URL', 'Manual_DT_Page_'];
-        
-        Object.keys(sessionStorage).forEach(function(key) {
-            var shouldRemove = targetPrefixes.some(function(prefix) { return key.indexOf(prefix) === 0; });
-            if (shouldRemove) { 
-                sessionStorage.removeItem(key); 
-            }
-        });
-    };
-
-    function backIframe() {
-        console.log("【外框守門員】收到返回請求，觸發原生歷史回退...");
-        var activeIframe = document.querySelector('.tab-pane.active iframe') || 
-                          document.querySelector('iframe:not([style*="display: none"])') ||
-                          document.getElementById('iFrame_main');
-
-        if (activeIframe && activeIframe.contentWindow) {
-            activeIframe.contentWindow.history.back();
-        }
-    }
-
-    // 直接取得 iFrame 中網址字串（URI）
-    function getUrlHex() {
-        try {
-            const iframeElement = document.getElementById('iFrame_main');
-            const iframeUrl = iframeElement.contentWindow.location.href;
-            const url = new URL(iframeUrl);
-            let fullPATH = url.pathname.split('/').pop() + url.search;
-            return urlEncodeHex(fullPATH);
-        } catch (error) {
-            console.error("無效的網址字串");
-            return "";
-        }
-    }
-
-    /** *************** JavaScript 十六進位 (Hex) 字串加解密 ************************* **/
-    function urlEncodeHex(text) {
-        const encoder = new TextEncoder();
-        const bytes = encoder.encode(text);
-        return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    function urlDecodeHex(hexString) {
-        if (!hexString) return "";
-        const bytes = new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-        const decoder = new TextDecoder();
-        return decoder.decode(bytes);
-    }
-
-    // 更新未讀訊息
-    function unreadUpdate(nuM) {
-        // 更新左側導航列未讀標註
-        var $badge = $('#badge_PG_MESSBOARD');
-        if ($badge.length == 0) { return false; }
-        var $badgeNum = (parseInt($badge.text()) || 0) - parseInt(nuM);
-        $badge.text($badgeNum > 0 ? $badgeNum : '');
-
-        // 更新左側樹狀導航列中的未讀標註
-        var $badge2 = $('#badge_ITEM_MESS');
-        if ($badge2.length > 0) {
-            var $badgeNum2 = (parseInt($badge2.text()) || 0) - parseInt(nuM);
-            $badge2.text($badgeNum2 > 0 ? $badgeNum2 : '');
-        }
-
-        // 更新上方導航列中的未讀標註
-        var $badgeT = $('#badge_NAVBAR_MESS');
-        if ($badgeT.length > 0) {
-            var $badgeNumT = (parseInt($badgeT.text()) || 0) - parseInt(nuM);
-            $badgeT.text($badgeNumT > 0 ? $badgeNumT : '');
-        }
-        return true;
-    }
-
-    //------- 取得簡易訊息(上方導航列使用) -------
-    function getEasyMess(nuM = 50, daTa = '') {
-        if (daTa) {
-            var messShort = daTa.chat_message.length > 20 ? daTa.chat_message.substring(0, 20) + '...' : daTa.chat_message;
-            // [修正1] 改用原生 JS 取得目前秒數，避免獨立 .js 檔無法解析 PHP 標籤
-            var nowSec = Math.floor(Date.now() / 1000);
-            var postPast = Math.floor((nowSec - parseInt(daTa.chat_published)) / 3600);
-            if (postPast > 24) {
-                postPast = Math.floor(postPast / 24) + ' 天前';
-            } else if (postPast <= 0) {
-                postPast = '小於1小時';
-            } else {
-                postPast = postPast + ' 小時前';
-            }
-
-            // [修正2] 使用 onerror 處理預設頭像，取代阻塞畫面的同步 HEAD 請求
-            var chatAvatar = `../uploadFiles/mb/mbphoto_${daTa.chat_postid}_thumb.jpg`;
-            // [修正3] 全面改用 Bootstrap 5 Flex 佈局 (d-flex, rounded-circle, ms-3) 與 Bootstrap Icons (bi-clock)
-            var newUnread = `
-                <a href="mess_board.php?chatType=1&joinID=${daTa.chat_joinid}" target="iFrame_main" class="dropdown-item ezmess py-2" data-chatid="${daTa.chat_id}" data-joinid="${daTa.chat_joinid}">
-                  <div class="d-flex align-items-center">
-                    <img src="${chatAvatar}" onerror="this.onerror=null;this.src='../imageFiles/nopic_user_64x64.jpg';" alt="User Avatar" class="rounded-circle flex-shrink-0" width="45" height="45">
-                    <div class="flex-grow-1 ms-3 overflow-hidden">
-                      <h6 class="dropdown-item-title mb-1 fw-bold text-truncate">${daTa.chat_poster}</h6>
-                      <p class="small mb-1 text-truncate">${messShort}</p>
-                      <p class="small text-muted mb-0" style="font-size: 0.75rem;"><i class="bi bi-clock me-1"></i>${postPast}</p>
-                    </div>
-                  </div>
-                </a>
-                <div class="dropdown-divider my-0"></div>
-            `;
-            $('#messDropdown').prepend(newUnread);
-            return true;
-        } else {
-            $.ajax({
-                type: "POST",
-                url: "../funcFiles/mb_chat_func.php",
-                data: {
-                    'nuM': nuM, 
-                    'formAcce': 'func_chat_ezmess',
-                    'token': getTokenVal()
-                },
-                dataType: 'json',
-                success: function (data) {
-                    if (data['RTN'] == 1 && data.messRes && data.messRes.length > 0) {
-                        var d = data.messRes;
-                        var content = '';
-                        for (var i = 0; i < d.length; i++) {
-                            content += `
-                                <a href="mess_board.php?chatType=1&joinID=${d[i].chat_joinid}" target="iFrame_main" class="dropdown-item ezmess py-2" data-chatid="${d[i].chat_id}" data-joinid="${d[i].chat_joinid}">
-                                  <div class="d-flex align-items-center">
-                                    <img src="${d[i].chatAvatar}" onerror="this.onerror=null;this.src='../imageFiles/nopic_user_64x64.jpg';" alt="User Avatar" class="rounded-circle flex-shrink-0" width="45" height="45">
-                                    <div class="flex-grow-1 ms-3 overflow-hidden">
-                                      <h6 class="dropdown-item-title mb-1 fw-bold text-truncate">${d[i].chat_poster}</h6>
-                                      <p class="small mb-1 text-truncate">${d[i].message}</p>
-                                      <p class="small text-muted mb-0" style="font-size: 0.75rem;"><i class="bi bi-clock me-1"></i>${d[i].postPast}</p>
-                                    </div>
-                                  </div>
-                                </a>
-                                <div class="dropdown-divider my-0"></div>
-                            `;
-                        }
-                        $('#messDropdown').prepend(content);
-                    }
-                },
-                error: function (data) {
-                    console.log(data);
-                    if (typeof toastr !== 'undefined') toastr['error']('系統讀寫錯誤，請聯絡管理人員！！');
-                }
-            });
-        }
-    }
-
-    //------- 取得簡易通知(上方導航列使用) -------
-    function getEasyNotify(nuM = 50, daTa = '') {
-        if (daTa) {
-            var infoShort = daTa.noti_content.length > 20 ? daTa.noti_content.substring(0, 20) + '...' : daTa.noti_content;
-            var nowSec = Math.floor(Date.now() / 1000);
-            var postPast = Math.floor((nowSec - parseInt(daTa.noti_published)) / 3600);
-            if (postPast > 24) {
-                postPast = Math.floor(postPast / 24) + ' 天前';
-            } else if (postPast <= 0) {
-                postPast = '小於1小時';
-            } else {
-                postPast = postPast + ' 小時前';
-            }
-            var colorClass = daTa.cAlert !== '' ? ' color' + daTa.cAlert : '';
-            // [修正4] 圖示改用 bi-envelope-fill，間距改用 me-2
-            var newInfo = `
-                <a href="mess_notidetail.php?currID=${daTa.noti_id}" target="iFrame_main" class="dropdown-item eznotify py-2 position-relative" data-ifid="${daTa.noti_id}">
-                  <div class="text-truncate pe-5"><i class="bi bi-envelope-fill me-2${colorClass}"></i>${infoShort}</div>
-                  <span class="text-muted small position-absolute end-0 bottom-0 me-2 mb-1" style="font-size: 0.75rem;">${postPast}</span>
-                </a>
-                <div class="dropdown-divider my-0"></div>
-            `;
-            $('#notifyDropdown').prepend(newInfo);
-        } else {
-            $.ajax({
-                type: "POST",
-                url: "../funcFiles/mb_chat_func.php",
-                data: {
-                    'nuM': nuM, 
-                    'formAcce': 'func_chat_eznotify',
-                    'token': getTokenVal()
-                },
-                dataType: 'json',
-                success: function (data) {
-                    if (data.RTN == 1 && data.notifyRes && data.notifyRes.length > 0) {
-                        var d = data.notifyRes;
-                        var infocontent = '';
-                        for (var i = 0; i < d.length; i++) {
-                            var colorClass = d[i].cAlert !== '' ? ' color' + d[i].cAlert : '';
-                            infocontent += `
-                                <a href="mess_notidetail.php?currID=${d[i].noti_id}" target="iFrame_main" class="dropdown-item eznotify py-2 position-relative" data-ifid="${d[i].noti_id}">
-                                  <div class="text-truncate pe-5"><i class="bi bi-envelope-fill me-2${colorClass}"></i>${d[i].content}</div>
-                                  <span class="text-muted small position-absolute end-0 bottom-0 me-2 mb-1" style="font-size: 0.75rem;">${d[i].postPast}</span>
-                                </a>
-                                <div class="dropdown-divider my-0"></div>
-                            `;
-                        }
-                        $('#badge_notify').html(data.totalNum);
-                        $('#notifyDropdown').prepend(infocontent);
-                    }
-                },
-                error: function (data) {
-                    console.log(data);
-                    if (typeof toastr !== 'undefined') toastr['error']('系統讀寫錯誤，請聯絡管理人員！！');
-                }
-            });
-        }
-    }
-
-    //**************************** ********************************//
-    //***************** jQuery FUNCTIONs 區域調用 ******************//
-    //**************************** ********************************//
-
-      $(document).ready(function() {
-
-        //---------------------------------------------------------//
-        // 3. 點擊側邊欄連結時即時切換 Active 樣式
-        //---------------------------------------------------------//
-        $('.sidebar-menu .nav-treeview .nav-link').on('click', function() {
-          $('.sidebar-menu .nav-link').removeClass('active');
-          $(this).addClass('active');
-          $(this).closest('.nav-item').parent().closest('.nav-item').children('.nav-link').addClass('active');
-        });
-        //---------------------------------------------------------//
-        // 4. 安全停滯倒數 
-        //---------------------------------------------------------//
-        // 安全滯留倒數計時器 (若需從 PHP 動態傳入秒數，建議在 PHP 頁面定義 window.SYS_IDLEOUT)
-        let countdownSec = (typeof window.SYS_IDLEOUT !== 'undefined') ? parseInt(window.SYS_IDLEOUT) : 600;
-        if ($('#timer_on_exhausted').length && typeof $('#timer_on_exhausted').backward_timer === 'function') {
-            $('#timer_on_exhausted').backward_timer({
-                seconds: countdownSec,
-                format: 'h%:m%:s%',
-                on_exhausted: function(timer) {
-                    window.location.assign("../lockscreen.php?backURI=" + getUrlHex());
-                }
-            });
-            $('#timer_on_exhausted').backward_timer('start');
-        }
-
-        $('body').on('keypress click', function(){
-            if ($('#timer_on_exhausted').length && typeof $('#timer_on_exhausted').backward_timer === 'function') {
-                $('#timer_on_exhausted').backward_timer('reset');
-            }
-        });
-
-        /////////////// Top Navigator 按鈕群操作 //////////////////////
-        $('#topBut_upload').click(function(e){ 
-            e.preventDefault();
-            if (!$(this).hasClass('active')) return false;
-            const win = $("#iFrame_main")[0].contentWindow;
-            if (win && typeof win.doButUpload === 'function') win.doButUpload();
-        });
-
-        $('#topBut_add').click(function(e){ 
-            e.preventDefault();
-            if (!$(this).hasClass('active')) return false;
-            if (confirm('當按下按鍵繼續進行操作時，即代表同意遵循「人生第五季管理辦法」進行操作！\r\r確定進行資料新增操作？！')){
-                const win = $("#iFrame_main")[0].contentWindow;
-                if (win && typeof win.doButAdd === 'function') win.doButAdd();
-            }
-        });
-
-        $('#topBut_save').click(function(e){ 
-            e.preventDefault();
-            if (!$(this).hasClass('active')) return false;
-            if (confirm('當按下按鍵繼續進行操作時，即代表同意遵循「人生第五季管理辦法」進行操作！\r\r確定進行資料儲存操作？！')){
-                const win = $("#iFrame_main")[0].contentWindow;
-                if (win && typeof win.doButSave === 'function') win.doButSave();
-            }
-        });
-
-        $('#topBut_reset').click(function(e){ 
-            e.preventDefault();
-            if (!$(this).hasClass('active')) return false;
-            const win = $("#iFrame_main")[0].contentWindow;
-            if (win && typeof win.doButReset === 'function') win.doButReset();
-        });
-
-        $('#topBut_delete').click(function(e){ 
-            e.preventDefault();
-            if (!$(this).hasClass('active')) return false;
-            const win = $("#iFrame_main")[0].contentWindow;
-            if (win && typeof win.doButDelete === 'function') win.doButDelete();
-        });
-
-        $('#topBut_bkurl').click(function(e){
-            e.preventDefault();
-            backIframe();
-        });
-
-        $('#topBut_SideBarR').click(function(e){
-            e.preventDefault();
-            const win = $("#iFrame_main")[0].contentWindow;
-            if (win && typeof win.doButSerach === 'function') win.doButSerach();
-        });
-
-        $('#topBut_excel').click(function(e){
-            e.preventDefault();
-            const win = $("#iFrame_main")[0].contentWindow;
-            if (win && typeof win.doButExcel === 'function') win.doButExcel();
-        });
-
-        $('#topBut_print').click(function(e){
-            e.preventDefault();
-            const win = $("#iFrame_main")[0].contentWindow;
-            if (win && typeof win.doButPrint === 'function') win.doButPrint();
-        });
-
-        // 鎖定與登出
-        $('#lockscreen').click(function(e){
-            window.location.assign("../lockscreen.php?backURI=" + getUrlHex());
-        }); 
-        $('#logout').click(function(e){
-            if (!confirm('確定登出系統？！')) return false;
-            window.location.replace("../5sladmin.php");
-        });
-
-        /* NOTE: 左側樹狀目錄首層數值標註顯示控制 */
-        $('#sidebarL > ul > li > a').click(function() { 
-            var parentLI = $(this).parent();
-            var bedgeSPAN = parentLI.find('> a span.badge');
-            var allLIspan = parentLI.parent().find('> li > a span.badge');
-            if (parentLI.hasClass('menu-open')) {
-                bedgeSPAN.css("visibility", "visible");
-            } else {
-                allLIspan.css("visibility", "visible");
-                bedgeSPAN.css("visibility", "hidden");
-            }
-        });
-        
-
-        ///////////////////////////////////////////////////////
-        //--------------- 網頁歷史紀錄操作區域函數 --------------//
-        ///////////////////////////////////////////////////////
-        var iframe = document.getElementById('iFrame_main');
-        if (iframe) {
-            var lastIframeUrl = sessionStorage.getItem('Current_Iframe_URL');
-            // 💡 F5 重新整理原地復活機制
-            if (lastIframeUrl) {
-                iframe.setAttribute('src', lastIframeUrl);
-            } else {
-                iframe.setAttribute('src', '5sladmin_startpage.html'); 
-            }
-        }
-
-        // 側邊欄點擊事件：更新為 AdminLTE 4 的 .app-sidebar 與 .sidebar-menu，並排除資料夾節點 (href="#")
-        $('.app-sidebar, .sidebar-menu').on('click', 'a[href!="#"]:not([data-lte-toggle="sidebar"])', function() {
-            sessionStorage.removeItem('Current_Iframe_URL');
-            if (typeof window.clearIframeCache === 'function') {
-                window.clearIframeCache();
-            }
-        });
-
-
-
-      });
-    </script>
+  <script src="../scriptFiles/5sladmin_iframe.js?t=<?php echo time(); ?>"></script>
 </body>
 </html>
+

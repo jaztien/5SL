@@ -295,7 +295,7 @@ $typeLabels = array(1 => '純紅利點數', 2 => '商品贈品 (實體/數位)',
                                 $mTypeTag = ((int)$mo['merch_type'] === 2) ? '數位' : '實體';
                               ?>
                               <div class="form-check py-1 border-bottom">
-                                <input class="form-check-input chk-gift-merch" type="checkbox" value="<?php echo $midStr; ?>" id="gm_<?php echo $midStr; ?>" <?php echo $isChk; ?>>
+                                <input class="form-check-input chk-gift-merch notSubmit" type="checkbox" value="<?php echo $midStr; ?>" id="gm_<?php echo $midStr; ?>" <?php echo $isChk; ?>>
                                 <label class="form-check-label small d-flex justify-content-between align-items-center" for="gm_<?php echo $midStr; ?>">
                                   <span>
                                     <code class="text-primary me-1">[#<?php echo $midStr; ?> <?php echo htmlspecialchars($mo['merch_sku'] ?? ''); ?>]</code>
@@ -535,8 +535,9 @@ $typeLabels = array(1 => '純紅利點數', 2 => '商品贈品 (實體/數位)',
 
   function validateBS5Form($form) {
     if (!$form || $form.length === 0) return true;
-    const isValid = $form.checkValidity();
-    $form.classList.add('was-validated');
+    const formEl = $form[0];
+    const isValid = formEl.checkValidity();
+    formEl.classList.add('was-validated');
     return isValid;
   }
 
@@ -591,6 +592,7 @@ $typeLabels = array(1 => '純紅利點數', 2 => '商品贈品 (實體/數位)',
       },
       dataType: 'json',
       success: function(data) {
+        console.log(data);
         if (accE == 'func_gift_addnew' && data['RTN'] == 1) {
           window.parent.toastr['success'](data['msgStr']);
           window.location.replace("gift_detail.php?currID=" + data['newID']);

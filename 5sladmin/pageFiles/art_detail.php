@@ -372,8 +372,9 @@ $statusLabels = array(0 => '下架停用', 1 => '上架啟用', 2 => '草稿待�
 
   function validateBS5Form($form) {
     if (!$form || $form.length === 0) return true;
-    const isValid = $form.checkValidity();
-    $form.classList.add('was-validated');
+    const formEl = $form[0];
+    const isValid = formEl.checkValidity();
+    formEl.classList.add('was-validated');
     return isValid;
   }
 

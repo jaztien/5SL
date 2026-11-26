@@ -29,6 +29,8 @@ switch ($formAcce) {
   // =========================================================================
   case 'func_gift_addnew':
   case 'func_gift_infoUpdate':
+
+
     $acc   = ($formAcce === 'func_gift_addnew') ? 'add' : 'up';
     $title = trim((string)($formData['gift_title'] ?? ''));
     $code  = strtoupper(trim((string)($formData['gift_code'] ?? '')));

@@ -440,7 +440,7 @@ $statusLabels = array(0 => '下架停用', 1 => '上架啟用', 2 => '預購或�
                           </div>
                           <?php endfor; ?>
                         </div>
-                        <input type="file" id="merchSlotFileInput" class="d-none" accept="image/*">
+                        <input type="file" id="merchSlotFileInput" class="d-none notSubmit" accept="image/*">
                       </div>
 
                       <!-- Tab 3: SunEditor 詳細圖文介紹 (聯動圖像資料庫) -->
@@ -575,8 +575,9 @@ $statusLabels = array(0 => '下架停用', 1 => '上架啟用', 2 => '預購或�
 
   function validateBS5Form($form) {
     if (!$form || $form.length === 0) return true;
-    const isValid = $form.checkValidity();
-    $form.classList.add('was-validated');
+    const formEl = $form[0];
+    const isValid = formEl.checkValidity();
+    formEl.classList.add('was-validated');
     return isValid;
   }
 
@@ -722,7 +723,7 @@ $statusLabels = array(0 => '下架停用', 1 => '上架啟用', 2 => '預購或�
         $('#merchCropTargetImg').attr('src', evt.target.result);
         bootstrap.Modal.getOrCreateInstance(document.getElementById('merchCropModal')).show();
       };
-      reader.readAsDataURL(files);
+      reader.readAsDataURL(files[0]);
     });
 
     // Modal 開啟時初始化 Cropper (1:1 正方形 800x800)

@@ -144,7 +144,7 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
                   <!-- [變更9] list-group-unbordered 改用 BS5 原生 list-group-flush，float-right 改為 float-end -->
                   <ul class="list-group list-group-flush mb-3">
                     <li class="list-group-item px-0">
-                      <b>狀態</b> <a class="float-end text-decoration-none<?php echo (!empty($res['ad_status']) && $res['ad_status']==1) ? "" : " text-danger"; ?>"><?php echo !empty($res['ad_status']) ? $adJS['status'][$res['ad_status']] : "&nbsp;"; ?></a>
+                      <b>狀態</b> <a class="float-end text-decoration-none<?php echo (!empty($res['ad_status']) && $res['ad_status']==1) ? "" : " text-danger"; ?>"><?php echo get_json_value($adJS['status']??'', $sr[$i]['ad_status']??'', true) ?? "&nbsp;"; ?></a>
                     </li>
                     <li class="list-group-item px-0">
                       <b>暱稱</b> <a class="float-end text-decoration-none"><?php echo !empty($res['ad_title']) ? $res['ad_title'] : "&nbsp;"; ?></a>
@@ -253,13 +253,7 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
                             <label for="ad_status" class="col-sm-3 col-form-label">管理授權狀態</label>
                             <div class="col-sm-9">
                               <select class="form-select" id="ad_status" name="ad_status" required<?php echo NdisAble; ?>>
-                                <?php
-                                  foreach($adJS['status'] as $key => $value){
-                                      echo '<option value="'.$key.'"';
-                                      if(!empty($res['ad_status']) && $res['ad_status']==$key) echo " selected";
-                                      echo '>'.$value.'</option>';
-                                  }
-                                ?>
+                                <?php echo init_select_options($adJS['status']??[], $res['ad_status']??'',true); ?>
                               </select>
                               <div class="invalid-feedback">請選擇管理授權狀態。</div>
                             </div>

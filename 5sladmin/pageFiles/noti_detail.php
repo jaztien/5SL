@@ -343,7 +343,7 @@ $catLabels = array(
   <script type="text/javascript">
   function validateBS5Form($form) {
     if (!$form || $form.length === 0) return true;
-    const formEl = $form;
+    const formEl = $form[0];
     const isValid = formEl.checkValidity();
     formEl.classList.add('was-validated');
     return isValid;

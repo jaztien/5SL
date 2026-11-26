@@ -453,8 +453,9 @@ $tierLabels = array(1 => 'Lv.1 一般會員', 2 => 'Lv.2 進階會員', 3 => 'Lv
   <script type="text/javascript">
   function validateBS5Form($form) {
     if (!$form || $form.length === 0) return true;
-    const isValid = $form.checkValidity();
-    $form.classList.add('was-validated');
+    const formEl = $form[0];
+    const isValid = formEl.checkValidity();
+    formEl.classList.add('was-validated');
     return isValid;
   }
 

@@ -524,8 +524,9 @@ $periodLabels = array(0 => '活動期間總計', 1 => '每日重置', 2 => '每�
   <script type="text/javascript">
   function validateBS5Form($form) {
     if (!$form || $form.length === 0) return true;
-    const isValid = $form.checkValidity();
-    $form.classList.add('was-validated');
+    const formEl = $form[0];
+    const isValid = formEl.checkValidity();
+    formEl.classList.add('was-validated');
     return isValid;
   }
 

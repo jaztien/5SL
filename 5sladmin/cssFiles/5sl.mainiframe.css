@@ -62,13 +62,15 @@
 
 /* 2-3. 未啟用 / 無權限狀態 (Muted) */
 .nav-item.nav-authpanel i:not(.active),
-.nav-item.nav-toppanel i:not(.active) {
+.nav-item.nav-toppanel i:not(.active),
+.nav-item.nav-topdrawer i:not(.active) {
   background-color: transparent !important;
   color: #adb5bd !important;
   opacity: 0.45 !important;
   cursor: not-allowed !important;
   border: 1px solid transparent !important;
 }
+
 
 /* 2-4. 權限指示燈 (已授權狀態) */
 .nav-item.nav-authpanel i.active {
@@ -86,6 +88,7 @@
 #topBut_reset.active,
 #topBut_delete.active,
 #topBut_bkurl.active,
+#topBut_SideBarL.active,
 #topBut_SideBarR.active,
 #topBut_excel.active,
 #topBut_pdf.active,
@@ -94,6 +97,7 @@
   cursor: pointer !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
+
 
 .nav-item.nav-toppanel i.active:active,
 .nav-item.nav-topbkredir i.active:active,
@@ -162,7 +166,8 @@
   box-shadow: 0 3px 6px rgba(245, 158, 11, 0.3);
 }
 
-/* 搜尋 / 匯出 / 列印 / 返回前頁 */
+/* 搜尋抽屜 / 匯出 / 列印 / 返回前頁（含抽屜開啟狀態 .drawer-open 與 Hover 完全一致） */
+#topBut_SideBarL.active,
 #topBut_SideBarR.active,
 #topBut_excel.active,
 #topBut_pdf.active,
@@ -172,7 +177,10 @@
   color: #343a40 !important;
   border: 1px solid #adb5bd !important;
 }
+#topBut_SideBarL.active:hover,
+#topBut_SideBarL.active.drawer-open,
 #topBut_SideBarR.active:hover,
+#topBut_SideBarR.active.drawer-open,
 #topBut_excel.active:hover,
 #topBut_pdf.active:hover,
 #topBut_print.active:hover,

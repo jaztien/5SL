@@ -255,12 +255,7 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                       <form id="form_tabMenu1" action="../funcFiles/cs_act_func.php" method="post" data-func="func_cs_infoUpdate" novalidate>
                         <input type="hidden" name="mainimgchk" id="mainimgchk" class="notSubmit" value="<?php echo $mainimgchk; ?>">
                         <div class="row g-3">
-                          <div class="col-md-6">
-                            <label class="form-label small fw-bold">課程 / 價格卡片主標題 <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="course_title" name="course_title" required
-                                   value="<?php echo htmlspecialchars($res['course_title'] ?? ''); ?>" placeholder="例如：步步向光陪跑系統">
-                          </div>
-                          <div class="col-md-6">
+                          <div class="col-md-12">
                             <label class="form-label small fw-bold">方案歸屬（主課程關聯）</label>
                             <select class="form-select" id="parent_id" name="parent_id">
                               <option value="0" <?php echo ($parentID === 0) ? 'selected' : ''; ?>>0 - 獨立主課程（擁有獨立開課梯次與教材）</option>
@@ -271,34 +266,43 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                               <?php endforeach; ?>
                             </select>
                           </div>
-
-                          <div class="col-12"><div class="hr-more">價格方案卡片視覺與行銷文案</div><hr class="my-1"></div>
-
-                          <div class="col-md-4">
-                            <label class="form-label small fw-bold">頂部徽章文字</label>
-                            <input type="text" class="form-control" name="course_badge_text"
-                                   value="<?php echo htmlspecialchars($res['course_badge_text'] ?? ''); ?>" placeholder="如：★ 熱門首選 / ✦ 女性專屬特惠">
+                          <div class="col-md-6">
+                            <label class="form-label small fw-bold">課程/價格卡片主標題 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="course_title" name="course_title" required
+                                   value="<?php echo htmlspecialchars($res['course_title'] ?? ''); ?>" placeholder="例如：步步向光陪跑系統">
                           </div>
-                          <div class="col-md-4">
-                            <label class="form-label small fw-bold">標題上方副標題</label>
-                            <input type="text" class="form-control" name="course_subtitle"
-                                   value="<?php echo htmlspecialchars($res['course_subtitle'] ?? ''); ?>" placeholder="如：16 週全方位人生重啟陪跑">
-                          </div>
-                          <div class="col-md-4">
-                            <label class="form-label small fw-bold">標題下方補充小字</label>
+                          <div class="col-md-6">
+                            <label class="form-label small fw-bold">下標補充小字</label>
                             <input type="text" class="form-control" name="course_subscript"
                                    value="<?php echo htmlspecialchars($res['course_subscript'] ?? ''); ?>" placeholder="如：四大秘密 × 12堂核心主題課程">
                           </div>
 
+                          <div class="col-12"><div class="hr-more">視覺與行銷文案</div><hr class="my-1"></div>
+
+                          <div class="col-md-6">
+                            <label class="form-label small fw-bold">頂部徽章文字</label>
+                            <input type="text" class="form-control" name="course_badge_text"
+                                   value="<?php echo htmlspecialchars($res['course_badge_text'] ?? ''); ?>" placeholder="如：★ 熱門首選 / ✦ 女性專屬特惠">
+                          </div>
+                          <div class="col-md-6">
+                            <label class="form-label small fw-bold">標題上方副標題</label>
+                            <input type="text" class="form-control" name="course_subtitle"
+                                   value="<?php echo htmlspecialchars($res['course_subtitle'] ?? ''); ?>" placeholder="如：16 週全方位人生重啟陪跑">
+                          </div>
+
                           <div class="col-md-3">
-                            <label class="form-label small fw-bold">方案售價 (NT$) <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="course_cost" name="course_cost" min="0" step="1" required
-                                   value="<?php echo (int)round((float)($res['course_cost'] ?? 0)); ?>">
+                            <label class="form-label small fw-bold">顯示於首頁價格卡片</label>
+                            <select class="form-select" name="course_show_pricing">
+                              <option value="1" <?php echo ((int)($res['course_show_pricing'] ?? 1) === 1) ? 'selected' : ''; ?>>1 - 顯示於前台價格輪播</option>
+                              <option value="0" <?php echo ((int)($res['course_show_pricing'] ?? 1) === 0) ? 'selected' : ''; ?>>0 - 隱藏（僅供專屬連結報名）</option>
+                            </select>
                           </div>
                           <div class="col-md-3">
-                            <label class="form-label small fw-bold">價格計費單位</label>
-                            <input type="text" class="form-control" name="course_price_unit"
-                                   value="<?php echo htmlspecialchars($res['course_price_unit'] ?? ''); ?>" placeholder="如：單次 / 完整系列 / 限時特惠價">
+                            <label class="form-label small fw-bold">首頁輪播預設置中主打</label>
+                            <select class="form-select" name="course_is_hot">
+                              <option value="0" <?php echo ((int)($res['course_is_hot'] ?? 0) === 0) ? 'selected' : ''; ?>>0 - 一般位置</option>
+                              <option value="1" <?php echo ((int)($res['course_is_hot'] ?? 0) === 1) ? 'selected' : ''; ?>>1 - 預設置中焦點 (hottest)</option>
+                            </select>
                           </div>
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">價格卡片階級樣式</label>
@@ -315,36 +319,40 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                                    value="<?php echo (int)($res['course_sort'] ?? 100); ?>">
                           </div>
 
-                          <div class="col-md-4">
-                            <label class="form-label small fw-bold">顯示於首頁價格卡片</label>
-                            <select class="form-select" name="course_show_pricing">
-                              <option value="1" <?php echo ((int)($res['course_show_pricing'] ?? 1) === 1) ? 'selected' : ''; ?>>1 - 顯示於前台價格輪播</option>
-                              <option value="0" <?php echo ((int)($res['course_show_pricing'] ?? 1) === 0) ? 'selected' : ''; ?>>0 - 隱藏（僅供專屬連結報名）</option>
-                            </select>
+                          <div class="col-12">
+                            <label class="form-label small fw-bold">價格卡片簡短描述<span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="course_brief" rows="3" required><?php echo htmlspecialchars($res['course_brief'] ?? ''); ?></textarea>
                           </div>
-                          <div class="col-md-4">
-                            <label class="form-label small fw-bold">首頁輪播預設置中主打</label>
-                            <select class="form-select" name="course_is_hot">
-                              <option value="0" <?php echo ((int)($res['course_is_hot'] ?? 0) === 0) ? 'selected' : ''; ?>>0 - 一般位置</option>
-                              <option value="1" <?php echo ((int)($res['course_is_hot'] ?? 0) === 1) ? 'selected' : ''; ?>>1 - 預設置中焦點 (hottest)</option>
-                            </select>
+
+                          <div class="col-12"><div class="hr-more">價格方案</div><hr class="my-1"></div>
+
+                          <div class="col-md-3">
+                            <label class="form-label small fw-bold">方案售價 (NT$) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="course_cost" name="course_cost" min="0" step="1" required
+                                   value="<?php echo (int)round((float)($res['course_cost'] ?? 0)); ?>">
                           </div>
-                          <div class="col-md-4">
+                          <div class="col-md-3">
+                            <label class="form-label small fw-bold">價格計費單位</label>
+                            <input type="text" class="form-control" name="course_price_unit"
+                                   value="<?php echo htmlspecialchars($res['course_price_unit'] ?? ''); ?>" placeholder="如：單次 / 完整系列 / 限時特惠價">
+                          </div>
+                          <div class="col-md-3">
                             <label class="form-label small fw-bold">上下架狀態</label>
                             <select class="form-select" id="course_status" name="course_status">
-                              <option value="1" <?php echo ((int)($res['course_status'] ?? 1) === 1) ? 'selected' : ''; ?>>1 - 上架販售中</option>
-                              <option value="2" <?php echo ((int)($res['course_status'] ?? 1) === 2) ? 'selected' : ''; ?>>2 - 草稿籌備中</option>
-                              <option value="0" <?php echo ((int)($res['course_status'] ?? 1) === 0) ? 'selected' : ''; ?>>0 - 下架停售</option>
+                              <option value="0" <?php echo ((int)($res['course_status'] ?? 1) === 0) ? 'selected' : ''; ?>>下架停售</option>
+                              <option value="1" <?php echo ((int)($res['course_status'] ?? 1) === 1) ? 'selected' : ''; ?>>上架販售中</option>
+                              <option value="2" <?php echo ((int)($res['course_status'] ?? 1) === 2) ? 'selected' : ''; ?>>草稿籌備中</option>
                             </select>
                           </div>
+
 
                           <div class="col-12"><div class="hr-more">開課規格與簡介說明</div><hr class="my-1"></div>
 
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">課程性質類型</label>
                             <select class="form-select" name="course_type">
-                              <option value="1" <?php echo ((int)($res['course_type'] ?? 1) === 1) ? 'selected' : ''; ?>>1 - 系列陪跑 / 團體工作坊</option>
-                              <option value="2" <?php echo ((int)($res['course_type'] ?? 1) === 2) ? 'selected' : ''; ?>>2 - 一對一深度顧問預約</option>
+                              <option value="1" <?php echo ((int)($res['course_type'] ?? 1) === 1) ? 'selected' : ''; ?>>系列陪跑/團體工作坊</option>
+                              <option value="2" <?php echo ((int)($res['course_type'] ?? 1) === 2) ? 'selected' : ''; ?>>一對一深度顧問預約</option>
                             </select>
                           </div>
                           <div class="col-md-3">
@@ -374,10 +382,6 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                                    value="<?php echo htmlspecialchars($res['course_starttime'] ?? '14:00:00'); ?>" placeholder="14:00:00">
                           </div>
 
-                          <div class="col-12">
-                            <label class="form-label small fw-bold">價格卡片簡短描述 (course_brief) <span class="text-danger">*</span></label>
-                            <textarea class="form-control" name="course_brief" rows="3" required><?php echo htmlspecialchars($res['course_brief'] ?? ''); ?></textarea>
-                          </div>
                         </div>
                       </form>
                     </div>
