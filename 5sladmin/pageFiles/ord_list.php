@@ -37,7 +37,7 @@ if ($searchText !== '') {
   $nameHash  = _fn_hash_hmac(_fn_secure_crypto($searchText, 'en'));
   $emailHash = _fn_hash_hmac(_fn_secure_crypto(strtolower($searchText), 'en'));
   $likeStr   = '%' . $searchText . '%';
-  $whereSql .= " AND (o.ord_no LIKE ? OR i.inv_no LIKE ? OR o.ord_tracking_no LIKE ? OR m.mb_name_hash = ? OR m.mb_email_hash = ?) ";
+  $whereSql .= " AND (o.ord_no LIKE ? OR i.inv_no LIKE ? OR o.ord_shipping_no LIKE ? OR m.mb_name_hash = ? OR m.mb_email_hash = ?) ";
   array_push($params, $likeStr, $likeStr, $likeStr, $nameHash, $emailHash);
 }
 if ($searchStatus !== '') {
@@ -209,8 +209,8 @@ $refStatusMap = array(
                           </td>
                           <td class="text-center">
                             <div><?php echo $ordStatusMap[$oSta] ?? $ordStatusMap; ?></div>
-                            <?php if (!empty($row['ord_tracking_no'])): ?>
-                              <div class="text-muted mt-1" style="font-size: 0.72rem;"><i class="bi bi-truck me-1"></i><?php echo htmlspecialchars($row['ord_tracking_no']); ?></div>
+                            <?php if (!empty($row['ord_shipping_no'])): ?>
+                              <div class="text-muted mt-1" style="font-size: 0.72rem;"><i class="bi bi-truck me-1"></i><?php echo htmlspecialchars($row['ord_shipping_no']); ?></div>
                             <?php endif; ?>
                           </td>
                           <td class="text-center">

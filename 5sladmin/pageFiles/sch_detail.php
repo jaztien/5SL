@@ -311,7 +311,7 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
                                   $chk = ($currTargetType === 3 && in_array($midStr, $selectedTargetIds, true)) ? 'checked' : '';
                                 ?>
                                 <div class="form-check py-1 border-bottom">
-                                  <input class="form-check-input chk-target-mb" type="checkbox" value="<?php echo $midStr; ?>" id="tmb_<?php echo $midStr; ?>" <?php echo $chk; ?>>
+                                  <input class="form-check-input chk-target-mb" type="checkbox" value="<?php echo $midStr; ?>" id="tmb_<?php echo $midStr; ?>" name="tmb_<?php echo $midStr; ?>" <?php echo $chk; ?>>
                                   <label class="form-check-label small" for="tmb_<?php echo $midStr; ?>"><?php echo htmlspecialchars($mo['label']); ?></label>
                                 </div>
                                 <?php endforeach; ?>
@@ -327,7 +327,7 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
                                   $chk = ($currTargetType === 4 && in_array($aidStr, $selectedTargetIds, true)) ? 'checked' : '';
                                 ?>
                                 <div class="form-check py-1 border-bottom">
-                                  <input class="form-check-input chk-target-ad" type="checkbox" value="<?php echo $aidStr; ?>" id="tad_<?php echo $aidStr; ?>" <?php echo $chk; ?>>
+                                  <input class="form-check-input chk-target-ad" type="checkbox" value="<?php echo $aidStr; ?>" id="tad_<?php echo $aidStr; ?>" name="tad_<?php echo $aidStr; ?>" <?php echo $chk; ?>>
                                   <label class="form-check-label small" for="tad_<?php echo $aidStr; ?>">
                                     #<?php echo $aidStr; ?> - <?php echo htmlspecialchars($ao['ad_name']); ?> (<?php echo htmlspecialchars($ao['ad_account']); ?>)
                                   </label>
@@ -343,19 +343,19 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
                               <label class="form-label small fw-bold d-block">發送通路選擇 (可複選，預留簡訊與 LINE 串接介面)</label>
                               <div class="d-flex flex-wrap gap-3 p-2 px-3 bg-light border rounded-2 small">
                                 <div class="form-check">
-                                  <input class="form-check-input chk-sch-channel" type="checkbox" value="noti" id="ch_noti" <?php echo in_array('noti', $selectedChannels, true) ? 'checked' : ''; ?>>
+                                  <input class="form-check-input chk-sch-channel" type="checkbox" value="noti" id="ch_noti" name="ch_noti" <?php echo in_array('noti', $selectedChannels, true) ? 'checked' : ''; ?>>
                                   <label class="form-check-label fw-bold text-primary" for="ch_noti"><i class="bi bi-bell-fill me-1"></i>會員站內通知 (noti)</label>
                                 </div>
                                 <div class="form-check">
-                                  <input class="form-check-input chk-sch-channel" type="checkbox" value="email" id="ch_email" <?php echo in_array('email', $selectedChannels, true) ? 'checked' : ''; ?>>
+                                  <input class="form-check-input chk-sch-channel" type="checkbox" value="email" id="ch_email" name="ch_email" <?php echo in_array('email', $selectedChannels, true) ? 'checked' : ''; ?>>
                                   <label class="form-check-label fw-bold text-success" for="ch_email"><i class="bi bi-envelope-fill me-1"></i>電子郵件 (email)</label>
                                 </div>
                                 <div class="form-check">
-                                  <input class="form-check-input chk-sch-channel" type="checkbox" value="sms" id="ch_sms" <?php echo in_array('sms', $selectedChannels, true) ? 'checked' : ''; ?>>
+                                  <input class="form-check-input chk-sch-channel" type="checkbox" value="sms" id="ch_sms" name="ch_sms" <?php echo in_array('sms', $selectedChannels, true) ? 'checked' : ''; ?>>
                                   <label class="form-check-label fw-bold text-warning-emphasis" for="ch_sms"><i class="bi bi-chat-dots-fill me-1"></i>手機簡訊 (sms 預留)</label>
                                 </div>
                                 <div class="form-check">
-                                  <input class="form-check-input chk-sch-channel" type="checkbox" value="line" id="ch_line" <?php echo in_array('line', $selectedChannels, true) ? 'checked' : ''; ?>>
+                                  <input class="form-check-input chk-sch-channel" type="checkbox" value="line" id="ch_line" name="ch_line" <?php echo in_array('line', $selectedChannels, true) ? 'checked' : ''; ?>>
                                   <label class="form-check-label fw-bold text-info-emphasis" for="ch_line"><i class="bi bi-line me-1"></i>LINE 官方推播 (line 預留)</label>
                                 </div>
                               </div>
@@ -478,15 +478,15 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
 
     function doButSave() {
       syncScheduleHiddenFields();
-      const frm1 = document.getElementById('form_tabMenu1');
+      const frm1 = document.getElementById('form_schMaster');
       if (!frm1.checkValidity()) {
         frm1.classList.add('was-validated');
         window.parent.toastr['warning']('請檢查標示紅框的必填欄位（事件標題與開始時間）！');
         return false;
       }
-
       // 合併 Tab 1 與 Tab 2 所有欄位送出儲存
-      const datA = Object.assign({}, getFormObjects($('#form_tabMenu1')), getFormObjects($('#form_tabMenu2')));
+      //const datA = Object.assign({}, getFormObjects($('#form_schMaster')), getFormObjects($('#form_tabMenu2')));
+      const datA = getFormObjects($('#form_schMaster'));
       const accE = (0 == parseInt('<?php echo $schID; ?>')) ? 'func_sch_addnew' : 'func_sch_infoUpdate';
 
       $.ajax({

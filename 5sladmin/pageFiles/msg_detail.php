@@ -179,7 +179,7 @@ $currReplySta = (int)($res['msg_reply_status'] ?? 0);
                   </div>
 
                   <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" id="chkMsgPinned" <?php echo !empty($res['msg_is_pinned']) ? 'checked' : ''; ?>>
+                    <input class="form-check-input" type="checkbox" id="chkMsgPinned" name="chkMsgPinned" <?php echo !empty($res['msg_is_pinned']) ? 'checked' : ''; ?>>
                     <label class="form-check-label fw-bold" for="chkMsgPinned">置頂此則訊息/公告</label>
                   </div>
 

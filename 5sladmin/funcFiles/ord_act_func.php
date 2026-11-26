@@ -41,28 +41,28 @@ switch ($formAcce) {
     $oldStatus  = (int)$ordRow['ord_status'];
     $newStatus  = (int)($formData['ord_status'] ?? $oldStatus);
     $carrier    = trim((string)($formData['ord_shipping_carrier'] ?? ''));
-    $trackingNo = trim((string)($formData['ord_tracking_no'] ?? ''));
+    $shippingNo = trim((string)($formData['ord_shipping_no'] ?? ''));
     $adminNote  = trim((string)($formData['ord_admin_note'] ?? ''));
 
     // 收件人敏感欄位加密儲存
     $recvName  = trim((string)($formData['ord_receiver_name'] ?? ''));
     $recvPhone = trim((string)($formData['ord_receiver_phone'] ?? ''));
-    $recvAddr  = trim((string)($formData['ord_receiver_addr'] ?? ''));
+    $recvAddr  = trim((string)($formData['ord_receiver_address'] ?? ''));
 
     $upd = array(
       'ord_status'           => $newStatus,
       'ord_shipping_carrier' => ($carrier !== '' ? $carrier : null),
-      'ord_tracking_no'      => ($trackingNo !== '' ? $trackingNo : null),
+      'ord_shipping_no'      => ($shippingNo !== '' ? $shippingNo : null),
       'ord_admin_note'       => ($adminNote !== '' ? $adminNote : null),
       'ord_receiver_name'    => ($recvName !== '' ? _fn_secure_crypto($recvName, 'en') : null),
       'ord_receiver_phone'   => ($recvPhone !== '' ? _fn_secure_crypto($recvPhone, 'en') : null),
-      'ord_receiver_addr'    => ($recvAddr !== '' ? _fn_secure_crypto($recvAddr, 'en') : null)
+      'ord_receiver_address' => ($recvAddr !== '' ? _fn_secure_crypto($recvAddr, 'en') : null)
     );
 
     // 若狀態首次切換為「3 - 已出貨配送中」，自動記錄出貨時間並推播通知給會員
     if ($oldStatus !== 3 && $newStatus === 3) {
       $upd['ord_shipped_at'] = date('Y-m-d H:i:s');
-      $trackTxt = ($trackingNo !== '') ? "（物流：{$carrier}，追蹤單號：{$trackingNo}）" : "";
+      $trackTxt = ($shippingNo !== '') ? "（物流：{$carrier}，追蹤單號：{$shippingNo}）" : "";
       DB->insert('fsl_notifications', array(
         'mb_id'       => (int)$ordRow['mb_id'],
         'no_category' => 2,
@@ -70,6 +70,7 @@ switch ($formAcce) {
         'no_content'  => "親愛的會員您好，您的訂單（{$ordRow['ord_no']}）已完成打包並交寄出貨{$trackTxt}，請留意近期包裹配送動態。"
       ));
     }
+
 
     DB->update('fsl_orders', $upd, ['ord_id' => $ordID]);
 

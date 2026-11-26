@@ -263,8 +263,8 @@ $currOrdSta = (int)($res['ord_status'] ?? 1);
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">物流追蹤單號 (Tracking No.)</label>
-                            <input type="text" class="form-control" id="ord_tracking_no" name="ord_tracking_no"
-                                   value="<?php echo htmlspecialchars($res['ord_tracking_no'] ?? ''); ?>" placeholder="輸入包裹追蹤碼">
+                            <input type="text" class="form-control" id="ord_shipping_no" name="ord_shipping_no"
+                                   value="<?php echo htmlspecialchars($res['ord_shipping_no'] ?? ''); ?>" placeholder="輸入包裹追蹤碼">
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">管理者內部處理備註</label>

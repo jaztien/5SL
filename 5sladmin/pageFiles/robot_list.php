@@ -62,6 +62,12 @@ $matchMap = array(
   2 => '<span class="badge text-bg-light border text-primary">全部關鍵字 (AND)</span>',
   3 => '<span class="badge text-bg-light border text-info-emphasis">關鍵字 + 相似度</span>'
 );
+
+// 讀取全站自動應答總開關狀態（預設 1-啟用中）
+$sysRobotCfg     = DB->getConfigVal('mess_robot');
+$isRobotGlobalOn = (!is_array($sysRobotCfg) || !isset($sysRobotCfg['config_value']) || (string)$sysRobotCfg['config_value'] !== '0');
+echo $isRobotGlobalOn;
+
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
@@ -110,10 +116,16 @@ $matchMap = array(
       <!-- 主要內容區域 -->
       <div class="app-content">
         <div class="container-fluid">
-          <!-- 即時問答模擬測試器 -->
+          <!-- 即時問答模擬測試器 + 全站自動應答總開關 -->
           <div class="card border-info shadow-sm mb-3">
-            <div class="card-header bg-info-subtle text-info-emphasis py-2 fw-bold small d-flex justify-content-between align-items-center">
+            <div class="card-header bg-info-subtle text-info-emphasis py-2 fw-bold small d-flex flex-wrap justify-content-between align-items-center gap-2">
               <span><i class="bi bi-magic me-1"></i>自動應答模擬測試器（測試會員輸入問題時會命中哪條規則與隨機語氣）</span>
+              <div class="form-check form-switch mb-0 d-flex align-items-center gap-2 bg-white px-3 py-1 rounded-pill border border-info-subtle shadow-xs">
+                <input class="form-check-input mt-0" type="checkbox" role="switch" id="chkGlobalRobotSwitch" name="chkGlobalRobotSwitch" style="cursor: pointer;" <?php echo $isRobotGlobalOn ? 'checked' : ''; ?>>
+                <label class="form-check-label fw-bold mb-0 <?php echo $isRobotGlobalOn ? 'text-success' : 'text-danger'; ?>" id="lblGlobalRobotSwitch" for="chkGlobalRobotSwitch" style="cursor: pointer;">
+                  <?php echo $isRobotGlobalOn ? '全站自動應答：啟用中' : '全站自動應答：已暫停'; ?>
+                </label>
+              </div>
             </div>
             <div class="card-body py-2 bg-white">
               <div class="row g-2 align-items-center">
@@ -274,6 +286,7 @@ $matchMap = array(
   function doButPrint() { $('.buttons-print').click(); }
 
   $(document).ready(function() {
+
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
 
@@ -333,6 +346,34 @@ $matchMap = array(
         }
       }, 'json');
     });
+
+    // 全站自動應答總開關即時切換
+    $('#chkGlobalRobotSwitch').on('change', function() {
+      const isChecked = $(this).is(':checked');
+      const $lbl = $('#lblGlobalRobotSwitch');
+
+      $.post('../funcFiles/robot_act_func.php', {
+        'formAcce': 'func_robot_globalToggle',
+        'token': getTokenVal(),
+        'enabled': isChecked ? 1 : 0
+      }, function(data) {
+        console.log(data);
+        if (window.parent && window.parent.toastr) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+        }
+        if (data['RTN'] == 1) {
+          if (isChecked) {
+            $lbl.removeClass('text-danger').addClass('text-success').text('全站自動應答：啟用中');
+          } else {
+            $lbl.removeClass('text-success').addClass('text-danger').text('全站自動應答：已暫停');
+          }
+        } else {
+          $('#chkGlobalRobotSwitch').prop('checked', !isChecked);
+        }
+      }, 'json');
+    });
+
+
 
     if (window.parent && typeof window.parent.treeviewCheck === 'function') {
       window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');

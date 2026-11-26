@@ -184,18 +184,18 @@ if (empty($repliesArr)) {
                           <span class="badge text-bg-primary variant-num">#<?php echo $idx + 1; ?></span>
                           <div class="input-group input-group-sm" style="max-width: 240px;">
                             <span class="input-group-text">口吻標籤</span>
-                            <input type="text" class="form-control inp-tone" value="<?php echo htmlspecialchars($rep['tone'] ?? ''); ?>" placeholder="如：溫暖陪伴型">
+                            <input type="text" class="form-control inp-tone notSubmit" value="<?php echo htmlspecialchars($rep['tone'] ?? ''); ?>" placeholder="如：溫暖陪伴型">
                           </div>
                           <div class="input-group input-group-sm" style="max-width: 150px;">
                             <span class="input-group-text">抽樣權重</span>
-                            <input type="number" class="form-control inp-weight" min="1" max="100" value="<?php echo max(1, (int)($rep['weight'] ?? 50)); ?>">
+                            <input type="number" class="form-control inp-weight notSubmit" min="1" max="100" value="<?php echo max(1, (int)($rep['weight'] ?? 50)); ?>">
                           </div>
                           <button type="button" class="btn btn-outline-danger btn-xs ms-auto btn-remove-variant" title="刪除此組變體">
                             <i class="bi bi-trash"></i> 移除
                           </button>
                         </div>
                         <div class="card-body p-2">
-                          <textarea class="form-control form-control-sm inp-content" rows="4" placeholder="輸入此口吻的完整回覆內容..."><?php echo htmlspecialchars($rep['content'] ?? ''); ?></textarea>
+                          <textarea class="form-control form-control-sm inp-content notSubmit" rows="4" placeholder="輸入此口吻的完整回覆內容..."><?php echo htmlspecialchars($rep['content'] ?? ''); ?></textarea>
                         </div>
                       </div>
                       <?php endforeach; ?>
@@ -225,6 +225,23 @@ if (empty($repliesArr)) {
     });
   }
 
+  // 依目前卡片數量自動均分抽樣權重（確保總和恆為 100）
+  function rebalanceVariantWeights() {
+    const $cards = $('.reply-variant-card');
+    const count  = $cards.length;
+    if (count === 0) return;
+
+    const baseVal   = Math.floor(100 / count);
+    const remainder = 100 % count;
+
+    $cards.each(function(idx) {
+      // 餘數分配給前幾張卡片，確保加總精準為 100（如 3 張為 34, 33, 33）
+      const w = baseVal + (idx < remainder ? 1 : 0);
+      $(this).find('.inp-weight').val(w);
+    });
+  }
+
+
   function buildVariantCardHtml(tone, weight, content) {
     const safeTone = $('<div>').text(tone || '').html();
     const safeContent = $('<div>').text(content || '').html();
@@ -234,18 +251,18 @@ if (empty($repliesArr)) {
           <span class="badge text-bg-primary variant-num">#</span>
           <div class="input-group input-group-sm" style="max-width: 240px;">
             <span class="input-group-text">口吻標籤</span>
-            <input type="text" class="form-control inp-tone" value="${safeTone}" placeholder="如：溫暖陪伴型">
+            <input type="text" class="form-control inp-tone notSubmit" value="${safeTone}" placeholder="如：溫暖陪伴型">
           </div>
           <div class="input-group input-group-sm" style="max-width: 150px;">
             <span class="input-group-text">抽樣權重</span>
-            <input type="number" class="form-control inp-weight" min="1" max="100" value="${weight || 50}">
+            <input type="number" class="form-control inp-weight notSubmit" min="1" max="100" value="${weight || 50}">
           </div>
           <button type="button" class="btn btn-outline-danger btn-xs ms-auto btn-remove-variant" title="刪除此組變體">
             <i class="bi bi-trash"></i> 移除
           </button>
         </div>
         <div class="card-body p-2">
-          <textarea class="form-control form-control-sm inp-content" rows="4" placeholder="輸入此口吻的完整回覆內容...">${safeContent}</textarea>
+          <textarea class="form-control form-control-sm inp-content notSubmit" rows="4" placeholder="輸入此口吻的完整回覆內容...">${safeContent}</textarea>
         </div>
       </div>
     `;
@@ -254,9 +271,9 @@ if (empty($repliesArr)) {
   function collectRepliesJson() {
     const list = [];
     $('.reply-variant-card').each(function() {
-      const tone    = $.trim($(this).find('.inp-tone').val()) || '標準應答';
+      const tone    = ($(this).find('.inp-tone').val() || '').trim() || '標準應答';
       const weight  = Math.max(1, parseInt($(this).find('.inp-weight').val(), 10) || 10);
-      const content = $.trim($(this).find('.inp-content').val());
+      const content = ($(this).find('.inp-content').val() || '').trim();
       if (content !== '') {
         list.push({ tone: tone, weight: weight, content: content });
       }
@@ -311,7 +328,9 @@ if (empty($repliesArr)) {
   function ajaxPOST(frm) {
     var $frm = frm || $('#form_tabMenu1');
     var accE = (0 == parseInt('<?php echo $robID; ?>')) ? 'func_robot_addnew' : $frm.data('func');
+    collectRepliesJson();
     var datA = getFormObjects($frm);
+    datA['rob_replies'] = $('#rob_replies').val();
 
     $.ajax({
       type: 'post',
@@ -333,6 +352,9 @@ if (empty($repliesArr)) {
           } else {
             $frm.removeClass('was-validated');
             if (typeof doSerialize === 'function') doSerialize();
+            if (window.parent && window.parent.document) {
+              $('#topBut_save', window.parent.document).removeClass('active');
+            }
           }
         }
       }
@@ -342,13 +364,26 @@ if (empty($repliesArr)) {
   $(document).ready(function() {
     refreshVariantNumbers();
 
-    // 新增空白語氣變體卡片
+    function notifyDirty() {
+      if (window.parent && window.parent.document) {
+        $('#topBut_save', window.parent.document).addClass('active');
+      }
+    }
+
+    // 1. 任何語氣變體輸入變更即點亮儲存鈕
+    $(document).on('input change', '#replyVariantsContainer input, #replyVariantsContainer textarea', function() {
+      notifyDirty();
+    });
+
+    // 2. 新增空白語氣變體卡片（自動均分權重）
     $('#btnAddReplyVariant').on('click', function() {
       $('#replyVariantsContainer').append(buildVariantCardHtml('親切引導型', 50, ''));
       refreshVariantNumbers();
+      rebalanceVariantWeights();
+      notifyDirty();
     });
 
-    // 一鍵補齊三種推薦語氣組
+    // 3. 一鍵補齊三種推薦語氣組
     $('#btnAddTonePreset').on('click', function() {
       const presets = [
         { tone: '溫暖陪伴型', weight: 40, content: '親愛的 {會員姓名} 您好，非常感謝您的來訊與信任！關於您提到的問題，我們為您說明如下：\n\n（請在此填寫溫暖細膩的解答內容）\n\n若還有任何需要陪伴或協助的地方，歡迎隨時回覆告訴我們喔！' },
@@ -360,10 +395,11 @@ if (empty($repliesArr)) {
         $('#replyVariantsContainer').append(buildVariantCardHtml(p.tone, p.weight, p.content));
       });
       refreshVariantNumbers();
+      notifyDirty();
       window.parent.toastr['info']('已為您帶入三種推薦語氣範本，請依實際問題修改括號內說明後儲存！');
     });
 
-    // 移除單組語氣變體
+    // 4. 移除單組語氣變體（自動均分剩餘卡片權重）
     $(document).on('click', '.btn-remove-variant', function() {
       if ($('.reply-variant-card').length <= 1) {
         window.parent.toastr['warning']('至少需保留一組應答變體卡片！');
@@ -371,6 +407,8 @@ if (empty($repliesArr)) {
       }
       $(this).closest('.reply-variant-card').remove();
       refreshVariantNumbers();
+      rebalanceVariantWeights();
+      notifyDirty();
     });
 
     $('li.prevLink').on('click', function() { window.location.replace(getCurrentURI('', 'robot_list.php')); });

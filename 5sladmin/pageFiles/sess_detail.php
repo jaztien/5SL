@@ -339,7 +339,7 @@ $currLive = (int)($res['sess_live_status'] ?? 0);
                                 $chk = in_array((string)$wKey, $onWeekArr, true) ? 'checked' : '';
                               ?>
                               <div class="form-check mb-0">
-                                <input class="form-check-input chk-onweek" type="checkbox" value="<?php echo $wKey; ?>" id="wk_<?php echo $wKey; ?>" <?php echo $chk; ?>>
+                                <input class="form-check-input chk-onweek" type="checkbox" value="<?php echo $wKey; ?>" id="wk_<?php echo $wKey; ?>" name="wk_<?php echo $wKey; ?>" <?php echo $chk; ?>>
                                 <label class="form-check-label small" for="wk_<?php echo $wKey; ?>"><?php echo $wName; ?></label>
                               </div>
                               <?php endforeach; ?>

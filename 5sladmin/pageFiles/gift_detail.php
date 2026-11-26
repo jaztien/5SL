@@ -277,7 +277,7 @@ $typeLabels = array(1 => '純紅利點數', 2 => '商品贈品 (實體/數位)',
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">領取後有效天數 (0=永久)</label>
-                            <input type="number" class="form-control" name="gift_valid_days" min="0" step="1"
+                            <input type="number" class="form-control" id="gift_valid_days" name="gift_valid_days" min="0" step="1"
                                    value="<?php echo (int)($res['gift_valid_days'] ?? 30); ?>">
                           </div>
 

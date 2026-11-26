@@ -28,6 +28,8 @@ switch ($formAcce) {
   // =========================================================================
   case 'func_robot_addnew':
   case 'func_robot_infoUpdate':
+
+
     $acc = ($formAcce === 'func_robot_addnew') ? 'add' : 'up';
 
     $topic     = trim((string)($formData['rob_topic'] ?? ''));
@@ -44,7 +46,22 @@ switch ($formAcce) {
       exit();
     }
 
-    $decodedReplies = json_decode($replies, true);
+    // 還原全域安全過濾造成的反斜線跳脫與 HTML 實體編碼
+    $rawReplies = html_entity_decode($replies, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $decodedReplies = json_decode($rawReplies, true);
+    if (!is_array($decodedReplies)) {
+      $decodedReplies = json_decode(stripslashes($rawReplies), true);
+    }
+    if (!is_array($decodedReplies)) {
+      $decodedReplies = json_decode(stripslashes(stripslashes($rawReplies)), true);
+    }
+
+    if (!is_array($decodedReplies) || empty($decodedReplies)) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'warning', 'msgStr' => '請至少建立一組有效的自動應答變體內容！']);
+      exit();
+    }
+
+
     if (!is_array($decodedReplies) || empty($decodedReplies)) {
       echo json_encode(['RTN' => 0, 'msgType' => 'warning', 'msgStr' => '請至少建立一組有效的自動應答變體內容！']);
       exit();
@@ -231,6 +248,27 @@ switch ($formAcce) {
     ]);
     exit();
   break;
+
+  // =========================================================================
+  // 4. 切換全站自動應答總開關 (func_robot_globalToggle)
+  // =========================================================================
+  case 'func_robot_globalToggle':
+    $enabled = ((int)($_POST['enabled'] ?? 1) === 1) ? '1' : '0';
+    //$enabled = (int)($_POST['enabled']);
+    $up = DB->setConfigVal($enabled, 'mess_robot');
+    if ($up) {
+        echo json_encode([
+          'RTN'     => 1,
+          'msgType' => ($enabled === '1') ? 'success' : 'warning',
+          'msgStr'  => ($enabled === '1') ? '已開啟全站自動應答機器人！' : '已暫停全站自動應答（新訊息將直接進入待人工回覆）！'
+        ]);
+    }
+    exit();
+  break;
+
+
+
+
 
   default:
     echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '未知的操作指令！']);

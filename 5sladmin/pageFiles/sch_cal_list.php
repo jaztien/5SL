@@ -206,11 +206,11 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                     <h6 class="text-uppercase text-body-secondary fw-semibold mb-2">日曆操作與檢視</h6>
                     <div class="d-flex flex-column gap-2 mb-3">
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckTheme" checked>
+                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckTheme" name="flexSwitchCheckTheme" checked>
                             <label class="form-check-label" for="flexSwitchCheckTheme">深色模式主題</label>
                         </div>
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="switchToggleDraggable">
+                            <input class="form-check-input" type="checkbox" role="switch" id="switchToggleDraggable" name="switchToggleDraggable">
                             <label class="form-check-label" for="switchToggleDraggable">啟用拖曳改期</label>
                         </div>
                         <div class="form-check form-switch">
@@ -420,7 +420,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
 
                 <div class="mb-3">
                     <div class="form-check form-switch mb-2">
-                        <input class="form-check-input" type="checkbox" role="switch" id="switchTriggeredEvents">
+                        <input class="form-check-input" type="checkbox" role="switch" id="switchTriggeredEvents" name="switchTriggeredEvents">
                         <label class="form-check-label" for="switchTriggeredEvents">顯示觸發事件通知 (Toast)</label>
                     </div>
                     <label class="form-label small text-secondary mb-1" for="selectClickSnapMode">點擊新增時間對齊</label>

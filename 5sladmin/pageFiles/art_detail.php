@@ -314,7 +314,7 @@ $statusLabels = array(0 => '下架停用', 1 => '上架啟用', 2 => '草稿待�
                             <button type="button" class="btn btn-outline-primary btn-xs py-0 px-2 btn-insert-var" data-var="{{date}}">系統日期</button>
                             <button type="button" class="btn btn-outline-primary btn-xs py-0 px-2 btn-insert-var" data-var="{{url}}">專屬連結網址</button>
                           </div>
-                          <button type="button" class="btn btn-warning btn-xs fw-bold" id="btnPreviewTplVars">
+                          <button type="button" class="btn btn-warning btn-xs fw-bold notSubmit" id="btnPreviewTplVars">
                             <i class="bi bi-eye-fill me-1"></i>模擬變數替換預覽
                           </button>
                         </div>

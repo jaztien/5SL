@@ -221,15 +221,17 @@ switch ($formAcce) {
         echo json_encode(array('list'=>$rtn));
     break;
     case "func_chat_robotconfig":////////////////////////////////////////// func_chat_robotconfig 更改機器人應答狀態
-        $nextOn = isset($_POST['nextOn']) ? intval($_POST['nextOn']) : 0;
+        $enabled = isset($_POST['nextOn']) ? intval($_POST['nextOn']) : 0;
+        //$enabled = ((int)($_POST['nextOn'] ?? 1) === 1) ? '1' : '0';
         //$up = DB->update('fsl_configurations', array('config_value'=>$nextOn), array('config_code'=>'mess_robot'));
-        $up = DB->setConfigVal($nextOn, 'mess_robot');
+        $up = DB->setConfigVal($enabled, 'mess_robot');
         if($up){
             $rtn = array(
-                'nextOn' => $nextOn
+                'nextOn' => $enabled
             );
+            echo json_encode($rtn);
         }
-        echo json_encode($rtn);
+        exit();
     break;
     case "func_chat_readupdate":////////////////////////////////////////// func_chat_readupdate 已讀更新
         $chatID = isset($_POST['chatID']) ? intval($_POST['chatID']) : 0;
