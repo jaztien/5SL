@@ -13,7 +13,7 @@ require_once('../includeFiles/common.lib.php');
 $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['token'] ?? '');
 ?>
 <!doctype html>
-<html lang="en" data-bs-theme="light">
+<html lang="en" data-bs-theme="dark">
 
 <head>
     <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
@@ -29,167 +29,201 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
     <link rel="stylesheet" href="../cssFiles/adminlte.css">
     <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
     <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
-    <style>
-        #appointmentModal .modal-content {
-            border: 0;
-            border-radius: 1rem;
-            box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, .32);
+<style>
+  #appointmentModal {
+    /* 顯式綁定 Bootstrap 5 明暗主題文字與背景色 */
+    --modal-text: var(--bs-body-color, #212529);
+    --modal-muted: var(--bs-secondary-color, #6c757d);
+    --modal-surface: var(--bs-body-bg, #ffffff);
+    --modal-input-bg: var(--bs-tertiary-bg, #f8f9fa);
+
+    .modal-content {
+      border: 0;
+      border-radius: 1rem;
+      background-color: var(--modal-surface) !important;
+      color: var(--modal-text) !important;
+      box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, .32);
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: var(--modal-text) !important;
+    }
+
+    /* 修正一般輸入框、日期時間框與下拉選單在明暗模式下與背景撞色 */
+    .form-control,
+    .form-select {
+      border-radius: .65rem;
+      color: var(--modal-text) !important;
+      background-color: var(--modal-input-bg) !important;
+      border-color: var(--bs-border-color);
+      -webkit-text-fill-color: var(--modal-text) !important;
+
+      &::placeholder {
+        color: var(--modal-muted) !important;
+        -webkit-text-fill-color: var(--modal-muted) !important;
+        opacity: 0.75;
+      }
+
+      &:focus {
+        color: var(--modal-text) !important;
+        background-color: var(--modal-input-bg) !important;
+      }
+    }
+
+    /* 修正 Dark 模式下展開下拉選單時，option 項目與背景同色的問題 */
+    .form-select option {
+      background-color: var(--modal-surface) !important;
+      color: var(--modal-text) !important;
+    }
+
+    .form-floating > label,
+    .event-icon {
+      color: var(--modal-muted);
+    }
+
+    /* 修正 Title 輸入框在 Light/Dark 模式下都與背景形成高對比 */
+    #appointmentTitle {
+      height: 3.5rem;
+      padding: .5rem 0;
+      border: 0;
+      border-bottom: 1px solid var(--bs-border-color);
+      border-radius: 0;
+      background: transparent !important;
+      color: var(--modal-text) !important;
+      -webkit-text-fill-color: var(--modal-text) !important;
+      caret-color: var(--bs-primary);
+      font-size: 1.35rem;
+      font-weight: 600;
+      box-shadow: none;
+
+      &::placeholder {
+        color: var(--modal-muted) !important;
+        -webkit-text-fill-color: var(--modal-muted) !important;
+        font-weight: 400;
+        opacity: 0.7;
+      }
+
+      &:focus {
+        border-bottom: 2px solid var(--bs-primary);
+      }
+
+      & + label {
+        display: none;
+      }
+    }
+
+    .editor-section {
+      padding: 0;
+      border: 0;
+      background: transparent;
+
+      .form-label {
+        color: var(--modal-muted);
+        font-size: .8rem;
+        font-weight: 600;
+        letter-spacing: .02em;
+        text-transform: uppercase;
+      }
+    }
+
+    .event-row {
+      display: grid;
+      grid-template-columns: 2rem minmax(0, 1fr);
+      gap: .75rem;
+      align-items: start;
+    }
+
+    .event-icon {
+      width: 2rem;
+      padding-top: .65rem;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .js-priority-fields .btn-group {
+      display: inline-flex;
+      width: auto !important;
+      gap: .25rem;
+
+      .btn {
+        min-width: 5rem;
+        border: 1px solid var(--bs-border-color) !important;
+        border-radius: 999px !important;
+        color: var(--modal-muted);
+        background: transparent;
+
+        &:hover {
+          color: var(--bs-primary);
+          background: var(--bs-primary-bg-subtle);
+          border-color: var(--bs-primary) !important;
         }
+      }
 
-        #appointmentModal .form-control,
-        #appointmentModal .form-select {
-            border-radius: .65rem;
+      .btn-check:checked + .btn {
+        color: var(--bs-primary);
+        background: var(--bs-primary-bg-subtle);
+        border-color: var(--bs-primary) !important;
+      }
+    }
+
+    .powered-by {
+      display: none;
+    }
+
+    .modal-footer-actions {
+      padding: 1rem 1.5rem;
+      background: var(--bs-secondary-bg);
+      border-radius: 0 0 1rem 1rem;
+
+      @media (min-width: 992px) {
+        padding-inline: 3rem;
+      }
+    }
+
+    .form-switch .form-check-input {
+      position: relative !important;
+      background-image: none !important;
+      background-color: transparent !important;
+      border: 1px solid #6c757d !important;
+      box-shadow: none !important;
+
+      &:focus {
+        border-color: #86b7fe !important;
+        box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .25) !important;
+      }
+
+      &::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 2px;
+        width: calc(1em - 5px);
+        height: calc(1em - 5px);
+        border-radius: 50%;
+        background-color: #adb5bd;
+        transform: translateY(-50%);
+        transition: transform .15s ease-in-out, background-color .15s ease-in-out;
+      }
+
+      &:checked {
+        background-color: #0d6efd !important;
+        border-color: #0d6efd !important;
+
+        &::after {
+          background-color: #ffffff;
+          transform: translate(1em, -50%);
         }
+      }
+    }
+  }
+</style>
 
-        #appointmentModal .form-floating>label {
-            color: var(--bs-secondary-color);
-        }
-
-        #appointmentModal .modal-title {
-            font-size: 1.25rem;
-            font-weight: 500;
-        }
-
-        #appointmentModal #appointmentTitle {
-            height: 3.5rem;
-            padding: .5rem 0;
-            border: 0;
-            border-bottom: 1px solid var(--bs-border-color);
-            border-radius: 0;
-            background: transparent;
-            font-size: 1.35rem;
-            box-shadow: none;
-        }
-
-        #appointmentModal #appointmentTitle:focus {
-            border-bottom: 2px solid var(--bs-primary);
-        }
-
-        #appointmentModal #appointmentTitle+label {
-            display: none;
-        }
-
-        #appointmentModal .editor-section {
-            padding: 0;
-            border: 0;
-            background: transparent;
-        }
-
-        #appointmentModal .editor-section .form-label {
-            color: var(--bs-secondary-color);
-            font-size: .8rem;
-            font-weight: 600;
-            letter-spacing: .02em;
-            text-transform: uppercase;
-        }
-
-        #appointmentModal .editor-section .form-control,
-        #appointmentModal .editor-section .form-select {
-            background: var(--bs-tertiary-bg);
-        }
-
-        #appointmentModal .event-row {
-            display: grid;
-            grid-template-columns: 2rem minmax(0, 1fr);
-            gap: .75rem;
-            align-items: start;
-        }
-
-        #appointmentModal .event-icon {
-            width: 2rem;
-            padding-top: .65rem;
-            color: var(--bs-secondary-color);
-            font-size: 1.1rem;
-            text-align: center;
-        }
-
-        #appointmentModal .js-priority-fields .btn-group {
-            display: inline-flex;
-            width: auto !important;
-            gap: .25rem;
-        }
-
-        #appointmentModal .js-priority-fields .btn-group .btn {
-            min-width: 5rem;
-            border: 1px solid var(--bs-border-color) !important;
-            border-radius: 999px !important;
-            color: var(--bs-secondary-color);
-            background: transparent;
-        }
-
-        #appointmentModal .js-priority-fields .btn-group .btn:hover,
-        #appointmentModal .js-priority-fields .btn-group .btn-check:checked+.btn {
-            color: var(--bs-primary);
-            background: var(--bs-primary-bg-subtle);
-            border-color: var(--bs-primary) !important;
-        }
-
-        #appointmentModal .powered-by {
-            display: none;
-        }
-
-        #appointmentModal .modal-footer-actions {
-            padding: 1rem 1.5rem;
-            background: var(--bs-secondary-bg);
-            border-radius: 0 0 1rem 1rem;
-        }
-
-        @media (min-width: 992px) {
-            #appointmentModal .modal-footer-actions {
-                padding-inline: 3rem;
-            }
-        }
-
-#appointmentModal .form-switch .form-check-input {
-    position: relative !important;
-    background-image: none !important;
-    background-color: transparent !important;
-    border: 1px solid #6c757d !important;
-    box-shadow: none !important;
-}
-#appointmentModal .form-switch .form-check-input::after {
-    content: "";
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: calc(1em - 4px);
-    height: calc(1em - 4px);
-    border-radius: 50%;
-    background-color: #adb5bd;
-    transition: transform .15s ease-in-out, background-color .15s ease-in-out;
-}
-#appointmentModal .form-switch .form-check-input:focus {
-    border-color: #86b7fe !important;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
-}
-#appointmentModal .form-switch .form-check-input::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 2px;
-    width: calc(1em - 5px);
-    height: calc(1em - 5px);
-    border-radius: 50%;
-    background-color: #adb5bd;
-    transform: translateY(-50%);
-    transition: transform .15s ease-in-out, background-color .15s ease-in-out;
-}
-#appointmentModal .form-switch .form-check-input:checked {
-    background-color: #0d6efd !important;
-    border-color: #0d6efd !important;
-}
-#appointmentModal .form-switch .form-check-input:checked::after {
-    background-color: #ffffff;
-    transform: translate(1em, -50%);
-}
-
-
-
-    </style>
 </head>
 
 <body class="bg-body-tertiary theme-cyan p-1">
-  <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
+    <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
     <div class="app-wrapper">
         <main class="app-main">
 
@@ -530,8 +564,13 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
             ];
             /** bs-calendar 繁體中文介面翻譯詞庫常數 */
             const FSL_TRANSLATIONS = {
-                today: '今天', day: '日', week: '週', month: '月',
-                agenda: '議程清單', allDay: '全天', search: '搜尋...'
+                today: '今天',
+                day: '日',
+                week: '週',
+                month: '月',
+                agenda: '議程清單',
+                allDay: '全天',
+                search: '搜尋...'
             };
             /** 統一封裝後端 AJAX 請求（自動夾帶 CSRF Token 與 formAcce 操作代碼） */
             async function callSchApi(actionName, payload = {}) {
@@ -690,13 +729,19 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                     calendars: FSL_CALENDARS,
                     /** 點擊資訊窗「複製」按鈕：自動複製一筆新排程寫入資料庫並重整 */
                     async onDuplicate(appointment) {
-                        const copyData = { ...appointment, title: '[複製] ' + String(appointment.title || '').replace(/^🔔\s*/, '') };
+                        const copyData = {
+                            ...appointment,
+                            title: '[複製] ' + String(appointment.title || '').replace(/^🔔\s*/, '')
+                        };
                         delete copyData.id;
                         delete copyData.recurringId;
                         const res = await callSchApi('func_bs_cal_save', copyData);
                         if (res.RTN === 1) {
                             $calendar.bsCalendar('refresh');
-                            if ($.bsToast) $.bsToast({ title: '已複製排程', message: res.msgStr });
+                            if ($.bsToast) $.bsToast({
+                                title: '已複製排程',
+                                message: res.msgStr
+                            });
                         }
                     },
                     onAll(eventName, ...args) {
@@ -756,9 +801,12 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                     .on('edit.bs.calendar', function(event, appointment, extras, dragExtras) {
                         event.preventDefault();
                         /** 若為週期展開的子項目，取 recurringId 作為主排程 ID 並還原原始起始結束時間 */
-                        const sourceAppointment = appointment.recurringId
-                            ? { ...appointment, id: appointment.recurringId, start: appointment.extras?.recurrence?.sourceStart || appointment.start }
-                            : appointment;
+                        const sourceAppointment = appointment.recurringId ? {
+                                ...appointment,
+                                id: appointment.recurringId,
+                                start: appointment.extras?.recurrence?.sourceStart || appointment.start
+                            } :
+                            appointment;
                         const eventExtras = dragExtras || extras;
                         const sourceStart = parseDateTimeString(sourceAppointment.start);
                         const sourceEnd = parseDateTimeString(sourceAppointment.end);
@@ -833,26 +881,28 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
             /** 綁定左側控制面板與右側 Offcanvas 測試按鈕事件 */
             function bindSidebarActions() {
                 // 1. 深色/淺色模式切換與 2. 重新同步資料按鈕事件
-                $calendar.on('change', '#flexSwitchCheckTheme', function () {
+                $calendar.on('change', '#flexSwitchCheckTheme', function() {
                     $('html').attr('data-bs-theme', $(this).is(':checked') ? 'dark' : 'light');
                     $calendar.bsCalendar('render');
-                }).on('click', '[data-method="refresh"]', function (e) {
+                }).on('click', '[data-method="refresh"]', function(e) {
                     e.preventDefault();
                     $calendar.bsCalendar('refresh');
                 });
-                $(document).on('click', '[data-cal-cmd]', function (e) {
+                $(document).on('click', '[data-cal-cmd]', function(e) {
                     e.preventDefault();
                     const cmd = $(this).data('cal-cmd');
                     const view = $(this).data('view');
                     if (cmd === 'setToday') $calendar.bsCalendar('setToday', view || 'week');
                     else $calendar.bsCalendar(cmd);
                 });
-                $(document).on('change', '#switchTriggeredEvents', function () {
+                $(document).on('change', '#switchTriggeredEvents', function() {
                     $calendar.bsCalendar('refresh');
-                }).on('change', '#selectClickSnapMode', function () {
-                    $calendar.bsCalendar('updateOptions', { clickSnapMode: $(this).val() });
+                }).on('change', '#selectClickSnapMode', function() {
+                    $calendar.bsCalendar('updateOptions', {
+                        clickSnapMode: $(this).val()
+                    });
                 });
-                $(document).on('change', '#selectAppointmentRule', function () {
+                $(document).on('change', '#selectAppointmentRule', function() {
                     $calendar.bsCalendar('updateOptions', {
                         appointmentRules: getDemoAppointmentRules($(this).val())
                     });
@@ -1243,8 +1293,8 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
             function resolveModalTime(preferredTime, fallbackDateTime) {
                 return normalizeTimeInputValue(preferredTime) || extractTimeFromDateTime(fallbackDateTime);
             }
-            
-            
+
+
             function formatDateTime(date) {
                 const yyyy = date.getFullYear();
                 const mm = String(date.getMonth() + 1).padStart(2, '0');

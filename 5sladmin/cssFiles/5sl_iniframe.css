@@ -3,7 +3,7 @@ html {
   overflow-y: scroll;          /* 1. 傳統標準寫法：始終顯示垂直捲軸軌道（內容不足時呈禁用灰態） */
   scrollbar-gutter: stable;    /* 2. 現代瀏覽器進階屬性：預留穩定的捲軸溝槽寬度，切換分頁或展開選單零抖動 */
 }
-
+/*
 body {
     background-image: url("../../imageFiles/mainBG03.jpg");
     background-attachment: fixed;
@@ -11,7 +11,7 @@ body {
     background-position: center;
     background-repeat: no-repeat;
 }
-
+*/
 
 /* ==================== 現代化 Detail 卡片頂部頁籤 (.modern-card-tabs) ==================== */
 /* ==================== 清爽透明底極簡頁籤 (.modern-card-tabs) ==================== */
