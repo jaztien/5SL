@@ -455,6 +455,7 @@ $admJS=_fn_getCachedJsonData("../jsonFiles/adminpage.json");
       window.location.replace(getCurrentURI('','ad_list.php'));
     });
 
+    //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
     if (window.parent && typeof window.parent.treeviewCheck === 'function') {
         window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
     }

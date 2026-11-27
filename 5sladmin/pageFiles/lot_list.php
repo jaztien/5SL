@@ -8,9 +8,15 @@ $searchMode   = isset($_REQUEST['searchMode']) ? trim($_REQUEST['searchMode']) :
 $searchStatus = isset($_REQUEST['searchStatus']) ? trim($_REQUEST['searchStatus']) : '';
 
 $searchURI = "";
-if ($searchText !== '')   { $searchURI .= "&searchText=" . rawurlencode($searchText); }
-if ($searchMode !== '')   { $searchURI .= "&searchMode=" . rawurlencode($searchMode); }
-if ($searchStatus !== '') { $searchURI .= "&searchStatus=" . rawurlencode($searchStatus); }
+if ($searchText !== '') {
+  $searchURI .= "&searchText=" . rawurlencode($searchText);
+}
+if ($searchMode !== '') {
+  $searchURI .= "&searchMode=" . rawurlencode($searchMode);
+}
+if ($searchStatus !== '') {
+  $searchURI .= "&searchStatus=" . rawurlencode($searchStatus);
+}
 if (!empty($searchURI)) {
   $searchURI = substr($searchURI, 1);
 }
@@ -23,6 +29,7 @@ define('PAGE_ITEM', 'ITEM_ACT');
 define('PAGE_OPANEL', 1); // 1-新增
 define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
 define('EXPORT_OPANEL', 3); // 3-Excel+Print
+define('bkRedir', 1);
 
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
@@ -71,6 +78,7 @@ $statusMap = array(
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -88,6 +96,7 @@ $statusMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-pink">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -153,38 +162,38 @@ $statusMap = array(
                           $limPer   = (int)($row['lot_limit_period'] ?? 0);
                           $sta      = (int)($row['lot_status'] ?? 1);
                         ?>
-                        <tr style="cursor: pointer;" onclick="window.location.href='lot_detail.php?currID=<?php echo $lid; ?>';">
-                          <td class="text-center fw-bold"><?php echo $lid; ?></td>
-                          <td>
-                            <div class="fw-bold text-dark">
-                              <code class="me-1 text-danger">[<?php echo htmlspecialchars($row['lot_keycode']); ?>]</code>
-                              <?php echo htmlspecialchars($row['lot_title']); ?>
-                            </div>
-                            <?php if (!empty($row['lot_subtitle'])): ?>
-                              <div class="text-muted" style="font-size: 0.78rem;"><?php echo htmlspecialchars($row['lot_subtitle']); ?></div>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center"><?php echo $modeMap[$mode] ?? $modeMap; ?></td>
-                          <td style="font-size: 0.78rem;">
-                            <div>起：<?php echo !empty($row['lot_start_at']) ? substr($row['lot_start_at'], 0, 16) : '立即開始'; ?></div>
-                            <div class="text-muted">訖：<?php echo !empty($row['lot_end_at']) ? substr($row['lot_end_at'], 0, 16) : '常駐活動'; ?></div>
-                          </td>
-                          <td class="text-center">
-                            <?php if ($costPts > 0): ?>
-                              <span class="badge bg-warning text-dark"><?php echo number_format($costPts); ?> PTS / 次</span>
-                            <?php else: ?>
-                              <span class="badge bg-success-subtle text-success border border-success">免費參加</span>
-                            <?php endif; ?>
-                            <div class="text-muted mt-1" style="font-size: 0.72rem;">
-                              <?php echo ($limUser === 0) ? '不限次數' : ($periodMap[$limPer] . '限 ' . $limUser . ' 次'); ?>
-                            </div>
-                          </td>
-                          <td class="text-center">
-                            <span class="badge text-bg-light border text-dark"><?php echo (int)$row['item_cnt']; ?> 格位</span>
-                            <span class="badge text-bg-primary"><?php echo number_format((int)$row['total_won']); ?> 次抽出</span>
-                          </td>
-                          <td class="text-center"><?php echo $statusMap[$sta] ?? '<span class="badge text-bg-secondary">未知</span>'; ?></td>
-                        </tr>
+                          <tr style="cursor: pointer;" onclick="window.location.href='lot_detail.php?currID=<?php echo $lid; ?>';">
+                            <td class="text-center fw-bold"><?php echo $lid; ?></td>
+                            <td>
+                              <div class="fw-bold text-dark">
+                                <code class="me-1 text-danger">[<?php echo htmlspecialchars($row['lot_keycode']); ?>]</code>
+                                <?php echo htmlspecialchars($row['lot_title']); ?>
+                              </div>
+                              <?php if (!empty($row['lot_subtitle'])): ?>
+                                <div class="text-muted" style="font-size: 0.78rem;"><?php echo htmlspecialchars($row['lot_subtitle']); ?></div>
+                              <?php endif; ?>
+                            </td>
+                            <td class="text-center"><?php echo $modeMap[$mode] ?? $modeMap; ?></td>
+                            <td style="font-size: 0.78rem;">
+                              <div>起：<?php echo !empty($row['lot_start_at']) ? substr($row['lot_start_at'], 0, 16) : '立即開始'; ?></div>
+                              <div class="text-muted">訖：<?php echo !empty($row['lot_end_at']) ? substr($row['lot_end_at'], 0, 16) : '常駐活動'; ?></div>
+                            </td>
+                            <td class="text-center">
+                              <?php if ($costPts > 0): ?>
+                                <span class="badge bg-warning text-dark"><?php echo number_format($costPts); ?> PTS / 次</span>
+                              <?php else: ?>
+                                <span class="badge bg-success-subtle text-success border border-success">免費參加</span>
+                              <?php endif; ?>
+                              <div class="text-muted mt-1" style="font-size: 0.72rem;">
+                                <?php echo ($limUser === 0) ? '不限次數' : ($periodMap[$limPer] . '限 ' . $limUser . ' 次'); ?>
+                              </div>
+                            </td>
+                            <td class="text-center">
+                              <span class="badge text-bg-light border text-dark"><?php echo (int)$row['item_cnt']; ?> 格位</span>
+                              <span class="badge text-bg-primary"><?php echo number_format((int)$row['total_won']); ?> 次抽出</span>
+                            </td>
+                            <td class="text-center"><?php echo $statusMap[$sta] ?? '<span class="badge text-bg-secondary">未知</span>'; ?></td>
+                          </tr>
                         <?php endforeach; ?>
                       </tbody>
                     </table>
@@ -242,48 +251,66 @@ $statusMap = array(
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function doButAdd() { window.location.href = 'lot_detail.php?currID=0'; }
-  function doButReset() { window.location.replace('lot_list.php'); }
-  function doButSerach() {
-    const offcanvasEl = document.getElementById('offcanvasSearch');
-    if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
-  }
-  function doButExcel() { $('.buttons-excel').click(); }
-  function doButPrint() { $('.buttons-print').click(); }
-
-  $(document).ready(function() {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
-
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
-
-    var lotlistTB = datatableCreate('dataTable_lotlist');
-
-    $('#dataSearch').on('keyup search input paste cut', function() {
-      if ($(this).is(':focus') || this.value !== '') {
-        lotlistTB.search(this.value).draw();
-      }
-    });
-
-    $('#searchReset').click(function() {
-      if ($('#dataSearch').val() !== '') {
-        $('#dataSearch').val('');
-        lotlistTB.search('').draw();
-      } else {
-        window.location.replace('lot_list.php');
-      }
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+    function doReDirect() {
+      window.history.back();
     }
-  });
+
+    function doButAdd() {
+      window.location.href = 'lot_detail.php?currID=0';
+    }
+
+    function doButReset() {
+      window.location.replace('lot_list.php');
+    }
+
+    function doButSerach() {
+      const offcanvasEl = document.getElementById('offcanvasSearch');
+      if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+    }
+
+    function doButExcel() {
+      $('.buttons-excel').click();
+    }
+
+    function doButPrint() {
+      $('.buttons-print').click();
+    }
+
+    $(document).ready(function() {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      var lotlistTB = datatableCreate('dataTable_lotlist');
+
+      $('#dataSearch').on('keyup search input paste cut', function() {
+        if ($(this).is(':focus') || this.value !== '') {
+          lotlistTB.search(this.value).draw();
+        }
+      });
+
+      $('#searchReset').click(function() {
+        if ($('#dataSearch').val() !== '') {
+          $('#dataSearch').val('');
+          lotlistTB.search('').draw();
+        } else {
+          window.location.replace('lot_list.php');
+        }
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+      }
+    });
   </script>
 </body>
+
 </html>

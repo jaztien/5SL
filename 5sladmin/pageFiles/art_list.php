@@ -9,10 +9,18 @@ $searchCate   = isset($_REQUEST['searchCate']) ? trim($_REQUEST['searchCate']) :
 $searchStatus = isset($_REQUEST['searchStatus']) ? trim($_REQUEST['searchStatus']) : '';
 
 $searchURI = "";
-if ($searchText !== '')   { $searchURI .= "&searchText=" . rawurlencode($searchText); }
-if ($searchMode !== '')   { $searchURI .= "&searchMode=" . rawurlencode($searchMode); }
-if ($searchCate !== '')   { $searchURI .= "&searchCate=" . rawurlencode($searchCate); }
-if ($searchStatus !== '') { $searchURI .= "&searchStatus=" . rawurlencode($searchStatus); }
+if ($searchText !== '') {
+  $searchURI .= "&searchText=" . rawurlencode($searchText);
+}
+if ($searchMode !== '') {
+  $searchURI .= "&searchMode=" . rawurlencode($searchMode);
+}
+if ($searchCate !== '') {
+  $searchURI .= "&searchCate=" . rawurlencode($searchCate);
+}
+if ($searchStatus !== '') {
+  $searchURI .= "&searchStatus=" . rawurlencode($searchStatus);
+}
 if (!empty($searchURI)) {
   $searchURI = substr($searchURI, 1);
 }
@@ -25,6 +33,7 @@ define('PAGE_ITEM', 'ITEM_ARTI');
 define('PAGE_OPANEL', 1); // 1-新增
 define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
 define('EXPORT_OPANEL', 3); // 3-Excel+Print
+define('bkRedir', 1);
 
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
@@ -81,6 +90,7 @@ $statusMap = array(
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -98,6 +108,7 @@ $statusMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-blue">
   <div class="app-wrapper">
     <main class="app-main">
@@ -160,41 +171,41 @@ $statusMap = array(
                           $browse  = (int)($row['arti_guestbrowse'] ?? 1);
                           $sta     = (int)($row['arti_status'] ?? 1);
                         ?>
-                        <tr style="cursor: pointer;" onclick="window.location.href='art_detail.php?currID=<?php echo $aid; ?>';">
-                          <td class="text-center fw-bold"><?php echo $aid; ?></td>
-                          <td class="text-center"><?php echo $modeMap[$mode] ?? $modeMap; ?></td>
-                          <td>
-                            <div class="fw-bold text-dark">
-                              <?php if ((int)($row['arti_is_featured'] ?? 0) === 1): ?>
-                                <span class="badge text-bg-danger me-1">精選</span>
+                          <tr style="cursor: pointer;" onclick="window.location.href='art_detail.php?currID=<?php echo $aid; ?>';">
+                            <td class="text-center fw-bold"><?php echo $aid; ?></td>
+                            <td class="text-center"><?php echo $modeMap[$mode] ?? $modeMap; ?></td>
+                            <td>
+                              <div class="fw-bold text-dark">
+                                <?php if ((int)($row['arti_is_featured'] ?? 0) === 1): ?>
+                                  <span class="badge text-bg-danger me-1">精選</span>
+                                <?php endif; ?>
+                                <?php if (!empty($row['arti_keycode'])): ?>
+                                  <code class="me-1 text-primary">[<?php echo htmlspecialchars($row['arti_keycode']); ?>]</code>
+                                <?php endif; ?>
+                                <?php echo htmlspecialchars($row['arti_title'] ?? ''); ?>
+                              </div>
+                              <?php if (!empty($row['arti_subscript'])): ?>
+                                <div class="text-muted" style="font-size: 0.78rem;"><?php echo htmlspecialchars($row['arti_subscript']); ?></div>
                               <?php endif; ?>
-                              <?php if (!empty($row['arti_keycode'])): ?>
-                                <code class="me-1 text-primary">[<?php echo htmlspecialchars($row['arti_keycode']); ?>]</code>
+                            </td>
+                            <td style="font-size: 0.76rem;">
+                              <div class="fw-semibold text-dark"><?php echo $cateMap[$row['arti_cate']] ?? htmlspecialchars($row['arti_cate'] ?? '-'); ?></div>
+                              <?php if (!empty($row['arti_tpl_vars'])): ?>
+                                <div class="text-danger mt-1">變數：<code><?php echo htmlspecialchars($row['arti_tpl_vars']); ?></code></div>
                               <?php endif; ?>
-                              <?php echo htmlspecialchars($row['arti_title'] ?? ''); ?>
-                            </div>
-                            <?php if (!empty($row['arti_subscript'])): ?>
-                              <div class="text-muted" style="font-size: 0.78rem;"><?php echo htmlspecialchars($row['arti_subscript']); ?></div>
-                            <?php endif; ?>
-                          </td>
-                          <td style="font-size: 0.76rem;">
-                            <div class="fw-semibold text-dark"><?php echo $cateMap[$row['arti_cate']] ?? htmlspecialchars($row['arti_cate'] ?? '-'); ?></div>
-                            <?php if (!empty($row['arti_tpl_vars'])): ?>
-                              <div class="text-danger mt-1">變數：<code><?php echo htmlspecialchars($row['arti_tpl_vars']); ?></code></div>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center">
-                            <?php echo $browseMap[$browse] ?? $browseMap; ?>
-                            <?php if ($browse === 3 && (int)$row['arti_cost_pts'] > 0): ?>
-                              <div class="text-warning-emphasis fw-bold mt-1" style="font-size: 0.72rem;"><?php echo (int)$row['arti_cost_pts']; ?> PTS</div>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center" style="font-size: 0.75rem;">
-                            <div><?php echo !empty($row['arti_dateopen']) ? $row['arti_dateopen'] : '立即上架'; ?></div>
-                            <div class="text-muted">瀏覽：<?php echo number_format((int)($row['arti_visits'] ?? 0)); ?></div>
-                          </td>
-                          <td class="text-center"><?php echo $statusMap[$sta] ?? '<span class="badge text-bg-secondary">未知</span>'; ?></td>
-                        </tr>
+                            </td>
+                            <td class="text-center">
+                              <?php echo $browseMap[$browse] ?? $browseMap; ?>
+                              <?php if ($browse === 3 && (int)$row['arti_cost_pts'] > 0): ?>
+                                <div class="text-warning-emphasis fw-bold mt-1" style="font-size: 0.72rem;"><?php echo (int)$row['arti_cost_pts']; ?> PTS</div>
+                              <?php endif; ?>
+                            </td>
+                            <td class="text-center" style="font-size: 0.75rem;">
+                              <div><?php echo !empty($row['arti_dateopen']) ? $row['arti_dateopen'] : '立即上架'; ?></div>
+                              <div class="text-muted">瀏覽：<?php echo number_format((int)($row['arti_visits'] ?? 0)); ?></div>
+                            </td>
+                            <td class="text-center"><?php echo $statusMap[$sta] ?? '<span class="badge text-bg-secondary">未知</span>'; ?></td>
+                          </tr>
                         <?php endforeach; ?>
                       </tbody>
                     </table>
@@ -253,48 +264,66 @@ $statusMap = array(
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function doButAdd() { window.location.href = 'art_detail.php?currID=0'; }
-  function doButReset() { window.location.replace('art_list.php'); }
-  function doButSerach() {
-    const offcanvasEl = document.getElementById('offcanvasSearch');
-    if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
-  }
-  function doButExcel() { $('.buttons-excel').click(); }
-  function doButPrint() { $('.buttons-print').click(); }
-
-  $(document).ready(function() {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
-
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
-
-    var artlistTB = datatableCreate('dataTable_artlist');
-
-    $('#dataSearch').on('keyup search input paste cut', function() {
-      if ($(this).is(':focus') || this.value !== '') {
-        artlistTB.search(this.value).draw();
-      }
-    });
-
-    $('#searchReset').click(function() {
-      if ($('#dataSearch').val() !== '') {
-        $('#dataSearch').val('');
-        artlistTB.search('').draw();
-      } else {
-        window.location.replace('art_list.php');
-      }
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+    function doReDirect() {
+      window.history.back();
     }
-  });
+
+    function doButAdd() {
+      window.location.href = 'art_detail.php?currID=0';
+    }
+
+    function doButReset() {
+      window.location.replace('art_list.php');
+    }
+
+    function doButSerach() {
+      const offcanvasEl = document.getElementById('offcanvasSearch');
+      if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+    }
+
+    function doButExcel() {
+      $('.buttons-excel').click();
+    }
+
+    function doButPrint() {
+      $('.buttons-print').click();
+    }
+
+    $(document).ready(function() {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      var artlistTB = datatableCreate('dataTable_artlist');
+
+      $('#dataSearch').on('keyup search input paste cut', function() {
+        if ($(this).is(':focus') || this.value !== '') {
+          artlistTB.search(this.value).draw();
+        }
+      });
+
+      $('#searchReset').click(function() {
+        if ($('#dataSearch').val() !== '') {
+          $('#dataSearch').val('');
+          artlistTB.search('').draw();
+        } else {
+          window.location.replace('art_list.php');
+        }
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+      }
+    });
   </script>
 </body>
+
 </html>

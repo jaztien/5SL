@@ -1,0 +1,97 @@
+{
+  "1": {
+    "name": "驗證安全",
+    "codes": {
+      "101": { "module": "會員驗證", "tpl": "會員 {{operator}} 登入了系統！", "level": 1 },
+      "102": { "module": "會員驗證", "tpl": "會員 {{operator}} 登出了系統。", "level": 1 },
+      "103": { "module": "會員驗證", "tpl": "會員 {{operator}} 修改了登入密碼。", "level": 2 },
+      "104": { "module": "後台驗證", "tpl": "管理員 {{operator}} 登入後台管理系統。", "level": 1 }
+    }
+  },
+  "2": {
+    "name": "法律與警語確認",
+    "codes": {
+      "201": { "module": "聲明確認", "tpl": "會員 {{operator}} 閱讀並勾選同意《{{array1}}》（版本：{{array2}}）。", "level": 3 },
+      "202": { "module": "警語確認", "tpl": "會員 {{operator}} 確認已知悉重要警語【{{array1}}】（關聯項目：{{array2}}）。", "level": 3 },
+      "203": { "module": "退費聲明", "tpl": "會員 {{operator}} 於結帳/報名時確認同意《退費與改期規範》（訂單：{{array1}}）。", "level": 3 },
+      "204": { "module": "個資授權", "tpl": "會員 {{operator}} 確認同意《個人資料蒐集與行銷授權聲明》（狀態：{{array1}}）。", "level": 2 }
+    }
+  },
+  "3": {
+    "name": "紅利點數異動",
+    "codes": {
+      "301": { "module": "點數取得", "tpl": "會員 {{operator}} 獲得 {{array1}} 點 PTS 紅利（來源：{{array2}}，目前餘額：{{array3}} 點）。", "level": 2 },
+      "302": { "module": "點數折抵", "tpl": "會員 {{operator}} 於訂單 {{array1}} 折抵使用 {{array2}} 點 PTS（折抵前：{{array3}} 點，折抵後：{{array4}} 點）。", "level": 3 },
+      "303": { "module": "點數退還", "tpl": "因訂單 {{array1}} 取消/退費，系統退還 {{array2}} 點 PTS 給會員 {{operator}}（目前餘額：{{array3}} 點）。", "level": 2 },
+      "304": { "module": "點數到期", "tpl": "會員 {{operator}} 有 {{array1}} 點 PTS 因屆期自動失效扣除（批次：{{array2}}）。", "level": 2 },
+      "305": { "module": "點數人工調整", "tpl": "管理員 {{operator}} 手動調整會員 #{{array1}} 點數（異動：{{array2}} 點，原因：{{array3}}）。", "level": 3 }
+    }
+  },
+  "4": {
+    "name": "禮品與優惠券",
+    "codes": {
+      "401": { "module": "禮品領取", "tpl": "會員 {{operator}} 領取優惠券/禮品【{{array1}}】（領收編號：{{array2}}）。", "level": 2 },
+      "402": { "module": "優惠券核銷", "tpl": "會員 {{operator}} 於訂單 {{array1}} 使用優惠券【{{array2}}】，折抵 NT$ {{array3}}。", "level": 2 },
+      "403": { "module": "禮品兌換", "tpl": "會員 {{operator}} 兌換實體/數位禮品【{{array1}}】（消耗點數：{{array2}} 點，單號：{{array3}}）。", "level": 2 }
+    }
+  },
+  "5": {
+    "name": "數位內容交付",
+    "codes": {
+      "501": { "module": "數位下載", "tpl": "會員 {{operator}} 下載了課程講義/禮品檔案【{{array1}}】（所屬課程/禮品：{{array2}}）。", "level": 2 },
+      "502": { "module": "影音觀看", "tpl": "會員 {{operator}} 開啟線上課程影音【{{array1}}】（課程：{{array2}}）。", "level": 1 }
+    }
+  },
+  "6": {
+    "name": "課程報名與異動",
+    "codes": {
+      "601": { "module": "課程報名", "tpl": "會員 {{operator}} 報名課程 #{{array1}} 第 {{array2}} 梯次（訂單：{{array3}}）。", "level": 2 },
+      "602": { "module": "課程改期", "tpl": "會員 {{operator}} 申請將課程【{{array1}}】由原梯次 #{{array2}} 改期至梯次 #{{array3}}。", "level": 3 },
+      "603": { "module": "課程請假", "tpl": "會員 {{operator}} 提交課程【{{array1}}】第 {{array2}} 堂課請假申請（原因：{{array3}}）。", "level": 2 },
+      "604": { "module": "課程報到", "tpl": "會員 {{operator}} 完成課程【{{array1}}】第 {{array2}} 堂課簽到（方式：{{array3}}）。", "level": 1 },
+      "605": { "module": "結業證書", "tpl": "系統核發課程【{{array1}}】結業證書給會員 {{operator}}（證書編號：{{array2}}）。", "level": 2 }
+    }
+  },
+  "7": {
+    "name": "訂單與退費",
+    "codes": {
+      "701": { "module": "訂單金流", "tpl": "會員 {{operator}} 完成訂單 {{array1}} 線上付款，實付金額 NT$ {{array2}}。", "level": 2 },
+      "702": { "module": "售後退費", "tpl": "會員 {{operator}} 針對訂單 {{array1}} 提交退費申請（工單：{{array2}}）。", "level": 2 },
+      "703": { "module": "訂單取消", "tpl": "會員 {{operator}} 自行取消未付款訂單 {{array1}}（原金額：NT$ {{array2}}）。", "level": 2 },
+      "704": { "module": "退費核准", "tpl": "管理員 {{operator}} 核准訂單 {{array1}} 退費（退款金額：NT$ {{array2}}，傳票：{{array3}}）。", "level": 3 }
+    }
+  },
+  "8": {
+    "name": "財會與發票",
+    "codes": {
+      "801": { "module": "財會發票", "tpl": "管理員 {{operator}} 開立電子發票 {{array1}}（關聯訂單：{{array2}}）。", "level": 2 },
+      "802": { "module": "發票折讓", "tpl": "管理員 {{operator}} 針對發票 {{array1}} 開立部分退費折讓單（折讓金額：NT$ {{array2}}）。", "level": 3 },
+      "803": { "module": "財會發票", "tpl": "管理員 {{operator}} 作廢電子發票 {{array1}} 並執行退費（金額：{{array2}}）。", "level": 3 },
+      "804": { "module": "財會總帳", "tpl": "管理員 {{operator}} 登錄會計傳票 {{array1}}（{{array2}} NT$ {{array3}}）。", "level": 2 },
+      "805": { "module": "傳票作廢", "tpl": "管理員 {{operator}} 作廢沖銷會計傳票 {{array1}}（原金額：NT$ {{array2}}）。", "level": 3 }
+    }
+  },
+  "9": {
+    "name": "服務工單",
+    "codes": {
+      "901": { "module": "工單立案", "tpl": "會員 {{operator}} 建立服務工單 {{array1}}（分類：{{array2}}，主旨：{{array3}}）。", "level": 1 },
+      "902": { "module": "服務工單", "tpl": "管理員 {{operator}} 回覆服務工單 {{array1}}（狀態更新為：{{array2}}）。", "level": 1 },
+      "903": { "module": "工單結案", "tpl": "管理員 {{operator}} 將服務工單 {{array1}} 標記為已結案。", "level": 1 }
+    }
+  },
+  "10": {
+    "name": "會員個資與狀態",
+    "codes": {
+      "1001": { "module": "個資修改", "tpl": "會員 {{operator}} 更新個人基本資料（變更欄位：{{array1}}）。", "level": 2 },
+      "1002": { "module": "個資查閱", "tpl": "管理員 {{operator}} 開啟檢視會員 #{{array1}} 之完整加密個資檔案。", "level": 2 },
+      "1003": { "module": "會員停權/啟用", "tpl": "管理員 {{operator}} 將會員 #{{array1}} 帳號狀態變更為【{{array2}}】（原因：{{array3}}）。", "level": 3 }
+    }
+  },
+  "11": {
+    "name": "系統維運",
+    "codes": {
+      "1101": { "module": "系統維運", "tpl": "最高管理員 {{operator}} 執行資料庫維護指令【{{array1}}】，共處理 {{array2}} 張資料表。", "level": 3 },
+      "1102": { "module": "系統維運", "tpl": "執行操作紀錄定期清理（{{operator}}），共清除 {{array1}} 筆超過 {{array2}} 天之歷史紀錄。", "level": 3 }
+    }
+  }
+}

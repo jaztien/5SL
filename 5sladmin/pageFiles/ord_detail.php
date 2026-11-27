@@ -31,14 +31,14 @@ if (empty($res)) {
 }
 
 $mbID = (int)$res['mb_id'];
-$decBuyerName  = !empty($res['mb_name']) ? _fn_secure_crypto($res['mb_name'], 'de') : '會員 #' . $mbID;
-$decBuyerEmail = !empty($res['mb_email']) ? _fn_secure_crypto($res['mb_email'], 'de') : '';
-$decBuyerPhone = !empty($res['mb_cellphone']) ? _fn_secure_crypto($res['mb_cellphone'], 'de') : '';
+$decBuyerName  = !empty($res['mb_name']) ? _fn_safe_dec_name($res['mb_name']) : '會員 #' . $mbID;
+$decBuyerEmail = !empty($res['mb_email']) ? _fn_safe_dec_name($res['mb_email']) : '';
+$decBuyerPhone = !empty($res['mb_cellphone']) ? _fn_safe_dec_name($res['mb_cellphone']) : '';
 
 // 收件人加密欄位解密（若有填寫）
-$decRecvName  = !empty($res['ord_receiver_name'])  ? _fn_secure_crypto($res['ord_receiver_name'], 'de')  : $decBuyerName;
-$decRecvPhone = !empty($res['ord_receiver_phone']) ? _fn_secure_crypto($res['ord_receiver_phone'], 'de') : $decBuyerPhone;
-$decRecvAddr  = !empty($res['ord_receiver_addr'])  ? _fn_secure_crypto($res['ord_receiver_addr'], 'de')  : '';
+$decRecvName  = !empty($res['ord_receiver_name'])  ? _fn_safe_dec_name($res['ord_receiver_name'])  : $decBuyerName;
+$decRecvPhone = !empty($res['ord_receiver_phone']) ? _fn_safe_dec_name($res['ord_receiver_phone']) : $decBuyerPhone;
+$decRecvAddr  = !empty($res['ord_receiver_addr'])  ? _fn_safe_dec_name($res['ord_receiver_addr'])  : '';
 
 // 查詢訂單品項明細 (fsl_order_items)
 $itemRows = DB->query("
@@ -69,6 +69,7 @@ $currOrdSta = (int)($res['ord_status'] ?? 1);
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -86,6 +87,7 @@ $currOrdSta = (int)($res['ord_status'] ?? 1);
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-gray">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -208,20 +210,20 @@ $currOrdSta = (int)($res['ord_status'] ?? 1);
                               $iType = (int)$it['ordi_type'];
                               $iName = ($iType === 1) ? ($it['course_title'] ?? '課程方案') : ($it['merch_title'] ?? '商品項目');
                             ?>
-                            <tr>
-                              <td class="text-center">
-                                <?php echo ($iType === 1) ? '<span class="badge text-bg-success">課程方案</span>' : '<span class="badge text-bg-warning">周邊商品</span>'; ?>
-                              </td>
-                              <td>
-                                <span class="fw-bold"><?php echo htmlspecialchars($iName); ?></span>
-                                <?php if (!empty($it['merch_sku'])): ?>
-                                  <code class="ms-1 text-muted">[<?php echo htmlspecialchars($it['merch_sku']); ?>]</code>
-                                <?php endif; ?>
-                              </td>
-                              <td class="text-end">NT$ <?php echo number_format((float)$it['ordi_unit_price']); ?></td>
-                              <td class="text-center fw-bold"><?php echo (int)$it['ordi_qty']; ?></td>
-                              <td class="text-end fw-bold">NT$ <?php echo number_format((float)$it['ordi_subtotal']); ?></td>
-                            </tr>
+                              <tr>
+                                <td class="text-center">
+                                  <?php echo ($iType === 1) ? '<span class="badge text-bg-success">課程方案</span>' : '<span class="badge text-bg-warning">周邊商品</span>'; ?>
+                                </td>
+                                <td>
+                                  <span class="fw-bold"><?php echo htmlspecialchars($iName); ?></span>
+                                  <?php if (!empty($it['merch_sku'])): ?>
+                                    <code class="ms-1 text-muted">[<?php echo htmlspecialchars($it['merch_sku']); ?>]</code>
+                                  <?php endif; ?>
+                                </td>
+                                <td class="text-end">NT$ <?php echo number_format((float)$it['ordi_unit_price']); ?></td>
+                                <td class="text-center fw-bold"><?php echo (int)$it['ordi_qty']; ?></td>
+                                <td class="text-end fw-bold">NT$ <?php echo number_format((float)$it['ordi_subtotal']); ?></td>
+                              </tr>
                             <?php endforeach; ?>
                           </tbody>
                         </table>
@@ -229,7 +231,10 @@ $currOrdSta = (int)($res['ord_status'] ?? 1);
 
                       <form id="form_tabMenu1" action="../funcFiles/ord_act_func.php" method="post" data-func="func_ord_updateShipping" novalidate>
                         <div class="row g-3">
-                          <div class="col-12"><div class="hr-more">收件人資訊與物流配送管理</div><hr class="my-1"></div>
+                          <div class="col-12">
+                            <div class="hr-more">收件人資訊與物流配送管理</div>
+                            <hr class="my-1">
+                          </div>
 
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">收件人姓名 (加密儲存)</label>
@@ -259,17 +264,17 @@ $currOrdSta = (int)($res['ord_status'] ?? 1);
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">物流配送業者</label>
                             <input type="text" class="form-control" id="ord_shipping_carrier" name="ord_shipping_carrier"
-                                   value="<?php echo htmlspecialchars($res['ord_shipping_carrier'] ?? ''); ?>" placeholder="如：黑貓宅急便 / 郵局 / 7-11店到店">
+                              value="<?php echo htmlspecialchars($res['ord_shipping_carrier'] ?? ''); ?>" placeholder="如：黑貓宅急便 / 郵局 / 7-11店到店">
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">物流追蹤單號 (Tracking No.)</label>
                             <input type="text" class="form-control" id="ord_shipping_no" name="ord_shipping_no"
-                                   value="<?php echo htmlspecialchars($res['ord_shipping_no'] ?? ''); ?>" placeholder="輸入包裹追蹤碼">
+                              value="<?php echo htmlspecialchars($res['ord_shipping_no'] ?? ''); ?>" placeholder="輸入包裹追蹤碼">
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">管理者內部處理備註</label>
                             <input type="text" class="form-control" name="ord_admin_note"
-                                   value="<?php echo htmlspecialchars($res['ord_admin_note'] ?? ''); ?>" placeholder="內部出貨或客服備註">
+                              value="<?php echo htmlspecialchars($res['ord_admin_note'] ?? ''); ?>" placeholder="內部出貨或客服備註">
                           </div>
                         </div>
                       </form>
@@ -311,9 +316,9 @@ $currOrdSta = (int)($res['ord_status'] ?? 1);
                               <span class="text-muted d-block">發票開立狀態</span>
                               <strong class="fs-6">
                                 <?php
-                                  if ($iSta === 1) echo '<span class="text-success">已正式開立</span>';
-                                  elseif ($iSta === 2) echo '<span class="text-danger">已作廢 / 折讓</span>';
-                                  else echo '<span class="text-warning-emphasis">待付款未開立</span>';
+                                if ($iSta === 1) echo '<span class="text-success">已正式開立</span>';
+                                elseif ($iSta === 2) echo '<span class="text-danger">已作廢 / 折讓</span>';
+                                else echo '<span class="text-warning-emphasis">待付款未開立</span>';
                                 ?>
                               </strong>
                             </div>
@@ -335,15 +340,15 @@ $currOrdSta = (int)($res['ord_status'] ?? 1);
                               <span class="text-muted d-block mb-1">買受人發票類型與載具歸戶資訊</span>
                               <strong>
                                 <?php
-                                  if ((int)($res['inv_type'] ?? 1) === 2) {
-                                    echo '三聯式公司發票｜統一編號：' . htmlspecialchars($res['inv_tax_id'] ?? '') . '｜抬頭：' . htmlspecialchars($res['inv_company_title'] ?? '');
-                                  } elseif ((int)($res['inv_carrier_type'] ?? 0) === 1) {
-                                    echo '二聯式個人電子發票｜手機條碼載具：' . htmlspecialchars($res['inv_carrier_code'] ?? '');
-                                  } elseif ((int)($res['inv_carrier_type'] ?? 0) === 2) {
-                                    echo '二聯式個人電子發票｜自然人憑證載具：' . htmlspecialchars($res['inv_carrier_code'] ?? '');
-                                  } else {
-                                    echo '二聯式個人電子發票｜人生第五季會員載具（系統自動託管兌獎）';
-                                  }
+                                if ((int)($res['inv_type'] ?? 1) === 2) {
+                                  echo '三聯式公司發票｜統一編號：' . htmlspecialchars($res['inv_tax_id'] ?? '') . '｜抬頭：' . htmlspecialchars($res['inv_company_title'] ?? '');
+                                } elseif ((int)($res['inv_carrier_type'] ?? 0) === 1) {
+                                  echo '二聯式個人電子發票｜手機條碼載具：' . htmlspecialchars($res['inv_carrier_code'] ?? '');
+                                } elseif ((int)($res['inv_carrier_type'] ?? 0) === 2) {
+                                  echo '二聯式個人電子發票｜自然人憑證載具：' . htmlspecialchars($res['inv_carrier_code'] ?? '');
+                                } else {
+                                  echo '二聯式個人電子發票｜人生第五季會員載具（系統自動託管兌獎）';
+                                }
                                 ?>
                               </strong>
                             </div>
@@ -358,7 +363,7 @@ $currOrdSta = (int)($res['ord_status'] ?? 1);
                           <i class="bi bi-shield-check fs-2 d-block mb-2 text-success"></i>
                           此訂單目前無任何售後退費或換貨申請紀錄。
                         </div>
-                      <?php else:
+                        <?php else:
                         $refTypeMap = array(1 => '全額退費取消', 2 => '部分品項退費', 3 => '商品瑕疵換貨');
                         $refStaMap  = array(
                           1 => '<span class="badge text-bg-danger">1 - 待審核</span>',
@@ -369,61 +374,62 @@ $currOrdSta = (int)($res['ord_status'] ?? 1);
                         foreach ($refundRows as $rf):
                           $rfId  = (int)$rf['ref_id'];
                           $rfSta = (int)$rf['ref_status'];
-                      ?>
-                        <div class="card border mb-3 shadow-sm">
-                          <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center gap-2">
-                            <div>
-                              <span class="fw-bold text-danger me-2"><?php echo htmlspecialchars($rf['ref_no']); ?></span>
-                              <span class="badge bg-dark me-1"><?php echo $refTypeMap[(int)$rf['ref_type']] ?? '售後申請'; ?></span>
-                              <?php echo $refStaMap[$rfSta] ?? ''; ?>
+                        ?>
+                          <div class="card border mb-3 shadow-sm">
+                            <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center gap-2">
+                              <div>
+                                <span class="fw-bold text-danger me-2"><?php echo htmlspecialchars($rf['ref_no']); ?></span>
+                                <span class="badge bg-dark me-1"><?php echo $refTypeMap[(int)$rf['ref_type']] ?? '售後申請'; ?></span>
+                                <?php echo $refStaMap[$rfSta] ?? ''; ?>
+                              </div>
+                              <span class="small text-muted">申請時間：<?php echo $rf['ref_created']; ?></span>
                             </div>
-                            <span class="small text-muted">申請時間：<?php echo $rf['ref_created']; ?></span>
-                          </div>
-                          <div class="card-body small">
-                            <div class="row g-3 mb-3">
-                              <div class="col-md-4">
-                                <span class="text-muted d-block">申請退費金額</span>
-                                <strong class="fs-6 text-danger">NT$ <?php echo number_format((float)$rf['ref_amount']); ?></strong>
+                            <div class="card-body small">
+                              <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                  <span class="text-muted d-block">申請退費金額</span>
+                                  <strong class="fs-6 text-danger">NT$ <?php echo number_format((float)$rf['ref_amount']); ?></strong>
+                                </div>
+                                <div class="col-md-4">
+                                  <span class="text-muted d-block">退還折抵 PTS 點數</span>
+                                  <strong class="text-warning-emphasis"><?php echo number_format((int)$rf['ref_pts_return']); ?> PTS</strong>
+                                </div>
+                                <div class="col-md-4">
+                                  <span class="text-muted d-block">處理完成時間</span>
+                                  <strong><?php echo $rf['ref_processed_at'] ?? '尚未結案'; ?></strong>
+                                </div>
+                                <div class="col-12">
+                                  <span class="text-muted d-block">會員申請原因說明：</span>
+                                  <div class="p-2 bg-light border rounded-2 mt-1"><?php echo nl2br(htmlspecialchars($rf['ref_reason'] ?? '未填寫原因')); ?></div>
+                                </div>
                               </div>
-                              <div class="col-md-4">
-                                <span class="text-muted d-block">退還折抵 PTS 點數</span>
-                                <strong class="text-warning-emphasis"><?php echo number_format((int)$rf['ref_pts_return']); ?> PTS</strong>
-                              </div>
-                              <div class="col-md-4">
-                                <span class="text-muted d-block">處理完成時間</span>
-                                <strong><?php echo $rf['ref_processed_at'] ?? '尚未結案'; ?></strong>
-                              </div>
-                              <div class="col-12">
-                                <span class="text-muted d-block">會員申請原因說明：</span>
-                                <div class="p-2 bg-light border rounded-2 mt-1"><?php echo nl2br(htmlspecialchars($rf['ref_reason'] ?? '未填寫原因')); ?></div>
-                              </div>
-                            </div>
 
-                            <div class="row g-2 align-items-end">
-                              <div class="col-md-7">
-                                <label class="form-label small fw-bold">審核回覆與客服備註 (將同步通知會員)</label>
-                                <input type="text" class="form-control form-control-sm" id="refReply_<?php echo $rfId; ?>"
-                                       value="<?php echo htmlspecialchars($rf['ref_admin_reply'] ?? ''); ?>" placeholder="輸入審核說明、退貨寄回地址或退款匯款資訊...">
-                              </div>
-                              <div class="col-md-5 d-flex flex-wrap justify-content-md-end gap-1">
-                                <?php if ($rfSta === 1): ?>
-                                  <button type="button" class="btn btn-warning btn-sm fw-bold btn-refund-act" data-rfid="<?php echo $rfId; ?>" data-act="approve">
-                                    <i class="bi bi-check-lg me-1"></i>核准退換
-                                  </button>
-                                  <button type="button" class="btn btn-outline-secondary btn-sm btn-refund-act" data-rfid="<?php echo $rfId; ?>" data-act="reject">
-                                    <i class="bi bi-x-lg me-1"></i>駁回
-                                  </button>
-                                <?php endif; ?>
-                                <?php if (in_array($rfSta, array(1, 2), true)): ?>
-                                  <button type="button" class="btn btn-success btn-sm fw-bold btn-refund-act" data-rfid="<?php echo $rfId; ?>" data-act="complete">
-                                    <i class="bi bi-cash-coin me-1"></i>完成退款並退點
-                                  </button>
-                                <?php endif; ?>
+                              <div class="row g-2 align-items-end">
+                                <div class="col-md-7">
+                                  <label class="form-label small fw-bold">審核回覆與客服備註 (將同步通知會員)</label>
+                                  <input type="text" class="form-control form-control-sm" id="refReply_<?php echo $rfId; ?>"
+                                    value="<?php echo htmlspecialchars($rf['ref_admin_reply'] ?? ''); ?>" placeholder="輸入審核說明、退貨寄回地址或退款匯款資訊...">
+                                </div>
+                                <div class="col-md-5 d-flex flex-wrap justify-content-md-end gap-1">
+                                  <?php if ($rfSta === 1): ?>
+                                    <button type="button" class="btn btn-warning btn-sm fw-bold btn-refund-act" data-rfid="<?php echo $rfId; ?>" data-act="approve">
+                                      <i class="bi bi-check-lg me-1"></i>核准退換
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm btn-refund-act" data-rfid="<?php echo $rfId; ?>" data-act="reject">
+                                      <i class="bi bi-x-lg me-1"></i>駁回
+                                    </button>
+                                  <?php endif; ?>
+                                  <?php if (in_array($rfSta, array(1, 2), true)): ?>
+                                    <button type="button" class="btn btn-success btn-sm fw-bold btn-refund-act" data-rfid="<?php echo $rfId; ?>" data-act="complete">
+                                      <i class="bi bi-cash-coin me-1"></i>完成退款並退點
+                                    </button>
+                                  <?php endif; ?>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      <?php endforeach; endif; ?>
+                      <?php endforeach;
+                      endif; ?>
                     </div>
                   </div>
                 </div>
@@ -441,112 +447,120 @@ $currOrdSta = (int)($res['ord_status'] ?? 1);
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function doReDirect() { window.history.back(); }
+    function doReDirect() {
+      window.history.back();
+    }
 
-  function doButSave() {
-    var frm = $('#form_' + $('.tab-pane.active').prop("id"));
-    if (!frm.length) return false;
-    ajaxPOST(frm);
-  }
+    function doButSave() {
+      var frm = $('#form_' + $('.tab-pane.active').prop("id"));
+      if (!frm.length) return false;
+      ajaxPOST(frm);
+    }
 
-  function doButReset() { location.reload(true); }
+    function doButReset() {
+      location.reload(true);
+    }
 
-  function ajaxPOST(frm) {
-    var $frm = frm || $('#form_tabMenu1');
-    var datA = getFormObjects($frm);
+    function ajaxPOST(frm) {
+      var $frm = frm || $('#form_tabMenu1');
+      var datA = getFormObjects($frm);
 
-    $.ajax({
-      type: 'post',
-      url: '../funcFiles/ord_act_func.php',
-      data: {
-        'arrDatA': datA,
-        'formAcce': $frm.data('func'),
-        'token': getTokenVal(),
-        'ordID': '<?php echo $ordID; ?>'
-      },
-      dataType: 'json',
-      success: function(data) {
-        if (window.parent && window.parent.toastr) {
+      $.ajax({
+        type: 'post',
+        url: '../funcFiles/ord_act_func.php',
+        data: {
+          'arrDatA': datA,
+          'formAcce': $frm.data('func'),
+          'token': getTokenVal(),
+          'ordID': '<?php echo $ordID; ?>'
+        },
+        dataType: 'json',
+        success: function(data) {
+          if (window.parent && window.parent.toastr) {
+            window.parent.toastr[data['msgType']](data['msgStr']);
+          }
+          if (data['RTN'] == 1) {
+            $('#sideOrdStatus').text($('#ord_status option:selected').text());
+            if (typeof doSerialize === 'function') doSerialize();
+          }
+        },
+        error: function() {
+          if (window.parent && window.parent.toastr) {
+            window.parent.toastr['error']('系統讀寫錯誤，請聯絡管理人員！');
+          }
+        }
+      });
+    }
+
+    $(document).ready(function() {
+      // 1. 確認收款並立即開立電子發票
+      $('#btnIssueInvoice').on('click', function() {
+        if (!confirm('確定此筆訂單款項已入帳，並立即開立電子發票嗎？')) return;
+        $.post('../funcFiles/ord_act_func.php', {
+          'formAcce': 'func_ord_issueInvoice',
+          'token': getTokenVal(),
+          'ordID': '<?php echo $ordID; ?>'
+        }, function(data) {
           window.parent.toastr[data['msgType']](data['msgStr']);
-        }
-        if (data['RTN'] == 1) {
-          $('#sideOrdStatus').text($('#ord_status option:selected').text());
-          if (typeof doSerialize === 'function') doSerialize();
-        }
-      },
-      error: function() {
-        if (window.parent && window.parent.toastr) {
-          window.parent.toastr['error']('系統讀寫錯誤，請聯絡管理人員！');
-        }
+          if (data['RTN'] == 1) location.reload(true);
+        }, 'json');
+      });
+
+      // 2. 執行電子發票作廢 / 折讓
+      $('#btnVoidInvoice').on('click', function() {
+        if (!confirm('警告：確定要將此張電子發票執行「作廢 / 折讓」嗎？此動作無法復原！')) return;
+        $.post('../funcFiles/ord_act_func.php', {
+          'formAcce': 'func_ord_voidInvoice',
+          'token': getTokenVal(),
+          'ordID': '<?php echo $ordID; ?>'
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) location.reload(true);
+        }, 'json');
+      });
+
+      // 3. 售後退換貨審核處理 (approve / reject / complete)
+      $(document).on('click', '.btn-refund-act', function() {
+        const rfId = $(this).data('rfid');
+        const act = $(this).data('act');
+        const reply = $('#refReply_' + rfId).val().trim();
+        const msgMap = {
+          'approve': '確定核准此筆售後退換貨申請嗎？',
+          'reject': '確定駁回此筆售後退換貨申請嗎？',
+          'complete': '確定已完成退款/換貨？系統將自動退還折抵的 PTS 點數並同步作廢發票！'
+        };
+        if (!confirm(msgMap[act] || '確定執行此操作？')) return;
+
+        $.post('../funcFiles/ord_act_func.php', {
+          'formAcce': 'func_ord_refundAction',
+          'token': getTokenVal(),
+          'ordID': '<?php echo $ordID; ?>',
+          'refID': rfId,
+          'refundAct': act,
+          'adminReply': reply
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) location.reload(true);
+        }, 'json');
+      });
+
+      $('li.prevLink').on('click', function() {
+        window.location.replace(getCurrentURI('', 'ord_list.php'));
+      });
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
       }
     });
-  }
-
-  $(document).ready(function() {
-    // 1. 確認收款並立即開立電子發票
-    $('#btnIssueInvoice').on('click', function() {
-      if (!confirm('確定此筆訂單款項已入帳，並立即開立電子發票嗎？')) return;
-      $.post('../funcFiles/ord_act_func.php', {
-        'formAcce': 'func_ord_issueInvoice',
-        'token': getTokenVal(),
-        'ordID': '<?php echo $ordID; ?>'
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) location.reload(true);
-      }, 'json');
-    });
-
-    // 2. 執行電子發票作廢 / 折讓
-    $('#btnVoidInvoice').on('click', function() {
-      if (!confirm('警告：確定要將此張電子發票執行「作廢 / 折讓」嗎？此動作無法復原！')) return;
-      $.post('../funcFiles/ord_act_func.php', {
-        'formAcce': 'func_ord_voidInvoice',
-        'token': getTokenVal(),
-        'ordID': '<?php echo $ordID; ?>'
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) location.reload(true);
-      }, 'json');
-    });
-
-    // 3. 售後退換貨審核處理 (approve / reject / complete)
-    $(document).on('click', '.btn-refund-act', function() {
-      const rfId  = $(this).data('rfid');
-      const act   = $(this).data('act');
-      const reply = $('#refReply_' + rfId).val().trim();
-      const msgMap = {
-        'approve': '確定核准此筆售後退換貨申請嗎？',
-        'reject': '確定駁回此筆售後退換貨申請嗎？',
-        'complete': '確定已完成退款/換貨？系統將自動退還折抵的 PTS 點數並同步作廢發票！'
-      };
-      if (!confirm(msgMap[act] || '確定執行此操作？')) return;
-
-      $.post('../funcFiles/ord_act_func.php', {
-        'formAcce': 'func_ord_refundAction',
-        'token': getTokenVal(),
-        'ordID': '<?php echo $ordID; ?>',
-        'refID': rfId,
-        'refundAct': act,
-        'adminReply': reply
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) location.reload(true);
-      }, 'json');
-    });
-
-    $('li.prevLink').on('click', function() { window.location.replace(getCurrentURI('', 'ord_list.php')); });
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
-    }
-  });
   </script>
 </body>
+
 </html>

@@ -57,7 +57,7 @@ switch ($formAcce) {
       $formData['mb_cellphone_hash'] =  _fn_hash_hmac($formData['mb_cellphone']);
     }
     if(!empty($formData['mb_email'])){
-      $formData['mb_email'] =  _fn_secure_crypto($formData['mb_email']);
+      $formData['mb_email'] =  _fn_secure_crypto($formData['']);
       $formData['mb_email_hash'] =  _fn_hash_hmac($formData['mb_email']);
     }
     $formData['mb_birth'] = !empty($formData['mb_birth']) ? $formData['mb_birth'] : null;

@@ -65,7 +65,7 @@ if ($giftID > 0) {
     foreach ($mList as $ml) {
       $memberOpts[] = array(
         'mb_id' => (int)$ml['mb_id'],
-        'label' => '#' . $ml['mb_id'] . ' - ' . _fn_secure_crypto($ml['mb_name'], 'de') . ' (' . _fn_secure_crypto($ml['mb_email'], 'de') . ')'
+        'label' => '#' . $ml['mb_id'] . ' - ' . _fn_safe_dec_name($ml['mb_name']) . ' (' . _fn_safe_dec_name($ml['mb_email']) . ')'
       );
     }
   }
@@ -76,13 +76,14 @@ if ($giftID > 0) {
     WHERE erule_target_type = 2 AND erule_target_id = ?
     ORDER BY erule_sort ASC, erule_id ASC
   ", array($giftID));
-  if (!is_array($ruleRows)) $ruleRows = array();  
+  if (!is_array($ruleRows)) $ruleRows = array();
 }
 
 $typeLabels = array(1 => '純紅利點數', 2 => '商品贈品 (實體/數位)', 3 => '複合大禮包 (點數+商品)', 4 => '課程折抵券');
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -97,26 +98,29 @@ $typeLabels = array(1 => '純紅利點數', 2 => '商品贈品 (實體/數位)',
   <link rel="stylesheet" href="../pluginFiles/bootstrap-icons/bootstrap-icons.min.css">
   <link rel="stylesheet" href="../pluginFiles/datatables3/datatables.min.css">
   <link rel="stylesheet" href="../cssFiles/adminlte.css">
-  <link rel="stylesheet" href="../pluginFiles/cropper/cropper.css"/>
+  <link rel="stylesheet" href="../pluginFiles/cropper/cropper.css" />
   <link rel="stylesheet" href="../cssFiles/5sl.fileupload.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 
-<style>
-  .gift-cover-area.image_area label[for^="cropUploadImage"] {
-    border-radius: 12px !important;
-    border: 1px solid #dee2e6;
-  }
-  .gift-cover-area.image_area label[for^="cropUploadImage"] img.imgEDicon {
-    border-radius: 12px !important;
-  }
-  .merch-pick-box {
-    max-height: 210px;
-    overflow-y: auto;
-    background-color: #ffffff;
-  }
-</style>
+  <style>
+    .gift-cover-area.image_area label[for^="cropUploadImage"] {
+      border-radius: 12px !important;
+      border: 1px solid #dee2e6;
+    }
+
+    .gift-cover-area.image_area label[for^="cropUploadImage"] img.imgEDicon {
+      border-radius: 12px !important;
+    }
+
+    .merch-pick-box {
+      max-height: 210px;
+      overflow-y: auto;
+      background-color: #ffffff;
+    }
+  </style>
 </head>
+
 <body class="bg-body-tertiary theme-red">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -157,7 +161,7 @@ $typeLabels = array(1 => '純紅利點數', 2 => '商品贈品 (實體/數位)',
                       <i class="nav-icon bi bi-trash3 fs-4 cropImgTrash <?php echo $cropImgDisplay; ?>" title="刪除圖像"></i>
                       <form method="post">
                         <label for="cropUploadImage">
-                          <img id="avatarImage" name="avatarImage" class="img-fluid imgEDicon" src="<?php echo $mainimgpath; ?>" width="200" alt="禮品展示圖" title="禮品展示圖"/>
+                          <img id="avatarImage" name="avatarImage" class="img-fluid imgEDicon" src="<?php echo $mainimgpath; ?>" width="200" alt="禮品展示圖" title="禮品展示圖" />
                           <div class="overlay" style="border-radius: 0 0 12px 12px;">
                             <div class="overtext"><?php echo !empty($giftID) ? "更改" : "新增"; ?>禮品圖示</div>
                           </div>
@@ -208,16 +212,16 @@ $typeLabels = array(1 => '純紅利點數', 2 => '商品贈品 (實體/數位)',
                       </a>
                     </li>
                     <?php if ($giftID > 0): ?>
-                    <li class="nav-item" role="presentation">
-                      <a class="nav-link" href="#tabMenu2" data-index="2" data-bs-toggle="tab" data-topbut="0" role="tab">
-                        <i class="bi bi-send-check me-1"></i>主動派發與領收寄送紀錄 (<?php echo count($recordRows); ?>)
-                      </a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                      <a class="nav-link" href="#tabMenu3" data-index="3" data-bs-toggle="tab" data-topbut="0" role="tab">
-                        <i class="bi bi-shield-check me-1"></i>領收條件規則 (<?php echo count($ruleRows); ?>)
-                      </a>
-                    </li>
+                      <li class="nav-item" role="presentation">
+                        <a class="nav-link" href="#tabMenu2" data-index="2" data-bs-toggle="tab" data-topbut="0" role="tab">
+                          <i class="bi bi-send-check me-1"></i>主動派發與領收寄送紀錄 (<?php echo count($recordRows); ?>)
+                        </a>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <a class="nav-link" href="#tabMenu3" data-index="3" data-bs-toggle="tab" data-topbut="0" role="tab">
+                          <i class="bi bi-shield-check me-1"></i>領收條件規則 (<?php echo count($ruleRows); ?>)
+                        </a>
+                      </li>
                     <?php endif; ?>
 
                   </ul>
@@ -233,12 +237,12 @@ $typeLabels = array(1 => '純紅利點數', 2 => '商品贈品 (實體/數位)',
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">禮品調用代碼 (gift_code)</label>
                             <input type="text" class="form-control text-uppercase" id="gift_code" name="gift_code"
-                                   value="<?php echo htmlspecialchars($res['gift_code'] ?? ''); ?>" placeholder="如：WELCOME_2026">
+                              value="<?php echo htmlspecialchars($res['gift_code'] ?? ''); ?>" placeholder="如：WELCOME_2026">
                           </div>
                           <div class="col-md-5">
                             <label class="form-label small fw-bold">禮品名稱 <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="gift_title" name="gift_title" required
-                                   value="<?php echo htmlspecialchars($res['gift_title'] ?? ''); ?>" placeholder="如：第五季向光啟程禮">
+                              value="<?php echo htmlspecialchars($res['gift_title'] ?? ''); ?>" placeholder="如：第五季向光啟程禮">
                           </div>
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">啟用狀態</label>
@@ -260,25 +264,28 @@ $typeLabels = array(1 => '純紅利點數', 2 => '商品贈品 (實體/數位)',
                           <div class="col-md-8">
                             <label class="form-label small fw-bold">禮品副標說明</label>
                             <input type="text" class="form-control" name="gift_subtitle"
-                                   value="<?php echo htmlspecialchars($res['gift_subtitle'] ?? ''); ?>" placeholder="顯示於會員禮品卡片上的溫馨說明">
+                              value="<?php echo htmlspecialchars($res['gift_subtitle'] ?? ''); ?>" placeholder="顯示於會員禮品卡片上的溫馨說明">
                           </div>
 
-                          <div class="col-12"><div class="hr-more">獎勵內容配置（點數 / 折抵金 / 關聯商品多選）</div><hr class="my-1"></div>
+                          <div class="col-12">
+                            <div class="hr-more">獎勵內容配置（點數 / 折抵金 / 關聯商品多選）</div>
+                            <hr class="my-1">
+                          </div>
 
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">內含紅利點數 (PTS)</label>
                             <input type="number" class="form-control" name="gift_pts" min="0" step="1"
-                                   value="<?php echo (int)($res['gift_pts'] ?? 0); ?>">
+                              value="<?php echo (int)($res['gift_pts'] ?? 0); ?>">
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">折抵金額 (USD，折價券用)</label>
                             <input type="number" class="form-control" name="gift_discount_usd" min="0" step="0.01"
-                                   value="<?php echo number_format((float)($res['gift_discount_usd'] ?? 0), 2, '.', ''); ?>">
+                              value="<?php echo number_format((float)($res['gift_discount_usd'] ?? 0), 2, '.', ''); ?>">
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">領取後有效天數 (0=永久)</label>
                             <input type="number" class="form-control" id="gift_valid_days" name="gift_valid_days" min="0" step="1"
-                                   value="<?php echo (int)($res['gift_valid_days'] ?? 30); ?>">
+                              value="<?php echo (int)($res['gift_valid_days'] ?? 30); ?>">
                           </div>
 
                           <!-- 多選關聯商品 (gift_merch_ids) -->
@@ -289,30 +296,34 @@ $typeLabels = array(1 => '純紅利點數', 2 => '商品贈品 (實體/數位)',
                             <div class="border rounded-2 p-2 merch-pick-box">
                               <?php if (empty($merchOptions)): ?>
                                 <div class="text-muted small py-2 text-center">目前尚無上架商品可關聯</div>
-                              <?php else: foreach ($merchOptions as $mo):
-                                $midStr = (string)$mo['merch_id'];
-                                $isChk  = in_array($midStr, $selectedMerchIds, true) ? 'checked' : '';
-                                $mTypeTag = ((int)$mo['merch_type'] === 2) ? '數位' : '實體';
-                              ?>
-                              <div class="form-check py-1 border-bottom">
-                                <input class="form-check-input chk-gift-merch notSubmit" type="checkbox" value="<?php echo $midStr; ?>" id="gm_<?php echo $midStr; ?>" <?php echo $isChk; ?>>
-                                <label class="form-check-label small d-flex justify-content-between align-items-center" for="gm_<?php echo $midStr; ?>">
-                                  <span>
-                                    <code class="text-primary me-1">[#<?php echo $midStr; ?> <?php echo htmlspecialchars($mo['merch_sku'] ?? ''); ?>]</code>
-                                    <strong><?php echo htmlspecialchars($mo['merch_title']); ?></strong>
-                                    <span class="badge bg-light text-dark border ms-1"><?php echo $mTypeTag; ?></span>
-                                  </span>
-                                  <span class="text-muted" style="font-size: 0.72rem;">
-                                    庫存：<?php echo ((int)$mo['merch_stock'] < 0) ? '無限' : $mo['merch_stock']; ?>
-                                  </span>
-                                </label>
-                              </div>
-                              <?php endforeach; endif; ?>
+                                <?php else: foreach ($merchOptions as $mo):
+                                  $midStr = (string)$mo['merch_id'];
+                                  $isChk  = in_array($midStr, $selectedMerchIds, true) ? 'checked' : '';
+                                  $mTypeTag = ((int)$mo['merch_type'] === 2) ? '數位' : '實體';
+                                ?>
+                                  <div class="form-check py-1 border-bottom">
+                                    <input class="form-check-input chk-gift-merch notSubmit" type="checkbox" value="<?php echo $midStr; ?>" id="gm_<?php echo $midStr; ?>" <?php echo $isChk; ?>>
+                                    <label class="form-check-label small d-flex justify-content-between align-items-center" for="gm_<?php echo $midStr; ?>">
+                                      <span>
+                                        <code class="text-primary me-1">[#<?php echo $midStr; ?> <?php echo htmlspecialchars($mo['merch_sku'] ?? ''); ?>]</code>
+                                        <strong><?php echo htmlspecialchars($mo['merch_title']); ?></strong>
+                                        <span class="badge bg-light text-dark border ms-1"><?php echo $mTypeTag; ?></span>
+                                      </span>
+                                      <span class="text-muted" style="font-size: 0.72rem;">
+                                        庫存：<?php echo ((int)$mo['merch_stock'] < 0) ? '無限' : $mo['merch_stock']; ?>
+                                      </span>
+                                    </label>
+                                  </div>
+                              <?php endforeach;
+                              endif; ?>
                             </div>
                             <input type="hidden" name="gift_merch_ids" id="gift_merch_ids" value="<?php echo htmlspecialchars($res['gift_merch_ids'] ?? ''); ?>">
                           </div>
 
-                          <div class="col-12"><div class="hr-more">領取對象規則與發放名額上限</div><hr class="my-1"></div>
+                          <div class="col-12">
+                            <div class="hr-more">領取對象規則與發放名額上限</div>
+                            <hr class="my-1">
+                          </div>
 
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">領取對象規則</label>
@@ -334,177 +345,180 @@ $typeLabels = array(1 => '純紅利點數', 2 => '商品贈品 (實體/數位)',
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">總發放名額上限 (-1=無限量)</label>
                             <input type="number" class="form-control" name="gift_total_quota" min="-1" step="1"
-                                   value="<?php echo (int)($res['gift_total_quota'] ?? -1); ?>">
+                              value="<?php echo (int)($res['gift_total_quota'] ?? -1); ?>">
                           </div>
                           <div class="col-12">
                             <label class="form-label small fw-bold">指定領取對象會員 ID (規則=2時生效，逗號分隔如 1,2,15)</label>
                             <input type="text" class="form-control" name="gift_target_mbids"
-                                   value="<?php echo htmlspecialchars($res['gift_target_mbids'] ?? ''); ?>" placeholder="例如：1,5,12">
+                              value="<?php echo htmlspecialchars($res['gift_target_mbids'] ?? ''); ?>" placeholder="例如：1,5,12">
                           </div>
                         </div>
                       </form>
                     </div>
                     <!-- Tab 2: 主動派發禮品與會員領收物流追蹤 (fsl_gift_records) -->
                     <?php if ($giftID > 0): ?>
-                    <div class="tab-pane fade" id="tabMenu2" role="tabpanel">
-                      <form id="form_issue_gift" class="row g-2 align-items-end p-3 bg-light border rounded-3 mb-4">
-                        <div class="col-md-5">
-                          <label class="form-label small fw-bold">選擇派發對象會員 <span class="text-danger">*</span></label>
-                          <select class="form-select form-select-sm" id="issueMbId" required>
-                            <option value="">-- 請選擇有效會員 --</option>
-                            <?php foreach ($memberOpts as $mo): ?>
-                              <option value="<?php echo $mo['mb_id']; ?>"><?php echo htmlspecialchars($mo['label']); ?></option>
-                            <?php endforeach; ?>
-                          </select>
-                        </div>
-                        <div class="col-md-3">
-                          <label class="form-label small fw-bold">取得來源標記</label>
-                          <select class="form-select form-select-sm" id="issueSourceType">
-                            <option value="4">4 - 系統後台主動派發</option>
-                            <option value="1">1 - 優惠卡片兌換</option>
-                            <option value="3">3 - 完課小禮物</option>
-                            <option value="5">5 - 任務獎勵補發</option>
-                          </select>
-                        </div>
-                        <div class="col-md-2">
-                          <label class="form-label small fw-bold">派發份數</label>
-                          <input type="number" class="form-control form-control-sm" id="issueQty" min="1" max="10" value="1">
-                        </div>
-                        <div class="col-md-2 d-grid">
-                          <button type="submit" class="btn btn-danger btn-sm fw-bold"><i class="bi bi-send-plus-fill me-1"></i>立即派發</button>
-                        </div>
-                      </form>
+                      <div class="tab-pane fade" id="tabMenu2" role="tabpanel">
+                        <form id="form_issue_gift" class="row g-2 align-items-end p-3 bg-light border rounded-3 mb-4">
+                          <div class="col-md-5">
+                            <label class="form-label small fw-bold">選擇派發對象會員 <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-sm" id="issueMbId" required>
+                              <option value="">-- 請選擇有效會員 --</option>
+                              <?php foreach ($memberOpts as $mo): ?>
+                                <option value="<?php echo $mo['mb_id']; ?>"><?php echo htmlspecialchars($mo['label']); ?></option>
+                              <?php endforeach; ?>
+                            </select>
+                          </div>
+                          <div class="col-md-3">
+                            <label class="form-label small fw-bold">取得來源標記</label>
+                            <select class="form-select form-select-sm" id="issueSourceType">
+                              <option value="4">4 - 系統後台主動派發</option>
+                              <option value="1">1 - 優惠卡片兌換</option>
+                              <option value="3">3 - 完課小禮物</option>
+                              <option value="5">5 - 任務獎勵補發</option>
+                            </select>
+                          </div>
+                          <div class="col-md-2">
+                            <label class="form-label small fw-bold">派發份數</label>
+                            <input type="number" class="form-control form-control-sm" id="issueQty" min="1" max="10" value="1">
+                          </div>
+                          <div class="col-md-2 d-grid">
+                            <button type="submit" class="btn btn-danger btn-sm fw-bold"><i class="bi bi-send-plus-fill me-1"></i>立即派發</button>
+                          </div>
+                        </form>
 
-                      <div class="table-responsive">
-                        <table id="dataTable_giftrec" class="table table-striped table-sm table-bordered table-hover align-middle w-100 small" data-search="1">
-                          <thead class="table-light text-nowrap">
-                            <tr>
-                              <th>流水ID</th>
-                              <th>領收會員</th>
-                              <th class="text-center">來源</th>
-                              <th class="text-center">領收狀態</th>
-                              <th>到期日 / 領取時間</th>
-                              <th>實體寄送物流備註 (grec_shipping_note)</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <?php
-                            $srcMap = array(1 => '優惠卡片', 2 => '幸運輪盤', 3 => '完課小禮', 4 => '系統派發', 5 => '任務獎勵');
-                            $recStaMap = array(
-                              0 => '<span class="badge text-bg-warning">0 - 待領取(未拆封)</span>',
-                              1 => '<span class="badge text-bg-success">1 - 已領取/入帳</span>',
-                              2 => '<span class="badge text-bg-primary">2 - 實體寄送中</span>',
-                              3 => '<span class="badge text-bg-secondary">3 - 已使用完畢</span>',
-                              9 => '<span class="badge text-bg-dark">9 - 已逾期失效</span>'
-                            );
-                            foreach ($recordRows as $rr):
-                              $rid      = (int)$rr['grec_id'];
-                              $decName  = !empty($rr['mb_name']) ? _fn_secure_crypto($rr['mb_name'], 'de') : '會員 #' . $rr['mb_id'];
-                              $decEmail = !empty($rr['mb_email']) ? _fn_secure_crypto($rr['mb_email'], 'de') : '';
-                              $rSrc     = (int)($rr['grec_source_type'] ?? 4);
-                              $rSta     = (int)($rr['grec_status'] ?? 0);
-                            ?>
-                            <tr>
-                              <td class="fw-bold">#<?php echo $rid; ?></td>
-                              <td>
-                                <a href="mb_detail.php?currID=<?php echo (int)$rr['mb_id']; ?>" class="fw-bold text-decoration-none"><?php echo htmlspecialchars($decName); ?></a>
-                                <div class="text-muted" style="font-size: 0.72rem;"><?php echo htmlspecialchars($decEmail); ?></div>
-                              </td>
-                              <td class="text-center"><span class="badge bg-light text-dark border"><?php echo $srcMap[$rSrc] ?? '系統'; ?></span></td>
-                              <td class="text-center"><?php echo $recStaMap[$rSta] ?? $recStaMap; ?></td>
-                              <td style="font-size: 0.74rem;">
-                                <div>派發：<?php echo substr($rr['grec_created'], 0, 16); ?></div>
-                                <div class="text-muted">到期：<?php echo !empty($rr['grec_expired_at']) ? substr($rr['grec_expired_at'], 0, 10) : '永久有效'; ?></div>
-                              </td>
-                              <td>
-                                <div class="input-group input-group-sm">
-                                  <input type="text" class="form-control inp-ship-note" id="shipNote_<?php echo $rid; ?>"
-                                         value="<?php echo htmlspecialchars($rr['grec_shipping_note'] ?? ''); ?>" placeholder="填寫物流單號或備註...">
-                                  <button type="button" class="btn btn-outline-primary btn-save-ship" data-rid="<?php echo $rid; ?>" title="儲存並標記實體寄送中">
-                                    <i class="bi bi-truck"></i>
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                            <?php endforeach; ?>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                    <!-- Tab 3: 禮品領收與發送資格條件規則 (共用 fsl_eligibility_rules, target_type=2) -->
-                    <div class="tab-pane fade" id="tabMenu3" role="tabpanel">
-                      <form id="form_add_gift_rule" class="row g-2 align-items-end p-3 bg-light border rounded-3 mb-4">
-                        <div class="col-md-3">
-                          <label class="form-label small fw-bold">條件判斷類型</label>
-                          <select class="form-select form-select-sm" id="gRuleType">
-                            <option value="gender">會員性別 (F / M)</option>
-                            <option value="time_range">領取時間區間 (起,迄)</option>
-                            <option value="birthday_month">當月壽星限定 (1)</option>
-                            <option value="city">居住城市代碼 (如 01,02)</option>
-                            <option value="mb_level">會員等級門檻 (1/2/3)</option>
-                            <option value="total_spent">累計消費金額門檻</option>
-                            <option value="id_last_digit">身分證尾數 (如 1,3,5,7,9)</option>
-                          </select>
-                        </div>
-                        <div class="col-md-2">
-                          <label class="form-label small fw-bold">比對運算子</label>
-                          <select class="form-select form-select-sm" id="gRuleOp">
-                            <option value="=">= (等於)</option>
-                            <option value="IN">IN (包含於清單)</option>
-                            <option value="BETWEEN">BETWEEN (區間)</option>
-                            <option value=">=">&gt;= (大於等於)</option>
-                            <option value="<=">&lt;= (小於等於)</option>
-                            <option value="!=">!= (不等於)</option>
-                          </select>
-                        </div>
-                        <div class="col-md-3">
-                          <label class="form-label small fw-bold">條件值 <span class="text-danger">*</span></label>
-                          <input type="text" class="form-control form-control-sm" id="gRuleVal" placeholder="如：1 或 2026-11-01 00:00:00,2026-12-31 23:59:59" required>
-                        </div>
-                        <div class="col-md-3">
-                          <label class="form-label small fw-bold">不符條件提示警語 <span class="text-danger">*</span></label>
-                          <input type="text" class="form-control form-control-sm" id="gRuleMsg" placeholder="顯示給會員的提示訊息" required>
-                        </div>
-                        <div class="col-md-1 d-grid">
-                          <button type="submit" class="btn btn-danger btn-sm fw-bold" title="新增領收規則"><i class="bi bi-plus-lg"></i></button>
-                        </div>
-                      </form>
-
-                      <div class="table-responsive">
-                        <table class="table table-sm table-bordered align-middle w-100 small">
-                          <thead class="table-light">
-                            <tr>
-                              <th>ID</th>
-                              <th>條件類型</th>
-                              <th>運算子</th>
-                              <th>比對值</th>
-                              <th>不符資格提示警語</th>
-                              <th class="text-center" style="width: 70px;">刪除</th>
-                            </tr>
-                          </thead>
-                          <tbody id="gRuleTbody">
-                            <?php if (empty($ruleRows)): ?>
-                              <tr><td colspan="6" class="text-center text-muted py-3">尚未設定額外領收限制條件（依 Tab 1 基本對象規則發放）</td></tr>
-                            <?php else: foreach ($ruleRows as $rl):
-                              $rid = (int)$rl['erule_id'];
-                            ?>
-                              <tr id="gRuleRow_<?php echo $rid; ?>">
-                                <td><?php echo $rid; ?></td>
-                                <td class="fw-bold text-danger"><?php echo htmlspecialchars($rl['erule_type']); ?></td>
-                                <td><code><?php echo htmlspecialchars($rl['erule_operator']); ?></code></td>
-                                <td><?php echo htmlspecialchars($rl['erule_val']); ?></td>
-                                <td><?php echo htmlspecialchars($rl['erule_fail_msg']); ?></td>
-                                <td class="text-center">
-                                  <button type="button" class="btn btn-outline-danger btn-xs py-0 px-2 btn-del-gift-rule" data-rid="<?php echo $rid; ?>">
-                                    <i class="bi bi-trash3"></i>
-                                  </button>
-                                </td>
+                        <div class="table-responsive">
+                          <table id="dataTable_giftrec" class="table table-striped table-sm table-bordered table-hover align-middle w-100 small" data-search="1">
+                            <thead class="table-light text-nowrap">
+                              <tr>
+                                <th>流水ID</th>
+                                <th>領收會員</th>
+                                <th class="text-center">來源</th>
+                                <th class="text-center">領收狀態</th>
+                                <th>到期日 / 領取時間</th>
+                                <th>實體寄送物流備註 (grec_shipping_note)</th>
                               </tr>
-                            <?php endforeach; endif; ?>
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              <?php
+                              $srcMap = array(1 => '優惠卡片', 2 => '幸運輪盤', 3 => '完課小禮', 4 => '系統派發', 5 => '任務獎勵');
+                              $recStaMap = array(
+                                0 => '<span class="badge text-bg-warning">0 - 待領取(未拆封)</span>',
+                                1 => '<span class="badge text-bg-success">1 - 已領取/入帳</span>',
+                                2 => '<span class="badge text-bg-primary">2 - 實體寄送中</span>',
+                                3 => '<span class="badge text-bg-secondary">3 - 已使用完畢</span>',
+                                9 => '<span class="badge text-bg-dark">9 - 已逾期失效</span>'
+                              );
+                              foreach ($recordRows as $rr):
+                                $rid      = (int)$rr['grec_id'];
+                                $decName  = !empty($rr['mb_name']) ? _fn_safe_dec_name($rr['mb_name']) : '會員 #' . $rr['mb_id'];
+                                $decEmail = !empty($rr['mb_email']) ? _fn_safe_dec_name($rr['mb_email']) : '';
+                                $rSrc     = (int)($rr['grec_source_type'] ?? 4);
+                                $rSta     = (int)($rr['grec_status'] ?? 0);
+                              ?>
+                                <tr>
+                                  <td class="fw-bold">#<?php echo $rid; ?></td>
+                                  <td>
+                                    <a href="mb_detail.php?currID=<?php echo (int)$rr['mb_id']; ?>" class="fw-bold text-decoration-none"><?php echo htmlspecialchars($decName); ?></a>
+                                    <div class="text-muted" style="font-size: 0.72rem;"><?php echo htmlspecialchars($decEmail); ?></div>
+                                  </td>
+                                  <td class="text-center"><span class="badge bg-light text-dark border"><?php echo $srcMap[$rSrc] ?? '系統'; ?></span></td>
+                                  <td class="text-center"><?php echo $recStaMap[$rSta] ?? $recStaMap; ?></td>
+                                  <td style="font-size: 0.74rem;">
+                                    <div>派發：<?php echo substr($rr['grec_created'], 0, 16); ?></div>
+                                    <div class="text-muted">到期：<?php echo !empty($rr['grec_expired_at']) ? substr($rr['grec_expired_at'], 0, 10) : '永久有效'; ?></div>
+                                  </td>
+                                  <td>
+                                    <div class="input-group input-group-sm">
+                                      <input type="text" class="form-control inp-ship-note" id="shipNote_<?php echo $rid; ?>"
+                                        value="<?php echo htmlspecialchars($rr['grec_shipping_note'] ?? ''); ?>" placeholder="填寫物流單號或備註...">
+                                      <button type="button" class="btn btn-outline-primary btn-save-ship" data-rid="<?php echo $rid; ?>" title="儲存並標記實體寄送中">
+                                        <i class="bi bi-truck"></i>
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              <?php endforeach; ?>
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                    </div>
+                      <!-- Tab 3: 禮品領收與發送資格條件規則 (共用 fsl_eligibility_rules, target_type=2) -->
+                      <div class="tab-pane fade" id="tabMenu3" role="tabpanel">
+                        <form id="form_add_gift_rule" class="row g-2 align-items-end p-3 bg-light border rounded-3 mb-4">
+                          <div class="col-md-3">
+                            <label class="form-label small fw-bold">條件判斷類型</label>
+                            <select class="form-select form-select-sm" id="gRuleType">
+                              <option value="gender">會員性別 (F / M)</option>
+                              <option value="time_range">領取時間區間 (起,迄)</option>
+                              <option value="birthday_month">當月壽星限定 (1)</option>
+                              <option value="city">居住城市代碼 (如 01,02)</option>
+                              <option value="mb_level">會員等級門檻 (1/2/3)</option>
+                              <option value="total_spent">累計消費金額門檻</option>
+                              <option value="id_last_digit">身分證尾數 (如 1,3,5,7,9)</option>
+                            </select>
+                          </div>
+                          <div class="col-md-2">
+                            <label class="form-label small fw-bold">比對運算子</label>
+                            <select class="form-select form-select-sm" id="gRuleOp">
+                              <option value="=">= (等於)</option>
+                              <option value="IN">IN (包含於清單)</option>
+                              <option value="BETWEEN">BETWEEN (區間)</option>
+                              <option value=">=">&gt;= (大於等於)</option>
+                              <option value="<=">&lt;= (小於等於)</option>
+                              <option value="!=">!= (不等於)</option>
+                            </select>
+                          </div>
+                          <div class="col-md-3">
+                            <label class="form-label small fw-bold">條件值 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="gRuleVal" placeholder="如：1 或 2026-11-01 00:00:00,2026-12-31 23:59:59" required>
+                          </div>
+                          <div class="col-md-3">
+                            <label class="form-label small fw-bold">不符條件提示警語 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="gRuleMsg" placeholder="顯示給會員的提示訊息" required>
+                          </div>
+                          <div class="col-md-1 d-grid">
+                            <button type="submit" class="btn btn-danger btn-sm fw-bold" title="新增領收規則"><i class="bi bi-plus-lg"></i></button>
+                          </div>
+                        </form>
+
+                        <div class="table-responsive">
+                          <table class="table table-sm table-bordered align-middle w-100 small">
+                            <thead class="table-light">
+                              <tr>
+                                <th>ID</th>
+                                <th>條件類型</th>
+                                <th>運算子</th>
+                                <th>比對值</th>
+                                <th>不符資格提示警語</th>
+                                <th class="text-center" style="width: 70px;">刪除</th>
+                              </tr>
+                            </thead>
+                            <tbody id="gRuleTbody">
+                              <?php if (empty($ruleRows)): ?>
+                                <tr>
+                                  <td colspan="6" class="text-center text-muted py-3">尚未設定額外領收限制條件（依 Tab 1 基本對象規則發放）</td>
+                                </tr>
+                                <?php else: foreach ($ruleRows as $rl):
+                                  $rid = (int)$rl['erule_id'];
+                                ?>
+                                  <tr id="gRuleRow_<?php echo $rid; ?>">
+                                    <td><?php echo $rid; ?></td>
+                                    <td class="fw-bold text-danger"><?php echo htmlspecialchars($rl['erule_type']); ?></td>
+                                    <td><code><?php echo htmlspecialchars($rl['erule_operator']); ?></code></td>
+                                    <td><?php echo htmlspecialchars($rl['erule_val']); ?></td>
+                                    <td><?php echo htmlspecialchars($rl['erule_fail_msg']); ?></td>
+                                    <td class="text-center">
+                                      <button type="button" class="btn btn-outline-danger btn-xs py-0 px-2 btn-del-gift-rule" data-rid="<?php echo $rid; ?>">
+                                        <i class="bi bi-trash3"></i>
+                                      </button>
+                                    </td>
+                                  </tr>
+                              <?php endforeach;
+                              endif; ?>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
                     <?php endif; ?>
                   </div>
                 </div>
@@ -523,193 +537,206 @@ $typeLabels = array(1 => '純紅利點數', 2 => '商品贈品 (實體/數位)',
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/fileupload.js<?php echo '?t='.time(); ?>"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/fileupload.js<?php echo '?t=' . time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function syncGiftMerchIds() {
-    const ids = [];
-    $('.chk-gift-merch:checked').each(function() { ids.push($(this).val()); });
-    $('#gift_merch_ids').val(ids.join(','));
-  }
-
-  function validateBS5Form($form) {
-    if (!$form || $form.length === 0) return true;
-    const formEl = $form[0];
-    const isValid = formEl.checkValidity();
-    formEl.classList.add('was-validated');
-    return isValid;
-  }
-
-  function doReDirect() { window.history.back(); }
-
-  function doButSave() {
-    syncGiftMerchIds();
-    var frm = $('#form_' + $('.tab-pane.active').prop("id"));
-    if (!frm.length) return false;
-    if (!validateBS5Form(frm)) {
-      window.parent.toastr['warning']('請檢查標示紅框的必填或格式錯誤欄位！');
-      return false;
+    function syncGiftMerchIds() {
+      const ids = [];
+      $('.chk-gift-merch:checked').each(function() {
+        ids.push($(this).val());
+      });
+      $('#gift_merch_ids').val(ids.join(','));
     }
-    ajaxPOST(frm);
-  }
 
-  function doButDelete() {
-    if (0 == parseInt('<?php echo $giftID; ?>')) return false;
-    $.post('../funcFiles/gift_act_func.php', {
-      'formAcce': 'func_gift_delete',
-      'token': getTokenVal(),
-      'giftID': '<?php echo $giftID; ?>'
-    }, function(data) {
-      if (data['RTN'] == 1) {
-        window.parent.toastr['success'](data['msgStr']);
-        window.location.replace("gift_list.php");
-      } else {
-        window.parent.toastr['error'](data['msgStr'] || '刪除失敗');
+    function validateBS5Form($form) {
+      if (!$form || $form.length === 0) return true;
+      const formEl = $form[0];
+      const isValid = formEl.checkValidity();
+      formEl.classList.add('was-validated');
+      return isValid;
+    }
+
+    function doReDirect() {
+      window.history.back();
+    }
+
+
+    function doButSave() {
+      syncGiftMerchIds();
+      var frm = $('#form_' + $('.tab-pane.active').prop("id"));
+      if (!frm.length) return false;
+      if (!validateBS5Form(frm)) {
+        window.parent.toastr['warning']('請檢查標示紅框的必填或格式錯誤欄位！');
+        return false;
       }
-    }, 'json');
-  }
+      ajaxPOST(frm);
+    }
 
-  function doButReset() { location.reload(true); }
-
-  function ajaxPOST(frm) {
-    var $frm = frm || $('#form_tabMenu1');
-    var accE = (0 == parseInt('<?php echo $giftID; ?>')) ? 'func_gift_addnew' : $frm.data('func');
-    var datA = getFormObjects($frm);
-    var imgBase64 = (typeof cropImage64 !== 'undefined' && cropImage64 !== '')
-                    ? cropImage64
-                    : ($('#main_crop_area').data('cropImage64') || '');
-
-    $.ajax({
-      type: 'post',
-      url: '../funcFiles/gift_act_func.php',
-      data: {
-        'arrDatA': datA,
-        'formAcce': accE,
-        'imgUp': imgBase64,
+    function doButDelete() {
+      if (0 == parseInt('<?php echo $giftID; ?>')) return false;
+      $.post('../funcFiles/gift_act_func.php', {
+        'formAcce': 'func_gift_delete',
         'token': getTokenVal(),
         'giftID': '<?php echo $giftID; ?>'
-      },
-      dataType: 'json',
-      success: function(data) {
-        console.log(data);
-        if (accE == 'func_gift_addnew' && data['RTN'] == 1) {
-          window.parent.toastr['success'](data['msgStr']);
-          window.location.replace("gift_detail.php?currID=" + data['newID']);
-          return false;
-        }
-        if (window.parent && window.parent.toastr) {
-          window.parent.toastr[data['msgType']](data['msgStr']);
-        }
+      }, function(data) {
         if (data['RTN'] == 1) {
-          $frm.removeClass('was-validated');
-          $('#sideGiftTitle').text($('#gift_title').val() || '未命名禮品');
-          $('#sideGiftType').text($('#gift_type option:selected').text().replace(/^\d+\s*-\s*/, ''));
-          $('#sideGiftCode').text($('#gift_code').val() ? $('#gift_code').val().toUpperCase() : '-');
-          const stVal = $('#gift_status').val();
-          $('#sideGiftStatus')
-            .text(stVal === '1' ? '啟用發放中' : '停用關閉')
-            .toggleClass('text-success fw-bold', stVal === '1')
-            .toggleClass('text-secondary', stVal !== '1');
-          if (data['upTime']) $('#sideGiftUpdated').text(data['upTime']);
-          cropImage64 = '';
-          if (typeof doSerialize === 'function') doSerialize();
+          window.parent.toastr['success'](data['msgStr']);
+          window.location.replace("gift_list.php");
+        } else {
+          window.parent.toastr['error'](data['msgStr'] || '刪除失敗');
         }
-      }
-    });
-  }
-
-  $(document).ready(function() {
-    if ($('#dataTable_giftrec').length) datatableCreate('dataTable_giftrec');
-
-    $('.chk-gift-merch').on('change', function() {
-      syncGiftMerchIds();
-      if (window.parent && window.parent.$) {
-        window.parent.$('#topBut_save').addClass('active');
-      }
-    });
-
-    // 後台主動派發禮品給指定會員
-    $('#form_issue_gift').on('submit', function(e) {
-      e.preventDefault();
-      const mbId = $('#issueMbId').val();
-      const src  = $('#issueSourceType').val();
-      const qty  = parseInt($('#issueQty').val(), 10) || 1;
-      if (!mbId) {
-        window.parent.toastr['warning']('請選擇要派發的會員！');
-        return;
-      }
-      $.post('../funcFiles/gift_act_func.php', {
-        'formAcce': 'func_gift_issue',
-        'token': getTokenVal(),
-        'giftID': '<?php echo $giftID; ?>',
-        'mbID': mbId,
-        'sourceType': src,
-        'qty': qty
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) location.reload(true);
       }, 'json');
-    });
-
-    // 更新實體贈品寄送物流單號
-    $(document).on('click', '.btn-save-ship', function() {
-      const rid  = $(this).data('rid');
-      const note = $('#shipNote_' + rid).val().trim();
-      $.post('../funcFiles/gift_act_func.php', {
-        'formAcce': 'func_gift_updateShipping',
-        'token': getTokenVal(),
-        'grecID': rid,
-        'shippingNote': note
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1 && note !== '') location.reload(true);
-      }, 'json');
-    });
-
-    // 新增 / 刪除禮品領收資格規則
-    $('#form_add_gift_rule').on('submit', function(e) {
-      e.preventDefault();
-      $.post('../funcFiles/gift_act_func.php', {
-        'formAcce': 'func_gift_rule_add',
-        'token': getTokenVal(),
-        'giftID': '<?php echo $giftID; ?>',
-        'erule_type': $('#gRuleType').val(),
-        'erule_operator': $('#gRuleOp').val(),
-        'erule_val': $('#gRuleVal').val().trim(),
-        'erule_fail_msg': $('#gRuleMsg').val().trim()
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) location.reload(true);
-      }, 'json');
-    });
-
-    $(document).on('click', '.btn-del-gift-rule', function() {
-      if (!confirm('確定刪除此禮品領收限制條件？')) return;
-      const rid = $(this).data('rid');
-      $.post('../funcFiles/gift_act_func.php', {
-        'formAcce': 'func_gift_rule_delete',
-        'token': getTokenVal(),
-        'eruleID': rid
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) $('#gRuleRow_' + rid).fadeOut(250, function() { $(this).remove(); });
-      }, 'json');
-    });
-
-
-
-
-    $('li.prevLink').on('click', function() { window.location.replace(getCurrentURI('', 'gift_list.php')); });
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
     }
-  });
+
+    function doButReset() {
+      location.reload(true);
+    }
+
+    function ajaxPOST(frm) {
+      var $frm = frm || $('#form_tabMenu1');
+      var accE = (0 == parseInt('<?php echo $giftID; ?>')) ? 'func_gift_addnew' : $frm.data('func');
+      var datA = getFormObjects($frm);
+      var imgBase64 = (typeof cropImage64 !== 'undefined' && cropImage64 !== '') ?
+        cropImage64 :
+        ($('#main_crop_area').data('cropImage64') || '');
+
+      $.ajax({
+        type: 'post',
+        url: '../funcFiles/gift_act_func.php',
+        data: {
+          'arrDatA': datA,
+          'formAcce': accE,
+          'imgUp': imgBase64,
+          'token': getTokenVal(),
+          'giftID': '<?php echo $giftID; ?>'
+        },
+        dataType: 'json',
+        success: function(data) {
+          console.log(data);
+          if (accE == 'func_gift_addnew' && data['RTN'] == 1) {
+            window.parent.toastr['success'](data['msgStr']);
+            window.location.replace("gift_detail.php?currID=" + data['newID']);
+            return false;
+          }
+          if (window.parent && window.parent.toastr) {
+            window.parent.toastr[data['msgType']](data['msgStr']);
+          }
+          if (data['RTN'] == 1) {
+            $frm.removeClass('was-validated');
+            $('#sideGiftTitle').text($('#gift_title').val() || '未命名禮品');
+            $('#sideGiftType').text($('#gift_type option:selected').text().replace(/^\d+\s*-\s*/, ''));
+            $('#sideGiftCode').text($('#gift_code').val() ? $('#gift_code').val().toUpperCase() : '-');
+            const stVal = $('#gift_status').val();
+            $('#sideGiftStatus')
+              .text(stVal === '1' ? '啟用發放中' : '停用關閉')
+              .toggleClass('text-success fw-bold', stVal === '1')
+              .toggleClass('text-secondary', stVal !== '1');
+            if (data['upTime']) $('#sideGiftUpdated').text(data['upTime']);
+            cropImage64 = '';
+            if (typeof doSerialize === 'function') doSerialize();
+          }
+        }
+      });
+    }
+
+    $(document).ready(function() {
+      if ($('#dataTable_giftrec').length) datatableCreate('dataTable_giftrec');
+
+      $('.chk-gift-merch').on('change', function() {
+        syncGiftMerchIds();
+        if (window.parent && window.parent.$) {
+          window.parent.$('#topBut_save').addClass('active');
+        }
+      });
+
+      // 後台主動派發禮品給指定會員
+      $('#form_issue_gift').on('submit', function(e) {
+        e.preventDefault();
+        const mbId = $('#issueMbId').val();
+        const src = $('#issueSourceType').val();
+        const qty = parseInt($('#issueQty').val(), 10) || 1;
+        if (!mbId) {
+          window.parent.toastr['warning']('請選擇要派發的會員！');
+          return;
+        }
+        $.post('../funcFiles/gift_act_func.php', {
+          'formAcce': 'func_gift_issue',
+          'token': getTokenVal(),
+          'giftID': '<?php echo $giftID; ?>',
+          'mbID': mbId,
+          'sourceType': src,
+          'qty': qty
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) location.reload(true);
+        }, 'json');
+      });
+
+      // 更新實體贈品寄送物流單號
+      $(document).on('click', '.btn-save-ship', function() {
+        const rid = $(this).data('rid');
+        const note = $('#shipNote_' + rid).val().trim();
+        $.post('../funcFiles/gift_act_func.php', {
+          'formAcce': 'func_gift_updateShipping',
+          'token': getTokenVal(),
+          'grecID': rid,
+          'shippingNote': note
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1 && note !== '') location.reload(true);
+        }, 'json');
+      });
+
+      // 新增 / 刪除禮品領收資格規則
+      $('#form_add_gift_rule').on('submit', function(e) {
+        e.preventDefault();
+        $.post('../funcFiles/gift_act_func.php', {
+          'formAcce': 'func_gift_rule_add',
+          'token': getTokenVal(),
+          'giftID': '<?php echo $giftID; ?>',
+          'erule_type': $('#gRuleType').val(),
+          'erule_operator': $('#gRuleOp').val(),
+          'erule_val': $('#gRuleVal').val().trim(),
+          'erule_fail_msg': $('#gRuleMsg').val().trim()
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) location.reload(true);
+        }, 'json');
+      });
+
+      $(document).on('click', '.btn-del-gift-rule', function() {
+        if (!confirm('確定刪除此禮品領收限制條件？')) return;
+        const rid = $(this).data('rid');
+        $.post('../funcFiles/gift_act_func.php', {
+          'formAcce': 'func_gift_rule_delete',
+          'token': getTokenVal(),
+          'eruleID': rid
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) $('#gRuleRow_' + rid).fadeOut(250, function() {
+            $(this).remove();
+          });
+        }, 'json');
+      });
+
+
+
+
+      $('li.prevLink').on('click', function() {
+        window.location.replace(getCurrentURI('', 'gift_list.php'));
+      });
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+      }
+    });
   </script>
 </body>
+
 </html>

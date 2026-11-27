@@ -84,6 +84,7 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -100,41 +101,46 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
   <link rel="stylesheet" href="../pluginFiles/flatpickr/flatpickr.min.css">
   <link rel="stylesheet" href="../cssFiles/adminlte.css">
   <link rel="stylesheet" href="../pluginFiles/dropzone/dropzone.css" />
-  <link rel="stylesheet" href="../pluginFiles/cropper/cropper.css"/>
+  <link rel="stylesheet" href="../pluginFiles/cropper/cropper.css" />
   <link rel="stylesheet" href="../cssFiles/5sl.fileupload.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl.lightbox.css">
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 
-<style>
-  /* 課程主圖改為滿寬自適應矩形（支援橫式與直式），覆蓋全站預設圓形頭像裁切 */
-  .cs-cover-area.image_area {
-    width: 100%;
-  }
-  .cs-cover-area.image_area label[for^="cropUploadImage"] {
-    display: block !important;
-    width: 100% !important;
-    border-radius: 10px !important;
-    overflow: hidden !important;
-    border: 1px solid #dee2e6;
-    background-color: #f8f9fa;
-  }
-  .cs-cover-area.image_area label[for^="cropUploadImage"] img.imgEDicon {
-    width: 100% !important;
-    height: auto !important;
-    max-height: 360px;
-    object-fit: cover;
-    border-radius: 10px !important;
-    display: block;
-  }
-  .cs-cover-area.image_area label[for^="cropUploadImage"] .overlay {
-    border-radius: 0 0 10px 10px !important;
-  }
-  .cs-cover-area.image_area label[for^="cropUploadImage"]:hover .overlay {
-    height: 44px !important;
-  }
-</style>
+  <style>
+    /* 課程主圖改為滿寬自適應矩形（支援橫式與直式），覆蓋全站預設圓形頭像裁切 */
+    .cs-cover-area.image_area {
+      width: 100%;
+    }
+
+    .cs-cover-area.image_area label[for^="cropUploadImage"] {
+      display: block !important;
+      width: 100% !important;
+      border-radius: 10px !important;
+      overflow: hidden !important;
+      border: 1px solid #dee2e6;
+      background-color: #f8f9fa;
+    }
+
+    .cs-cover-area.image_area label[for^="cropUploadImage"] img.imgEDicon {
+      width: 100% !important;
+      height: auto !important;
+      max-height: 360px;
+      object-fit: cover;
+      border-radius: 10px !important;
+      display: block;
+    }
+
+    .cs-cover-area.image_area label[for^="cropUploadImage"] .overlay {
+      border-radius: 0 0 10px 10px !important;
+    }
+
+    .cs-cover-area.image_area label[for^="cropUploadImage"]:hover .overlay {
+      height: 44px !important;
+    }
+  </style>
 </head>
+
 <body class="bg-body-tertiary theme-green">
   <div class="app-wrapper">
     <main class="app-main">
@@ -173,7 +179,7 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                       <i class="nav-icon bi bi-trash3 fs-4 cropImgTrash <?php echo $cropImgDisplay; ?>" title="刪除圖像"></i>
                       <form method="post">
                         <label for="cropUploadImage">
-                          <img id="avatarImage" name="avatarImage" class="img-fluid imgEDicon" src="<?php echo $mainimgpath; ?>" alt="課程封面" title="課程封面"/>
+                          <img id="avatarImage" name="avatarImage" class="img-fluid imgEDicon" src="<?php echo $mainimgpath; ?>" alt="課程封面" title="課程封面" />
                           <div class="overlay">
                             <div class="overtext"><?php echo !empty($csID) ? "更改" : "新增"; ?>課程封面</div>
                           </div>
@@ -229,21 +235,21 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                       </a>
                     </li>
                     <?php if ($csID > 0): ?>
-                    <li class="nav-item" role="presentation">
-                      <a class="nav-link" href="#tabMenu2" data-index="2" data-bs-toggle="tab" data-topbut="0" role="tab">
-                        <i class="bi bi-calendar3 me-1"></i>開課梯次排程 (<?php echo count($sessionRows); ?>)
-                      </a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                      <a class="nav-link" href="#tabMenu3" data-index="3" data-bs-toggle="tab" data-topbut="0" role="tab">
-                        <i class="bi bi-people me-1"></i>參與學員名單 (<?php echo count($enrollRows); ?>)
-                      </a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                      <a class="nav-link" href="#tabMenu4" data-index="4" data-bs-toggle="tab" data-topbut="0" role="tab">
-                        <i class="bi bi-shield-check me-1"></i>優惠資格規則 (<?php echo count($ruleRows); ?>)
-                      </a>
-                    </li>
+                      <li class="nav-item" role="presentation">
+                        <a class="nav-link" href="#tabMenu2" data-index="2" data-bs-toggle="tab" data-topbut="0" role="tab">
+                          <i class="bi bi-calendar3 me-1"></i>開課梯次排程 (<?php echo count($sessionRows); ?>)
+                        </a>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <a class="nav-link" href="#tabMenu3" data-index="3" data-bs-toggle="tab" data-topbut="0" role="tab">
+                          <i class="bi bi-people me-1"></i>參與學員名單 (<?php echo count($enrollRows); ?>)
+                        </a>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <a class="nav-link" href="#tabMenu4" data-index="4" data-bs-toggle="tab" data-topbut="0" role="tab">
+                          <i class="bi bi-shield-check me-1"></i>優惠資格規則 (<?php echo count($ruleRows); ?>)
+                        </a>
+                      </li>
                     <?php endif; ?>
                   </ul>
                 </div>
@@ -269,25 +275,28 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                           <div class="col-md-6">
                             <label class="form-label small fw-bold">課程/價格卡片主標題 <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="course_title" name="course_title" required
-                                   value="<?php echo htmlspecialchars($res['course_title'] ?? ''); ?>" placeholder="例如：步步向光陪跑系統">
+                              value="<?php echo htmlspecialchars($res['course_title'] ?? ''); ?>" placeholder="例如：步步向光陪跑系統">
                           </div>
                           <div class="col-md-6">
                             <label class="form-label small fw-bold">下標補充小字</label>
                             <input type="text" class="form-control" name="course_subscript"
-                                   value="<?php echo htmlspecialchars($res['course_subscript'] ?? ''); ?>" placeholder="如：四大秘密 × 12堂核心主題課程">
+                              value="<?php echo htmlspecialchars($res['course_subscript'] ?? ''); ?>" placeholder="如：四大秘密 × 12堂核心主題課程">
                           </div>
 
-                          <div class="col-12"><div class="hr-more">視覺與行銷文案</div><hr class="my-1"></div>
+                          <div class="col-12">
+                            <div class="hr-more">視覺與行銷文案</div>
+                            <hr class="my-1">
+                          </div>
 
                           <div class="col-md-6">
                             <label class="form-label small fw-bold">頂部徽章文字</label>
                             <input type="text" class="form-control" name="course_badge_text"
-                                   value="<?php echo htmlspecialchars($res['course_badge_text'] ?? ''); ?>" placeholder="如：★ 熱門首選 / ✦ 女性專屬特惠">
+                              value="<?php echo htmlspecialchars($res['course_badge_text'] ?? ''); ?>" placeholder="如：★ 熱門首選 / ✦ 女性專屬特惠">
                           </div>
                           <div class="col-md-6">
                             <label class="form-label small fw-bold">標題上方副標題</label>
                             <input type="text" class="form-control" name="course_subtitle"
-                                   value="<?php echo htmlspecialchars($res['course_subtitle'] ?? ''); ?>" placeholder="如：16 週全方位人生重啟陪跑">
+                              value="<?php echo htmlspecialchars($res['course_subtitle'] ?? ''); ?>" placeholder="如：16 週全方位人生重啟陪跑">
                           </div>
 
                           <div class="col-md-3">
@@ -316,7 +325,7 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">輪播排序權重</label>
                             <input type="number" class="form-control" name="course_sort" min="0" max="9999"
-                                   value="<?php echo (int)($res['course_sort'] ?? 100); ?>">
+                              value="<?php echo (int)($res['course_sort'] ?? 100); ?>">
                           </div>
 
                           <div class="col-12">
@@ -324,17 +333,20 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                             <textarea class="form-control" name="course_brief" rows="3" required><?php echo htmlspecialchars($res['course_brief'] ?? ''); ?></textarea>
                           </div>
 
-                          <div class="col-12"><div class="hr-more">價格方案</div><hr class="my-1"></div>
+                          <div class="col-12">
+                            <div class="hr-more">價格方案</div>
+                            <hr class="my-1">
+                          </div>
 
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">方案售價 (NT$) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="course_cost" name="course_cost" min="0" step="1" required
-                                   value="<?php echo (int)round((float)($res['course_cost'] ?? 0)); ?>">
+                              value="<?php echo (int)round((float)($res['course_cost'] ?? 0)); ?>">
                           </div>
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">價格計費單位</label>
                             <input type="text" class="form-control" name="course_price_unit"
-                                   value="<?php echo htmlspecialchars($res['course_price_unit'] ?? ''); ?>" placeholder="如：單次 / 完整系列 / 限時特惠價">
+                              value="<?php echo htmlspecialchars($res['course_price_unit'] ?? ''); ?>" placeholder="如：單次 / 完整系列 / 限時特惠價">
                           </div>
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">上下架狀態</label>
@@ -346,7 +358,10 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                           </div>
 
 
-                          <div class="col-12"><div class="hr-more">開課規格與簡介說明</div><hr class="my-1"></div>
+                          <div class="col-12">
+                            <div class="hr-more">開課規格與簡介說明</div>
+                            <hr class="my-1">
+                          </div>
 
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">課程性質類型</label>
@@ -358,28 +373,28 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">總堂數</label>
                             <input type="number" class="form-control" name="course_lesson" min="1"
-                                   value="<?php echo (int)($res['course_lesson'] ?? 1); ?>">
+                              value="<?php echo (int)($res['course_lesson'] ?? 1); ?>">
                           </div>
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">單堂時長 (分鐘)</label>
                             <input type="number" class="form-control" name="course_duration" min="15" step="15"
-                                   value="<?php echo (int)($res['course_duration'] ?? 60); ?>">
+                              value="<?php echo (int)($res['course_duration'] ?? 60); ?>">
                           </div>
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">單梯次名額上限</label>
                             <input type="number" class="form-control" name="course_max" min="1"
-                                   value="<?php echo (int)($res['course_max'] ?? 20); ?>">
+                              value="<?php echo (int)($res['course_max'] ?? 20); ?>">
                           </div>
 
                           <div class="col-md-6">
                             <label class="form-label small fw-bold">預設開課日期</label>
                             <input type="date" class="form-control" name="course_startdate"
-                                   value="<?php echo htmlspecialchars($res['course_startdate'] ?? date('Y-m-d')); ?>">
+                              value="<?php echo htmlspecialchars($res['course_startdate'] ?? date('Y-m-d')); ?>">
                           </div>
                           <div class="col-md-6">
                             <label class="form-label small fw-bold">預設開課時間</label>
                             <input type="text" class="form-control" name="course_starttime"
-                                   value="<?php echo htmlspecialchars($res['course_starttime'] ?? '14:00:00'); ?>" placeholder="14:00:00">
+                              value="<?php echo htmlspecialchars($res['course_starttime'] ?? '14:00:00'); ?>" placeholder="14:00:00">
                           </div>
 
                         </div>
@@ -434,25 +449,25 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                               $sid = (int)$sr['sess_id'];
                               $sst = (int)($sr['sess_status'] ?? 1);
                             ?>
-                            <tr id="sessRow_<?php echo $sid; ?>">
-                              <td class="text-center fw-bold">第 <?php echo (int)$sr['sess_batch']; ?> 梯</td>
-                              <td><?php echo htmlspecialchars($sr['sess_startdate']) . ' ' . substr($sr['sess_starttime'], 0, 5); ?></td>
-                              <td><?php echo htmlspecialchars($sr['sess_location'] ?? '線上視訊會議室'); ?></td>
-                              <td class="text-center">
-                                <span class="badge text-bg-primary"><?php echo (int)$sr['sess_enrollee']; ?> / <?php echo $maxCap; ?> 人</span>
-                              </td>
-                              <td class="text-center">
-                                <?php echo ($sst === 1) ? '<span class="badge text-bg-success">開放報名</span>' : '<span class="badge text-bg-secondary">已額滿/關閉</span>'; ?>
-                              </td>
-                              <td class="text-center">
-                                <button type="button" class="btn btn-outline-secondary btn-xs py-0 px-2 btn-toggle-sess" data-sid="<?php echo $sid; ?>" data-curr="<?php echo $sst; ?>" title="切換開放/關閉">
-                                  <i class="bi bi-arrow-repeat"></i>
-                                </button>
-                                <button type="button" class="btn btn-outline-danger btn-xs py-0 px-2 btn-del-sess" data-sid="<?php echo $sid; ?>" title="刪除梯次">
-                                  <i class="bi bi-trash3"></i>
-                                </button>
-                              </td>
-                            </tr>
+                              <tr id="sessRow_<?php echo $sid; ?>">
+                                <td class="text-center fw-bold">第 <?php echo (int)$sr['sess_batch']; ?> 梯</td>
+                                <td><?php echo htmlspecialchars($sr['sess_startdate']) . ' ' . substr($sr['sess_starttime'], 0, 5); ?></td>
+                                <td><?php echo htmlspecialchars($sr['sess_location'] ?? '線上視訊會議室'); ?></td>
+                                <td class="text-center">
+                                  <span class="badge text-bg-primary"><?php echo (int)$sr['sess_enrollee']; ?> / <?php echo $maxCap; ?> 人</span>
+                                </td>
+                                <td class="text-center">
+                                  <?php echo ($sst === 1) ? '<span class="badge text-bg-success">開放報名</span>' : '<span class="badge text-bg-secondary">已額滿/關閉</span>'; ?>
+                                </td>
+                                <td class="text-center">
+                                  <button type="button" class="btn btn-outline-secondary btn-xs py-0 px-2 btn-toggle-sess" data-sid="<?php echo $sid; ?>" data-curr="<?php echo $sst; ?>" title="切換開放/關閉">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                  </button>
+                                  <button type="button" class="btn btn-outline-danger btn-xs py-0 px-2 btn-del-sess" data-sid="<?php echo $sid; ?>" title="刪除梯次">
+                                    <i class="bi bi-trash3"></i>
+                                  </button>
+                                </td>
+                              </tr>
                             <?php endforeach; ?>
                           </tbody>
                         </table>
@@ -477,45 +492,45 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                           <tbody>
                             <?php foreach ($enrollRows as $er):
                               $eid      = (int)$er['enr_id'];
-                              $decName  = !empty($er['mb_name']) ? _fn_secure_crypto($er['mb_name'], 'de') : '未填寫';
-                              $decMail  = !empty($er['mb_email']) ? _fn_secure_crypto($er['mb_email'], 'de') : '';
-                              $decTel   = !empty($er['mb_cellphone']) ? _fn_secure_crypto($er['mb_cellphone'], 'de') : '-';
+                              $decName  = !empty($er['mb_name']) ? _fn_safe_dec_name($er['mb_name']) : '未填寫';
+                              $decMail  = !empty($er['mb_email']) ? _fn_safe_dec_name($er['mb_email']) : '';
+                              $decTel   = !empty($er['mb_cellphone']) ? _fn_safe_dec_name($er['mb_cellphone']) : '-';
                               $ePay     = (int)($er['enr_pay_status'] ?? 0);
                               $eSta     = (int)($er['enr_status'] ?? 1);
                             ?>
-                            <tr>
-                              <td><?php echo $eid; ?></td>
-                              <td>
-                                <a href="mb_detail.php?currID=<?php echo (int)$er['mb_id']; ?>" class="fw-bold text-decoration-none"><?php echo htmlspecialchars($decName); ?></a>
-                                <div class="text-muted" style="font-size: 0.75rem;"><?php echo htmlspecialchars($decMail); ?></div>
-                              </td>
-                              <td><?php echo htmlspecialchars($decTel); ?></td>
-                              <td>
-                                <?php if (!empty($er['sess_startdate'])): ?>
-                                  第 <?php echo (int)$er['sess_batch']; ?> 梯 (<?php echo $er['sess_startdate']; ?>)
-                                <?php else: ?>
-                                  <span class="text-muted">不限梯次</span>
-                                <?php endif; ?>
-                              </td>
-                              <td>
-                                <?php if (!empty($er['ord_no'])): ?>
-                                  <span class="text-primary fw-semibold"><?php echo htmlspecialchars($er['ord_no']); ?></span>
-                                  <div class="text-muted" style="font-size: 0.75rem;">NT$ <?php echo number_format((float)$er['ord_total']); ?></div>
-                                <?php else: ?>
-                                  <span class="text-muted">手動匯入/免費</span>
-                                <?php endif; ?>
-                              </td>
-                              <td class="text-center">
-                                <?php echo ($ePay === 2) ? '<span class="badge text-bg-success">已結清</span>' : '<span class="badge text-bg-warning">待付款</span>'; ?>
-                              </td>
-                              <td class="text-center">
-                                <select class="form-select form-select-sm sel-enroll-status" data-eid="<?php echo $eid; ?>" style="min-width: 110px;">
-                                  <option value="1" <?php echo ($eSta === 1) ? 'selected' : ''; ?>>進行中/已預約</option>
-                                  <option value="2" <?php echo ($eSta === 2) ? 'selected' : ''; ?>>已結業完課</option>
-                                  <option value="0" <?php echo ($eSta === 0) ? 'selected' : ''; ?>>已取消退課</option>
-                                </select>
-                              </td>
-                            </tr>
+                              <tr>
+                                <td><?php echo $eid; ?></td>
+                                <td>
+                                  <a href="mb_detail.php?currID=<?php echo (int)$er['mb_id']; ?>" class="fw-bold text-decoration-none"><?php echo htmlspecialchars($decName); ?></a>
+                                  <div class="text-muted" style="font-size: 0.75rem;"><?php echo htmlspecialchars($decMail); ?></div>
+                                </td>
+                                <td><?php echo htmlspecialchars($decTel); ?></td>
+                                <td>
+                                  <?php if (!empty($er['sess_startdate'])): ?>
+                                    第 <?php echo (int)$er['sess_batch']; ?> 梯 (<?php echo $er['sess_startdate']; ?>)
+                                  <?php else: ?>
+                                    <span class="text-muted">不限梯次</span>
+                                  <?php endif; ?>
+                                </td>
+                                <td>
+                                  <?php if (!empty($er['ord_no'])): ?>
+                                    <span class="text-primary fw-semibold"><?php echo htmlspecialchars($er['ord_no']); ?></span>
+                                    <div class="text-muted" style="font-size: 0.75rem;">NT$ <?php echo number_format((float)$er['ord_total']); ?></div>
+                                  <?php else: ?>
+                                    <span class="text-muted">手動匯入/免費</span>
+                                  <?php endif; ?>
+                                </td>
+                                <td class="text-center">
+                                  <?php echo ($ePay === 2) ? '<span class="badge text-bg-success">已結清</span>' : '<span class="badge text-bg-warning">待付款</span>'; ?>
+                                </td>
+                                <td class="text-center">
+                                  <select class="form-select form-select-sm sel-enroll-status" data-eid="<?php echo $eid; ?>" style="min-width: 110px;">
+                                    <option value="1" <?php echo ($eSta === 1) ? 'selected' : ''; ?>>進行中/已預約</option>
+                                    <option value="2" <?php echo ($eSta === 2) ? 'selected' : ''; ?>>已結業完課</option>
+                                    <option value="0" <?php echo ($eSta === 0) ? 'selected' : ''; ?>>已取消退課</option>
+                                  </select>
+                                </td>
+                              </tr>
                             <?php endforeach; ?>
                           </tbody>
                         </table>
@@ -575,23 +590,26 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                           </thead>
                           <tbody id="ruleTbody">
                             <?php if (empty($ruleRows)): ?>
-                              <tr id="emptyRuleRow"><td colspan="6" class="text-center text-muted py-3">尚未設定任何購買限制條件（所有會員皆可報名）</td></tr>
-                            <?php else: foreach ($ruleRows as $rl):
-                              $rid = (int)$rl['erule_id'];
-                            ?>
-                              <tr id="ruleRow_<?php echo $rid; ?>">
-                                <td><?php echo $rid; ?></td>
-                                <td class="fw-bold text-primary"><?php echo htmlspecialchars($rl['erule_type']); ?></td>
-                                <td><code><?php echo htmlspecialchars($rl['erule_operator']); ?></code></td>
-                                <td><?php echo htmlspecialchars($rl['erule_val']); ?></td>
-                                <td><?php echo htmlspecialchars($rl['erule_fail_msg']); ?></td>
-                                <td class="text-center">
-                                  <button type="button" class="btn btn-outline-danger btn-xs py-0 px-2 btn-del-rule" data-rid="<?php echo $rid; ?>">
-                                    <i class="bi bi-trash3"></i>
-                                  </button>
-                                </td>
+                              <tr id="emptyRuleRow">
+                                <td colspan="6" class="text-center text-muted py-3">尚未設定任何購買限制條件（所有會員皆可報名）</td>
                               </tr>
-                            <?php endforeach; endif; ?>
+                              <?php else: foreach ($ruleRows as $rl):
+                                $rid = (int)$rl['erule_id'];
+                              ?>
+                                <tr id="ruleRow_<?php echo $rid; ?>">
+                                  <td><?php echo $rid; ?></td>
+                                  <td class="fw-bold text-primary"><?php echo htmlspecialchars($rl['erule_type']); ?></td>
+                                  <td><code><?php echo htmlspecialchars($rl['erule_operator']); ?></code></td>
+                                  <td><?php echo htmlspecialchars($rl['erule_val']); ?></td>
+                                  <td><?php echo htmlspecialchars($rl['erule_fail_msg']); ?></td>
+                                  <td class="text-center">
+                                    <button type="button" class="btn btn-outline-danger btn-xs py-0 px-2 btn-del-rule" data-rid="<?php echo $rid; ?>">
+                                      <i class="bi bi-trash3"></i>
+                                    </button>
+                                  </td>
+                                </tr>
+                            <?php endforeach;
+                            endif; ?>
                           </tbody>
                         </table>
                       </div>
@@ -616,181 +634,216 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/fileupload.js<?php echo '?t='.time(); ?>"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/fileupload.js<?php echo '?t=' . time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function validateBS5Form($form) {
-    if (!$form || $form.length === 0) return true;
-    const isValid = $form[0].checkValidity();
-    $form[0].classList.add('was-validated');
-    return isValid;
-  }
-
-  function doReDirect() { window.history.back(); }
-
-  function doButSave() {
-    var frm = $('#form_' + $('.tab-pane.active').prop("id"));
-    if (!frm.length) return false;
-    if (!validateBS5Form(frm)) {
-      window.parent.toastr['warning']('請檢查標示紅框的必填或格式錯誤欄位！');
-      return false;
+    function validateBS5Form($form) {
+      if (!$form || $form.length === 0) return true;
+      const isValid = $form[0].checkValidity();
+      $form[0].classList.add('was-validated');
+      return isValid;
     }
-    ajaxPOST(frm);
-  }
 
-  function doButDelete() {
-    if (0 == parseInt('<?php echo $csID; ?>')) return false;
-    $.post('../funcFiles/cs_act_func.php', {
-      'formAcce': 'func_cs_delete',
-      'token': getTokenVal(),
-      'csID': '<?php echo $csID; ?>'
-    }, function(data) {
-      if (data['RTN'] == 1) {
-        window.parent.toastr['success'](data['msgStr']);
-        window.location.replace("cs_list.php");
-      } else {
-        window.parent.toastr['error'](data['msgStr'] || '刪除失敗');
+    function doReDirect() {
+      window.history.back();
+    }
+
+    function doButSave() {
+      var frm = $('#form_' + $('.tab-pane.active').prop("id"));
+      if (!frm.length) return false;
+      if (!validateBS5Form(frm)) {
+        window.parent.toastr['warning']('請檢查標示紅框的必填或格式錯誤欄位！');
+        return false;
       }
-    }, 'json');
-  }
+      ajaxPOST(frm);
+    }
 
-  function doButReset() { location.reload(true); }
-
-  function ajaxPOST(frm) {
-    var $frm = frm || $('#form_tabMenu1');
-    var accE = (0 == parseInt('<?php echo $csID; ?>')) ? 'func_cs_addnew' : $frm.data('func');
-    var datA = getFormObjects($frm);
-    var imgBase64 = (typeof cropImage64 !== 'undefined' && cropImage64 !== '')
-                    ? cropImage64
-                    : ($('#main_crop_area').data('cropImage64') || '');
-
-    $.ajax({
-      type: 'post',
-      url: '../funcFiles/cs_act_func.php',
-      data: {
-        'arrDatA': datA,
-        'formAcce': accE,
-        'imgUp': imgBase64,
+    function doButDelete() {
+      if (0 == parseInt('<?php echo $csID; ?>')) return false;
+      $.post('../funcFiles/cs_act_func.php', {
+        'formAcce': 'func_cs_delete',
         'token': getTokenVal(),
         'csID': '<?php echo $csID; ?>'
-      },
-      dataType: 'json',
-      success: function(data) {
-        if (accE == 'func_cs_addnew' && data['RTN'] == 1) {
-          window.parent.toastr['success'](data['msgStr']);
-          window.location.replace("cs_detail.php?currID=" + data['newID']);
-          return false;
-        }
-        if (window.parent && window.parent.toastr) {
-          window.parent.toastr[data['msgType']](data['msgStr']);
-        }
+      }, function(data) {
         if (data['RTN'] == 1) {
-          $frm.removeClass('was-validated');
-          $('#sideCsTitle').text($('#course_title').val() || '未命名課程');
-          $('#sideCsTier').text($('#course_tier_class option:selected').text());
-          $('#sideCsCost').text('NT$ ' + Number($('#course_cost').val() || 0).toLocaleString());
-          const stVal = $('#course_status').val();
-          $('#sideCsStatus')
-            .text($('#course_status option:selected').text().replace(/^\d+\s*-\s*/, ''))
-            .toggleClass('text-success fw-bold', stVal === '1')
-            .toggleClass('text-danger', stVal !== '1');
-          if (data['upTime']) $('#sideCsUpdated').text(data['upTime']);
-          cropImage64 = '';
-          if (typeof doSerialize === 'function') doSerialize();
+          window.parent.toastr['success'](data['msgStr']);
+          window.location.replace("cs_list.php");
+        } else {
+          window.parent.toastr['error'](data['msgStr'] || '刪除失敗');
         }
+      }, 'json');
+    }
+
+    function doButReset() {
+      location.reload(true);
+    }
+
+    function ajaxPOST(frm) {
+      var $frm = frm || $('#form_tabMenu1');
+      var accE = (0 == parseInt('<?php echo $csID; ?>')) ? 'func_cs_addnew' : $frm.data('func');
+      var datA = getFormObjects($frm);
+      var imgBase64 = (typeof cropImage64 !== 'undefined' && cropImage64 !== '') ?
+        cropImage64 :
+        ($('#main_crop_area').data('cropImage64') || '');
+
+      $.ajax({
+        type: 'post',
+        url: '../funcFiles/cs_act_func.php',
+        data: {
+          'arrDatA': datA,
+          'formAcce': accE,
+          'imgUp': imgBase64,
+          'token': getTokenVal(),
+          'csID': '<?php echo $csID; ?>'
+        },
+        dataType: 'json',
+        success: function(data) {
+          if (accE == 'func_cs_addnew' && data['RTN'] == 1) {
+            window.parent.toastr['success'](data['msgStr']);
+            window.location.replace("cs_detail.php?currID=" + data['newID']);
+            return false;
+          }
+          if (window.parent && window.parent.toastr) {
+            window.parent.toastr[data['msgType']](data['msgStr']);
+          }
+          if (data['RTN'] == 1) {
+            $frm.removeClass('was-validated');
+            $('#sideCsTitle').text($('#course_title').val() || '未命名課程');
+            $('#sideCsTier').text($('#course_tier_class option:selected').text());
+            $('#sideCsCost').text('NT$ ' + Number($('#course_cost').val() || 0).toLocaleString());
+            const stVal = $('#course_status').val();
+            $('#sideCsStatus')
+              .text($('#course_status option:selected').text().replace(/^\d+\s*-\s*/, ''))
+              .toggleClass('text-success fw-bold', stVal === '1')
+              .toggleClass('text-danger', stVal !== '1');
+            if (data['upTime']) $('#sideCsUpdated').text(data['upTime']);
+            cropImage64 = '';
+            if (typeof doSerialize === 'function') doSerialize();
+          }
+        }
+      });
+    }
+
+    $(document).ready(function() {
+      if (typeof flatpickr !== 'undefined') {
+        flatpickr($('input[type="date"]'), {
+          locale: 'zh_tw',
+          dateFormat: 'Y-m-d',
+          allowInput: true,
+          disableMobile: true
+        });
+      }
+      if ($('#dataTable_cssess').length) datatableCreate('dataTable_cssess');
+      if ($('#dataTable_csenroll').length) datatableCreate('dataTable_csenroll');
+
+      // 新增開課梯次
+      $('#form_add_session').on('submit', function(e) {
+        e.preventDefault();
+        $.post('../funcFiles/cs_act_func.php', {
+          'formAcce': 'func_sess_add',
+          'token': getTokenVal(),
+          'masterID': '<?php echo $masterID; ?>',
+          'sess_batch': $('#newSessBatch').val(),
+          'sess_startdate': $('#newSessDate').val(),
+          'sess_starttime': $('#newSessTime').val(),
+          'sess_location': $('#newSessRoom').val().trim()
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) location.reload(true);
+        }, 'json');
+      });
+
+      // 切換梯次狀態 / 刪除梯次
+      $(document).on('click', '.btn-toggle-sess', function() {
+        const sid = $(this).data('sid');
+        const nxt = ($(this).data('curr') == 1) ? 0 : 1;
+        $.post('../funcFiles/cs_act_func.php', {
+          'formAcce': 'func_sess_status',
+          'token': getTokenVal(),
+          'sessID': sid,
+          'status': nxt
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) location.reload(true);
+        }, 'json');
+      });
+
+      $(document).on('click', '.btn-del-sess', function() {
+        if (!confirm('確定要刪除此開課梯次嗎？')) return;
+        const sid = $(this).data('sid');
+        $.post('../funcFiles/cs_act_func.php', {
+          'formAcce': 'func_sess_delete',
+          'token': getTokenVal(),
+          'sessID': sid
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) $('#sessRow_' + sid).fadeOut(250, function() {
+            $(this).remove();
+          });
+        }, 'json');
+      });
+
+      // 更新參與學員修課狀態
+      $(document).on('change', '.sel-enroll-status', function() {
+        const eid = $(this).data('eid');
+        const st = $(this).val();
+        $.post('../funcFiles/cs_act_func.php', {
+          'formAcce': 'func_enroll_status',
+          'token': getTokenVal(),
+          'enrID': eid,
+          'enrStatus': st
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+        }, 'json');
+      });
+
+      // 新增 / 刪除優惠資格條件規則
+      $('#form_add_rule').on('submit', function(e) {
+        e.preventDefault();
+        $.post('../funcFiles/cs_act_func.php', {
+          'formAcce': 'func_rule_add',
+          'token': getTokenVal(),
+          'csID': '<?php echo $csID; ?>',
+          'erule_type': $('#ruleType').val(),
+          'erule_operator': $('#ruleOp').val(),
+          'erule_val': $('#ruleVal').val().trim(),
+          'erule_fail_msg': $('#ruleMsg').val().trim()
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) location.reload(true);
+        }, 'json');
+      });
+
+      $(document).on('click', '.btn-del-rule', function() {
+        if (!confirm('確定刪除此資格限制條件？')) return;
+        const rid = $(this).data('rid');
+        $.post('../funcFiles/cs_act_func.php', {
+          'formAcce': 'func_rule_delete',
+          'token': getTokenVal(),
+          'eruleID': rid
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) $('#ruleRow_' + rid).fadeOut(250, function() {
+            $(this).remove();
+          });
+        }, 'json');
+      });
+
+      $('li.prevLink').on('click', function() {
+        window.location.replace(getCurrentURI('', 'cs_list.php'));
+      });
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
       }
     });
-  }
-
-  $(document).ready(function() {
-    if (typeof flatpickr !== 'undefined') {
-      flatpickr($('input[type="date"]'), { locale: 'zh_tw', dateFormat: 'Y-m-d', allowInput: true, disableMobile: true });
-    }
-    if ($('#dataTable_cssess').length)   datatableCreate('dataTable_cssess');
-    if ($('#dataTable_csenroll').length) datatableCreate('dataTable_csenroll');
-
-    // 新增開課梯次
-    $('#form_add_session').on('submit', function(e) {
-      e.preventDefault();
-      $.post('../funcFiles/cs_act_func.php', {
-        'formAcce': 'func_sess_add',
-        'token': getTokenVal(),
-        'masterID': '<?php echo $masterID; ?>',
-        'sess_batch': $('#newSessBatch').val(),
-        'sess_startdate': $('#newSessDate').val(),
-        'sess_starttime': $('#newSessTime').val(),
-        'sess_location': $('#newSessRoom').val().trim()
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) location.reload(true);
-      }, 'json');
-    });
-
-    // 切換梯次狀態 / 刪除梯次
-    $(document).on('click', '.btn-toggle-sess', function() {
-      const sid = $(this).data('sid');
-      const nxt = ($(this).data('curr') == 1) ? 0 : 1;
-      $.post('../funcFiles/cs_act_func.php', { 'formAcce': 'func_sess_status', 'token': getTokenVal(), 'sessID': sid, 'status': nxt }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) location.reload(true);
-      }, 'json');
-    });
-
-    $(document).on('click', '.btn-del-sess', function() {
-      if (!confirm('確定要刪除此開課梯次嗎？')) return;
-      const sid = $(this).data('sid');
-      $.post('../funcFiles/cs_act_func.php', { 'formAcce': 'func_sess_delete', 'token': getTokenVal(), 'sessID': sid }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) $('#sessRow_' + sid).fadeOut(250, function() { $(this).remove(); });
-      }, 'json');
-    });
-
-    // 更新參與學員修課狀態
-    $(document).on('change', '.sel-enroll-status', function() {
-      const eid = $(this).data('eid');
-      const st  = $(this).val();
-      $.post('../funcFiles/cs_act_func.php', { 'formAcce': 'func_enroll_status', 'token': getTokenVal(), 'enrID': eid, 'enrStatus': st }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-      }, 'json');
-    });
-
-    // 新增 / 刪除優惠資格條件規則
-    $('#form_add_rule').on('submit', function(e) {
-      e.preventDefault();
-      $.post('../funcFiles/cs_act_func.php', {
-        'formAcce': 'func_rule_add',
-        'token': getTokenVal(),
-        'csID': '<?php echo $csID; ?>',
-        'erule_type': $('#ruleType').val(),
-        'erule_operator': $('#ruleOp').val(),
-        'erule_val': $('#ruleVal').val().trim(),
-        'erule_fail_msg': $('#ruleMsg').val().trim()
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) location.reload(true);
-      }, 'json');
-    });
-
-    $(document).on('click', '.btn-del-rule', function() {
-      if (!confirm('確定刪除此資格限制條件？')) return;
-      const rid = $(this).data('rid');
-      $.post('../funcFiles/cs_act_func.php', { 'formAcce': 'func_rule_delete', 'token': getTokenVal(), 'eruleID': rid }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) $('#ruleRow_' + rid).fadeOut(250, function() { $(this).remove(); });
-      }, 'json');
-    });
-
-    $('li.prevLink').on('click', function() { window.location.replace(getCurrentURI('', 'cs_list.php')); });
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
-    }
-  });
   </script>
 </body>
+
 </html>

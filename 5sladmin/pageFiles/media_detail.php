@@ -23,7 +23,8 @@ if (!is_array($giftOptions))  $giftOptions  = array();
 if (!is_array($merchOptions)) $merchOptions = array();
 
 // 輔助函式：擷取 YouTube Video ID 並轉為標準 embed 網址
-function _getYoutubeEmbedUrl($url) {
+function _getYoutubeEmbedUrl($url)
+{
   if (empty($url)) return '';
   if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i', $url, $m)) {
     return 'https://www.youtube.com/embed/' . $m[1];
@@ -40,6 +41,7 @@ $safeDlUrl = ($medID > 0) ? ("5sl_download.php?id=" . $medID) : "";
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -57,6 +59,7 @@ $safeDlUrl = ($medID > 0) ? ("5sl_download.php?id=" . $medID) : "";
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-indigo">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -106,7 +109,9 @@ $safeDlUrl = ($medID > 0) ? ("5sl_download.php?id=" . $medID) : "";
                     <?php elseif ($mType === 3 && $fullUrl !== ''): ?>
                       <div class="w-100 px-2">
                         <i class="bi bi-music-note-beamed fs-1 text-info d-block mb-2"></i>
-                        <audio controls class="w-100"><source src="<?php echo htmlspecialchars($fullUrl); ?>"></audio>
+                        <audio controls class="w-100">
+                          <source src="<?php echo htmlspecialchars($fullUrl); ?>">
+                        </audio>
                       </div>
                     <?php elseif ($mType === 4 && $fullUrl !== ''): ?>
                       <div>
@@ -122,15 +127,15 @@ $safeDlUrl = ($medID > 0) ? ("5sl_download.php?id=" . $medID) : "";
                   </div>
 
                   <?php if ($medID > 0): ?>
-                  <div class="mb-3">
-                    <label class="form-label small fw-bold text-primary">隱藏真實檔名安全下載網址（前端用）</label>
-                    <div class="input-group input-group-sm">
-                      <input type="text" class="form-control bg-light" id="safeDownloadInput" value="<?php echo htmlspecialchars($safeDlUrl); ?>" readonly>
-                      <button type="button" class="btn btn-outline-primary" id="btnCopySafeDl" title="複製安全下載網址">
-                        <i class="bi bi-clipboard"></i>
-                      </button>
+                    <div class="mb-3">
+                      <label class="form-label small fw-bold text-primary">隱藏真實檔名安全下載網址（前端用）</label>
+                      <div class="input-group input-group-sm">
+                        <input type="text" class="form-control bg-light" id="safeDownloadInput" value="<?php echo htmlspecialchars($safeDlUrl); ?>" readonly>
+                        <button type="button" class="btn btn-outline-primary" id="btnCopySafeDl" title="複製安全下載網址">
+                          <i class="bi bi-clipboard"></i>
+                        </button>
+                      </div>
                     </div>
-                  </div>
                   <?php endif; ?>
 
                   <ul class="list-group list-group-flush small">
@@ -174,7 +179,7 @@ $safeDlUrl = ($medID > 0) ? ("5sl_download.php?id=" . $medID) : "";
                       <div class="col-md-7">
                         <label class="form-label small fw-bold">媒體名稱 / 標題 <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="med_title" name="med_title" required
-                               value="<?php echo htmlspecialchars($res['med_title'] ?? ''); ?>" placeholder="例如：2026 冬季向光工作坊現場紀實 / 冥想引導音檔">
+                          value="<?php echo htmlspecialchars($res['med_title'] ?? ''); ?>" placeholder="例如：2026 冬季向光工作坊現場紀實 / 冥想引導音檔">
                       </div>
                       <div class="col-md-5">
                         <label class="form-label small fw-bold">活動 / 素材分類</label>
@@ -206,7 +211,7 @@ $safeDlUrl = ($medID > 0) ? ("5sl_download.php?id=" . $medID) : "";
                       <div class="col-md-4">
                         <label class="form-label small fw-bold">活動 / 事件發生日期 <span class="text-danger">*</span></label>
                         <input type="date" class="form-control" name="med_event_date" required
-                               value="<?php echo htmlspecialchars($res['med_event_date'] ?? date('Y-m-d')); ?>">
+                          value="<?php echo htmlspecialchars($res['med_event_date'] ?? date('Y-m-d')); ?>">
                       </div>
 
                       <!-- 本地檔案上傳欄位 (med_source = 1 時顯示) -->
@@ -224,15 +229,18 @@ $safeDlUrl = ($medID > 0) ? ("5sl_download.php?id=" . $medID) : "";
                       <div class="col-md-9" id="boxCloudUrl">
                         <label class="form-label small fw-bold">檔案路徑或雲端 / YouTube 連結 (med_url)</label>
                         <input type="text" class="form-control" id="med_url" name="med_url"
-                               value="<?php echo htmlspecialchars($rawUrl); ?>" placeholder="貼上 YouTube 網址（自動轉 Embed 預覽）或雲端檔案連結">
+                          value="<?php echo htmlspecialchars($rawUrl); ?>" placeholder="貼上 YouTube 網址（自動轉 Embed 預覽）或雲端檔案連結">
                       </div>
                       <div class="col-md-3">
                         <label class="form-label small fw-bold">影音長度標示</label>
                         <input type="text" class="form-control" name="med_duration"
-                               value="<?php echo htmlspecialchars($res['med_duration'] ?? ''); ?>" placeholder="如：08:45">
+                          value="<?php echo htmlspecialchars($res['med_duration'] ?? ''); ?>" placeholder="如：08:45">
                       </div>
 
-                      <div class="col-12"><div class="hr-more">下載權限控管與業務關聯設定</div><hr class="my-1"></div>
+                      <div class="col-12">
+                        <div class="hr-more">下載權限控管與業務關聯設定</div>
+                        <hr class="my-1">
+                      </div>
 
                       <div class="col-md-4">
                         <label class="form-label small fw-bold">下載權限註記 (med_allow_download)</label>
@@ -255,7 +263,7 @@ $safeDlUrl = ($medID > 0) ? ("5sl_download.php?id=" . $medID) : "";
                       <div class="col-md-4">
                         <label class="form-label small fw-bold">關聯模組主鍵 ID (med_forid)</label>
                         <input type="number" class="form-control" name="med_forid" min="0"
-                               value="<?php echo (int)($res['med_forid'] ?? 0); ?>" placeholder="0 代表不指定特定ID">
+                          value="<?php echo (int)($res['med_forid'] ?? 0); ?>" placeholder="0 代表不指定特定ID">
                       </div>
 
                       <div class="col-md-6">
@@ -281,7 +289,10 @@ $safeDlUrl = ($medID > 0) ? ("5sl_download.php?id=" . $medID) : "";
                         </select>
                       </div>
 
-                      <div class="col-12"><div class="hr-more">展示曝光、SunEditor 圖庫與紀實說明</div><hr class="my-1"></div>
+                      <div class="col-12">
+                        <div class="hr-more">展示曝光、SunEditor 圖庫與紀實說明</div>
+                        <hr class="my-1">
+                      </div>
 
                       <div class="col-md-3">
                         <label class="form-label small fw-bold">首頁精選花絮展示</label>
@@ -331,133 +342,145 @@ $safeDlUrl = ($medID > 0) ? ("5sl_download.php?id=" . $medID) : "";
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-    
     function extractYoutubeId(url) {
-    if (!url) return '';
-    const reg = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
-    const m = url.match(reg);
-    return m ? m[1] : '';
+      if (!url) return '';
+      const reg = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+      const m = url.match(reg);
+      return m ? m[1] : '';
     }
 
 
-  function refreshMediaPreview() {
-    const type = parseInt($('#med_type').val(), 10);
-    const url  = $('#med_url').val().trim();
-    const $box = $('#mediaPreviewBox');
+    function refreshMediaPreview() {
+      const type = parseInt($('#med_type').val(), 10);
+      const url = $('#med_url').val().trim();
+      const $box = $('#mediaPreviewBox');
 
-    if (type === 2) {
-      const ytId = extractYoutubeId(url);
-      if (ytId) {
-        $box.html(`<div class="ratio ratio-16x9 w-100"><iframe src="https://youtube.com{ytId}" allowfullscreen></iframe></div>`);
-      } else {
-        $box.html(`<div class="text-danger small"><i class="bi bi-youtube fs-2 d-block mb-1"></i>請輸入有效的 YouTube 影片網址以產生 Embed 預覽</div>`);
-      }
-    } else if (type === 1 && url) {
-      const src = url.startsWith('http') ? url : ('../../' + url.replace(/^\/+/, ''));
-      $box.html(`<img src="${src}" class="img-fluid rounded" style="max-height: 240px;">`);
-    } else if (type === 3 && url) {
-      const src = url.startsWith('http') ? url : ('../../' + url.replace(/^\/+/, ''));
-      $box.html(`<div class="w-100 px-2"><i class="bi bi-music-note-beamed fs-1 text-info d-block mb-2"></i><audio controls class="w-100"><source src="${src}"></audio></div>`);
-    }
-  }
-
-  function doReDirect() { window.history.back(); }
-
-  function doButSave() {
-    const frm = document.getElementById('form_mediaMaster');
-    if (!frm.checkValidity()) {
-      frm.classList.add('was-validated');
-      window.parent.toastr['warning']('請填寫必填欄位（媒體標題與活動日期）！');
-      return false;
-    }
-
-    const fd = new FormData(frm);
-    fd.append('token', getTokenVal());
-
-    $.ajax({
-      type: 'post',
-      url: '../funcFiles/media_act_func.php',
-      data: fd,
-      processData: false,
-      contentType: false,
-      dataType: 'json',
-      success: function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) {
-          if (data['newID']) {
-            window.location.replace('media_detail.php?currID=' + data['newID']);
-          } else {
-            location.reload(true);
-          }
+      if (type === 2) {
+        const ytId = extractYoutubeId(url);
+        if (ytId) {
+          $box.html(`<div class="ratio ratio-16x9 w-100"><iframe src="https://youtube.com{ytId}" allowfullscreen></iframe></div>`);
+        } else {
+          $box.html(`<div class="text-danger small"><i class="bi bi-youtube fs-2 d-block mb-1"></i>請輸入有效的 YouTube 影片網址以產生 Embed 預覽</div>`);
         }
-      },
-      error: function() {
-        window.parent.toastr['error']('檔案上傳或寫入失敗，請檢查檔案大小限制！');
+      } else if (type === 1 && url) {
+        const src = url.startsWith('http') ? url : ('../../' + url.replace(/^\/+/, ''));
+        $box.html(`<img src="${src}" class="img-fluid rounded" style="max-height: 240px;">`);
+      } else if (type === 3 && url) {
+        const src = url.startsWith('http') ? url : ('../../' + url.replace(/^\/+/, ''));
+        $box.html(`<div class="w-100 px-2"><i class="bi bi-music-note-beamed fs-1 text-info d-block mb-2"></i><audio controls class="w-100"><source src="${src}"></audio></div>`);
       }
-    });
-  }
-
-  function doButDelete() {
-    if (0 == parseInt('<?php echo $medID; ?>')) return false;
-    $.post('../funcFiles/media_act_func.php', {
-      'formAcce': 'func_media_delete',
-      'token': getTokenVal(),
-      'medID': '<?php echo $medID; ?>'
-    }, function(data) {
-      if (data['RTN'] == 1) {
-        window.parent.toastr['success'](data['msgStr']);
-        window.location.replace('media_list.php');
-      } else {
-        window.parent.toastr['error'](data['msgStr'] || '刪除失敗');
-      }
-    }, 'json');
-  }
-
-  function doButReset() { location.reload(true); }
-
-  $(document).ready(function() {
-    if (typeof flatpickr !== 'undefined') {
-      flatpickr($('input[type="date"]'), { locale: 'zh_tw', dateFormat: 'Y-m-d', allowInput: true, disableMobile: true });
     }
 
-    $('#med_source').on('change', function() {
-      if ($(this).val() === '1') {
-        $('#boxLocalUpload').slideDown(180);
-      } else {
-        $('#boxLocalUpload').slideUp(180);
-      }
-    });
-
-    $('#med_type').on('change', function() {
-      if ($(this).val() === '2') {
-        $('#med_source').val('2').trigger('change');
-      }
-      refreshMediaPreview();
-    });
-
-    $('#med_url').on('input change blur', refreshMediaPreview);
-
-    $('#btnCopySafeDl').on('click', function() {
-      const inp = document.getElementById('safeDownloadInput');
-      if (!inp) return;
-      inp.select();
-      navigator.clipboard.writeText(inp.value);
-      window.parent.toastr['success']('已複製隱藏檔名安全下載網址：' + inp.value);
-    });
-
-    $('li.prevLink').on('click', function() { window.location.replace(getCurrentURI('', 'media_list.php')); });
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+    function doReDirect() {
+      window.history.back();
     }
-  });
+
+    function doButSave() {
+      const frm = document.getElementById('form_mediaMaster');
+      if (!frm.checkValidity()) {
+        frm.classList.add('was-validated');
+        window.parent.toastr['warning']('請填寫必填欄位（媒體標題與活動日期）！');
+        return false;
+      }
+
+      const fd = new FormData(frm);
+      fd.append('token', getTokenVal());
+
+      $.ajax({
+        type: 'post',
+        url: '../funcFiles/media_act_func.php',
+        data: fd,
+        processData: false,
+        contentType: false,
+        dataType: 'json',
+        success: function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) {
+            if (data['newID']) {
+              window.location.replace('media_detail.php?currID=' + data['newID']);
+            } else {
+              location.reload(true);
+            }
+          }
+        },
+        error: function() {
+          window.parent.toastr['error']('檔案上傳或寫入失敗，請檢查檔案大小限制！');
+        }
+      });
+    }
+
+    function doButDelete() {
+      if (0 == parseInt('<?php echo $medID; ?>')) return false;
+      $.post('../funcFiles/media_act_func.php', {
+        'formAcce': 'func_media_delete',
+        'token': getTokenVal(),
+        'medID': '<?php echo $medID; ?>'
+      }, function(data) {
+        if (data['RTN'] == 1) {
+          window.parent.toastr['success'](data['msgStr']);
+          window.location.replace('media_list.php');
+        } else {
+          window.parent.toastr['error'](data['msgStr'] || '刪除失敗');
+        }
+      }, 'json');
+    }
+
+    function doButReset() {
+      location.reload(true);
+    }
+
+    $(document).ready(function() {
+      if (typeof flatpickr !== 'undefined') {
+        flatpickr($('input[type="date"]'), {
+          locale: 'zh_tw',
+          dateFormat: 'Y-m-d',
+          allowInput: true,
+          disableMobile: true
+        });
+      }
+
+      $('#med_source').on('change', function() {
+        if ($(this).val() === '1') {
+          $('#boxLocalUpload').slideDown(180);
+        } else {
+          $('#boxLocalUpload').slideUp(180);
+        }
+      });
+
+      $('#med_type').on('change', function() {
+        if ($(this).val() === '2') {
+          $('#med_source').val('2').trigger('change');
+        }
+        refreshMediaPreview();
+      });
+
+      $('#med_url').on('input change blur', refreshMediaPreview);
+
+      $('#btnCopySafeDl').on('click', function() {
+        const inp = document.getElementById('safeDownloadInput');
+        if (!inp) return;
+        inp.select();
+        navigator.clipboard.writeText(inp.value);
+        window.parent.toastr['success']('已複製隱藏檔名安全下載網址：' + inp.value);
+      });
+
+      $('li.prevLink').on('click', function() {
+        window.location.replace(getCurrentURI('', 'media_list.php'));
+      });
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+      }
+    });
   </script>
 </body>
+
 </html>

@@ -8,9 +8,15 @@ $searchLevel  = isset($_REQUEST['searchLevel']) ? trim($_REQUEST['searchLevel'])
 $searchStatus = isset($_REQUEST['searchStatus']) ? trim($_REQUEST['searchStatus']) : '';
 
 $searchURI = "";
-if ($searchText !== '')   { $searchURI .= "&searchText=" . rawurlencode($searchText); }
-if ($searchLevel !== '')  { $searchURI .= "&searchLevel=" . rawurlencode($searchLevel); }
-if ($searchStatus !== '') { $searchURI .= "&searchStatus=" . rawurlencode($searchStatus); }
+if ($searchText !== '') {
+  $searchURI .= "&searchText=" . rawurlencode($searchText);
+}
+if ($searchLevel !== '') {
+  $searchURI .= "&searchLevel=" . rawurlencode($searchLevel);
+}
+if ($searchStatus !== '') {
+  $searchURI .= "&searchStatus=" . rawurlencode($searchStatus);
+}
 if (!empty($searchURI)) {
   $searchURI = substr($searchURI, 1);
 }
@@ -18,12 +24,13 @@ if (!empty($searchURI)) {
 $maxResult = (!empty($searchURI)) ? 300 : 100;
 
 // 定義本頁面代碼（對應左側樹狀導航列與頂部操作面板）
-define('PAGE_MARK','PG_MEM');
-define('PAGE_ITEM','ITEM_MEM');
-define('PAGE_ITEM2','ITEM_MEMSHIP');
+define('PAGE_MARK', 'PG_MEM');
+define('PAGE_ITEM', 'ITEM_MEM');
+define('PAGE_ITEM2', 'ITEM_MEMSHIP');
 define('PAGE_OPANEL', 1); // 1-新增
 define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
 define('EXPORT_OPANEL', 3); // 3-Excel+Print
+define('bkRedir', 1);
 
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
@@ -63,6 +70,7 @@ $statusMap = array(
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -80,6 +88,7 @@ $statusMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-blue">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -150,31 +159,31 @@ $statusMap = array(
                           $sta = (int)($row['mb_status'] ?? 1);
                           $isVerified = ((int)($row['mb_email_verified'] ?? 0) === 1);
                         ?>
-                        <tr style="cursor: pointer;" onclick="window.location.href='mb_detail.php?currID=<?php echo $mid; ?>';">
-                          <td class="text-center fw-bold"><?php echo $mid; ?></td>
-                          <td class="text-center">
-                            <img src="<?php echo $avatarSrc; ?>" class="rounded-circle border" width="38" height="38" style="object-fit: cover;" alt="Avatar">
-                          </td>
-                          <td class="fw-200"><?php echo htmlspecialchars(_fn_secure_crypto($row['mb_email'],'de') ?? ''); ?></td>
-                          <td>
-                            <div class="fw-bold text-dark"><?php echo htmlspecialchars(_fn_secure_crypto($row['mb_name'],'de') ?? '-'); ?></div>
-                            <?php if (!empty($row['mb_nick'])): ?>
-                              <div class="text-muted" style="font-size: 0.78rem;">/<?php echo htmlspecialchars($row['mb_title']); ?></div>
-                            <?php endif; ?>
-                          </td>
-                          <td><?php echo htmlspecialchars($row['mb_phone'] ?? '-'); ?></td>
-                          <td class="text-center"><?php echo $levelMap[$lvl] ?? $levelMap[1]; ?></td>
-                          <td class="text-end fw-bold text-warning-emphasis"><?php echo number_format((int)($row['mb_points'] ?? 0)); ?></td>
-                          <td class="text-center">
-                            <?php if ($isVerified): ?>
-                              <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-patch-check-fill me-1"></i>已驗證</span>
-                            <?php else: ?>
-                              <span class="badge bg-secondary-subtle text-secondary border"><i class="bi bi-clock me-1"></i>未驗證</span>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center"><?php echo $statusMap[$sta] ?? '<span class="badge text-bg-secondary">未知</span>'; ?></td>
-                          <td class="text-center text-muted"><?php echo !empty($row['mb_created']) ? date('Y-m-d H:i', strtotime($row['mb_created'])) : '-'; ?></td>
-                        </tr>
+                          <tr style="cursor: pointer;" onclick="window.location.href='mb_detail.php?currID=<?php echo $mid; ?>';">
+                            <td class="text-center fw-bold"><?php echo $mid; ?></td>
+                            <td class="text-center">
+                              <img src="<?php echo $avatarSrc; ?>" class="rounded-circle border" width="38" height="38" style="object-fit: cover;" alt="Avatar">
+                            </td>
+                            <td class="fw-200"><?php echo htmlspecialchars(_fn_secure_crypto($row['mb_email'], 'de') ?? ''); ?></td>
+                            <td>
+                              <div class="fw-bold text-dark"><?php echo htmlspecialchars(_fn_secure_crypto($row['mb_name'], 'de') ?? '-'); ?></div>
+                              <?php if (!empty($row['mb_nick'])): ?>
+                                <div class="text-muted" style="font-size: 0.78rem;">/<?php echo htmlspecialchars($row['mb_title']); ?></div>
+                              <?php endif; ?>
+                            </td>
+                            <td><?php echo htmlspecialchars($row['mb_phone'] ?? '-'); ?></td>
+                            <td class="text-center"><?php echo $levelMap[$lvl] ?? $levelMap[1]; ?></td>
+                            <td class="text-end fw-bold text-warning-emphasis"><?php echo number_format((int)($row['mb_points'] ?? 0)); ?></td>
+                            <td class="text-center">
+                              <?php if ($isVerified): ?>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-patch-check-fill me-1"></i>已驗證</span>
+                              <?php else: ?>
+                                <span class="badge bg-secondary-subtle text-secondary border"><i class="bi bi-clock me-1"></i>未驗證</span>
+                              <?php endif; ?>
+                            </td>
+                            <td class="text-center"><?php echo $statusMap[$sta] ?? '<span class="badge text-bg-secondary">未知</span>'; ?></td>
+                            <td class="text-center text-muted"><?php echo !empty($row['mb_created']) ? date('Y-m-d H:i', strtotime($row['mb_created'])) : '-'; ?></td>
+                          </tr>
                         <?php endforeach; ?>
                       </tbody>
                     </table>
@@ -232,58 +241,68 @@ $statusMap = array(
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function doButAdd() {
-    window.location.href = 'mb_detail.php?currID=0';
-  }
-  function doButReset() {
-    window.location.replace('mb_list.php');
-  }
-  function doButSerach() {
-    const offcanvasEl = document.getElementById('offcanvasSearch');
-    if (offcanvasEl) {
-      bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+    function doReDirect() {
+      window.history.back();
     }
-  }
-  function doButExcel() {
-    $('.buttons-excel').click();
-  }
-  function doButPrint() {
-    $('.buttons-print').click();
-  }
 
-  $(document).ready(function() {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+    function doButAdd() {
+      window.location.href = 'mb_detail.php?currID=0';
+    }
 
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
+    function doButReset() {
+      window.location.replace('mb_list.php');
+    }
 
-    var mblistTB = datatableCreate('dataTable_mblist');
+    function doButSerach() {
+      const offcanvasEl = document.getElementById('offcanvasSearch');
+      if (offcanvasEl) {
+        bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+      }
+    }
 
-    $('#dataSearch').on('keyup search input paste cut', function() {
-      if ($(this).is(':focus') || this.value !== '') {
-        mblistTB.search(this.value).draw();
+    function doButExcel() {
+      $('.buttons-excel').click();
+    }
+
+    function doButPrint() {
+      $('.buttons-print').click();
+    }
+
+    $(document).ready(function() {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      var mblistTB = datatableCreate('dataTable_mblist');
+
+      $('#dataSearch').on('keyup search input paste cut', function() {
+        if ($(this).is(':focus') || this.value !== '') {
+          mblistTB.search(this.value).draw();
+        }
+      });
+
+      $('#searchReset').click(function() {
+        if ($('#dataSearch').val() !== '') {
+          $('#dataSearch').val('');
+          mblistTB.search('').draw();
+        } else {
+          window.location.replace('mb_list.php');
+        }
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
       }
     });
-
-    $('#searchReset').click(function() {
-      if ($('#dataSearch').val() !== '') {
-        $('#dataSearch').val('');
-        mblistTB.search('').draw();
-      } else {
-        window.location.replace('mb_list.php');
-      }
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
-    }
-  });
   </script>
 </body>
+
 </html>

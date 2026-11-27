@@ -6,7 +6,7 @@ define('PAGE_MARK', 'PG_SCH_CAL');
 define('PAGE_ITEM', 'ITEM_SCH');
 define('PAGE_OPANEL', 1); // 1-新增
 define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
-define('COLL_OPANEL', 1);
+define('bkRedir', 1);
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
 
@@ -29,196 +29,253 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
     <link rel="stylesheet" href="../cssFiles/adminlte.css">
     <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
     <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
-<style>
-  #appointmentModal {
-    /* 顯式綁定 Bootstrap 5 明暗主題文字與背景色 */
-    --modal-text: var(--bs-body-color, #212529);
-    --modal-muted: var(--bs-secondary-color, #6c757d);
-    --modal-surface: var(--bs-body-bg, #ffffff);
-    --modal-input-bg: var(--bs-tertiary-bg, #f8f9fa);
+    <style>
+        #appointmentModal {
+            /* 顯式綁定 Bootstrap 5 明暗主題文字與背景色 */
+            --modal-text: var(--bs-body-color, #212529);
+            --modal-muted: var(--bs-secondary-color, #6c757d);
+            --modal-surface: var(--bs-body-bg, #ffffff);
+            --modal-input-bg: var(--bs-tertiary-bg, #f8f9fa);
 
-    .modal-content {
-      border: 0;
-      border-radius: 1rem;
-      background-color: var(--modal-surface) !important;
-      color: var(--modal-text) !important;
-      box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, .32);
-    }
+            .modal-content {
+                border: 0;
+                border-radius: 1rem;
+                background-color: var(--modal-surface) !important;
+                color: var(--modal-text) !important;
+                box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, .32);
+            }
 
-    .modal-title {
-      font-size: 1.25rem;
-      font-weight: 500;
-      color: var(--modal-text) !important;
-    }
+            .modal-title {
+                font-size: 1.25rem;
+                font-weight: 500;
+                color: var(--modal-text) !important;
+            }
 
-    /* 修正一般輸入框、日期時間框與下拉選單在明暗模式下與背景撞色 */
-    .form-control,
-    .form-select {
-      border-radius: .65rem;
-      color: var(--modal-text) !important;
-      background-color: var(--modal-input-bg) !important;
-      border-color: var(--bs-border-color);
-      -webkit-text-fill-color: var(--modal-text) !important;
+            /* 修正一般輸入框、日期時間框與下拉選單在明暗模式下與背景撞色 */
+            .form-control,
+            .form-select {
+                border-radius: .65rem;
+                color: var(--modal-text) !important;
+                background-color: var(--modal-input-bg) !important;
+                border-color: var(--bs-border-color);
+                -webkit-text-fill-color: var(--modal-text) !important;
 
-      &::placeholder {
-        color: var(--modal-muted) !important;
-        -webkit-text-fill-color: var(--modal-muted) !important;
-        opacity: 0.75;
-      }
+                &::placeholder {
+                    color: var(--modal-muted) !important;
+                    -webkit-text-fill-color: var(--modal-muted) !important;
+                    opacity: 0.75;
+                }
 
-      &:focus {
-        color: var(--modal-text) !important;
-        background-color: var(--modal-input-bg) !important;
-      }
-    }
+                &:focus {
+                    color: var(--modal-text) !important;
+                    background-color: var(--modal-input-bg) !important;
+                }
+            }
 
-    /* 修正 Dark 模式下展開下拉選單時，option 項目與背景同色的問題 */
-    .form-select option {
-      background-color: var(--modal-surface) !important;
-      color: var(--modal-text) !important;
-    }
+            /* 修正 Dark 模式下展開下拉選單時，option 項目與背景同色的問題 */
+            .form-select option {
+                background-color: var(--modal-surface) !important;
+                color: var(--modal-text) !important;
+            }
 
-    .form-floating > label,
-    .event-icon {
-      color: var(--modal-muted);
-    }
+            .form-floating>label,
+            .event-icon {
+                color: var(--modal-muted);
+            }
 
-    /* 修正 Title 輸入框在 Light/Dark 模式下都與背景形成高對比 */
-    #appointmentTitle {
-      height: 3.5rem;
-      padding: .5rem 0;
-      border: 0;
-      border-bottom: 1px solid var(--bs-border-color);
-      border-radius: 0;
-      background: transparent !important;
-      color: var(--modal-text) !important;
-      -webkit-text-fill-color: var(--modal-text) !important;
-      caret-color: var(--bs-primary);
-      font-size: 1.35rem;
-      font-weight: 600;
-      box-shadow: none;
+            /* 修正 Title 輸入框在 Light/Dark 模式下都與背景形成高對比 */
+            #appointmentTitle {
+                height: 3.5rem;
+                padding: .5rem 0;
+                border: 0;
+                border-bottom: 1px solid var(--bs-border-color);
+                border-radius: 0;
+                background: transparent !important;
+                color: var(--modal-text) !important;
+                -webkit-text-fill-color: var(--modal-text) !important;
+                caret-color: var(--bs-primary);
+                font-size: 1.35rem;
+                font-weight: 600;
+                box-shadow: none;
 
-      &::placeholder {
-        color: var(--modal-muted) !important;
-        -webkit-text-fill-color: var(--modal-muted) !important;
-        font-weight: 400;
-        opacity: 0.7;
-      }
+                &::placeholder {
+                    color: var(--modal-muted) !important;
+                    -webkit-text-fill-color: var(--modal-muted) !important;
+                    font-weight: 400;
+                    opacity: 0.7;
+                }
 
-      &:focus {
-        border-bottom: 2px solid var(--bs-primary);
-      }
+                &:focus {
+                    border-bottom: 2px solid var(--bs-primary);
+                }
 
-      & + label {
-        display: none;
-      }
-    }
+                &+label {
+                    display: none;
+                }
+            }
 
-    .editor-section {
-      padding: 0;
-      border: 0;
-      background: transparent;
+            .editor-section {
+                padding: 0;
+                border: 0;
+                background: transparent;
 
-      .form-label {
-        color: var(--modal-muted);
-        font-size: .8rem;
-        font-weight: 600;
-        letter-spacing: .02em;
-        text-transform: uppercase;
-      }
-    }
+                .form-label {
+                    color: var(--modal-muted);
+                    font-size: .8rem;
+                    font-weight: 600;
+                    letter-spacing: .02em;
+                    text-transform: uppercase;
+                }
+            }
 
-    .event-row {
-      display: grid;
-      grid-template-columns: 2rem minmax(0, 1fr);
-      gap: .75rem;
-      align-items: start;
-    }
+            .event-row {
+                display: grid;
+                grid-template-columns: 2rem minmax(0, 1fr);
+                gap: .75rem;
+                align-items: start;
+            }
 
-    .event-icon {
-      width: 2rem;
-      padding-top: .65rem;
-      font-size: 1.1rem;
-      text-align: center;
-    }
+            .event-icon {
+                width: 2rem;
+                padding-top: .65rem;
+                font-size: 1.1rem;
+                text-align: center;
+            }
 
-    .js-priority-fields .btn-group {
-      display: inline-flex;
-      width: auto !important;
-      gap: .25rem;
+            .js-priority-fields .btn-group {
+                display: inline-flex;
+                width: auto !important;
+                gap: .25rem;
 
-      .btn {
-        min-width: 5rem;
-        border: 1px solid var(--bs-border-color) !important;
-        border-radius: 999px !important;
-        color: var(--modal-muted);
-        background: transparent;
+                .btn {
+                    min-width: 5rem;
+                    border: 1px solid var(--bs-border-color) !important;
+                    border-radius: 999px !important;
+                    color: var(--modal-muted);
+                    background: transparent;
 
-        &:hover {
-          color: var(--bs-primary);
-          background: var(--bs-primary-bg-subtle);
-          border-color: var(--bs-primary) !important;
+                    &:hover {
+                        color: var(--bs-primary);
+                        background: var(--bs-primary-bg-subtle);
+                        border-color: var(--bs-primary) !important;
+                    }
+                }
+
+                .btn-check:checked+.btn {
+                    color: var(--bs-primary);
+                    background: var(--bs-primary-bg-subtle);
+                    border-color: var(--bs-primary) !important;
+                }
+            }
+
+            .powered-by {
+                display: none;
+            }
+
+            .modal-footer-actions {
+                padding: 1rem 1.5rem;
+                background: var(--bs-secondary-bg);
+                border-radius: 0 0 1rem 1rem;
+
+                @media (min-width: 992px) {
+                    padding-inline: 3rem;
+                }
+            }
+
+            .form-switch .form-check-input {
+                position: relative !important;
+                background-image: none !important;
+                background-color: transparent !important;
+                border: 1px solid #6c757d !important;
+                box-shadow: none !important;
+
+                &:focus {
+                    border-color: #86b7fe !important;
+                    box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .25) !important;
+                }
+
+                &::after {
+                    content: "";
+                    position: absolute;
+                    top: 50%;
+                    left: 2px;
+                    width: calc(1em - 5px);
+                    height: calc(1em - 5px);
+                    border-radius: 50%;
+                    background-color: #adb5bd;
+                    transform: translateY(-50%);
+                    transition: transform .15s ease-in-out, background-color .15s ease-in-out;
+                }
+
+                &:checked {
+                    background-color: #0d6efd !important;
+                    border-color: #0d6efd !important;
+
+                    &::after {
+                        background-color: #ffffff;
+                        transform: translate(1em, -50%);
+                    }
+                }
+            }
         }
-      }
 
-      .btn-check:checked + .btn {
-        color: var(--bs-primary);
-        background: var(--bs-primary-bg-subtle);
-        border-color: var(--bs-primary) !important;
-      }
-    }
-
-    .powered-by {
-      display: none;
-    }
-
-    .modal-footer-actions {
-      padding: 1rem 1.5rem;
-      background: var(--bs-secondary-bg);
-      border-radius: 0 0 1rem 1rem;
-
-      @media (min-width: 992px) {
-        padding-inline: 3rem;
-      }
-    }
-
-    .form-switch .form-check-input {
-      position: relative !important;
-      background-image: none !important;
-      background-color: transparent !important;
-      border: 1px solid #6c757d !important;
-      box-shadow: none !important;
-
-      &:focus {
-        border-color: #86b7fe !important;
-        box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .25) !important;
-      }
-
-      &::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 2px;
-        width: calc(1em - 5px);
-        height: calc(1em - 5px);
-        border-radius: 50%;
-        background-color: #adb5bd;
-        transform: translateY(-50%);
-        transition: transform .15s ease-in-out, background-color .15s ease-in-out;
-      }
-
-      &:checked {
-        background-color: #0d6efd !important;
-        border-color: #0d6efd !important;
-
-        &::after {
-          background-color: #ffffff;
-          transform: translate(1em, -50%);
+        /* 隱藏 bsCalendar 內建的頂部導覽列，放大日曆可視區 */
+        #calendar [data-bs-calendar-inner-wrapper]>nav,
+        #calendar [data-bs-calendar-mobile-topnav] {
+            display: none !important;
         }
-      }
-    }
-  }
-</style>
+
+        #calendar [data-bs-calendar-inner-wrapper] {
+            padding-bottom: 0 !important;
+            gap: 0.5rem !important;
+        }
+
+        /* 修正 Modal 寬度與 Light/Dark 模式高對比文字 */
+        #appointmentModal {
+            --bs-modal-width: 520px;
+            --modal-text: var(--bs-body-color, #212529);
+            --modal-muted: var(--bs-secondary-color, #6c757d);
+            --modal-surface: var(--bs-body-bg, #ffffff);
+            --modal-input-bg: var(--bs-tertiary-bg, #f8f9fa);
+        }
+
+        #appointmentModal .modal-content {
+            background-color: var(--modal-surface) !important;
+            color: var(--modal-text) !important;
+        }
+
+        #appointmentModal .form-control,
+        #appointmentModal .form-select,
+        #appointmentModal #appointmentTitle {
+            color: var(--modal-text) !important;
+            background-color: var(--modal-input-bg) !important;
+            -webkit-text-fill-color: var(--modal-text) !important;
+        }
+
+        #appointmentModal #appointmentTitle {
+            background: transparent !important;
+        }
+
+        #appointmentModal .form-select option {
+            background-color: var(--modal-surface) !important;
+            color: var(--modal-text) !important;
+        }
+
+        /* 1. 月檢視：滑鼠移過日期格子時柔和變色（自動相容 Light / Dark 模式） */
+        #calendar td[data-month-date] {
+            transition: background-color 0.15s ease-in-out;
+        }
+
+        #calendar td[data-month-date]:hover {
+            background-color: color-mix(in srgb, var(--bs-primary) 12%, var(--bs-body-bg)) !important;
+            cursor: pointer;
+        }
+
+        /* 2. 週 / 4日 / 日檢視：滑鼠移過單一小時格時柔和提示 */
+        #calendar .wc-day-view-time-slots [data-day-hour]:hover {
+            background-color: color-mix(in srgb, var(--bs-primary) 10%, transparent) !important;
+        }
+    </style>
 
 </head>
 
@@ -445,12 +502,21 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
             </div>
         </main>
         <!-- 右側進階搜尋 Offcanvas -->
-        <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasSearch" aria-labelledby="offcanvasSearchLabel">
+        <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasSearch" aria-labelledby="offcanvasSearchLabel" style="--bs-offcanvas-width: 280px; max-width: 80vw;">
             <div class="offcanvas-header border-bottom border-secondary">
-                <h5 class="offcanvas-title" id="offcanvasSearchLabel"><i class="bi bi-funnel-fill me-2 text-warning"></i>排程與通知日曆功能篩選</h5>
+                <h5 class="offcanvas-title" id="offcanvasSearchLabel"><i class="bi bi-funnel-fill me-2 text-warning"></i>排程日曆功能篩選</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
             <div class="offcanvas-body">
+                <div class="mb-3 pb-3 border-bottom border-secondary">
+                    <label class="form-label small text-warning fw-bold mb-1" for="rightDrawerSearchInput">
+                        <i class="bi bi-search me-1"></i>關鍵字搜尋排程
+                    </label>
+                    <div class="input-group input-group-sm mb-2">
+                        <input type="search" class="form-control" id="rightDrawerSearchInput" name="rightDrawerSearchInput" placeholder="輸入標題/地點/內容按 Enter...">
+                        <button type="button" class="btn btn-warning fw-bold" id="btnRightDrawerSearchGo">搜尋</button>
+                    </div>
+                </div>
 
                 <div class="mb-3">
                     <div class="form-check form-switch mb-2">
@@ -505,6 +571,10 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
         // -------------- 可接收include檔案要求後自定義動作 -------------- //
         ////////////////////////////////////////////////////////////////
         /** 頂部工具列「新增」按鈕：前往完整排程設定頁 */
+        function doReDirect() {
+            window.history.back();
+        }
+
         function doButAdd() {
             window.location.href = 'sch_detail.php?currID=0&fromCal=1';
         }
@@ -513,9 +583,25 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
             window.location.replace('sch_cal_list.php');
         }
 
-        function doButLeftSide() {
-            alert('doButLeftSide');
+        function doButSideBarL() {
+            const $cal = $('#calendar');
+            const $side = $cal.find('[data-bs-calendar-main-container] > div:first-child');
+            const $nativeToggle = $cal.find('[data-bs-toggle="sidebar"]').first();
+
+            if ($nativeToggle.length) {
+                $nativeToggle.trigger('click');
+            } else if ($side.length) {
+                $side.toggle();
+            }
+
+            setTimeout(function() {
+                const isOpen = $side.is(':visible') && $side.css('left') !== '-400px';
+                if (window.parent && window.parent.document) {
+                    $('#topBut_SideBarL', window.parent.document).toggleClass('drawer-open', isOpen);
+                }
+            }, 320);
         }
+
 
         function doButSerach() {
             const offcanvasEl = document.getElementById('offcanvasSearch');
@@ -528,6 +614,13 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
         ////////////////////////////////////////////////////////////////
 
         $(document).ready(function() {
+
+            $(document).on('click', '#btnInlineExitSearch', function() {
+                $('#rightDrawerSearchInput').val('');
+                const $closeBtn = $calendar.find('.js-btn-close-search').first();
+                if ($closeBtn.length) $closeBtn.click();
+            });
+
 
             const $calendar = $('#calendar');
             const $modal = $('#appointmentModal');
@@ -747,7 +840,102 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                     onAll(eventName, ...args) {
                         if (eventName.startsWith('init.')) {
                             $('#temp_loading').remove();
+
+                            // 1. 在原有左側區塊最頂端插入「移到今天」與「顯示方式選單」（保留原有小月曆、分類與下半部 #sidebarAddons）
+                            const $origSide = $calendar.find('[data-bs-calendar-main-container] > div:first-child');
+                            if ($origSide.length && !$('#origSideTopControls').length) {
+                                $origSide.prepend(`
+                                    <div id="origSideTopControls" class="d-flex gap-2 mb-3 pb-3 border-bottom">
+                                        <button type="button" class="btn btn-primary btn-sm flex-shrink-0 fw-bold" id="btnLeftCalToday">
+                                            <i class="bi bi-calendar-check me-1"></i>移到今天
+                                        </button>
+                                        <select class="form-select form-select-sm" id="selLeftCalView" aria-label="顯示方式選單">
+                                            <option value="month" selected>月檢視 (Month)</option>
+                                            <option value="week">週檢視 (Week)</option>
+                                            <option value="workweek">工作週 (Workweek)</option>
+                                            <option value="4day">4日檢視 (4 Days)</option>
+                                            <option value="day">日檢視 (Day)</option>
+                                            <option value="timeline">時間軸 (Timeline)</option>
+                                            <option value="agenda">議程清單 (Agenda)</option>
+                                            <option value="monthCompact">精簡月議程 (Compact)</option>
+                                            <option value="year">年檢視 (Year)</option>
+                                        </select>
+                                    </div>
+                                `);
+                                if (window.parent && window.parent.document) {
+                                    $('#topBut_SideBarL', window.parent.document)
+                                        .addClass('active drawer-open')
+                                        .css({
+                                            opacity: '1',
+                                            cursor: 'pointer'
+                                        });
+                                }
+                            }
+
+                            // 2. 綁定左側「移到今天 / 顯示方式」與右抽屜「搜尋 / 清除」事件
+                            $('#btnLeftCalToday').off('click').on('click', () => $calendar.bsCalendar('setToday'));
+                            $('#selLeftCalView').off('change').on('change', function() {
+                                if ($(this).val()) $calendar.bsCalendar('setView', $(this).val());
+                            });
+                            $('#rightDrawerSearchInput').off('keyup').on('keyup', function(e) {
+                                if (e.key === 'Enter' || e.which === 13) $('#btnRightDrawerSearchGo').click();
+                            });
+
+                            $('#btnRightDrawerSearchGo').off('click').on('click', function() {
+                                const kw = ($('#rightDrawerSearchInput').val() || '').trim();
+                                if (!kw) {
+                                    alert('請先輸入搜尋關鍵字！');
+                                    return;
+                                }
+                                // 1. 自動關閉右抽屜
+                                const rightDrawerEl = document.getElementById('offcanvasSearch');
+                                if (rightDrawerEl) {
+                                    bootstrap.Offcanvas.getOrCreateInstance(rightDrawerEl).hide();
+                                }
+                                // 2. 觸發套件搜尋
+                                const $nativeInput = $calendar.find('[data-search-input]').first();
+                                if ($nativeInput.length) {
+                                    $nativeInput.val(kw).trigger($.Event('keyup', {
+                                        key: 'Enter',
+                                        which: 13,
+                                        keyCode: 13
+                                    }));
+                                }
+                            });
+
                         }
+
+                        // 當日曆檢視模式改變（例如點擊小月曆某天自動切換到 day 檢視，或點擊週次切換到 week）時，同步更新左側下拉選單
+                        if (eventName.startsWith('view.')) {
+                            const currentView = args.at(0);
+                            if (currentView && $('#selLeftCalView option[value="' + currentView + '"]').length) {
+                                $('#selLeftCalView').val(currentView);
+                            }
+                        }
+                        // 搜尋結果列表載入完成後，在列表最上方自動補上「返回日曆檢視」按鈕橫幅
+                        if (eventName.startsWith('after-load.')) {
+                            setTimeout(function() {
+                                const calData = $calendar.data('bsCalendar');
+                                if (calData && calData.searchMode) {
+                                    const $resultBox = $calendar.find('.wc-search-result-container');
+                                    if ($resultBox.length && !$resultBox.find('#calSearchReturnBar').length) {
+                                        const kwText = $('<div>').text(($('#rightDrawerSearchInput').val() || '').trim()).html();
+                                        $resultBox.prepend(`
+                                            <div id="calSearchReturnBar" class="d-flex flex-wrap justify-content-between align-items-center bg-body-secondary px-3 py-2 rounded-3 mb-3 border gap-2">
+                                                <div class="small">
+                                                    <i class="bi bi-search text-warning me-1"></i>
+                                                    搜尋關鍵字：<strong class="text-primary">${kwText}</strong>
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" id="btnInlineExitSearch">
+                                                    <i class="bi bi-arrow-left me-1"></i>返回日曆檢視
+                                                </button>
+                                            </div>
+                                        `);
+                                    }
+                                }
+                            }, 0);
+                        }
+
                         if ($('#switchTriggeredEvents').is(':checked')) {
                             $.bsToast({
                                 title: 'Event ' + eventCounter,
@@ -883,7 +1071,11 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 // 1. 深色/淺色模式切換與 2. 重新同步資料按鈕事件
                 $calendar.on('change', '#flexSwitchCheckTheme', function() {
                     $('html').attr('data-bs-theme', $(this).is(':checked') ? 'dark' : 'light');
-                    $calendar.bsCalendar('render');
+                    const calData = $calendar.data('bsCalendar');
+                    if (!calData || !calData.searchMode) {
+                        $calendar.bsCalendar('render');
+                    }
+
                 }).on('click', '[data-method="refresh"]', function(e) {
                     e.preventDefault();
                     $calendar.bsCalendar('refresh');
@@ -1033,6 +1225,11 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
 
                 $modal
                     .on('hide.bs.modal', function() {
+                        const calData = $calendar.data('bsCalendar');
+                        // 若目前正處於「搜尋結果列表」模式，關閉彈窗時不可呼叫 render()，保留原搜尋結果列表與返回按鈕
+                        if (calData && calData.searchMode) {
+                            return;
+                        }
                         $calendar.bsCalendar('render');
                     })
                     .on('change', 'input[name="allDay"]', function() {
@@ -1046,7 +1243,13 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                         const res = await callSchApi('func_bs_cal_save', appt);
                         if (res.RTN === 1) {
                             $modal.modal('hide');
-                            $calendar.bsCalendar('refresh');
+                            const calData = $calendar.data('bsCalendar');
+                            // 若在搜尋模式下儲存變更，重新觸發目前關鍵字搜尋以更新列表；否則正常重整日曆
+                            if (calData && calData.searchMode) {
+                                $('#btnRightDrawerSearchGo').click();
+                            } else {
+                                $calendar.bsCalendar('refresh');
+                            }
                             if ($.bsToast) $.bsToast({
                                 title: '成功',
                                 message: res.msgStr
@@ -1056,6 +1259,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                         }
                     });
             }
+
             /** 批次初始化彈窗內的開始時間與結束時間選擇器（bsTimepicker） */
             function initModalTimepickers() {
                 if (typeof $.fn.bsTimepicker !== 'function') {
@@ -1134,7 +1338,10 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                 $modal.find('textarea[name="location"]').val(formatLocationValue(appointment.location));
                 $colorpicker.bsColorPicker('val', appointment.color);
                 // $modal.find('input[name="color"]').val(normalizeColorInput(appointment.color));
-                $modal.find('input[name="link"]').val(appointment.link || '');
+                let cleanLink = (appointment.link && typeof appointment.link === 'object') ? '' : String(appointment.link || '');
+                if (cleanLink.includes('[object')) cleanLink = '';
+                $modal.find('input[name="link"]').val(cleanLink);
+
                 $modal.modal('show');
             }
             /** 設定彈窗內開始或結束時間選擇器的值（自動標準化為 HH:mm 格式） */

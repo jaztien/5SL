@@ -8,9 +8,15 @@ $searchCourseId = isset($_REQUEST['searchCourseId']) ? trim($_REQUEST['searchCou
 $searchLive     = isset($_REQUEST['searchLive']) ? trim($_REQUEST['searchLive']) : '';
 
 $searchURI = "";
-if ($searchText !== '')     { $searchURI .= "&searchText=" . rawurlencode($searchText); }
-if ($searchCourseId !== '') { $searchURI .= "&searchCourseId=" . rawurlencode($searchCourseId); }
-if ($searchLive !== '')     { $searchURI .= "&searchLive=" . rawurlencode($searchLive); }
+if ($searchText !== '') {
+  $searchURI .= "&searchText=" . rawurlencode($searchText);
+}
+if ($searchCourseId !== '') {
+  $searchURI .= "&searchCourseId=" . rawurlencode($searchCourseId);
+}
+if ($searchLive !== '') {
+  $searchURI .= "&searchLive=" . rawurlencode($searchLive);
+}
 if (!empty($searchURI)) {
   $searchURI = substr($searchURI, 1);
 }
@@ -23,6 +29,7 @@ define('PAGE_ITEM', 'ITEM_COURSE');
 define('PAGE_OPANEL', 1); // 1-新增
 define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
 define('EXPORT_OPANEL', 3); // 3-Excel+Print
+define('bkRedir', 1);
 
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
@@ -72,6 +79,7 @@ $weekNames = array('0' => '日', '1' => '一', '2' => '二', '3' => '三', '4' =
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -89,6 +97,7 @@ $weekNames = array('0' => '日', '1' => '一', '2' => '二', '3' => '三', '4' =
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-cyan">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -168,53 +177,53 @@ $weekNames = array('0' => '日', '1' => '一', '2' => '二', '3' => '三', '4' =
                             if (!empty($wTxt)) $weekStr = '每' . implode('、', $wTxt);
                           }
                         ?>
-                        <tr style="cursor: pointer;" onclick="window.location.href='sess_detail.php?currID=<?php echo $sid; ?>';">
-                          <td class="text-center fw-bold"><?php echo $sid; ?></td>
-                          <td>
-                            <div class="fw-bold text-dark">
-                              <span class="badge text-bg-dark me-1">第 <?php echo (int)$row['sess_batch']; ?> 梯</span>
-                              <?php echo htmlspecialchars($row['course_title'] ?? '未指定主課程'); ?>
-                              <?php if (!empty($row['sess_keycode'])): ?>
-                                <code class="ms-1 text-primary">[<?php echo htmlspecialchars($row['sess_keycode']); ?>]</code>
+                          <tr style="cursor: pointer;" onclick="window.location.href='sess_detail.php?currID=<?php echo $sid; ?>';">
+                            <td class="text-center fw-bold"><?php echo $sid; ?></td>
+                            <td>
+                              <div class="fw-bold text-dark">
+                                <span class="badge text-bg-dark me-1">第 <?php echo (int)$row['sess_batch']; ?> 梯</span>
+                                <?php echo htmlspecialchars($row['course_title'] ?? '未指定主課程'); ?>
+                                <?php if (!empty($row['sess_keycode'])): ?>
+                                  <code class="ms-1 text-primary">[<?php echo htmlspecialchars($row['sess_keycode']); ?>]</code>
+                                <?php endif; ?>
+                              </div>
+                              <?php if (!empty($row['sess_altname'])): ?>
+                                <div class="text-muted" style="font-size: 0.78rem;"><?php echo htmlspecialchars($row['sess_altname']); ?></div>
                               <?php endif; ?>
-                            </div>
-                            <?php if (!empty($row['sess_altname'])): ?>
-                              <div class="text-muted" style="font-size: 0.78rem;"><?php echo htmlspecialchars($row['sess_altname']); ?></div>
-                            <?php endif; ?>
-                          </td>
-                          <td class="fw-semibold">
-                            <div><?php echo htmlspecialchars($row['sess_startdate'] ?? '-'); ?> <?php echo !empty($row['sess_starttime']) ? substr($row['sess_starttime'], 0, 5) : ''; ?></div>
-                            <div class="text-muted" style="font-size: 0.75rem;">
-                              共 <?php echo (int)($row['sess_lesson'] ?? 1); ?> 堂 • <?php echo (int)($row['sess_duration'] ?? 40); ?> 分鐘
-                              <?php if ($weekStr !== '') echo ' • ' . $weekStr; ?>
-                            </div>
-                          </td>
-                          <td>
-                            <?php if ($hasZoom): ?>
-                              <div class="fw-bold text-primary"><i class="bi bi-camera-video me-1"></i><?php echo htmlspecialchars($row['sess_meetingid']); ?></div>
-                              <?php if (!empty($row['sess_passcode'])): ?>
-                                <div class="text-muted" style="font-size: 0.75rem;">密碼：<code><?php echo htmlspecialchars($row['sess_passcode']); ?></code></div>
+                            </td>
+                            <td class="fw-semibold">
+                              <div><?php echo htmlspecialchars($row['sess_startdate'] ?? '-'); ?> <?php echo !empty($row['sess_starttime']) ? substr($row['sess_starttime'], 0, 5) : ''; ?></div>
+                              <div class="text-muted" style="font-size: 0.75rem;">
+                                共 <?php echo (int)($row['sess_lesson'] ?? 1); ?> 堂 • <?php echo (int)($row['sess_duration'] ?? 40); ?> 分鐘
+                                <?php if ($weekStr !== '') echo ' • ' . $weekStr; ?>
+                              </div>
+                            </td>
+                            <td>
+                              <?php if ($hasZoom): ?>
+                                <div class="fw-bold text-primary"><i class="bi bi-camera-video me-1"></i><?php echo htmlspecialchars($row['sess_meetingid']); ?></div>
+                                <?php if (!empty($row['sess_passcode'])): ?>
+                                  <div class="text-muted" style="font-size: 0.75rem;">密碼：<code><?php echo htmlspecialchars($row['sess_passcode']); ?></code></div>
+                                <?php endif; ?>
+                              <?php else: ?>
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">尚未建立 Zoom 會議間</span>
                               <?php endif; ?>
-                            <?php else: ?>
-                              <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">尚未建立 Zoom 會議間</span>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center"><?php echo $liveMap[$liveSta] ?? $liveMap[0]; ?></td>
-                          <td class="text-center">
-                            <span class="badge text-bg-primary"><?php echo $enrCnt; ?> / <?php echo $maxCap; ?> 人</span>
-                            <div class="text-success fw-semibold mt-1" style="font-size: 0.75rem;">已簽到：<?php echo $chkCnt; ?> 人</div>
-                          </td>
-                          <td class="text-center">
-                            <?php if ($hasRec): ?>
-                              <span class="badge bg-success-subtle text-success border border-success"><i class="bi bi-play-btn-fill me-1"></i>已上架</span>
-                            <?php else: ?>
-                              <span class="text-muted">-</span>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center">
-                            <?php echo ($sessSta === 1) ? '<span class="badge text-bg-success">開放中</span>' : '<span class="badge text-bg-secondary">已關閉</span>'; ?>
-                          </td>
-                        </tr>
+                            </td>
+                            <td class="text-center"><?php echo $liveMap[$liveSta] ?? $liveMap[0]; ?></td>
+                            <td class="text-center">
+                              <span class="badge text-bg-primary"><?php echo $enrCnt; ?> / <?php echo $maxCap; ?> 人</span>
+                              <div class="text-success fw-semibold mt-1" style="font-size: 0.75rem;">已簽到：<?php echo $chkCnt; ?> 人</div>
+                            </td>
+                            <td class="text-center">
+                              <?php if ($hasRec): ?>
+                                <span class="badge bg-success-subtle text-success border border-success"><i class="bi bi-play-btn-fill me-1"></i>已上架</span>
+                              <?php else: ?>
+                                <span class="text-muted">-</span>
+                              <?php endif; ?>
+                            </td>
+                            <td class="text-center">
+                              <?php echo ($sessSta === 1) ? '<span class="badge text-bg-success">開放中</span>' : '<span class="badge text-bg-secondary">已關閉</span>'; ?>
+                            </td>
+                          </tr>
                         <?php endforeach; ?>
                       </tbody>
                     </table>
@@ -274,48 +283,66 @@ $weekNames = array('0' => '日', '1' => '一', '2' => '二', '3' => '三', '4' =
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function doButAdd() { window.location.href = 'sess_detail.php?currID=0'; }
-  function doButReset() { window.location.replace('sess_list.php'); }
-  function doButSerach() {
-    const offcanvasEl = document.getElementById('offcanvasSearch');
-    if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
-  }
-  function doButExcel() { $('.buttons-excel').click(); }
-  function doButPrint() { $('.buttons-print').click(); }
-
-  $(document).ready(function() {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
-
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
-
-    var sesslistTB = datatableCreate('dataTable_sesslist');
-
-    $('#dataSearch').on('keyup search input paste cut', function() {
-      if ($(this).is(':focus') || this.value !== '') {
-        sesslistTB.search(this.value).draw();
-      }
-    });
-
-    $('#searchReset').click(function() {
-      if ($('#dataSearch').val() !== '') {
-        $('#dataSearch').val('');
-        sesslistTB.search('').draw();
-      } else {
-        window.location.replace('sess_list.php');
-      }
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+    function doReDirect() {
+      window.history.back();
     }
-  });
+
+    function doButAdd() {
+      window.location.href = 'sess_detail.php?currID=0';
+    }
+
+    function doButReset() {
+      window.location.replace('sess_list.php');
+    }
+
+    function doButSerach() {
+      const offcanvasEl = document.getElementById('offcanvasSearch');
+      if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+    }
+
+    function doButExcel() {
+      $('.buttons-excel').click();
+    }
+
+    function doButPrint() {
+      $('.buttons-print').click();
+    }
+
+    $(document).ready(function() {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      var sesslistTB = datatableCreate('dataTable_sesslist');
+
+      $('#dataSearch').on('keyup search input paste cut', function() {
+        if ($(this).is(':focus') || this.value !== '') {
+          sesslistTB.search(this.value).draw();
+        }
+      });
+
+      $('#searchReset').click(function() {
+        if ($('#dataSearch').val() !== '') {
+          $('#dataSearch').val('');
+          sesslistTB.search('').draw();
+        } else {
+          window.location.replace('sess_list.php');
+        }
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+      }
+    });
   </script>
 </body>
+
 </html>

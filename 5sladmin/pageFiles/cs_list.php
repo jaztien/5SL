@@ -8,9 +8,15 @@ $searchType   = isset($_REQUEST['searchType']) ? trim($_REQUEST['searchType']) :
 $searchStatus = isset($_REQUEST['searchStatus']) ? trim($_REQUEST['searchStatus']) : '';
 
 $searchURI = "";
-if ($searchText !== '')   { $searchURI .= "&searchText=" . rawurlencode($searchText); }
-if ($searchType !== '')   { $searchURI .= "&searchType=" . rawurlencode($searchType); }
-if ($searchStatus !== '') { $searchURI .= "&searchStatus=" . rawurlencode($searchStatus); }
+if ($searchText !== '') {
+  $searchURI .= "&searchText=" . rawurlencode($searchText);
+}
+if ($searchType !== '') {
+  $searchURI .= "&searchType=" . rawurlencode($searchType);
+}
+if ($searchStatus !== '') {
+  $searchURI .= "&searchStatus=" . rawurlencode($searchStatus);
+}
 if (!empty($searchURI)) {
   $searchURI = substr($searchURI, 1);
 }
@@ -23,6 +29,7 @@ define('PAGE_ITEM', 'ITEM_COURSE');
 define('PAGE_OPANEL', 1); // 1-新增
 define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
 define('EXPORT_OPANEL', 3); // 3-Excel+Print
+define('bkRedir', 1);
 
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
@@ -74,6 +81,7 @@ $statusMap = array(
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -91,6 +99,7 @@ $statusMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-green">
   <div class="app-wrapper">
     <main class="app-main">
@@ -136,7 +145,7 @@ $statusMap = array(
                 </div>
                 <div class="card-body">
                   <div class="table-responsive">
-                    <table id="dataTable_cslist" class="table table-striped table-hover table-bordered align-middle w-100 small"  data-search="1">
+                    <table id="dataTable_cslist" class="table table-striped table-hover table-bordered align-middle w-100 small" data-search="1">
                       <thead class="table-light text-nowrap">
                         <tr>
                           <th class="text-center" style="width: 55px;">ID</th>
@@ -161,52 +170,52 @@ $statusMap = array(
                           $sta       = (int)($row['course_status'] ?? 1);
                           $showPrice = ((int)($row['course_show_pricing'] ?? 1) === 1);
                         ?>
-                        <tr style="cursor: pointer;" onclick="window.location.href='cs_detail.php?currID=<?php echo $cid; ?>';">
-                          <td class="text-center fw-bold"><?php echo $cid; ?></td>
-                          <td class="text-center">
-                            <img src="<?php echo $coverSrc; ?>" class="rounded border" width="52" height="38" style="object-fit: cover;" alt="Cover">
-                          </td>
-                          <td>
-                            <div class="fw-bold text-dark">
-                              <?php if ((int)($row['course_is_hot'] ?? 0) === 1): ?>
-                                <span class="badge text-bg-danger me-1">置中主打</span>
+                          <tr style="cursor: pointer;" onclick="window.location.href='cs_detail.php?currID=<?php echo $cid; ?>';">
+                            <td class="text-center fw-bold"><?php echo $cid; ?></td>
+                            <td class="text-center">
+                              <img src="<?php echo $coverSrc; ?>" class="rounded border" width="52" height="38" style="object-fit: cover;" alt="Cover">
+                            </td>
+                            <td>
+                              <div class="fw-bold text-dark">
+                                <?php if ((int)($row['course_is_hot'] ?? 0) === 1): ?>
+                                  <span class="badge text-bg-danger me-1">置中主打</span>
+                                <?php endif; ?>
+                                <?php echo htmlspecialchars($row['course_title'] ?? ''); ?>
+                              </div>
+                              <?php if (!empty($row['course_subtitle'])): ?>
+                                <div class="text-muted" style="font-size: 0.78rem;"><?php echo htmlspecialchars($row['course_subtitle']); ?></div>
                               <?php endif; ?>
-                              <?php echo htmlspecialchars($row['course_title'] ?? ''); ?>
-                            </div>
-                            <?php if (!empty($row['course_subtitle'])): ?>
-                              <div class="text-muted" style="font-size: 0.78rem;"><?php echo htmlspecialchars($row['course_subtitle']); ?></div>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center">
-                            <?php if ($pid > 0): ?>
-                              <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
-                                <i class="bi bi-diagram-2 me-1"></i>子方案 (#<?php echo $pid; ?>)
-                              </span>
-                            <?php else: ?>
-                              <span class="badge bg-light text-dark border">獨立主課程</span>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-end">
-                            <span class="fw-bold text-success-emphasis">NT$ <?php echo number_format((float)($row['course_cost'] ?? 0)); ?></span>
-                            <?php if (!empty($row['course_price_unit'])): ?>
-                              <div class="text-muted" style="font-size: 0.75rem;">/ <?php echo htmlspecialchars($row['course_price_unit']); ?></div>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center"><?php echo $tierMap[$tierKey] ?? $tierMap['plan-tier-standard']; ?></td>
-                          <td class="text-center">
-                            <?php if ($showPrice): ?>
-                              <i class="bi bi-check-circle-fill text-success fs-6" title="顯示於首頁價格卡片"></i>
-                            <?php else: ?>
-                              <i class="bi bi-dash-circle text-muted fs-6" title="不顯示於價格卡片"></i>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center">
-                            <span class="badge text-bg-light border text-dark"><?php echo (int)$row['sess_cnt']; ?> 梯</span>
-                            <span class="badge text-bg-primary"><?php echo (int)$row['enroll_cnt']; ?> 人</span>
-                          </td>
-                          <td class="text-center text-muted"><?php echo (int)($row['course_sort'] ?? 100); ?></td>
-                          <td class="text-center"><?php echo $statusMap[$sta] ?? '<span class="badge text-bg-secondary">未知</span>'; ?></td>
-                        </tr>
+                            </td>
+                            <td class="text-center">
+                              <?php if ($pid > 0): ?>
+                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
+                                  <i class="bi bi-diagram-2 me-1"></i>子方案 (#<?php echo $pid; ?>)
+                                </span>
+                              <?php else: ?>
+                                <span class="badge bg-light text-dark border">獨立主課程</span>
+                              <?php endif; ?>
+                            </td>
+                            <td class="text-end">
+                              <span class="fw-bold text-success-emphasis">NT$ <?php echo number_format((float)($row['course_cost'] ?? 0)); ?></span>
+                              <?php if (!empty($row['course_price_unit'])): ?>
+                                <div class="text-muted" style="font-size: 0.75rem;">/ <?php echo htmlspecialchars($row['course_price_unit']); ?></div>
+                              <?php endif; ?>
+                            </td>
+                            <td class="text-center"><?php echo $tierMap[$tierKey] ?? $tierMap['plan-tier-standard']; ?></td>
+                            <td class="text-center">
+                              <?php if ($showPrice): ?>
+                                <i class="bi bi-check-circle-fill text-success fs-6" title="顯示於首頁價格卡片"></i>
+                              <?php else: ?>
+                                <i class="bi bi-dash-circle text-muted fs-6" title="不顯示於價格卡片"></i>
+                              <?php endif; ?>
+                            </td>
+                            <td class="text-center">
+                              <span class="badge text-bg-light border text-dark"><?php echo (int)$row['sess_cnt']; ?> 梯</span>
+                              <span class="badge text-bg-primary"><?php echo (int)$row['enroll_cnt']; ?> 人</span>
+                            </td>
+                            <td class="text-center text-muted"><?php echo (int)($row['course_sort'] ?? 100); ?></td>
+                            <td class="text-center"><?php echo $statusMap[$sta] ?? '<span class="badge text-bg-secondary">未知</span>'; ?></td>
+                          </tr>
                         <?php endforeach; ?>
                       </tbody>
                     </table>
@@ -263,58 +272,68 @@ $statusMap = array(
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function doButAdd() {
-    window.location.href = 'cs_detail.php?currID=0';
-  }
-  function doButReset() {
-    window.location.replace('cs_list.php');
-  }
-  function doButSerach() {
-    const offcanvasEl = document.getElementById('offcanvasSearch');
-    if (offcanvasEl) {
-      bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+    function doReDirect() {
+      window.history.back();
     }
-  }
-  function doButExcel() {
-    $('.buttons-excel').click();
-  }
-  function doButPrint() {
-    $('.buttons-print').click();
-  }
 
-  $(document).ready(function() {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+    function doButAdd() {
+      window.location.href = 'cs_detail.php?currID=0';
+    }
 
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
+    function doButReset() {
+      window.location.replace('cs_list.php');
+    }
 
-    var cslistTB = datatableCreate('dataTable_cslist');
+    function doButSerach() {
+      const offcanvasEl = document.getElementById('offcanvasSearch');
+      if (offcanvasEl) {
+        bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+      }
+    }
 
-    $('#dataSearch').on('keyup search input paste cut', function() {
-      if ($(this).is(':focus') || this.value !== '') {
-        cslistTB.search(this.value).draw();
+    function doButExcel() {
+      $('.buttons-excel').click();
+    }
+
+    function doButPrint() {
+      $('.buttons-print').click();
+    }
+
+    $(document).ready(function() {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      var cslistTB = datatableCreate('dataTable_cslist');
+
+      $('#dataSearch').on('keyup search input paste cut', function() {
+        if ($(this).is(':focus') || this.value !== '') {
+          cslistTB.search(this.value).draw();
+        }
+      });
+
+      $('#searchReset').click(function() {
+        if ($('#dataSearch').val() !== '') {
+          $('#dataSearch').val('');
+          cslistTB.search('').draw();
+        } else {
+          window.location.replace('cs_list.php');
+        }
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
       }
     });
-
-    $('#searchReset').click(function() {
-      if ($('#dataSearch').val() !== '') {
-        $('#dataSearch').val('');
-        cslistTB.search('').draw();
-      } else {
-        window.location.replace('cs_list.php');
-      }
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
-    }
-  });
   </script>
 </body>
+
 </html>

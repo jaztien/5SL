@@ -8,9 +8,15 @@ $searchCat   = isset($_REQUEST['searchCat']) ? trim($_REQUEST['searchCat']) : ''
 $searchScope = isset($_REQUEST['searchScope']) ? trim($_REQUEST['searchScope']) : '';
 
 $searchURI = "";
-if ($searchText !== '')  { $searchURI .= "&searchText=" . rawurlencode($searchText); }
-if ($searchCat !== '')   { $searchURI .= "&searchCat=" . rawurlencode($searchCat); }
-if ($searchScope !== '') { $searchURI .= "&searchScope=" . rawurlencode($searchScope); }
+if ($searchText !== '') {
+  $searchURI .= "&searchText=" . rawurlencode($searchText);
+}
+if ($searchCat !== '') {
+  $searchURI .= "&searchCat=" . rawurlencode($searchCat);
+}
+if ($searchScope !== '') {
+  $searchURI .= "&searchScope=" . rawurlencode($searchScope);
+}
 if (!empty($searchURI)) {
   $searchURI = substr($searchURI, 1);
 }
@@ -23,6 +29,7 @@ define('PAGE_ITEM', 'ITEM_MSG');
 define('PAGE_OPANEL', 1); // 1-新增(手動發送站內通知)
 define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
 define('EXPORT_OPANEL', 3); // 3-Excel+Print
+define('bkRedir', 1);
 
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
@@ -88,6 +95,7 @@ $lvlMap = array(
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -105,6 +113,7 @@ $lvlMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-indigo">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -211,40 +220,40 @@ $lvlMap = array(
                           $minLvl   = (int)($row['no_minlvl'] ?? 0);
                           $briefTxt = mb_strimwidth(strip_tags((string)$row['no_content']), 0, 80, '...', 'UTF-8');
                         ?>
-                        <tr style="cursor: pointer;" onclick="window.location.href='noti_detail.php?currID=<?php echo $nid; ?>';">
-                          <td class="text-center fw-bold">#<?php echo $nid; ?></td>
-                          <td>
-                            <?php if ($isGlobal): ?>
-                              <span class="badge text-bg-success"><i class="bi bi-broadcast me-1"></i>全站公告</span>
-                              <div class="text-muted mt-1" style="font-size: 0.74rem;"><?php echo $lvlMap[$minLvl] ?? "Lv.{$minLvl} 以上"; ?></div>
-                            <?php else:
-                              $decName  = !empty($row['mb_name']) ? _fn_secure_crypto($row['mb_name'], 'de') : '會員 #' . $mid;
-                              $decEmail = !empty($row['mb_email']) ? _fn_secure_crypto($row['mb_email'], 'de') : '';
-                            ?>
-                              <div class="fw-bold text-dark"><?php echo htmlspecialchars($decName); ?> <span class="text-muted fw-normal">(#<?php echo $mid; ?>)</span></div>
-                              <?php if ($decEmail !== ''): ?>
-                                <div class="text-muted" style="font-size: 0.74rem;"><?php echo htmlspecialchars($decEmail); ?></div>
+                          <tr style="cursor: pointer;" onclick="window.location.href='noti_detail.php?currID=<?php echo $nid; ?>';">
+                            <td class="text-center fw-bold">#<?php echo $nid; ?></td>
+                            <td>
+                              <?php if ($isGlobal): ?>
+                                <span class="badge text-bg-success"><i class="bi bi-broadcast me-1"></i>全站公告</span>
+                                <div class="text-muted mt-1" style="font-size: 0.74rem;"><?php echo $lvlMap[$minLvl] ?? "Lv.{$minLvl} 以上"; ?></div>
+                              <?php else:
+                                $decName  = !empty($row['mb_name']) ? _fn_safe_dec_name($row['mb_name']) : '會員 #' . $mid;
+                                $decEmail = !empty($row['mb_email']) ? _fn_safe_dec_name($row['mb_email']) : '';
+                              ?>
+                                <div class="fw-bold text-dark"><?php echo htmlspecialchars($decName); ?> <span class="text-muted fw-normal">(#<?php echo $mid; ?>)</span></div>
+                                <?php if ($decEmail !== ''): ?>
+                                  <div class="text-muted" style="font-size: 0.74rem;"><?php echo htmlspecialchars($decEmail); ?></div>
+                                <?php endif; ?>
                               <?php endif; ?>
-                            <?php endif; ?>
-                          </td>
-                          <td>
-                            <div class="mb-1">
-                              <?php echo $catMap[(int)$row['no_category']] ?? $catMap; ?>
-                              <span class="fw-bold text-dark ms-1"><?php echo htmlspecialchars($row['no_title']); ?></span>
-                            </div>
-                            <div class="text-muted" style="font-size: 0.76rem;"><?php echo htmlspecialchars($briefTxt); ?></div>
-                          </td>
-                          <td class="text-center">
-                            <?php if (!empty($row['no_link'])): ?>
-                              <span class="badge bg-light text-primary border" title="<?php echo htmlspecialchars($row['no_link']); ?>"><i class="bi bi-link-45deg"></i>有連結</span>
-                            <?php else: ?>
-                              <span class="text-muted">-</span>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center text-muted" style="font-size: 0.78rem;">
-                            <?php echo !empty($row['no_created']) ? date('Y-m-d H:i', strtotime($row['no_created'])) : '-'; ?>
-                          </td>
-                        </tr>
+                            </td>
+                            <td>
+                              <div class="mb-1">
+                                <?php echo $catMap[(int)$row['no_category']] ?? $catMap; ?>
+                                <span class="fw-bold text-dark ms-1"><?php echo htmlspecialchars($row['no_title']); ?></span>
+                              </div>
+                              <div class="text-muted" style="font-size: 0.76rem;"><?php echo htmlspecialchars($briefTxt); ?></div>
+                            </td>
+                            <td class="text-center">
+                              <?php if (!empty($row['no_link'])): ?>
+                                <span class="badge bg-light text-primary border" title="<?php echo htmlspecialchars($row['no_link']); ?>"><i class="bi bi-link-45deg"></i>有連結</span>
+                              <?php else: ?>
+                                <span class="text-muted">-</span>
+                              <?php endif; ?>
+                            </td>
+                            <td class="text-center text-muted" style="font-size: 0.78rem;">
+                              <?php echo !empty($row['no_created']) ? date('Y-m-d H:i', strtotime($row['no_created'])) : '-'; ?>
+                            </td>
+                          </tr>
                         <?php endforeach; ?>
                       </tbody>
                     </table>
@@ -302,48 +311,66 @@ $lvlMap = array(
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function doButAdd() { window.location.href = 'noti_detail.php?currID=0'; }
-  function doButReset() { window.location.replace('noti_list.php'); }
-  function doButSerach() {
-    const offcanvasEl = document.getElementById('offcanvasSearch');
-    if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
-  }
-  function doButExcel() { $('.buttons-excel').click(); }
-  function doButPrint() { $('.buttons-print').click(); }
-
-  $(document).ready(function() {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
-
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
-
-    var notilistTB = datatableCreate('dataTable_notilist');
-
-    $('#dataSearch').on('keyup search input paste cut', function() {
-      if ($(this).is(':focus') || this.value !== '') {
-        notilistTB.search(this.value).draw();
-      }
-    });
-
-    $('#searchReset').click(function() {
-      if ($('#dataSearch').val() !== '') {
-        $('#dataSearch').val('');
-        notilistTB.search('').draw();
-      } else {
-        window.location.replace('noti_list.php');
-      }
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+    function doReDirect() {
+      window.history.back();
     }
-  });
+
+    function doButAdd() {
+      window.location.href = 'noti_detail.php?currID=0';
+    }
+
+    function doButReset() {
+      window.location.replace('noti_list.php');
+    }
+
+    function doButSerach() {
+      const offcanvasEl = document.getElementById('offcanvasSearch');
+      if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+    }
+
+    function doButExcel() {
+      $('.buttons-excel').click();
+    }
+
+    function doButPrint() {
+      $('.buttons-print').click();
+    }
+
+    $(document).ready(function() {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      var notilistTB = datatableCreate('dataTable_notilist');
+
+      $('#dataSearch').on('keyup search input paste cut', function() {
+        if ($(this).is(':focus') || this.value !== '') {
+          notilistTB.search(this.value).draw();
+        }
+      });
+
+      $('#searchReset').click(function() {
+        if ($('#dataSearch').val() !== '') {
+          $('#dataSearch').val('');
+          notilistTB.search('').draw();
+        } else {
+          window.location.replace('noti_list.php');
+        }
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+      }
+    });
   </script>
 </body>
+
 </html>

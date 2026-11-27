@@ -2,12 +2,14 @@
 require_once('../includeFiles/init.inc.php');
 require_once('../includeFiles/db.inc.php');
 //架構搜尋條件(以搜尋條件架構搜尋表格，以及URI傳遞值字串)
-$searchText = isset($_REQUEST['searchText']) ? rawurldecode($_REQUEST['searchText']) : ''; 
+$searchText = isset($_REQUEST['searchText']) ? rawurldecode($_REQUEST['searchText']) : '';
 //$searchxxxx = isset($_REQUEST['searchxxxx']) ? $_REQUEST['searchxxxx'] : '';
 //
 $searchURI = "";
 //
-if(!empty($searchText)){ $searchURI .= "&searchText=".$searchText; }
+if (!empty($searchText)) {
+  $searchURI .= "&searchText=" . $searchText;
+}
 //if(!empty($searchxxxx)){ $searchURI .= "&searchxxxx=".$searchxxxx; }
 if (!empty($searchURI)) {
   $searchURI = substr($searchURI, 1);
@@ -15,20 +17,23 @@ if (!empty($searchURI)) {
 //定義條件搜尋之前以及之後不同的顯示筆數
 $maxResult = (!empty($searchURI)) ? 200 : 50;
 //定義本頁面的代碼，用於 SideBar 的開合效果以及本頁面管理權限使用。
-define('PAGE_MARK','PG_SYSADMIN');
-define('PAGE_ITEM','ITEM_SYS');
-define('PAGE_OPANEL',1);//1-新增；2-編輯；3-上傳；4-編輯/刪除；9-[空]。
-define('DRAWER_OPANEL',!empty($searchURI)?2:1);
-define('EXPORT_OPANEL',3);//1-Excel；2-PDF；3-Excel+Print；
+define('PAGE_MARK', 'PG_SYSADMIN');
+define('PAGE_ITEM', 'ITEM_SYS');
+define('PAGE_OPANEL', 1); //1-新增；2-編輯；3-上傳；4-編輯/刪除；9-[空]。
+define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
+define('EXPORT_OPANEL', 3); //1-Excel；2-PDF；3-Excel+Print；
+define('bkRedir', 1);
+
 //頁面基本功能檔案(必須放置於 PAGE_MARK 定義之後)
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
 //功能陣列建立，取自JSON檔案
-$adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
+$adJS = _fn_getCachedJsonData("../jsonFiles/administrator.json");
 
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -36,9 +41,9 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="../imageFiles/favicon.ico" type="image/ico" />
-	
+
   <title> Fifth Season Life 人生第五季 | 系統管理人員 </title>
-<!-- -------------------------- CSS Link -------------------------- -->
+  <!-- -------------------------- CSS Link -------------------------- -->
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="../pluginFiles/googleapis/fonts.googleapis.css">
   <!-- Bootstrap 5 & Bootstrap Icons -->
@@ -51,19 +56,21 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
   <!-- Custom JS style -->
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
-<!-- -------------------------- /CSS Link -------------------------- -->
+  <!-- -------------------------- /CSS Link -------------------------- -->
 </head>
 <!-- [變更1] 移除舊版 hold-transition sidebar-mini 等多餘類別，改用 bg-body-tertiary -->
+
 <body class="bg-body-tertiary">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <!-- 全頁框：[變更2] .wrapper 改為 .app-wrapper -->
   <div class="app-wrapper">
-    
+
     <!-- 頁內全頁內容：[變更3] .content-wrapper 改為 .app-main -->
     <main class="app-main">
       <!-- [變更4] 使用 BS5 原生 visually-hidden 取代 inline style -->
-      <input type="text" id="searchURI" name="searchURI" class="visually-hidden" value="<?php //echo $searchURI; ?>">
-      
+      <input type="text" id="searchURI" name="searchURI" class="visually-hidden" value="<?php //echo $searchURI; 
+                                                                                        ?>">
+
       <!-- 頁頭導覽條：[變更5] .content-header 改為 .app-content-header -->
       <div class="app-content-header">
         <div class="container-fluid">
@@ -95,7 +102,7 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
             <div class="col-12">
               <div class="card shadow-sm">
                 <div class="card-header position-relative">
-                  <?php if(!empty($searchURI)){ ?>
+                  <?php if (!empty($searchURI)) { ?>
                     <!-- [變更9] badge-warning 改為 text-bg-warning -->
                     <span class="badge text-bg-warning" style="position:absolute; top: -6px;">條件搜尋中</span>
                   <?php } ?>
@@ -124,29 +131,29 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
                     </thead>
                     <tbody>
                       <?php
-                        $listSql = "SELECT *, COUNT(*) OVER() AS totalNum FROM fsl_administrator LIMIT {$maxResult}";
-                        //if(!empty($searchURI)){ $listSql .= " WHERE 1=1"; }
-                        $sr = DB->query($listSql);
-                        $totalNum = intval(@$sr[0]['totalNum']);
-                        $i = 0;
-                        while($i<count($sr)){ 
-                        ?>
-                            <tr style="cursor:pointer;" onclick="window.location.href='ad_profile.php?currID=<?php echo $sr[$i]['ad_id']; ?>';" data-currid="<?php echo $sr[$i]['ad_id']; ?>">
-                              <td>
-                                <!-- [注意] 請確認 administrator.json 中的 badge 欄位已更新為 BS5 的 text-bg-* 類別 -->
-                                <span class="badge <?php echo trim($adJS['badge'][$sr[$i]['ad_status']]); ?>"><?php echo get_json_value($adJS['status']??'', $sr[$i]['ad_status']??'', true); ?></span>
-                              </td>
-                              <td><?php echo $sr[$i]['ad_id']; ?></td>
-                              <td><?php echo $sr[$i]['ad_name']; ?></td>
-                              <td><?php echo $sr[$i]['ad_title']; ?></td>
-                              <!-- <td><?php echo $adJS['authlevel'][$sr[$i]['ad_authlevel']] ?? '未定權限'; ?></td> -->
-                              <td><?php echo get_json_value($adJS['authlevel']??'', $sr[$i]['ad_authlevel']??'', true); ?></td>
-                              <td><?php echo $sr[$i]['ad_published']; ?></td>
-                              <td><?php echo $sr[$i]['ad_onboard']; ?></td>
-                            </tr>
-                      <?php 
-                          $i++;
-                          } 
+                      $listSql = "SELECT *, COUNT(*) OVER() AS totalNum FROM fsl_administrator LIMIT {$maxResult}";
+                      //if(!empty($searchURI)){ $listSql .= " WHERE 1=1"; }
+                      $sr = DB->query($listSql);
+                      $totalNum = intval(@$sr[0]['totalNum']);
+                      $i = 0;
+                      while ($i < count($sr)) {
+                      ?>
+                        <tr style="cursor:pointer;" onclick="window.location.href='ad_profile.php?currID=<?php echo $sr[$i]['ad_id']; ?>';" data-currid="<?php echo $sr[$i]['ad_id']; ?>">
+                          <td>
+                            <!-- [注意] 請確認 administrator.json 中的 badge 欄位已更新為 BS5 的 text-bg-* 類別 -->
+                            <span class="badge <?php echo trim($adJS['badge'][$sr[$i]['ad_status']]); ?>"><?php echo get_json_value($adJS['status'] ?? '', $sr[$i]['ad_status'] ?? '', true); ?></span>
+                          </td>
+                          <td><?php echo $sr[$i]['ad_id']; ?></td>
+                          <td><?php echo $sr[$i]['ad_name']; ?></td>
+                          <td><?php echo $sr[$i]['ad_title']; ?></td>
+                          <!-- <td><?php echo $adJS['authlevel'][$sr[$i]['ad_authlevel']] ?? '未定權限'; ?></td> -->
+                          <td><?php echo get_json_value($adJS['authlevel'] ?? '', $sr[$i]['ad_authlevel'] ?? '', true); ?></td>
+                          <td><?php echo $sr[$i]['ad_published']; ?></td>
+                          <td><?php echo $sr[$i]['ad_onboard']; ?></td>
+                        </tr>
+                      <?php
+                        $i++;
+                      }
                       ?>
                     </tbody>
                     <tfoot>
@@ -193,9 +200,9 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
             <div class="mb-3">
               <input type="text" class="form-control form-control-sm notSubmit" id="dataSearch" name="dataSearch" value="" placeholder="-請輸入搜尋條件-" autocomplete="off">
             </div>
-            
+
             <hr class="border-secondary">
-            
+
             <div class="mb-1 small">
               <i class="bi bi-question-circle-fill text-info" data-bs-toggle="tooltip" data-bs-placement="top" title="部份開放查詢的文字型欄位皆列入被查目標，搜尋條件(欄位)可以依照管理者需求增減，請產生需求時通知工程人員修改。"></i>
               綜合搜尋
@@ -241,62 +248,66 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
   <!-- ------------------------ /Scripts Link ------------------------ -->
   <script type="text/javascript">
-  //*************************** *********************************//
-  //***************** JAVASCRIPTS 全域調用參數設置 *****************//
-  //*************************** *********************************//
+    //*************************** *********************************//
+    //***************** JAVASCRIPTS 全域調用參數設置 *****************//
+    //*************************** *********************************//
 
 
 
 
 
-  //*************************** *********************************//
-  //*************** JAVASCRIPTS FUNCTIONs 全域調用 ***************//
-  //*************** 可接收include檔案要求後自定義動作 ***************//
-  //*************************** *********************************//
-  // 當「新增」按鈕按下時的動作
-  function doButAdd(){
-    window.location.replace('ad_profile.php?currID=0');
-  }
-  // 當「重置」按鈕按下時的動作
-  function doButReset(){
-    location.reload(true);
-  }
-  // [變更13] 側邊隱藏區域開啟閉合：改用 Bootstrap 5 Offcanvas 實例切換
-  function doButSerach(){
-    const offcanvasEl = document.getElementById('offcanvasSearch');
-    if (!offcanvasEl) {
-      return false;
+    //*************************** *********************************//
+    //*************** JAVASCRIPTS FUNCTIONs 全域調用 ***************//
+    //*************** 可接收include檔案要求後自定義動作 ***************//
+    //*************************** *********************************//
+    // 當「新增」按鈕按下時的動作
+    function doReDirect() {
+      window.history.back();
     }
-    const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
-    bsOffcanvas.toggle();
-  }
-  // 系統自動生成Excel按鍵
-  function doButExcel(){
-    $('.buttons-excel').click(); 
-  }
-  // 系統開啟列印視窗按鍵
-  function doButPrint(){
-    $('.buttons-print').click(); 
-  }
 
-  //*************************** *********************************//
-  //***************** jQuery FUNCTIONs 區域調用 ******************//
-  //*************************** *********************************//
-  $(document).ready(function() {
+    function doButAdd() {
+      window.location.replace('ad_profile.php?currID=0');
+    }
+    // 當「重置」按鈕按下時的動作
+    function doButReset() {
+      location.reload(true);
+    }
+    // [變更13] 側邊隱藏區域開啟閉合：改用 Bootstrap 5 Offcanvas 實例切換
+    function doButSerach() {
+      const offcanvasEl = document.getElementById('offcanvasSearch');
+      if (!offcanvasEl) {
+        return false;
+      }
+      const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
+      bsOffcanvas.toggle();
+    }
+    // 系統自動生成Excel按鍵
+    function doButExcel() {
+      $('.buttons-excel').click();
+    }
+    // 系統開啟列印視窗按鍵
+    function doButPrint() {
+      $('.buttons-print').click();
+    }
+
+    //*************************** *********************************//
+    //***************** jQuery FUNCTIONs 區域調用 ******************//
+    //*************************** *********************************//
+    $(document).ready(function() {
       //------------------------- [變更14] Bootstrap 5 Tooltips 初始化 -----------------------------//
       const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
       [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
       // 動態顯示筆數
-      $('#resultCount').html('<?php echo $totalNum > $maxResult ? $totalNum."筆符合，表列".$maxResult : $totalNum; ?>');
-    
+      $('#resultCount').html('<?php echo $totalNum > $maxResult ? $totalNum . "筆符合，表列" . $maxResult : $totalNum; ?>');
+
       //* iFrame 頁面中安全滯留倒數功能 scripts
-      $('body').on('keypress click', function(){
+      $('body').on('keypress click', function() {
         let timerElm = window.parent.$('#timer_on_exhausted');
-        if( timerElm.length ){
+        if (timerElm.length) {
           timerElm.backward_timer('reset');
         }
       });
@@ -305,15 +316,15 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
       var adlistTB = datatableCreate('dataTable_adlist');
 
       // 外置表列內容搜尋框動作操作
-      $('#dataSearch').on('keyup search input paste cut', function () {
+      $('#dataSearch').on('keyup search input paste cut', function() {
         if ($(this).is(':focus') || this.value !== '') {
-            adlistTB.search(this.value).draw();
+          adlistTB.search(this.value).draw();
         }
       });
 
       // 搜尋表格重置清除
       $('#searchReset').click(function() {
-        if($('#dataSearch').val() != '') {
+        if ($('#dataSearch').val() != '') {
           $('#dataSearch').val('');
           adlistTB.search('').draw();
         } else {
@@ -324,11 +335,12 @@ $adJS=_fn_getCachedJsonData("../jsonFiles/administrator.json");
 
       //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
       if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-          window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
       }
-  ////////////////////////////////////////////////////////////////
-  });
+      ////////////////////////////////////////////////////////////////
+    });
   </script>
 
 </body>
+
 </html>

@@ -35,9 +35,9 @@ $courseID = (int)($res['course_id'] ?? 0);
 $sessID   = (int)($res['sess_id'] ?? 0);
 
 // 解密學員個資
-$decName  = !empty($res['mb_name']) ? _fn_secure_crypto($res['mb_name'], 'de') : '';
-$decEmail = !empty($res['mb_email']) ? _fn_secure_crypto($res['mb_email'], 'de') : '';
-$decPhone = !empty($res['mb_cellphone']) ? _fn_secure_crypto($res['mb_cellphone'], 'de') : '';
+$decName  = !empty($res['mb_name']) ? _fn_safe_dec_name($res['mb_name']) : '';
+$decEmail = !empty($res['mb_email']) ? _fn_safe_dec_name($res['mb_email']) : '';
+$decPhone = !empty($res['mb_cellphone']) ? _fn_safe_dec_name($res['mb_cellphone']) : '';
 
 // 頭像設定
 $thumbFile = "../uploadFiles/mb/mbphoto_" . $mbID . "_thumb.jpg";
@@ -58,7 +58,7 @@ if ($enrID === 0) {
     foreach ($mRows as $mr) {
       $memberOptions[] = array(
         'mb_id' => (int)$mr['mb_id'],
-        'label' => '#' . $mr['mb_id'] . ' - ' . _fn_secure_crypto($mr['mb_name'], 'de') . ' (' . _fn_secure_crypto($mr['mb_email'], 'de') . ')'
+        'label' => '#' . $mr['mb_id'] . ' - ' . _fn_safe_dec_name($mr['mb_name']) . ' (' . _fn_safe_dec_name($mr['mb_email']) . ')'
       );
     }
   }
@@ -86,6 +86,7 @@ $attendLabels = array(0 => '未簽到', 1 => '已簽到上課中', 2 => '已完�
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -104,6 +105,7 @@ $attendLabels = array(0 => '未簽到', 1 => '已簽到上課中', 2 => '已完�
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-purple">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -151,15 +153,15 @@ $attendLabels = array(0 => '未簽到', 1 => '已簽到上課中', 2 => '已完�
                   </div>
 
                   <?php if ($enrID > 0): ?>
-                  <!-- 快速服務動作按鈕群 -->
-                  <div class="d-grid gap-2 my-3">
-                    <button type="button" class="btn btn-primary btn-sm fw-bold" id="btnQuickSendZoom">
-                      <i class="bi bi-send-check-fill me-1"></i>發送 / 補發 Zoom 上課連結
-                    </button>
-                    <button type="button" class="btn btn-outline-success btn-sm fw-bold" id="btnQuickGraduate">
-                      <i class="bi bi-award-fill me-1"></i>一鍵核發完課結業並通知
-                    </button>
-                  </div>
+                    <!-- 快速服務動作按鈕群 -->
+                    <div class="d-grid gap-2 my-3">
+                      <button type="button" class="btn btn-primary btn-sm fw-bold" id="btnQuickSendZoom">
+                        <i class="bi bi-send-check-fill me-1"></i>發送 / 補發 Zoom 上課連結
+                      </button>
+                      <button type="button" class="btn btn-outline-success btn-sm fw-bold" id="btnQuickGraduate">
+                        <i class="bi bi-award-fill me-1"></i>一鍵核發完課結業並通知
+                      </button>
+                    </div>
                   <?php endif; ?>
 
                   <ul class="list-group list-group-flush small">
@@ -206,21 +208,21 @@ $attendLabels = array(0 => '未簽到', 1 => '已簽到上課中', 2 => '已完�
                       </a>
                     </li>
                     <?php if ($enrID > 0): ?>
-                    <li class="nav-item" role="presentation">
-                      <a class="nav-link" href="#tabMenu2" data-index="2" data-bs-toggle="tab" data-topbut="0" role="tab">
-                        <i class="bi bi-receipt-cutoff me-1"></i>付費與金流
-                      </a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                      <a class="nav-link" href="#tabMenu3" data-index="3" data-bs-toggle="tab" data-topbut="0" role="tab">
-                        <i class="bi bi-chat-dots me-1"></i>通訊通知推播 (<?php echo count($notiRows); ?>)
-                      </a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                      <a class="nav-link" href="#tabMenu4" data-index="4" data-bs-toggle="tab" data-topbut="1" role="tab">
-                        <i class="bi bi-clipboard2-pulse me-1"></i>課堂與課後狀態
-                      </a>
-                    </li>
+                      <li class="nav-item" role="presentation">
+                        <a class="nav-link" href="#tabMenu2" data-index="2" data-bs-toggle="tab" data-topbut="0" role="tab">
+                          <i class="bi bi-receipt-cutoff me-1"></i>付費與金流
+                        </a>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <a class="nav-link" href="#tabMenu3" data-index="3" data-bs-toggle="tab" data-topbut="0" role="tab">
+                          <i class="bi bi-chat-dots me-1"></i>通訊通知推播 (<?php echo count($notiRows); ?>)
+                        </a>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <a class="nav-link" href="#tabMenu4" data-index="4" data-bs-toggle="tab" data-topbut="1" role="tab">
+                          <i class="bi bi-clipboard2-pulse me-1"></i>課堂與課後狀態
+                        </a>
+                      </li>
                     <?php endif; ?>
                   </ul>
                 </div>
@@ -232,15 +234,15 @@ $attendLabels = array(0 => '未簽到', 1 => '已簽到上課中', 2 => '已完�
                       <form id="form_tabMenu1" action="../funcFiles/enr_act_func.php" method="post" data-func="func_enr_infoUpdate" novalidate>
                         <div class="row g-3">
                           <?php if ($enrID === 0): ?>
-                          <div class="col-md-12">
-                            <label class="form-label small fw-bold">選擇報名會員 <span class="text-danger">*</span></label>
-                            <select class="form-select" name="mb_id" required>
-                              <option value="">-- 請選擇有效會員 --</option>
-                              <?php foreach ($memberOptions as $mo): ?>
-                                <option value="<?php echo $mo['mb_id']; ?>"><?php echo htmlspecialchars($mo['label']); ?></option>
-                              <?php endforeach; ?>
-                            </select>
-                          </div>
+                            <div class="col-md-12">
+                              <label class="form-label small fw-bold">選擇報名會員 <span class="text-danger">*</span></label>
+                              <select class="form-select" name="mb_id" required>
+                                <option value="">-- 請選擇有效會員 --</option>
+                                <?php foreach ($memberOptions as $mo): ?>
+                                  <option value="<?php echo $mo['mb_id']; ?>"><?php echo htmlspecialchars($mo['label']); ?></option>
+                                <?php endforeach; ?>
+                              </select>
+                            </div>
                           <?php endif; ?>
 
                           <div class="col-md-6">
@@ -300,17 +302,17 @@ $attendLabels = array(0 => '未簽到', 1 => '已簽到上課中', 2 => '已完�
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">已完成單元 / 堂數（本梯共 <?php echo $actualTotalLessons; ?> 堂）</label>
                             <input type="number" class="form-control" name="enr_done_lessons" min="0" max="<?php echo $actualTotalLessons; ?>"
-                                  value="<?php echo (int)($res['enr_done_lessons'] ?? 0); ?>">
+                              value="<?php echo (int)($res['enr_done_lessons'] ?? 0); ?>">
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">回放觀看權限到期日 (留空=永久)</label>
                             <input type="date" class="form-control" name="enr_expire_at"
-                                   value="<?php echo !empty($res['enr_expire_at']) ? substr($res['enr_expire_at'], 0, 10) : ''; ?>">
+                              value="<?php echo !empty($res['enr_expire_at']) ? substr($res['enr_expire_at'], 0, 10) : ''; ?>">
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">專屬 Zoom 進入連結</label>
                             <input type="text" class="form-control" name="enr_zoom_url"
-                                   value="<?php echo htmlspecialchars($res['enr_zoom_url'] ?? ''); ?>" placeholder="派發連結後自動產生">
+                              value="<?php echo htmlspecialchars($res['enr_zoom_url'] ?? ''); ?>" placeholder="派發連結後自動產生">
                           </div>
 
                           <div class="col-12">
@@ -362,15 +364,15 @@ $attendLabels = array(0 => '未簽到', 1 => '已簽到上課中', 2 => '已完�
                                 <span class="text-muted d-block">發票類型與載具</span>
                                 <strong>
                                   <?php
-                                    if ((int)($res['inv_type'] ?? 1) === 2) {
-                                      echo '三聯式統編：' . htmlspecialchars($res['inv_tax_id'] ?? '') . ' (' . htmlspecialchars($res['inv_company_title'] ?? '') . ')';
-                                    } elseif ((int)($res['inv_carrier_type'] ?? 0) === 1) {
-                                      echo '二聯式手機條碼：' . htmlspecialchars($res['inv_carrier_code'] ?? '');
-                                    } elseif ((int)($res['inv_carrier_type'] ?? 0) === 2) {
-                                      echo '二聯式自然人憑證：' . htmlspecialchars($res['inv_carrier_code'] ?? '');
-                                    } else {
-                                      echo '二聯式會員載具（自動歸戶）';
-                                    }
+                                  if ((int)($res['inv_type'] ?? 1) === 2) {
+                                    echo '三聯式統編：' . htmlspecialchars($res['inv_tax_id'] ?? '') . ' (' . htmlspecialchars($res['inv_company_title'] ?? '') . ')';
+                                  } elseif ((int)($res['inv_carrier_type'] ?? 0) === 1) {
+                                    echo '二聯式手機條碼：' . htmlspecialchars($res['inv_carrier_code'] ?? '');
+                                  } elseif ((int)($res['inv_carrier_type'] ?? 0) === 2) {
+                                    echo '二聯式自然人憑證：' . htmlspecialchars($res['inv_carrier_code'] ?? '');
+                                  } else {
+                                    echo '二聯式會員載具（自動歸戶）';
+                                  }
                                   ?>
                                 </strong>
                               </div>
@@ -417,17 +419,17 @@ $attendLabels = array(0 => '未簽到', 1 => '已簽到上課中', 2 => '已完�
                           </thead>
                           <tbody id="notiTbody">
                             <?php foreach ($notiRows as $nr): ?>
-                            <tr>
-                              <td><?php echo (int)$nr['no_id']; ?></td>
-                              <td>
-                                <div class="fw-bold text-dark"><?php echo htmlspecialchars($nr['no_title'] ?? ''); ?></div>
-                                <div class="text-muted" style="font-size: 0.78rem;"><?php echo nl2br(htmlspecialchars($nr['no_content'] ?? '')); ?></div>
-                              </td>
-                              <td class="text-center">
-                                <?php echo ((int)($nr['no_is_read'] ?? 0) === 1) ? '<span class="badge text-bg-success">已讀</span>' : '<span class="badge text-bg-warning">未讀</span>'; ?>
-                              </td>
-                              <td class="text-muted"><?php echo $nr['no_created'] ?? '-'; ?></td>
-                            </tr>
+                              <tr>
+                                <td><?php echo (int)$nr['no_id']; ?></td>
+                                <td>
+                                  <div class="fw-bold text-dark"><?php echo htmlspecialchars($nr['no_title'] ?? ''); ?></div>
+                                  <div class="text-muted" style="font-size: 0.78rem;"><?php echo nl2br(htmlspecialchars($nr['no_content'] ?? '')); ?></div>
+                                </td>
+                                <td class="text-center">
+                                  <?php echo ((int)($nr['no_is_read'] ?? 0) === 1) ? '<span class="badge text-bg-success">已讀</span>' : '<span class="badge text-bg-warning">未讀</span>'; ?>
+                                </td>
+                                <td class="text-muted"><?php echo $nr['no_created'] ?? '-'; ?></td>
+                              </tr>
                             <?php endforeach; ?>
                           </tbody>
                         </table>
@@ -457,71 +459,71 @@ $attendLabels = array(0 => '未簽到', 1 => '已簽到上課中', 2 => '已完�
                         </div>
                       </div>
                       <?php if (!empty($lessonRows)): ?>
-                      <div class="card border mb-4">
-                        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-                          <span class="fw-bold small text-dark"><i class="bi bi-calendar2-week me-1 text-primary"></i>本梯次單堂課次排程與 Zoom 連線資訊（共 <?php echo count($lessonRows); ?> 堂）</span>
-                          <a href="sess_detail.php?currID=<?php echo $sessID; ?>" class="btn btn-outline-primary btn-xs py-0 px-2">前往梯次課堂中控台</a>
+                        <div class="card border mb-4">
+                          <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+                            <span class="fw-bold small text-dark"><i class="bi bi-calendar2-week me-1 text-primary"></i>本梯次單堂課次排程與 Zoom 連線資訊（共 <?php echo count($lessonRows); ?> 堂）</span>
+                            <a href="sess_detail.php?currID=<?php echo $sessID; ?>" class="btn btn-outline-primary btn-xs py-0 px-2">前往梯次課堂中控台</a>
+                          </div>
+                          <div class="table-responsive">
+                            <table class="table table-sm table-bordered align-middle mb-0 small">
+                              <thead class="table-light text-nowrap">
+                                <tr>
+                                  <th class="text-center" style="width: 65px;">堂次</th>
+                                  <th>課程主題</th>
+                                  <th>上課時段</th>
+                                  <th class="text-center">上課狀態</th>
+                                  <th>單堂 Zoom / 地點</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <?php
+                                $lessStBadge = array(
+                                  0 => '<span class="badge text-bg-secondary">待上課</span>',
+                                  1 => '<span class="badge text-bg-danger">上課中</span>',
+                                  2 => '<span class="badge text-bg-success">已完課</span>',
+                                  3 => '<span class="badge text-bg-warning">已延期</span>'
+                                );
+                                foreach ($lessonRows as $lr):
+                                  $lSt = (int)($lr['less_status'] ?? 0);
+                                ?>
+                                  <tr>
+                                    <td class="text-center fw-bold">第 <?php echo (int)$lr['less_no']; ?> 堂</td>
+                                    <td>
+                                      <div class="fw-semibold text-dark"><?php echo htmlspecialchars($lr['less_title'] ?: '單堂課程'); ?></div>
+                                      <?php if (!empty($lr['less_note'])): ?>
+                                        <div class="text-muted" style="font-size: 0.72rem;"><?php echo htmlspecialchars($lr['less_note']); ?></div>
+                                      <?php endif; ?>
+                                    </td>
+                                    <td class="text-nowrap">
+                                      <?php echo substr((string)$lr['less_start_at'], 0, 16); ?> ~ <?php echo substr((string)$lr['less_end_at'], 11, 5); ?>
+                                    </td>
+                                    <td class="text-center"><?php echo $lessStBadge[$lSt] ?? $lessStBadge[0]; ?></td>
+                                    <td style="font-size: 0.75rem;">
+                                      <?php if (!empty($lr['less_location'])): ?>
+                                        <div><i class="bi bi-geo-alt text-danger me-1"></i><?php echo htmlspecialchars($lr['less_location']); ?></div>
+                                      <?php endif; ?>
+                                      <?php if (!empty($lr['less_zoom_url'])): ?>
+                                        <a href="<?php echo htmlspecialchars($lr['less_zoom_url']); ?>" target="_blank" class="text-primary text-decoration-none"><i class="bi bi-camera-video me-1"></i>單堂專屬連結</a>
+                                      <?php elseif (!empty($res['enr_zoom_url'])): ?>
+                                        <span class="text-muted">沿用梯次專屬授權連結</span>
+                                      <?php else: ?>
+                                        <span class="text-warning-emphasis">尚未派發授權連結</span>
+                                      <?php endif; ?>
+                                    </td>
+                                  </tr>
+                                <?php endforeach; ?>
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
-                        <div class="table-responsive">
-                          <table class="table table-sm table-bordered align-middle mb-0 small">
-                            <thead class="table-light text-nowrap">
-                              <tr>
-                                <th class="text-center" style="width: 65px;">堂次</th>
-                                <th>課程主題</th>
-                                <th>上課時段</th>
-                                <th class="text-center">上課狀態</th>
-                                <th>單堂 Zoom / 地點</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <?php
-                              $lessStBadge = array(
-                                0 => '<span class="badge text-bg-secondary">待上課</span>',
-                                1 => '<span class="badge text-bg-danger">上課中</span>',
-                                2 => '<span class="badge text-bg-success">已完課</span>',
-                                3 => '<span class="badge text-bg-warning">已延期</span>'
-                              );
-                              foreach ($lessonRows as $lr):
-                                $lSt = (int)($lr['less_status'] ?? 0);
-                              ?>
-                              <tr>
-                                <td class="text-center fw-bold">第 <?php echo (int)$lr['less_no']; ?> 堂</td>
-                                <td>
-                                  <div class="fw-semibold text-dark"><?php echo htmlspecialchars($lr['less_title'] ?: '單堂課程'); ?></div>
-                                  <?php if (!empty($lr['less_note'])): ?>
-                                    <div class="text-muted" style="font-size: 0.72rem;"><?php echo htmlspecialchars($lr['less_note']); ?></div>
-                                  <?php endif; ?>
-                                </td>
-                                <td class="text-nowrap">
-                                  <?php echo substr((string)$lr['less_start_at'], 0, 16); ?> ~ <?php echo substr((string)$lr['less_end_at'], 11, 5); ?>
-                                </td>
-                                <td class="text-center"><?php echo $lessStBadge[$lSt] ?? $lessStBadge[0]; ?></td>
-                                <td style="font-size: 0.75rem;">
-                                  <?php if (!empty($lr['less_location'])): ?>
-                                    <div><i class="bi bi-geo-alt text-danger me-1"></i><?php echo htmlspecialchars($lr['less_location']); ?></div>
-                                  <?php endif; ?>
-                                  <?php if (!empty($lr['less_zoom_url'])): ?>
-                                    <a href="<?php echo htmlspecialchars($lr['less_zoom_url']); ?>" target="_blank" class="text-primary text-decoration-none"><i class="bi bi-camera-video me-1"></i>單堂專屬連結</a>
-                                  <?php elseif (!empty($res['enr_zoom_url'])): ?>
-                                    <span class="text-muted">沿用梯次專屬授權連結</span>
-                                  <?php else: ?>
-                                    <span class="text-warning-emphasis">尚未派發授權連結</span>
-                                  <?php endif; ?>
-                                </td>
-                              </tr>
-                              <?php endforeach; ?>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
                       <?php endif; ?>
 
-                    <form id="form_tabMenu4" action="../funcFiles/enr_act_func.php" method="post" data-func="func_enr_followupUpdate">
-                      <div class="mb-0">
-                        <label class="form-label small fw-bold">課後追蹤與顧問後續服務紀錄 (enr_note)</label>
-                        <textarea class="form-control" id="enr_note" name="enr_note" rows="5" placeholder="記錄每次課後訪談回饋、學員狀態觀察、轉介下一階段陪跑或一對一顧問建議..."><?php echo htmlspecialchars($res['enr_note'] ?? ''); ?></textarea>
-                      </div>
-                    </form>
+                      <form id="form_tabMenu4" action="../funcFiles/enr_act_func.php" method="post" data-func="func_enr_followupUpdate">
+                        <div class="mb-0">
+                          <label class="form-label small fw-bold">課後追蹤與顧問後續服務紀錄 (enr_note)</label>
+                          <textarea class="form-control" id="enr_note" name="enr_note" rows="5" placeholder="記錄每次課後訪談回饋、學員狀態觀察、轉介下一階段陪跑或一對一顧問建議..."><?php echo htmlspecialchars($res['enr_note'] ?? ''); ?></textarea>
+                        </div>
+                      </form>
                     </div>
                   </div>
                 </div>
@@ -541,178 +543,187 @@ $attendLabels = array(0 => '未簽到', 1 => '已簽到上課中', 2 => '已完�
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function validateBS5Form($form) {
-    if (!$form || $form.length === 0) return true;
-    const formEl = $form[0];
-    const isValid = formEl.checkValidity();
-    formEl.classList.add('was-validated');
-    return isValid;
-  }
-
-  function doReDirect() { window.history.back(); }
-
-  function doButSave() {
-    var frm = $('#form_' + $('.tab-pane.active').prop("id"));
-    if (!frm.length) return false;
-    if (!validateBS5Form(frm)) {
-      window.parent.toastr['warning']('請檢查標示紅框的必填或格式錯誤欄位！');
-      return false;
+    function validateBS5Form($form) {
+      if (!$form || $form.length === 0) return true;
+      const formEl = $form[0];
+      const isValid = formEl.checkValidity();
+      formEl.classList.add('was-validated');
+      return isValid;
     }
-    ajaxPOST(frm);
-  }
 
-  function doButDelete() {
-    if (0 == parseInt('<?php echo $enrID; ?>')) return false;
-    $.post('../funcFiles/enr_act_func.php', {
-      'formAcce': 'func_enr_delete',
-      'token': getTokenVal(),
-      'enrID': '<?php echo $enrID; ?>'
-    }, function(data) {
-      if (data['RTN'] == 1) {
-        window.parent.toastr['success'](data['msgStr']);
-        window.location.replace("enr_list.php");
-      } else {
-        window.parent.toastr['error'](data['msgStr'] || '操作失敗');
+    function doReDirect() {
+      window.history.back();
+    }
+
+    function doButSave() {
+      var frm = $('#form_' + $('.tab-pane.active').prop("id"));
+      if (!frm.length) return false;
+      if (!validateBS5Form(frm)) {
+        window.parent.toastr['warning']('請檢查標示紅框的必填或格式錯誤欄位！');
+        return false;
       }
-    }, 'json');
-  }
+      ajaxPOST(frm);
+    }
 
-
-  function doButReset() { location.reload(true); }
-
-  function ajaxPOST(frm) {
-    var $frm = frm || $('#form_tabMenu1');
-    var accE = (0 == parseInt('<?php echo $enrID; ?>')) ? 'func_enr_addnew' : $frm.data('func');
-    var datA = getFormObjects($frm);
-
-    $.ajax({
-      type: 'post',
-      url: '../funcFiles/enr_act_func.php',
-      data: {
-        'arrDatA': datA,
-        'formAcce': accE,
+    function doButDelete() {
+      if (0 == parseInt('<?php echo $enrID; ?>')) return false;
+      $.post('../funcFiles/enr_act_func.php', {
+        'formAcce': 'func_enr_delete',
         'token': getTokenVal(),
         'enrID': '<?php echo $enrID; ?>'
-      },
-      dataType: 'json',
-      success: function(data) {
-        if (accE == 'func_enr_addnew' && data['RTN'] == 1) {
+      }, function(data) {
+        if (data['RTN'] == 1) {
           window.parent.toastr['success'](data['msgStr']);
-          window.location.replace("enr_detail.php?currID=" + data['newID']);
-          return false;
+          window.location.replace("enr_list.php");
+        } else {
+          window.parent.toastr['error'](data['msgStr'] || '操作失敗');
         }
-        if (window.parent && window.parent.toastr) {
-          window.parent.toastr[data['msgType']](data['msgStr']);
-        }
-        if (data['RTN'] == 1) {
-          $frm.removeClass('was-validated');
-          if ($('#enr_status').length) {
-            $('#sideEnrStatus').text($('#enr_status option:selected').text().replace(/^\d+\s*-\s*/, ''));
-          }
-          if ($('#enr_pay_status').length) {
-            $('#sidePayLabel').text($('#enr_pay_status option:selected').text().replace(/^\d+\s*-\s*/, ''));
-          }
-          if (typeof doSerialize === 'function') doSerialize();
-        }
-      }
-    });
-  }
-
-  $(document).ready(function() {
-    if (typeof flatpickr !== 'undefined') {
-      flatpickr($('input[type="date"]'), { locale: 'zh_tw', dateFormat: 'Y-m-d', allowInput: true, disableMobile: true });
+      }, 'json');
     }
-    if ($('#dataTable_enrnoti').length) datatableCreate('dataTable_enrnoti');
 
-    // 新增補登模式：切換課程時過濾對應梯次
-    $('#course_id').on('change', function() {
-      const cid = $(this).val();
-      $('#sess_id option').each(function() {
-        const optCid = $(this).attr('data-cid');
-        if (!optCid) return;
-        $(this).toggle(cid === '' || optCid === cid);
-      });
-      $('#sess_id').val('');
-    });
 
-    // 1. 確認已收款入帳並開立電子發票
-    $('#btnConfirmPaid').on('click', function() {
-      if (!confirm('確定要將關聯訂單與發票標記為「已收款入帳」，並正式確認該學員修課名額嗎？')) return;
-      $.post('../funcFiles/enr_act_func.php', {
-        'formAcce': 'func_enr_confirmPaid',
-        'token': getTokenVal(),
-        'enrID': '<?php echo $enrID; ?>'
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) location.reload(true);
-      }, 'json');
-    });
+    function doButReset() {
+      location.reload(true);
+    }
 
-    // 2. 左側快速發送 Zoom 上課連結
-    $('#btnQuickSendZoom').on('click', function() {
-      $.post('../funcFiles/enr_act_func.php', {
-        'formAcce': 'func_enr_sendZoom',
-        'token': getTokenVal(),
-        'enrID': '<?php echo $enrID; ?>'
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) {
-          $('#sideLinkCnt').text(data['sentCnt'] + ' 次');
-          $('input[name="enr_zoom_url"]').val(data['zoomUrl']);
+    function ajaxPOST(frm) {
+      var $frm = frm || $('#form_tabMenu1');
+      var accE = (0 == parseInt('<?php echo $enrID; ?>')) ? 'func_enr_addnew' : $frm.data('func');
+      var datA = getFormObjects($frm);
+
+      $.ajax({
+        type: 'post',
+        url: '../funcFiles/enr_act_func.php',
+        data: {
+          'arrDatA': datA,
+          'formAcce': accE,
+          'token': getTokenVal(),
+          'enrID': '<?php echo $enrID; ?>'
+        },
+        dataType: 'json',
+        success: function(data) {
+          if (accE == 'func_enr_addnew' && data['RTN'] == 1) {
+            window.parent.toastr['success'](data['msgStr']);
+            window.location.replace("enr_detail.php?currID=" + data['newID']);
+            return false;
+          }
+          if (window.parent && window.parent.toastr) {
+            window.parent.toastr[data['msgType']](data['msgStr']);
+          }
+          if (data['RTN'] == 1) {
+            $frm.removeClass('was-validated');
+            if ($('#enr_status').length) {
+              $('#sideEnrStatus').text($('#enr_status option:selected').text().replace(/^\d+\s*-\s*/, ''));
+            }
+            if ($('#enr_pay_status').length) {
+              $('#sidePayLabel').text($('#enr_pay_status option:selected').text().replace(/^\d+\s*-\s*/, ''));
+            }
+            if (typeof doSerialize === 'function') doSerialize();
+          }
         }
-      }, 'json');
-    });
+      });
+    }
 
-    // 3. 一鍵核發完課結業並推播通知
-    $('#btnQuickGraduate').on('click', function() {
-      if (!confirm('確定核發「已完課結業」狀態並發送結業祝賀通知給該學員嗎？')) return;
-      $.post('../funcFiles/enr_act_func.php', {
-        'formAcce': 'func_enr_graduate',
-        'token': getTokenVal(),
-        'enrID': '<?php echo $enrID; ?>'
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) location.reload(true);
-      }, 'json');
-    });
-
-    // 4. 人工確認收款入帳並開立電子發票
-    $('#btnConfirmPaid').on('click', function() {
-      if (!confirm('確定此筆訂單已收款入帳？系統將同步開立發票並正式計入梯次名額。')) return;
-      $.post('../funcFiles/enr_act_func.php', {
-        'formAcce': 'func_enr_confirmPaid',
-        'token': getTokenVal(),
-        'enrID': '<?php echo $enrID; ?>'
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) location.reload(true);
-      }, 'json');
-    });
-
-    // 5. 發送專屬通訊通知推播至會員中心
-    $('#form_send_noti').on('submit', function(e) {
-      e.preventDefault();
-      const title   = $('#notiTitle').val().trim();
-      const content = $('#notiContent').val().trim();
-      if (!title || !content) {
-        window.parent.toastr['warning']('請輸入通知主旨與訊息內容！');
-        return;
+    $(document).ready(function() {
+      if (typeof flatpickr !== 'undefined') {
+        flatpickr($('input[type="date"]'), {
+          locale: 'zh_tw',
+          dateFormat: 'Y-m-d',
+          allowInput: true,
+          disableMobile: true
+        });
       }
-      $.post('../funcFiles/enr_act_func.php', {
-        'formAcce': 'func_enr_sendNoti',
-        'token': getTokenVal(),
-        'enrID': '<?php echo $enrID; ?>',
-        'mbID': '<?php echo $mbID; ?>',
-        'noTitle': title,
-        'noContent': content
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) {
-          $('#notiContent').val('');
-          $('#notiHistoryList').prepend(`
+      if ($('#dataTable_enrnoti').length) datatableCreate('dataTable_enrnoti');
+
+      // 新增補登模式：切換課程時過濾對應梯次
+      $('#course_id').on('change', function() {
+        const cid = $(this).val();
+        $('#sess_id option').each(function() {
+          const optCid = $(this).attr('data-cid');
+          if (!optCid) return;
+          $(this).toggle(cid === '' || optCid === cid);
+        });
+        $('#sess_id').val('');
+      });
+
+      // 1. 確認已收款入帳並開立電子發票
+      $('#btnConfirmPaid').on('click', function() {
+        if (!confirm('確定要將關聯訂單與發票標記為「已收款入帳」，並正式確認該學員修課名額嗎？')) return;
+        $.post('../funcFiles/enr_act_func.php', {
+          'formAcce': 'func_enr_confirmPaid',
+          'token': getTokenVal(),
+          'enrID': '<?php echo $enrID; ?>'
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) location.reload(true);
+        }, 'json');
+      });
+
+      // 2. 左側快速發送 Zoom 上課連結
+      $('#btnQuickSendZoom').on('click', function() {
+        $.post('../funcFiles/enr_act_func.php', {
+          'formAcce': 'func_enr_sendZoom',
+          'token': getTokenVal(),
+          'enrID': '<?php echo $enrID; ?>'
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) {
+            $('#sideLinkCnt').text(data['sentCnt'] + ' 次');
+            $('input[name="enr_zoom_url"]').val(data['zoomUrl']);
+          }
+        }, 'json');
+      });
+
+      // 3. 一鍵核發完課結業並推播通知
+      $('#btnQuickGraduate').on('click', function() {
+        if (!confirm('確定核發「已完課結業」狀態並發送結業祝賀通知給該學員嗎？')) return;
+        $.post('../funcFiles/enr_act_func.php', {
+          'formAcce': 'func_enr_graduate',
+          'token': getTokenVal(),
+          'enrID': '<?php echo $enrID; ?>'
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) location.reload(true);
+        }, 'json');
+      });
+
+      // 4. 人工確認收款入帳並開立電子發票
+      $('#btnConfirmPaid').on('click', function() {
+        if (!confirm('確定此筆訂單已收款入帳？系統將同步開立發票並正式計入梯次名額。')) return;
+        $.post('../funcFiles/enr_act_func.php', {
+          'formAcce': 'func_enr_confirmPaid',
+          'token': getTokenVal(),
+          'enrID': '<?php echo $enrID; ?>'
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) location.reload(true);
+        }, 'json');
+      });
+
+      // 5. 發送專屬通訊通知推播至會員中心
+      $('#form_send_noti').on('submit', function(e) {
+        e.preventDefault();
+        const title = $('#notiTitle').val().trim();
+        const content = $('#notiContent').val().trim();
+        if (!title || !content) {
+          window.parent.toastr['warning']('請輸入通知主旨與訊息內容！');
+          return;
+        }
+        $.post('../funcFiles/enr_act_func.php', {
+          'formAcce': 'func_enr_sendNoti',
+          'token': getTokenVal(),
+          'enrID': '<?php echo $enrID; ?>',
+          'mbID': '<?php echo $mbID; ?>',
+          'noTitle': title,
+          'noContent': content
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) {
+            $('#notiContent').val('');
+            $('#notiHistoryList').prepend(`
             <div class="p-2 border rounded-2 bg-white">
               <div class="d-flex justify-content-between">
                 <strong class="text-primary">${$('<div>').text(title).html()}</strong>
@@ -721,62 +732,62 @@ $attendLabels = array(0 => '未簽到', 1 => '已簽到上課中', 2 => '已完�
               <div class="text-dark mt-1">${$('<div>').text(content).html().replace(/\n/g, '<br>')}</div>
             </div>
           `);
-        }
-      }, 'json');
-    });
+          }
+        }, 'json');
+      });
 
-    // 套用常用服務訊息範本
-    $('#notiTemplate').on('change', function() {
-      const tpl = $(this).val();
-      const cName = <?php echo json_encode($res['course_title'] ?? '課程', JSON_UNESCAPED_UNICODE); ?>;
-      const bNo   = '<?php echo (int)($res['sess_batch'] ?? 1); ?>';
-      const zUrl  = $('input[name="enr_zoom_url"]').val() || '（請至會員中心查看專屬連結）';
-      const map = {
-        remind: {
-          title: `【課前提醒】《${cName}》第 ${bNo} 梯即將開課`,
-          body: `親愛的學員您好，提醒您報名的《${cName}》（第 ${bNo} 梯）即將開課，請準時透過您的專屬連結進入教室：\n${zUrl}`
-        },
-        reschedule: {
-          title: `【梯次調度確認】《${cName}》已為您調整至第 ${bNo} 梯`,
-          body: `親愛的學員您好，我們已依您的需求協助將《${cName}》調整至第 ${bNo} 梯次，新的上課連結將另行通知派發。`
-        },
-        followup: {
-          title: `【課後關懷與複習提醒】《${cName}》課後影音與講義已上架`,
-          body: `親愛的學員您好，感謝您參與《${cName}》課程！課後回放影音與講義已歸檔，歡迎隨時登入「我的專屬課程」複習。`
-        },
-        graduate: {
-          title: `【完課結業祝賀】恭喜圓滿完成《${cName}》`,
-          body: `親愛的學員您好，恭喜您完成《${cName}》全部單元！期待在人生第五季的下一段旅程繼續陪伴您。`
+      // 套用常用服務訊息範本
+      $('#notiTemplate').on('change', function() {
+        const tpl = $(this).val();
+        const cName = <?php echo json_encode($res['course_title'] ?? '課程', JSON_UNESCAPED_UNICODE); ?>;
+        const bNo = '<?php echo (int)($res['sess_batch'] ?? 1); ?>';
+        const zUrl = $('input[name="enr_zoom_url"]').val() || '（請至會員中心查看專屬連結）';
+        const map = {
+          remind: {
+            title: `【課前提醒】《${cName}》第 ${bNo} 梯即將開課`,
+            body: `親愛的學員您好，提醒您報名的《${cName}》（第 ${bNo} 梯）即將開課，請準時透過您的專屬連結進入教室：\n${zUrl}`
+          },
+          reschedule: {
+            title: `【梯次調度確認】《${cName}》已為您調整至第 ${bNo} 梯`,
+            body: `親愛的學員您好，我們已依您的需求協助將《${cName}》調整至第 ${bNo} 梯次，新的上課連結將另行通知派發。`
+          },
+          followup: {
+            title: `【課後關懷與複習提醒】《${cName}》課後影音與講義已上架`,
+            body: `親愛的學員您好，感謝您參與《${cName}》課程！課後回放影音與講義已歸檔，歡迎隨時登入「我的專屬課程」複習。`
+          },
+          graduate: {
+            title: `【完課結業祝賀】恭喜圓滿完成《${cName}》`,
+            body: `親愛的學員您好，恭喜您完成《${cName}》全部單元！期待在人生第五季的下一段旅程繼續陪伴您。`
+          }
+        };
+        if (map[tpl]) {
+          $('#notiTitle').val(map[tpl].title);
+          $('#notiContent').val(map[tpl].body);
         }
-      };
-      if (map[tpl]) {
-        $('#notiTitle').val(map[tpl].title);
-        $('#notiContent').val(map[tpl].body);
-      }
-    });
+      });
 
-    // 發送專屬通訊通知推播至會員中心
-    $('#form_send_noti').on('submit', function(e) {
-      e.preventDefault();
-      const title   = $('#notiTitle').val().trim();
-      const content = $('#notiContent').val().trim();
-      if (!title || !content) {
-        window.parent.toastr['warning']('請輸入通知主旨與訊息內容！');
-        return;
-      }
-      $.post('../funcFiles/enr_act_func.php', {
-        'formAcce': 'func_enr_sendNoti',
-        'token': getTokenVal(),
-        'enrID': '<?php echo $enrID; ?>',
-        'mbID': '<?php echo $mbID; ?>',
-        'noTitle': title,
-        'noContent': content
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) {
-          $('#notiTitle').val('');
-          $('#notiContent').val('');
-          $('#notiTbody').prepend(`
+      // 發送專屬通訊通知推播至會員中心
+      $('#form_send_noti').on('submit', function(e) {
+        e.preventDefault();
+        const title = $('#notiTitle').val().trim();
+        const content = $('#notiContent').val().trim();
+        if (!title || !content) {
+          window.parent.toastr['warning']('請輸入通知主旨與訊息內容！');
+          return;
+        }
+        $.post('../funcFiles/enr_act_func.php', {
+          'formAcce': 'func_enr_sendNoti',
+          'token': getTokenVal(),
+          'enrID': '<?php echo $enrID; ?>',
+          'mbID': '<?php echo $mbID; ?>',
+          'noTitle': title,
+          'noContent': content
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) {
+            $('#notiTitle').val('');
+            $('#notiContent').val('');
+            $('#notiTbody').prepend(`
             <tr>
               <td>NEW</td>
               <td>
@@ -787,24 +798,28 @@ $attendLabels = array(0 => '未簽到', 1 => '已簽到上課中', 2 => '已完�
               <td class="text-muted">${data['createdAt']}</td>
             </tr>
           `);
-        }
-      }, 'json');
+          }
+        }, 'json');
+      });
+
+
+
+
+
+      $('li.prevLink').on('click', function() {
+        window.location.replace(getCurrentURI('', 'enr_list.php'));
+      });
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+      }
     });
-
-
-
-
-
-    $('li.prevLink').on('click', function() { window.location.replace(getCurrentURI('', 'enr_list.php')); });
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
-    }
-  });
   </script>
 </body>
+
 </html>

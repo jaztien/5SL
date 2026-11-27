@@ -9,10 +9,18 @@ $searchGift   = isset($_REQUEST['searchGift']) ? trim($_REQUEST['searchGift']) :
 $searchStatus = isset($_REQUEST['searchStatus']) ? trim($_REQUEST['searchStatus']) : '';
 
 $searchURI = "";
-if ($searchText !== '')   { $searchURI .= "&searchText=" . rawurlencode($searchText); }
-if ($searchType !== '')   { $searchURI .= "&searchType=" . rawurlencode($searchType); }
-if ($searchGift !== '')   { $searchURI .= "&searchGift=" . rawurlencode($searchGift); }
-if ($searchStatus !== '') { $searchURI .= "&searchStatus=" . rawurlencode($searchStatus); }
+if ($searchText !== '') {
+  $searchURI .= "&searchText=" . rawurlencode($searchText);
+}
+if ($searchType !== '') {
+  $searchURI .= "&searchType=" . rawurlencode($searchType);
+}
+if ($searchGift !== '') {
+  $searchURI .= "&searchGift=" . rawurlencode($searchGift);
+}
+if ($searchStatus !== '') {
+  $searchURI .= "&searchStatus=" . rawurlencode($searchStatus);
+}
 if (!empty($searchURI)) {
   $searchURI = substr($searchURI, 1);
 }
@@ -25,6 +33,7 @@ define('PAGE_ITEM', 'ITEM_MERCH');
 define('PAGE_OPANEL', 1); // 1-新增
 define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
 define('EXPORT_OPANEL', 3); // 3-Excel+Print
+define('bkRedir', 1);
 
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
@@ -74,6 +83,7 @@ $statusMap = array(
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -91,6 +101,7 @@ $statusMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-orange">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -159,50 +170,50 @@ $statusMap = array(
                           $sold    = (int)($row['merch_sold'] ?? 0);
                           $sta     = (int)($row['merch_status'] ?? 1);
                         ?>
-                        <tr style="cursor: pointer;" onclick="window.location.href='merch_detail.php?currID=<?php echo $mid; ?>';">
-                          <td class="text-center fw-bold"><?php echo $mid; ?></td>
-                          <td class="text-center">
-                            <img src="<?php echo $imgSrc; ?>" class="rounded border" width="48" height="48" style="object-fit: cover;" alt="Merch">
-                          </td>
-                          <td>
-                            <div class="fw-bold text-dark">
-                              <?php if (!empty($row['merch_sku'])): ?>
-                                <code class="me-1 text-primary">[<?php echo htmlspecialchars($row['merch_sku']); ?>]</code>
+                          <tr style="cursor: pointer;" onclick="window.location.href='merch_detail.php?currID=<?php echo $mid; ?>';">
+                            <td class="text-center fw-bold"><?php echo $mid; ?></td>
+                            <td class="text-center">
+                              <img src="<?php echo $imgSrc; ?>" class="rounded border" width="48" height="48" style="object-fit: cover;" alt="Merch">
+                            </td>
+                            <td>
+                              <div class="fw-bold text-dark">
+                                <?php if (!empty($row['merch_sku'])): ?>
+                                  <code class="me-1 text-primary">[<?php echo htmlspecialchars($row['merch_sku']); ?>]</code>
+                                <?php endif; ?>
+                                <?php if ($rib > 0 && isset($ribbonMap[$rib])): ?>
+                                  <span class="badge text-bg-danger me-1"><?php echo $ribbonMap[$rib]; ?></span>
+                                <?php endif; ?>
+                                <?php echo htmlspecialchars($row['merch_title'] ?? ''); ?>
+                              </div>
+                              <?php if (!empty($row['merch_subtitle'])): ?>
+                                <div class="text-muted" style="font-size: 0.78rem;"><?php echo htmlspecialchars($row['merch_subtitle']); ?></div>
                               <?php endif; ?>
-                              <?php if ($rib > 0 && isset($ribbonMap[$rib])): ?>
-                                <span class="badge text-bg-danger me-1"><?php echo $ribbonMap[$rib]; ?></span>
+                            </td>
+                            <td class="text-center">
+                              <div><?php echo $typeMap[$mType] ?? $typeMap; ?></div>
+                              <div class="mt-1"><?php echo $giftMap[$isGift] ?? $giftMap; ?></div>
+                            </td>
+                            <td class="text-end">
+                              <div class="fw-bold text-dark">NT$ <?php echo number_format((int)($row['merch_price_twd'] ?? 0)); ?></div>
+                              <div class="text-muted" style="font-size: 0.75rem;">
+                                USD $<?php echo number_format((float)($row['merch_price_usd'] ?? 0), 2); ?>
+                                <?php if ($row['merch_sale_usd'] !== null): ?>
+                                  <span class="text-danger fw-bold">(特價 $<?php echo number_format((float)$row['merch_sale_usd'], 2); ?>)</span>
+                                <?php endif; ?>
+                              </div>
+                            </td>
+                            <td class="text-center">
+                              <?php if ($stock < 0): ?>
+                                <span class="badge bg-info-subtle text-info-emphasis border">無限量 (數位)</span>
+                              <?php elseif ($stock <= 10): ?>
+                                <span class="badge text-bg-danger">剩 <?php echo $stock; ?> 件</span>
+                              <?php else: ?>
+                                <span class="badge text-bg-light border text-dark">庫存 <?php echo number_format($stock); ?></span>
                               <?php endif; ?>
-                              <?php echo htmlspecialchars($row['merch_title'] ?? ''); ?>
-                            </div>
-                            <?php if (!empty($row['merch_subtitle'])): ?>
-                              <div class="text-muted" style="font-size: 0.78rem;"><?php echo htmlspecialchars($row['merch_subtitle']); ?></div>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center">
-                            <div><?php echo $typeMap[$mType] ?? $typeMap; ?></div>
-                            <div class="mt-1"><?php echo $giftMap[$isGift] ?? $giftMap; ?></div>
-                          </td>
-                          <td class="text-end">
-                            <div class="fw-bold text-dark">NT$ <?php echo number_format((int)($row['merch_price_twd'] ?? 0)); ?></div>
-                            <div class="text-muted" style="font-size: 0.75rem;">
-                              USD $<?php echo number_format((float)($row['merch_price_usd'] ?? 0), 2); ?>
-                              <?php if ($row['merch_sale_usd'] !== null): ?>
-                                <span class="text-danger fw-bold">(特價 $<?php echo number_format((float)$row['merch_sale_usd'], 2); ?>)</span>
-                              <?php endif; ?>
-                            </div>
-                          </td>
-                          <td class="text-center">
-                            <?php if ($stock < 0): ?>
-                              <span class="badge bg-info-subtle text-info-emphasis border">無限量 (數位)</span>
-                            <?php elseif ($stock <= 10): ?>
-                              <span class="badge text-bg-danger">剩 <?php echo $stock; ?> 件</span>
-                            <?php else: ?>
-                              <span class="badge text-bg-light border text-dark">庫存 <?php echo number_format($stock); ?></span>
-                            <?php endif; ?>
-                            <div class="text-muted mt-1" style="font-size: 0.74rem;">累計售出：<?php echo number_format($sold); ?></div>
-                          </td>
-                          <td class="text-center"><?php echo $statusMap[$sta] ?? '<span class="badge text-bg-secondary">未知</span>'; ?></td>
-                        </tr>
+                              <div class="text-muted mt-1" style="font-size: 0.74rem;">累計售出：<?php echo number_format($sold); ?></div>
+                            </td>
+                            <td class="text-center"><?php echo $statusMap[$sta] ?? '<span class="badge text-bg-secondary">未知</span>'; ?></td>
+                          </tr>
                         <?php endforeach; ?>
                       </tbody>
                     </table>
@@ -269,48 +280,66 @@ $statusMap = array(
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function doButAdd() { window.location.href = 'merch_detail.php?currID=0'; }
-  function doButReset() { window.location.replace('merch_list.php'); }
-  function doButSerach() {
-    const offcanvasEl = document.getElementById('offcanvasSearch');
-    if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
-  }
-  function doButExcel() { $('.buttons-excel').click(); }
-  function doButPrint() { $('.buttons-print').click(); }
-
-  $(document).ready(function() {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
-
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
-
-    var merchlistTB = datatableCreate('dataTable_merchlist');
-
-    $('#dataSearch').on('keyup search input paste cut', function() {
-      if ($(this).is(':focus') || this.value !== '') {
-        merchlistTB.search(this.value).draw();
-      }
-    });
-
-    $('#searchReset').click(function() {
-      if ($('#dataSearch').val() !== '') {
-        $('#dataSearch').val('');
-        merchlistTB.search('').draw();
-      } else {
-        window.location.replace('merch_list.php');
-      }
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+    function doReDirect() {
+      window.history.back();
     }
-  });
+
+    function doButAdd() {
+      window.location.href = 'merch_detail.php?currID=0';
+    }
+
+    function doButReset() {
+      window.location.replace('merch_list.php');
+    }
+
+    function doButSerach() {
+      const offcanvasEl = document.getElementById('offcanvasSearch');
+      if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+    }
+
+    function doButExcel() {
+      $('.buttons-excel').click();
+    }
+
+    function doButPrint() {
+      $('.buttons-print').click();
+    }
+
+    $(document).ready(function() {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      var merchlistTB = datatableCreate('dataTable_merchlist');
+
+      $('#dataSearch').on('keyup search input paste cut', function() {
+        if ($(this).is(':focus') || this.value !== '') {
+          merchlistTB.search(this.value).draw();
+        }
+      });
+
+      $('#searchReset').click(function() {
+        if ($('#dataSearch').val() !== '') {
+          $('#dataSearch').val('');
+          merchlistTB.search('').draw();
+        } else {
+          window.location.replace('merch_list.php');
+        }
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+      }
+    });
   </script>
 </body>
+
 </html>

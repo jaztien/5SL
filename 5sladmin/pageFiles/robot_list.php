@@ -7,8 +7,12 @@ $searchText = isset($_REQUEST['searchText']) ? trim(rawurldecode($_REQUEST['sear
 $searchCat  = isset($_REQUEST['searchCat']) ? trim($_REQUEST['searchCat']) : '';
 
 $searchURI = "";
-if ($searchText !== '') { $searchURI .= "&searchText=" . rawurlencode($searchText); }
-if ($searchCat !== '')  { $searchURI .= "&searchCat=" . rawurlencode($searchCat); }
+if ($searchText !== '') {
+  $searchURI .= "&searchText=" . rawurlencode($searchText);
+}
+if ($searchCat !== '') {
+  $searchURI .= "&searchCat=" . rawurlencode($searchCat);
+}
 if (!empty($searchURI)) {
   $searchURI = substr($searchURI, 1);
 }
@@ -21,6 +25,7 @@ define('PAGE_ITEM', 'ITEM_MSG');
 define('PAGE_OPANEL', 1); // 1-新增
 define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
 define('EXPORT_OPANEL', 3); // 3-Excel+Print
+define('bkRedir', 1);
 
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
@@ -71,6 +76,7 @@ echo $isRobotGlobalOn;
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -88,6 +94,7 @@ echo $isRobotGlobalOn;
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-indigo">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -197,32 +204,32 @@ echo $isRobotGlobalOn;
                           $needHuman = (int)($row['rob_need_human'] ?? 0);
                           $robSta    = (int)($row['rob_status'] ?? 1);
                         ?>
-                        <tr style="cursor: pointer;" onclick="window.location.href='robot_detail.php?currID=<?php echo $rid; ?>';">
-                          <td class="text-center fw-bold text-primary"><?php echo (int)$row['rob_priority']; ?></td>
-                          <td>
-                            <div class="mb-1"><?php echo $catMap[(int)$row['rob_category']] ?? $catMap[0]; ?></div>
-                            <div class="fw-bold text-dark"><?php echo htmlspecialchars($row['rob_topic']); ?></div>
-                          </td>
-                          <td>
-                            <div class="mb-1"><?php echo $matchMap[(int)$row['rob_match_mode']] ?? $matchMap[1]; ?></div>
-                            <div class="text-muted" style="font-size: 0.76rem;"><?php echo htmlspecialchars($row['rob_keywords']); ?></div>
-                          </td>
-                          <td class="text-center">
-                            <span class="badge text-bg-primary"><?php echo count($replies); ?> 組變體</span>
-                            <?php if (!empty($toneList)): ?>
-                              <div class="text-muted mt-1" style="font-size: 0.72rem;"><?php echo htmlspecialchars(implode(' / ', $toneList)); ?></div>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center">
-                            <?php echo ($needHuman === 1)
-                              ? '<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">仍需人工覆核</span>'
-                              : '<span class="badge bg-light text-secondary border">直接完成應答</span>'; ?>
-                          </td>
-                          <td class="text-center fw-bold text-success"><?php echo number_format((int)$row['rob_hit_count']); ?> 次</td>
-                          <td class="text-center">
-                            <?php echo ($robSta === 1) ? '<span class="badge text-bg-success">啟用中</span>' : '<span class="badge text-bg-secondary">已停用</span>'; ?>
-                          </td>
-                        </tr>
+                          <tr style="cursor: pointer;" onclick="window.location.href='robot_detail.php?currID=<?php echo $rid; ?>';">
+                            <td class="text-center fw-bold text-primary"><?php echo (int)$row['rob_priority']; ?></td>
+                            <td>
+                              <div class="mb-1"><?php echo $catMap[(int)$row['rob_category']] ?? $catMap[0]; ?></div>
+                              <div class="fw-bold text-dark"><?php echo htmlspecialchars($row['rob_topic']); ?></div>
+                            </td>
+                            <td>
+                              <div class="mb-1"><?php echo $matchMap[(int)$row['rob_match_mode']] ?? $matchMap[1]; ?></div>
+                              <div class="text-muted" style="font-size: 0.76rem;"><?php echo htmlspecialchars($row['rob_keywords']); ?></div>
+                            </td>
+                            <td class="text-center">
+                              <span class="badge text-bg-primary"><?php echo count($replies); ?> 組變體</span>
+                              <?php if (!empty($toneList)): ?>
+                                <div class="text-muted mt-1" style="font-size: 0.72rem;"><?php echo htmlspecialchars(implode(' / ', $toneList)); ?></div>
+                              <?php endif; ?>
+                            </td>
+                            <td class="text-center">
+                              <?php echo ($needHuman === 1)
+                                ? '<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">仍需人工覆核</span>'
+                                : '<span class="badge bg-light text-secondary border">直接完成應答</span>'; ?>
+                            </td>
+                            <td class="text-center fw-bold text-success"><?php echo number_format((int)$row['rob_hit_count']); ?> 次</td>
+                            <td class="text-center">
+                              <?php echo ($robSta === 1) ? '<span class="badge text-bg-success">啟用中</span>' : '<span class="badge text-bg-secondary">已停用</span>'; ?>
+                            </td>
+                          </tr>
                         <?php endforeach; ?>
                       </tbody>
                     </table>
@@ -273,61 +280,77 @@ echo $isRobotGlobalOn;
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function doButAdd() { window.location.href = 'robot_detail.php?currID=0'; }
-  function doButReset() { window.location.replace('robot_list.php'); }
-  function doButSerach() {
-    const offcanvasEl = document.getElementById('offcanvasSearch');
-    if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
-  }
-  function doButExcel() { $('.buttons-excel').click(); }
-  function doButPrint() { $('.buttons-print').click(); }
+    function doReDirect() {
+      window.history.back();
+    }
 
-  $(document).ready(function() {
+    function doButAdd() {
+      window.location.href = 'robot_detail.php?currID=0';
+    }
 
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+    function doButReset() {
+      window.location.replace('robot_list.php');
+    }
 
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
+    function doButSerach() {
+      const offcanvasEl = document.getElementById('offcanvasSearch');
+      if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+    }
 
-    var robotlistTB = datatableCreate('dataTable_robotlist');
+    function doButExcel() {
+      $('.buttons-excel').click();
+    }
 
-    $('#dataSearch').on('keyup search input paste cut', function() {
-      if ($(this).is(':focus') || this.value !== '') {
-        robotlistTB.search(this.value).draw();
-      }
-    });
+    function doButPrint() {
+      $('.buttons-print').click();
+    }
 
-    $('#searchReset').click(function() {
-      if ($('#dataSearch').val() !== '') {
-        $('#dataSearch').val('');
-        robotlistTB.search('').draw();
-      } else {
-        window.location.replace('robot_list.php');
-      }
-    });
+    $(document).ready(function() {
 
-    // 即時模擬測試自動應答
-    $('#btnSimulateRobot').on('click', function() {
-      const q = $.trim($('#simQuestion').val());
-      if (!q) {
-        window.parent.toastr['warning']('請先輸入模擬會員發問內容！');
-        return;
-      }
-      $.post('../funcFiles/robot_act_func.php', {
-        'formAcce': 'func_robot_simulate',
-        'token': getTokenVal(),
-        'category': $('#simCategory').val(),
-        'question': q
-      }, function(data) {
-        const $box = $('#simResultBox').removeClass('d-none');
-        if (data['RTN'] == 1 && data['matched']) {
-          $box.html(`
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      var robotlistTB = datatableCreate('dataTable_robotlist');
+
+      $('#dataSearch').on('keyup search input paste cut', function() {
+        if ($(this).is(':focus') || this.value !== '') {
+          robotlistTB.search(this.value).draw();
+        }
+      });
+
+      $('#searchReset').click(function() {
+        if ($('#dataSearch').val() !== '') {
+          $('#dataSearch').val('');
+          robotlistTB.search('').draw();
+        } else {
+          window.location.replace('robot_list.php');
+        }
+      });
+
+      // 即時模擬測試自動應答
+      $('#btnSimulateRobot').on('click', function() {
+        const q = $.trim($('#simQuestion').val());
+        if (!q) {
+          window.parent.toastr['warning']('請先輸入模擬會員發問內容！');
+          return;
+        }
+        $.post('../funcFiles/robot_act_func.php', {
+          'formAcce': 'func_robot_simulate',
+          'token': getTokenVal(),
+          'category': $('#simCategory').val(),
+          'question': q
+        }, function(data) {
+          const $box = $('#simResultBox').removeClass('d-none');
+          if (data['RTN'] == 1 && data['matched']) {
+            $box.html(`
             <div class="alert alert-success py-2 px-3 mb-0 small">
               <div class="fw-bold mb-1">
                 <i class="bi bi-check-circle-fill me-1"></i>命中規則：#${data['rob_id']}【${$('<div>').text(data['topic']).html()}】
@@ -337,48 +360,50 @@ echo $isRobotGlobalOn;
               <div class="p-2 bg-white border rounded text-dark mt-1">${$('<div>').text(data['reply']).html().replace(/\n/g, '<br>')}</div>
             </div>
           `);
-        } else {
-          $box.html(`
+          } else {
+            $box.html(`
             <div class="alert alert-secondary py-2 px-3 mb-0 small">
               <i class="bi bi-info-circle me-1"></i>未命中任何啟用中的自動應答規則，系統將轉為「待後台人工回覆」狀態。
             </div>
           `);
-        }
-      }, 'json');
-    });
-
-    // 全站自動應答總開關即時切換
-    $('#chkGlobalRobotSwitch').on('change', function() {
-      const isChecked = $(this).is(':checked');
-      const $lbl = $('#lblGlobalRobotSwitch');
-
-      $.post('../funcFiles/robot_act_func.php', {
-        'formAcce': 'func_robot_globalToggle',
-        'token': getTokenVal(),
-        'enabled': isChecked ? 1 : 0
-      }, function(data) {
-        console.log(data);
-        if (window.parent && window.parent.toastr) {
-          window.parent.toastr[data['msgType']](data['msgStr']);
-        }
-        if (data['RTN'] == 1) {
-          if (isChecked) {
-            $lbl.removeClass('text-danger').addClass('text-success').text('全站自動應答：啟用中');
-          } else {
-            $lbl.removeClass('text-success').addClass('text-danger').text('全站自動應答：已暫停');
           }
-        } else {
-          $('#chkGlobalRobotSwitch').prop('checked', !isChecked);
-        }
-      }, 'json');
+        }, 'json');
+      });
+
+      // 全站自動應答總開關即時切換
+      $('#chkGlobalRobotSwitch').on('change', function() {
+        const isChecked = $(this).is(':checked');
+        const $lbl = $('#lblGlobalRobotSwitch');
+
+        $.post('../funcFiles/robot_act_func.php', {
+          'formAcce': 'func_robot_globalToggle',
+          'token': getTokenVal(),
+          'enabled': isChecked ? 1 : 0
+        }, function(data) {
+          console.log(data);
+          if (window.parent && window.parent.toastr) {
+            window.parent.toastr[data['msgType']](data['msgStr']);
+          }
+          if (data['RTN'] == 1) {
+            if (isChecked) {
+              $lbl.removeClass('text-danger').addClass('text-success').text('全站自動應答：啟用中');
+            } else {
+              $lbl.removeClass('text-success').addClass('text-danger').text('全站自動應答：已暫停');
+            }
+          } else {
+            $('#chkGlobalRobotSwitch').prop('checked', !isChecked);
+          }
+        }, 'json');
+      });
+
+
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+      }
     });
-
-
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
-    }
-  });
   </script>
 </body>
+
 </html>

@@ -157,7 +157,7 @@ switch ($formAcce) {
       $body  = $rawContent;
 
       if ($hasNameVar) {
-        $decName = !empty($tm['mb_name']) ? _fn_secure_crypto($tm['mb_name'], 'de') : '';
+        $decName = !empty($tm['mb_name']) ? _fn_safe_dec_name($tm['mb_name']) : '';
         $mbLabel = ($decName !== '') ? $decName : '學員';
         $title   = str_replace('{會員姓名}', $mbLabel, $title);
         $body    = str_replace('{會員姓名}', $mbLabel, $body);

@@ -35,6 +35,7 @@ function _fn_format_bscal_rows($rows) {
     $id     = (int)$r['sch_id'];
     //目前列表顯示時為了辨識自動通知排程，會在 title 前加上 '🔔 '；等下前端 openAppointmentModal 
     //開啟編輯視窗時，記得把開頭的 '🔔 ' 濾掉（title.replace(/^🔔\s*/, '')），否則每次編輯儲存都
+    $validLink = (!empty($meta['link']) && is_string($meta['link']) && !str_contains($meta['link'], '[object')) ? trim($meta['link']) : '';
     //會多一顆鈴鐺！
     $prefix = ((int)$r['sch_trigger_enable'] === 1) ? '🔔 ' : '';
     $item   = [
@@ -50,9 +51,10 @@ function _fn_format_bscal_rows($rows) {
       'description' => nl2br(htmlspecialchars($rawBody, ENT_QUOTES, 'UTF-8')),
       'rawDesc'     => $rawBody,
       'triggerEn'   => (int)$r['sch_trigger_enable'],
-      'link'        => !empty($meta['link']) ? $meta['link'] : [
+      'link'        => ($validLink !== '') ? $validLink : [
         'href' => "sch_detail.php?currID={$id}&fromCal=1", 'text' => '⚙️ 詳細排程與通知對象設定', 'target' => '_self'
       ]
+
     ];
     if (!empty($meta['recurrence'])) $item['recurrence'] = $meta['recurrence'];
     if (!empty($meta['task'])) $item['task'] = [

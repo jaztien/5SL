@@ -8,9 +8,15 @@ $searchCate   = isset($_REQUEST['searchCate']) ? trim($_REQUEST['searchCate']) :
 $searchStatus = isset($_REQUEST['searchStatus']) ? trim($_REQUEST['searchStatus']) : '';
 
 $searchURI = "";
-if ($searchText !== '')   { $searchURI .= "&searchText=" . rawurlencode($searchText); }
-if ($searchCate !== '')   { $searchURI .= "&searchCate=" . rawurlencode($searchCate); }
-if ($searchStatus !== '') { $searchURI .= "&searchStatus=" . rawurlencode($searchStatus); }
+if ($searchText !== '') {
+  $searchURI .= "&searchText=" . rawurlencode($searchText);
+}
+if ($searchCate !== '') {
+  $searchURI .= "&searchCate=" . rawurlencode($searchCate);
+}
+if ($searchStatus !== '') {
+  $searchURI .= "&searchStatus=" . rawurlencode($searchStatus);
+}
 if (!empty($searchURI)) {
   $searchURI = substr($searchURI, 1);
 }
@@ -23,6 +29,7 @@ define('PAGE_ITEM', 'ITEM_SCH');
 define('PAGE_OPANEL', 1); // 1-新增
 define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
 define('EXPORT_OPANEL', 3);
+define('bkRedir', 1);
 
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
@@ -76,6 +83,7 @@ $execMap = array(
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -93,6 +101,7 @@ $execMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-teal">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -166,54 +175,54 @@ $execMap = array(
                           $trig  = (int)($row['sch_trigger_enable'] ?? 0);
                           $chs   = explode(',', $row['sch_channels'] ?? '');
                         ?>
-                        <tr style="cursor: pointer;" onclick="window.location.href='sch_detail.php?currID=<?php echo $sid; ?>';">
-                          <td class="text-center fw-bold"><?php echo $sid; ?></td>
-                          <td>
-                            <div class="fw-bold text-dark">
-                              <span class="d-inline-block rounded-circle me-1" style="width:10px;height:10px;background:<?php echo htmlspecialchars($row['sch_color'] ?? '#3b82f6'); ?>;"></span>
-                              <?php echo $cateMap[$cate] ?? ''; ?>
-                              <?php if ((int)$row['sch_source'] === 2): ?>
-                                <span class="badge bg-light text-muted border ms-1" title="由課程梯次自動提取">自動同步</span>
+                          <tr style="cursor: pointer;" onclick="window.location.href='sch_detail.php?currID=<?php echo $sid; ?>';">
+                            <td class="text-center fw-bold"><?php echo $sid; ?></td>
+                            <td>
+                              <div class="fw-bold text-dark">
+                                <span class="d-inline-block rounded-circle me-1" style="width:10px;height:10px;background:<?php echo htmlspecialchars($row['sch_color'] ?? '#3b82f6'); ?>;"></span>
+                                <?php echo $cateMap[$cate] ?? ''; ?>
+                                <?php if ((int)$row['sch_source'] === 2): ?>
+                                  <span class="badge bg-light text-muted border ms-1" title="由課程梯次自動提取">自動同步</span>
+                                <?php endif; ?>
+                                <span class="ms-1"><?php echo htmlspecialchars($row['sch_title']); ?></span>
+                              </div>
+                              <?php if (!empty($row['course_title'])): ?>
+                                <div class="text-muted" style="font-size: 0.75rem;">關聯課程：<?php echo htmlspecialchars($row['course_title']); ?></div>
                               <?php endif; ?>
-                              <span class="ms-1"><?php echo htmlspecialchars($row['sch_title']); ?></span>
-                            </div>
-                            <?php if (!empty($row['course_title'])): ?>
-                              <div class="text-muted" style="font-size: 0.75rem;">關聯課程：<?php echo htmlspecialchars($row['course_title']); ?></div>
-                            <?php endif; ?>
-                          </td>
-                          <td style="font-size: 0.76rem;">
-                            <div>起：<?php echo substr($row['sch_start_at'], 0, 16); ?></div>
-                            <div class="text-muted">訖：<?php echo !empty($row['sch_end_at']) ? substr($row['sch_end_at'], 0, 16) : '-'; ?></div>
-                          </td>
-                          <td style="font-size: 0.76rem;">
-                            <?php if ($trig === 1): ?>
-                              <div class="fw-bold text-danger"><i class="bi bi-clock-history me-1"></i><?php echo substr($row['sch_trigger_at'] ?? '', 0, 16); ?></div>
-                              <div class="text-dark"><?php echo $targetMap[$tType] ?? ''; ?></div>
-                            <?php else: ?>
-                              <span class="text-muted">純日曆記事（不發通知）</span>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center">
-                            <?php if ($trig === 1): ?>
-                              <?php if (in_array('noti', $chs))  echo '<span class="badge bg-primary me-1">站內</span>'; ?>
-                              <?php if (in_array('email', $chs)) echo '<span class="badge bg-success me-1">郵件</span>'; ?>
-                              <?php if (in_array('sms', $chs))   echo '<span class="badge bg-warning text-dark me-1">簡訊</span>'; ?>
-                              <?php if (in_array('line', $chs))  echo '<span class="badge bg-info text-dark">LINE</span>'; ?>
-                            <?php else: ?>
-                              <span class="text-muted">-</span>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center">
-                            <?php if ($trig === 1): ?>
-                              <div><?php echo $execMap[$eSta] ?? ''; ?></div>
-                              <?php if (!empty($row['sch_exec_result'])): ?>
-                                <div class="text-muted mt-1" style="font-size: 0.72rem;"><?php echo htmlspecialchars($row['sch_exec_result']); ?></div>
+                            </td>
+                            <td style="font-size: 0.76rem;">
+                              <div>起：<?php echo substr($row['sch_start_at'], 0, 16); ?></div>
+                              <div class="text-muted">訖：<?php echo !empty($row['sch_end_at']) ? substr($row['sch_end_at'], 0, 16) : '-'; ?></div>
+                            </td>
+                            <td style="font-size: 0.76rem;">
+                              <?php if ($trig === 1): ?>
+                                <div class="fw-bold text-danger"><i class="bi bi-clock-history me-1"></i><?php echo substr($row['sch_trigger_at'] ?? '', 0, 16); ?></div>
+                                <div class="text-dark"><?php echo $targetMap[$tType] ?? ''; ?></div>
+                              <?php else: ?>
+                                <span class="text-muted">純日曆記事（不發通知）</span>
                               <?php endif; ?>
-                            <?php else: ?>
-                              <span class="badge bg-light text-secondary border">日曆事件</span>
-                            <?php endif; ?>
-                          </td>
-                        </tr>
+                            </td>
+                            <td class="text-center">
+                              <?php if ($trig === 1): ?>
+                                <?php if (in_array('noti', $chs))  echo '<span class="badge bg-primary me-1">站內</span>'; ?>
+                                <?php if (in_array('email', $chs)) echo '<span class="badge bg-success me-1">郵件</span>'; ?>
+                                <?php if (in_array('sms', $chs))   echo '<span class="badge bg-warning text-dark me-1">簡訊</span>'; ?>
+                                <?php if (in_array('line', $chs))  echo '<span class="badge bg-info text-dark">LINE</span>'; ?>
+                              <?php else: ?>
+                                <span class="text-muted">-</span>
+                              <?php endif; ?>
+                            </td>
+                            <td class="text-center">
+                              <?php if ($trig === 1): ?>
+                                <div><?php echo $execMap[$eSta] ?? ''; ?></div>
+                                <?php if (!empty($row['sch_exec_result'])): ?>
+                                  <div class="text-muted mt-1" style="font-size: 0.72rem;"><?php echo htmlspecialchars($row['sch_exec_result']); ?></div>
+                                <?php endif; ?>
+                              <?php else: ?>
+                                <span class="badge bg-light text-secondary border">日曆事件</span>
+                              <?php endif; ?>
+                            </td>
+                          </tr>
                         <?php endforeach; ?>
                       </tbody>
                     </table>
@@ -272,76 +281,94 @@ $execMap = array(
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  ////////////////////////////////////////////////////////////////
-  // ---------------- JAVASCRIPTS 全域調用參數設置 --------------- //
-  ////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////
+    // ---------------- JAVASCRIPTS 全域調用參數設置 --------------- //
+    ////////////////////////////////////////////////////////////////
 
-  ////////////////////////////////////////////////////////////////
-  // -------------- JAVASCRIPTS FUNCTIONs 全域調用 -------------- //
-  // -------------- 可接收include檔案要求後自定義動作 -------------- //
-  ////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////
+    // -------------- JAVASCRIPTS FUNCTIONs 全域調用 -------------- //
+    // -------------- 可接收include檔案要求後自定義動作 -------------- //
+    ////////////////////////////////////////////////////////////////
 
-  function doButAdd() { window.location.href = 'sch_detail.php?currID=0'; }
-  function doButReset() { window.location.replace('sch_list.php'); }
-  function doButSerach() {
-    const offcanvasEl = document.getElementById('offcanvasSearch');
-    if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
-  }
-  function doButExcel() { $('.buttons-excel').click(); }
-  function doButPrint() { $('.buttons-print').click(); }
-
-  ////////////////////////////////////////////////////////////////
-  // ---------------- jQuery FUNCTIONs 區域調用 ---------------- //
-  // ---------------------------------------------------------- //
-  ////////////////////////////////////////////////////////////////
-
-  $(document).ready(function() {
-    
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
-
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
-
-    var schlistTB = datatableCreate('dataTable_schlist');
-
-    $('#dataSearch').on('keyup search input paste cut', function() {
-      if ($(this).is(':focus') || this.value !== '') {
-        schlistTB.search(this.value).draw();
-      }
-    });
-
-    $('#searchReset').click(function() {
-      if ($('#dataSearch').val() !== '') {
-        $('#dataSearch').val('');
-        schlistTB.search('').draw();
-      } else {
-        window.location.replace('sch_list.php');
-      }
-    });
-
-    // 一鍵從 fsl_course_sessions 自動提取所有未來開課梯次時間並建立課前24小時提醒排程
-    $('#btnSyncCourseSessions').on('click', function() {
-      const $btn = $(this).prop('disabled', true);
-      $.post('../funcFiles/sch_act_func.php', {
-        'formAcce': 'func_sch_syncCourses',
-        'token': getTokenVal()
-      }, function(data) {
-        $btn.prop('disabled', false);
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) location.reload(true);
-      }, 'json');
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+    function doReDirect() {
+      window.history.back();
     }
-  });
+
+    function doButAdd() {
+      window.location.href = 'sch_detail.php?currID=0';
+    }
+
+    function doButReset() {
+      window.location.replace('sch_list.php');
+    }
+
+    function doButSerach() {
+      const offcanvasEl = document.getElementById('offcanvasSearch');
+      if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+    }
+
+    function doButExcel() {
+      $('.buttons-excel').click();
+    }
+
+    function doButPrint() {
+      $('.buttons-print').click();
+    }
+
+    ////////////////////////////////////////////////////////////////
+    // ---------------- jQuery FUNCTIONs 區域調用 ---------------- //
+    // ---------------------------------------------------------- //
+    ////////////////////////////////////////////////////////////////
+
+    $(document).ready(function() {
+
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      var schlistTB = datatableCreate('dataTable_schlist');
+
+      $('#dataSearch').on('keyup search input paste cut', function() {
+        if ($(this).is(':focus') || this.value !== '') {
+          schlistTB.search(this.value).draw();
+        }
+      });
+
+      $('#searchReset').click(function() {
+        if ($('#dataSearch').val() !== '') {
+          $('#dataSearch').val('');
+          schlistTB.search('').draw();
+        } else {
+          window.location.replace('sch_list.php');
+        }
+      });
+
+      // 一鍵從 fsl_course_sessions 自動提取所有未來開課梯次時間並建立課前24小時提醒排程
+      $('#btnSyncCourseSessions').on('click', function() {
+        const $btn = $(this).prop('disabled', true);
+        $.post('../funcFiles/sch_act_func.php', {
+          'formAcce': 'func_sch_syncCourses',
+          'token': getTokenVal()
+        }, function(data) {
+          $btn.prop('disabled', false);
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) location.reload(true);
+        }, 'json');
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+      }
+    });
   </script>
 </body>
+
 </html>

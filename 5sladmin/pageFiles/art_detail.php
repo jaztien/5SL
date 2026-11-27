@@ -43,6 +43,7 @@ $statusLabels = array(0 => '下架停用', 1 => '上架啟用', 2 => '草稿待�
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -57,30 +58,33 @@ $statusLabels = array(0 => '下架停用', 1 => '上架啟用', 2 => '草稿待�
   <link rel="stylesheet" href="../pluginFiles/bootstrap-icons/bootstrap-icons.min.css">
   <link rel="stylesheet" href="../pluginFiles/flatpickr/flatpickr.min.css">
   <link rel="stylesheet" href="../cssFiles/adminlte.css">
-  <link rel="stylesheet" href="../pluginFiles/cropper/cropper.css"/>
+  <link rel="stylesheet" href="../pluginFiles/cropper/cropper.css" />
   <link rel="stylesheet" href="../pluginFiles/suneditor/css/suneditor.min.css">
   <link rel="stylesheet" href="../cssFiles/5sl.fileupload.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 
-<style>
-  .art-cover-area.image_area label[for^="cropUploadImage"] {
-    border-radius: 12px !important;
-    border: 1px solid #dee2e6;
-    width: 100% !important;
-    max-width: 240px;
-  }
-  .art-cover-area.image_area label[for^="cropUploadImage"] img.imgEDicon {
-    border-radius: 12px !important;
-    width: 100%;
-    object-fit: cover;
-  }
-  .sun-editor {
-    font-family: 'Noto Sans TC', sans-serif !important;
-    border-radius: 8px !important;
-  }
-</style>
+  <style>
+    .art-cover-area.image_area label[for^="cropUploadImage"] {
+      border-radius: 12px !important;
+      border: 1px solid #dee2e6;
+      width: 100% !important;
+      max-width: 240px;
+    }
+
+    .art-cover-area.image_area label[for^="cropUploadImage"] img.imgEDicon {
+      border-radius: 12px !important;
+      width: 100%;
+      object-fit: cover;
+    }
+
+    .sun-editor {
+      font-family: 'Noto Sans TC', sans-serif !important;
+      border-radius: 8px !important;
+    }
+  </style>
 </head>
+
 <body class="bg-body-tertiary theme-blue">
   <div class="app-wrapper">
     <main class="app-main">
@@ -119,7 +123,7 @@ $statusLabels = array(0 => '下架停用', 1 => '上架啟用', 2 => '草稿待�
                       <i class="nav-icon bi bi-trash3 fs-4 cropImgTrash <?php echo $cropImgDisplay; ?>" title="刪除封面圖"></i>
                       <form method="post">
                         <label for="cropUploadImage">
-                          <img id="avatarImage" name="avatarImage" class="img-fluid imgEDicon" src="<?php echo $mainimgpath; ?>" alt="文章封面圖" title="文章封面圖 (800×500)"/>
+                          <img id="avatarImage" name="avatarImage" class="img-fluid imgEDicon" src="<?php echo $mainimgpath; ?>" alt="文章封面圖" title="文章封面圖 (800×500)" />
                           <div class="overlay" style="border-radius: 0 0 12px 12px;">
                             <div class="overtext"><?php echo !empty($artiID) ? "更改" : "上傳"; ?>封面主圖 (800×500)</div>
                           </div>
@@ -197,7 +201,7 @@ $statusLabels = array(0 => '下架停用', 1 => '上架啟用', 2 => '草稿待�
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">唯一調用代碼 (arti_keycode)</label>
                             <input type="text" class="form-control text-uppercase" id="arti_keycode" name="arti_keycode"
-                                   value="<?php echo htmlspecialchars($res['arti_keycode'] ?? ''); ?>" placeholder="如：MAIL_WELCOME / PRIVACY_POLICY">
+                              value="<?php echo htmlspecialchars($res['arti_keycode'] ?? ''); ?>" placeholder="如：MAIL_WELCOME / PRIVACY_POLICY">
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">所屬分類 (arti_cate)</label>
@@ -213,23 +217,23 @@ $statusLabels = array(0 => '下架停用', 1 => '上架啟用', 2 => '草稿待�
                           <div class="col-md-7">
                             <label class="form-label small fw-bold">文章標題 / 郵件主旨 (支援變數如 {{member_name}}) <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="arti_title" name="arti_title" required
-                                   value="<?php echo htmlspecialchars($res['arti_title'] ?? ''); ?>" placeholder="輸入專欄標題或通知/郵件主旨...">
+                              value="<?php echo htmlspecialchars($res['arti_title'] ?? ''); ?>" placeholder="輸入專欄標題或通知/郵件主旨...">
                           </div>
                           <div class="col-md-5">
                             <label class="form-label small fw-bold">副標題 / 郵件摘要前言</label>
                             <input type="text" class="form-control" name="arti_subscript"
-                                   value="<?php echo htmlspecialchars($res['arti_subscript'] ?? ''); ?>" placeholder="顯示於文章標題下方或郵件預覽摘要">
+                              value="<?php echo htmlspecialchars($res['arti_subscript'] ?? ''); ?>" placeholder="顯示於文章標題下方或郵件預覽摘要">
                           </div>
 
                           <div class="col-md-6">
                             <label class="form-label small fw-bold">標籤關鍵字 (逗號分隔)</label>
                             <input type="text" class="form-control" name="arti_tag"
-                                   value="<?php echo htmlspecialchars($res['arti_tag'] ?? ''); ?>" placeholder="如：生命整理,色彩心理,第五季">
+                              value="<?php echo htmlspecialchars($res['arti_tag'] ?? ''); ?>" placeholder="如：生命整理,色彩心理,第五季">
                           </div>
                           <div class="col-md-6">
                             <label class="form-label small fw-bold">支援動態變數清單說明 (arti_tpl_vars)</label>
                             <input type="text" class="form-control" id="arti_tpl_vars" name="arti_tpl_vars"
-                                   value="<?php echo htmlspecialchars($res['arti_tpl_vars'] ?? ''); ?>" placeholder="如：member_name,order_no,course_title,date,url">
+                              value="<?php echo htmlspecialchars($res['arti_tpl_vars'] ?? ''); ?>" placeholder="如：member_name,order_no,course_title,date,url">
                           </div>
 
                           <div class="col-12">
@@ -237,7 +241,10 @@ $statusLabels = array(0 => '下架停用', 1 => '上架啟用', 2 => '草稿待�
                             <textarea class="form-control" name="arti_brief" rows="2" maxlength="500"><?php echo htmlspecialchars($res['arti_brief'] ?? ''); ?></textarea>
                           </div>
 
-                          <div class="col-12"><div class="hr-more">閱讀解鎖權限、上下架排程與關聯推薦</div><hr class="my-1"></div>
+                          <div class="col-12">
+                            <div class="hr-more">閱讀解鎖權限、上下架排程與關聯推薦</div>
+                            <hr class="my-1">
+                          </div>
 
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">閱讀權限控管</label>
@@ -250,7 +257,7 @@ $statusLabels = array(0 => '下架停用', 1 => '上架啟用', 2 => '草稿待�
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">解鎖消耗 PTS 點數</label>
                             <input type="number" class="form-control" name="arti_cost_pts" min="0" step="1"
-                                   value="<?php echo (int)($res['arti_cost_pts'] ?? 0); ?>">
+                              value="<?php echo (int)($res['arti_cost_pts'] ?? 0); ?>">
                           </div>
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">精選置頂設定</label>
@@ -364,186 +371,199 @@ $statusLabels = array(0 => '下架停用', 1 => '上架啟用', 2 => '草稿待�
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/fileupload.js<?php echo '?t='.time(); ?>"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/fileupload.js<?php echo '?t=' . time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  let artSunEditor = null;
+    let artSunEditor = null;
 
-  function validateBS5Form($form) {
-    if (!$form || $form.length === 0) return true;
-    const formEl = $form[0];
-    const isValid = formEl.checkValidity();
-    formEl.classList.add('was-validated');
-    return isValid;
-  }
-
-  function doReDirect() { window.history.back(); }
-
-  function doButSave() {
-    if (artSunEditor) {
-      $('#arti_body').val(artSunEditor.getContents());
+    function validateBS5Form($form) {
+      if (!$form || $form.length === 0) return true;
+      const formEl = $form[0];
+      const isValid = formEl.checkValidity();
+      formEl.classList.add('was-validated');
+      return isValid;
     }
-    var frm = $('#form_artMaster');
-    if (!validateBS5Form(frm)) {
-      const tab1El = document.querySelector('a[href="#tabMenu1"]');
-      if (tab1El) bootstrap.Tab.getOrCreateInstance(tab1El).show();
-      window.parent.toastr['warning']('請檢查標示紅框的必填欄位（如文章標題/郵件主旨）！');
-      return false;
-    }
-    ajaxPOST(frm);
-  }
 
-  function doButDelete() {
-    if (0 == parseInt('<?php echo $artiID; ?>')) return false;
-    $.post('../funcFiles/art_act_func.php', {
-      'formAcce': 'func_art_delete',
-      'token': getTokenVal(),
-      'artiID': '<?php echo $artiID; ?>'
-    }, function(data) {
-      if (data['RTN'] == 1) {
-        window.parent.toastr['success'](data['msgStr']);
-        window.location.replace('art_list.php');
-      } else {
-        window.parent.toastr['error'](data['msgStr'] || '刪除失敗');
+    function doReDirect() {
+      window.history.back();
+    }
+
+    function doButSave() {
+      if (artSunEditor) {
+        $('#arti_body').val(artSunEditor.getContents());
       }
-    }, 'json');
-  }
-
-  function doButReset() { location.reload(true); }
-
-  function ajaxPOST(frm) {
-    var $frm = frm || $('#form_artMaster');
-    var accE = (0 == parseInt('<?php echo $artiID; ?>')) ? 'func_art_addnew' : $frm.data('func');
-    var datA = getFormObjects($frm);
-    if (artSunEditor) {
-      datA['arti_body'] = artSunEditor.getContents();
+      var frm = $('#form_artMaster');
+      if (!validateBS5Form(frm)) {
+        const tab1El = document.querySelector('a[href="#tabMenu1"]');
+        if (tab1El) bootstrap.Tab.getOrCreateInstance(tab1El).show();
+        window.parent.toastr['warning']('請檢查標示紅框的必填欄位（如文章標題/郵件主旨）！');
+        return false;
+      }
+      ajaxPOST(frm);
     }
-    var imgBase64 = (typeof cropImage64 !== 'undefined' && cropImage64 !== '')
-                    ? cropImage64
-                    : ($('#main_crop_area').data('cropImage64') || '');
 
-    $.ajax({
-      type: 'post',
-      url: '../funcFiles/art_act_func.php',
-      data: {
-        'arrDatA': datA,
-        'formAcce': accE,
-        'imgUp': imgBase64,
+    function doButDelete() {
+      if (0 == parseInt('<?php echo $artiID; ?>')) return false;
+      $.post('../funcFiles/art_act_func.php', {
+        'formAcce': 'func_art_delete',
         'token': getTokenVal(),
         'artiID': '<?php echo $artiID; ?>'
-      },
-      dataType: 'json',
-      success: function(data) {
-        if (accE == 'func_art_addnew' && data['RTN'] == 1) {
-          window.parent.toastr['success'](data['msgStr']);
-          window.location.replace('art_detail.php?currID=' + data['newID']);
-          return false;
-        }
-        if (window.parent && window.parent.toastr) {
-          window.parent.toastr[data['msgType']](data['msgStr']);
-        }
+      }, function(data) {
         if (data['RTN'] == 1) {
-          $frm.removeClass('was-validated');
-          $('#sideArtTitle').text($('#arti_title').val() || '未命名內容');
-          $('#sideArtMode').text($('#arti_mode option:selected').text());
-          $('#sideArtCode').text($('#arti_keycode').val() ? $('#arti_keycode').val().toUpperCase() : '-');
-          const stVal = $('#arti_status').val();
-          $('#sideArtStatus')
-            .text($('#arti_status option:selected').text().replace(/^\d+\s*-\s*/, ''))
-            .toggleClass('text-success fw-bold', stVal === '1')
-            .toggleClass('text-secondary', stVal !== '1');
-          if (data['upTime']) $('#sideArtUpdated').text(data['upTime']);
-          cropImage64 = '';
-          if (typeof doSerialize === 'function') doSerialize();
+          window.parent.toastr['success'](data['msgStr']);
+          window.location.replace('art_list.php');
+        } else {
+          window.parent.toastr['error'](data['msgStr'] || '刪除失敗');
         }
-      }
-    });
-  }
-
-  $(document).ready(function() {
-    if (typeof flatpickr !== 'undefined') {
-      flatpickr($('input[type="date"]'), { locale: 'zh_tw', dateFormat: 'Y-m-d', allowInput: true, disableMobile: true });
+      }, 'json');
     }
 
-    // 1. 初始化 SunEditor（聯動檔案庫圖庫 img_gallery_api.php）
-    if (typeof SUNEDITOR !== 'undefined' && document.getElementById('arti_body')) {
-      artSunEditor = SUNEDITOR.create(document.getElementById('arti_body'), {
-        lang: SUNEDITOR_LANG['zh_tw'],
-        width: '100%',
-        height: '420px',
-        imageGalleryUrl: '../funcFiles/img_gallery_api.php',
-        buttonList: [
-          ['undo', 'redo'],
-          ['font', 'fontSize', 'formatBlock'],
-          ['bold', 'underline', 'italic', 'strike'],
-          ['fontColor', 'hiliteColor'],
-          ['removeFormat'],
-          ['outdent', 'indent', 'align', 'horizontalRule', 'list', 'table'],
-          ['link', 'image', 'imageGallery', 'video'],
-          ['fullScreen', 'showBlocks', 'codeView']
-        ]
-      });
-
-      artSunEditor.onChange = function() {
-        if (window.parent && window.parent.$) {
-          window.parent.$('#topBut_save').addClass('active');
-        }
-      };
+    function doButReset() {
+      location.reload(true);
     }
 
-    // 2. 點擊一鍵插入 {{變數}} 至 SunEditor 游標處並同步更新變數說明欄
-    $(document).on('click', '.btn-insert-var', function() {
-      const vTag = $(this).data('var');
+    function ajaxPOST(frm) {
+      var $frm = frm || $('#form_artMaster');
+      var accE = (0 == parseInt('<?php echo $artiID; ?>')) ? 'func_art_addnew' : $frm.data('func');
+      var datA = getFormObjects($frm);
       if (artSunEditor) {
-        artSunEditor.insertHTML(`<span style="background:#eef2ff;color:#4f46e5;padding:1px 5px;border-radius:4px;font-family:monospace;">${vTag}</span>&nbsp;`);
+        datA['arti_body'] = artSunEditor.getContents();
       }
-      const cleanName = vTag.replace(/[{}]/g, '');
-      const curVars   = $('#arti_tpl_vars').val().trim();
-      const varList   = curVars ? curVars.split(',').map(s => s.trim()) : [];
-      if (!varList.includes(cleanName)) {
-        varList.push(cleanName);
-        $('#arti_tpl_vars').val(varList.join(','));
+      var imgBase64 = (typeof cropImage64 !== 'undefined' && cropImage64 !== '') ?
+        cropImage64 :
+        ($('#main_crop_area').data('cropImage64') || '');
+
+      $.ajax({
+        type: 'post',
+        url: '../funcFiles/art_act_func.php',
+        data: {
+          'arrDatA': datA,
+          'formAcce': accE,
+          'imgUp': imgBase64,
+          'token': getTokenVal(),
+          'artiID': '<?php echo $artiID; ?>'
+        },
+        dataType: 'json',
+        success: function(data) {
+          if (accE == 'func_art_addnew' && data['RTN'] == 1) {
+            window.parent.toastr['success'](data['msgStr']);
+            window.location.replace('art_detail.php?currID=' + data['newID']);
+            return false;
+          }
+          if (window.parent && window.parent.toastr) {
+            window.parent.toastr[data['msgType']](data['msgStr']);
+          }
+          if (data['RTN'] == 1) {
+            $frm.removeClass('was-validated');
+            $('#sideArtTitle').text($('#arti_title').val() || '未命名內容');
+            $('#sideArtMode').text($('#arti_mode option:selected').text());
+            $('#sideArtCode').text($('#arti_keycode').val() ? $('#arti_keycode').val().toUpperCase() : '-');
+            const stVal = $('#arti_status').val();
+            $('#sideArtStatus')
+              .text($('#arti_status option:selected').text().replace(/^\d+\s*-\s*/, ''))
+              .toggleClass('text-success fw-bold', stVal === '1')
+              .toggleClass('text-secondary', stVal !== '1');
+            if (data['upTime']) $('#sideArtUpdated').text(data['upTime']);
+            cropImage64 = '';
+            if (typeof doSerialize === 'function') doSerialize();
+          }
+        }
+      });
+    }
+
+    $(document).ready(function() {
+      if (typeof flatpickr !== 'undefined') {
+        flatpickr($('input[type="date"]'), {
+          locale: 'zh_tw',
+          dateFormat: 'Y-m-d',
+          allowInput: true,
+          disableMobile: true
+        });
       }
-    });
 
-    // 3. 模擬動態變數替換預覽
-    $('#btnPreviewTplVars').on('click', function() {
-      const rawTitle = $('#arti_title').val() || '（未設定標題）';
-      const rawBody  = artSunEditor ? artSunEditor.getContents() : $('#arti_body').val();
-      const mockData = {
-        '{{member_name}}': '林向光',
-        '{{member_email}}': 'guang@5slife.com',
-        '{{order_no}}': 'ORD202611230088',
-        '{{course_title}}': '《人生第五季：色彩覺察與生命微整理》',
-        '{{pts}}': '500',
-        '{{date}}': '2026-11-23',
-        '{{url}}': 'https://5slife.com'
-      };
+      // 1. 初始化 SunEditor（聯動檔案庫圖庫 img_gallery_api.php）
+      if (typeof SUNEDITOR !== 'undefined' && document.getElementById('arti_body')) {
+        artSunEditor = SUNEDITOR.create(document.getElementById('arti_body'), {
+          lang: SUNEDITOR_LANG['zh_tw'],
+          width: '100%',
+          height: '420px',
+          imageGalleryUrl: '../funcFiles/img_gallery_api.php',
+          buttonList: [
+            ['undo', 'redo'],
+            ['font', 'fontSize', 'formatBlock'],
+            ['bold', 'underline', 'italic', 'strike'],
+            ['fontColor', 'hiliteColor'],
+            ['removeFormat'],
+            ['outdent', 'indent', 'align', 'horizontalRule', 'list', 'table'],
+            ['link', 'image', 'imageGallery', 'video'],
+            ['fullScreen', 'showBlocks', 'codeView']
+          ]
+        });
 
-      let renderedTitle = rawTitle;
-      let renderedBody  = rawBody;
-      Object.keys(mockData).forEach(key => {
-        const reg = new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-        renderedTitle = renderedTitle.replace(reg, mockData[key]);
-        renderedBody  = renderedBody.replace(reg, mockData[key]);
+        artSunEditor.onChange = function() {
+          if (window.parent && window.parent.$) {
+            window.parent.$('#topBut_save').addClass('active');
+          }
+        };
+      }
+
+      // 2. 點擊一鍵插入 {{變數}} 至 SunEditor 游標處並同步更新變數說明欄
+      $(document).on('click', '.btn-insert-var', function() {
+        const vTag = $(this).data('var');
+        if (artSunEditor) {
+          artSunEditor.insertHTML(`<span style="background:#eef2ff;color:#4f46e5;padding:1px 5px;border-radius:4px;font-family:monospace;">${vTag}</span>&nbsp;`);
+        }
+        const cleanName = vTag.replace(/[{}]/g, '');
+        const curVars = $('#arti_tpl_vars').val().trim();
+        const varList = curVars ? curVars.split(',').map(s => s.trim()) : [];
+        if (!varList.includes(cleanName)) {
+          varList.push(cleanName);
+          $('#arti_tpl_vars').val(varList.join(','));
+        }
       });
 
-      $('#previewRenderedTitle').text(renderedTitle);
-      $('#previewRenderedBody').html(renderedBody);
-      bootstrap.Modal.getOrCreateInstance(document.getElementById('tplPreviewModal')).show();
-    });
+      // 3. 模擬動態變數替換預覽
+      $('#btnPreviewTplVars').on('click', function() {
+        const rawTitle = $('#arti_title').val() || '（未設定標題）';
+        const rawBody = artSunEditor ? artSunEditor.getContents() : $('#arti_body').val();
+        const mockData = {
+          '{{member_name}}': '林向光',
+          '{{member_email}}': 'guang@5slife.com',
+          '{{order_no}}': 'ORD202611230088',
+          '{{course_title}}': '《人生第五季：色彩覺察與生命微整理》',
+          '{{pts}}': '500',
+          '{{date}}': '2026-11-23',
+          '{{url}}': 'https://5slife.com'
+        };
 
-    $('li.prevLink').on('click', function() { window.location.replace(getCurrentURI('', 'art_list.php')); });
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
+        let renderedTitle = rawTitle;
+        let renderedBody = rawBody;
+        Object.keys(mockData).forEach(key => {
+          const reg = new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+          renderedTitle = renderedTitle.replace(reg, mockData[key]);
+          renderedBody = renderedBody.replace(reg, mockData[key]);
+        });
 
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
-    }
-  });
+        $('#previewRenderedTitle').text(renderedTitle);
+        $('#previewRenderedBody').html(renderedBody);
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('tplPreviewModal')).show();
+      });
+
+      $('li.prevLink').on('click', function() {
+        window.location.replace(getCurrentURI('', 'art_list.php'));
+      });
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+      }
+    });
   </script>
 </body>
+
 </html>

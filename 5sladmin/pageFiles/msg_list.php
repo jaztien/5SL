@@ -9,10 +9,18 @@ $searchReplySta = isset($_REQUEST['searchReplySta']) ? trim($_REQUEST['searchRep
 $searchTarget   = isset($_REQUEST['searchTarget']) ? trim($_REQUEST['searchTarget']) : '';
 
 $searchURI = "";
-if ($searchText !== '')     { $searchURI .= "&searchText=" . rawurlencode($searchText); }
-if ($searchCat !== '')      { $searchURI .= "&searchCat=" . rawurlencode($searchCat); }
-if ($searchReplySta !== '') { $searchURI .= "&searchReplySta=" . rawurlencode($searchReplySta); }
-if ($searchTarget !== '')   { $searchURI .= "&searchTarget=" . rawurlencode($searchTarget); }
+if ($searchText !== '') {
+  $searchURI .= "&searchText=" . rawurlencode($searchText);
+}
+if ($searchCat !== '') {
+  $searchURI .= "&searchCat=" . rawurlencode($searchCat);
+}
+if ($searchReplySta !== '') {
+  $searchURI .= "&searchReplySta=" . rawurlencode($searchReplySta);
+}
+if ($searchTarget !== '') {
+  $searchURI .= "&searchTarget=" . rawurlencode($searchTarget);
+}
 if (!empty($searchURI)) {
   $searchURI = substr($searchURI, 1);
 }
@@ -25,6 +33,7 @@ define('PAGE_ITEM', 'ITEM_MSG');
 define('PAGE_OPANEL', 1); // 1-新增(發送新訊息給前台)
 define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
 define('EXPORT_OPANEL', 3); // 3-Excel+Print
+define('bkRedir', 1);
 
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
@@ -99,6 +108,7 @@ $targetModeMap = array(
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -116,6 +126,7 @@ $targetModeMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-indigo">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -242,7 +253,7 @@ $targetModeMap = array(
                           $isPinned  = (int)($row['msg_is_pinned'] ?? 0);
 
                           if ($sType === 1) {
-                            $decName = !empty($row['sender_mb_name']) ? _fn_secure_crypto($row['sender_mb_name'], 'de') : '會員 #' . $row['sender_id'];
+                            $decName = !empty($row['sender_mb_name']) ? _fn_safe_dec_name($row['sender_mb_name']) : '會員 #' . $row['sender_id'];
                             $senderLabel = '<span class="fw-bold text-dark"><i class="bi bi-person-circle text-info me-1"></i>' . htmlspecialchars($decName) . '</span>';
                           } else {
                             $adName = $row['sender_ad_name'] ?: ('管理員 #' . $row['sender_id']);
@@ -252,31 +263,31 @@ $targetModeMap = array(
                           $briefTxt = mb_strimwidth(strip_tags((string)$row['msg_content']), 0, 75, '...', 'UTF-8');
                           $lastTime = $row['msg_last_reply_at'] ?: $row['msg_created'];
                         ?>
-                        <tr style="cursor: pointer;" onclick="window.location.href='msg_detail.php?currID=<?php echo $mid; ?>';">
-                          <td class="text-center fw-bold">
-                            <?php if ($isPinned): ?><i class="bi bi-pin-angle-fill text-danger me-1" title="置頂"></i><?php endif; ?>
-                            #<?php echo $mid; ?>
-                          </td>
-                          <td>
-                            <div class="mb-1">
-                              <?php echo $catMap[(int)$row['msg_category']] ?? $catMap[1]; ?>
-                              <span class="fw-bold text-dark ms-1"><?php echo htmlspecialchars($row['msg_title']); ?></span>
-                            </div>
-                            <div class="text-muted" style="font-size: 0.76rem;"><?php echo htmlspecialchars($briefTxt); ?></div>
-                          </td>
-                          <td>
-                            <div><?php echo $senderLabel; ?></div>
-                            <div style="font-size: 0.75rem;"><?php echo $targetModeMap[$tMode] ?? $tMode; ?></div>
-                          </td>
-                          <td class="text-center"><?php echo $replyStaMap[$rSta] ?? $replyStaMap[0]; ?></td>
-                          <td class="text-center">
-                            <span class="badge text-bg-light border text-dark"><?php echo (int)$row['reply_cnt']; ?> 則回覆</span>
-                            <div class="text-muted mt-1" style="font-size: 0.72rem;">已讀：<?php echo (int)$row['read_cnt']; ?> 人</div>
-                          </td>
-                          <td class="text-center text-muted" style="font-size: 0.78rem;">
-                            <?php echo !empty($lastTime) ? date('Y-m-d H:i', strtotime($lastTime)) : '-'; ?>
-                          </td>
-                        </tr>
+                          <tr style="cursor: pointer;" onclick="window.location.href='msg_detail.php?currID=<?php echo $mid; ?>';">
+                            <td class="text-center fw-bold">
+                              <?php if ($isPinned): ?><i class="bi bi-pin-angle-fill text-danger me-1" title="置頂"></i><?php endif; ?>
+                              #<?php echo $mid; ?>
+                            </td>
+                            <td>
+                              <div class="mb-1">
+                                <?php echo $catMap[(int)$row['msg_category']] ?? $catMap[1]; ?>
+                                <span class="fw-bold text-dark ms-1"><?php echo htmlspecialchars($row['msg_title']); ?></span>
+                              </div>
+                              <div class="text-muted" style="font-size: 0.76rem;"><?php echo htmlspecialchars($briefTxt); ?></div>
+                            </td>
+                            <td>
+                              <div><?php echo $senderLabel; ?></div>
+                              <div style="font-size: 0.75rem;"><?php echo $targetModeMap[$tMode] ?? $tMode; ?></div>
+                            </td>
+                            <td class="text-center"><?php echo $replyStaMap[$rSta] ?? $replyStaMap[0]; ?></td>
+                            <td class="text-center">
+                              <span class="badge text-bg-light border text-dark"><?php echo (int)$row['reply_cnt']; ?> 則回覆</span>
+                              <div class="text-muted mt-1" style="font-size: 0.72rem;">已讀：<?php echo (int)$row['read_cnt']; ?> 人</div>
+                            </td>
+                            <td class="text-center text-muted" style="font-size: 0.78rem;">
+                              <?php echo !empty($lastTime) ? date('Y-m-d H:i', strtotime($lastTime)) : '-'; ?>
+                            </td>
+                          </tr>
                         <?php endforeach; ?>
                       </tbody>
                     </table>
@@ -348,48 +359,66 @@ $targetModeMap = array(
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function doButAdd() { window.location.href = 'msg_detail.php?currID=0'; }
-  function doButReset() { window.location.replace('msg_list.php'); }
-  function doButSerach() {
-    const offcanvasEl = document.getElementById('offcanvasSearch');
-    if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
-  }
-  function doButExcel() { $('.buttons-excel').click(); }
-  function doButPrint() { $('.buttons-print').click(); }
-
-  $(document).ready(function() {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
-
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
-
-    var msglistTB = datatableCreate('dataTable_msglist');
-
-    $('#dataSearch').on('keyup search input paste cut', function() {
-      if ($(this).is(':focus') || this.value !== '') {
-        msglistTB.search(this.value).draw();
-      }
-    });
-
-    $('#searchReset').click(function() {
-      if ($('#dataSearch').val() !== '') {
-        $('#dataSearch').val('');
-        msglistTB.search('').draw();
-      } else {
-        window.location.replace('msg_list.php');
-      }
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+    function doReDirect() {
+      window.history.back();
     }
-  });
+
+    function doButAdd() {
+      window.location.href = 'msg_detail.php?currID=0';
+    }
+
+    function doButReset() {
+      window.location.replace('msg_list.php');
+    }
+
+    function doButSerach() {
+      const offcanvasEl = document.getElementById('offcanvasSearch');
+      if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+    }
+
+    function doButExcel() {
+      $('.buttons-excel').click();
+    }
+
+    function doButPrint() {
+      $('.buttons-print').click();
+    }
+
+    $(document).ready(function() {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      var msglistTB = datatableCreate('dataTable_msglist');
+
+      $('#dataSearch').on('keyup search input paste cut', function() {
+        if ($(this).is(':focus') || this.value !== '') {
+          msglistTB.search(this.value).draw();
+        }
+      });
+
+      $('#searchReset').click(function() {
+        if ($('#dataSearch').val() !== '') {
+          $('#dataSearch').val('');
+          msglistTB.search('').draw();
+        } else {
+          window.location.replace('msg_list.php');
+        }
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+      }
+    });
   </script>
 </body>
+
 </html>

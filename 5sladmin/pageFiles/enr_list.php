@@ -9,10 +9,18 @@ $searchPay      = isset($_REQUEST['searchPay']) ? trim($_REQUEST['searchPay']) :
 $searchStatus   = isset($_REQUEST['searchStatus']) ? trim($_REQUEST['searchStatus']) : '';
 
 $searchURI = "";
-if ($searchText !== '')     { $searchURI .= "&searchText=" . rawurlencode($searchText); }
-if ($searchCourseId !== '') { $searchURI .= "&searchCourseId=" . rawurlencode($searchCourseId); }
-if ($searchPay !== '')      { $searchURI .= "&searchPay=" . rawurlencode($searchPay); }
-if ($searchStatus !== '')   { $searchURI .= "&searchStatus=" . rawurlencode($searchStatus); }
+if ($searchText !== '') {
+  $searchURI .= "&searchText=" . rawurlencode($searchText);
+}
+if ($searchCourseId !== '') {
+  $searchURI .= "&searchCourseId=" . rawurlencode($searchCourseId);
+}
+if ($searchPay !== '') {
+  $searchURI .= "&searchPay=" . rawurlencode($searchPay);
+}
+if ($searchStatus !== '') {
+  $searchURI .= "&searchStatus=" . rawurlencode($searchStatus);
+}
 if (!empty($searchURI)) {
   $searchURI = substr($searchURI, 1);
 }
@@ -25,6 +33,7 @@ define('PAGE_ITEM', 'ITEM_COURSE');
 define('PAGE_OPANEL', 1); // 1-新增(手動補登報名)
 define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
 define('EXPORT_OPANEL', 3); // 3-Excel+Print
+define('bkRedir', 1);
 
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
@@ -105,6 +114,7 @@ $statusMap = array(
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -122,6 +132,7 @@ $statusMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-purple">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -182,9 +193,9 @@ $statusMap = array(
                       <tbody>
                         <?php foreach ($enrList as $row):
                           $eid      = (int)$row['enr_id'];
-                          $decName  = !empty($row['mb_name']) ? _fn_secure_crypto($row['mb_name'], 'de') : '未填寫';
-                          $decMail  = !empty($row['mb_email']) ? _fn_secure_crypto($row['mb_email'], 'de') : '';
-                          $decPhone = !empty($row['mb_cellphone']) ? _fn_secure_crypto($row['mb_cellphone'], 'de') : '-';
+                          $decName  = !empty($row['mb_name']) ? _fn_safe_dec_name($row['mb_name']) : '未填寫';
+                          $decMail  = !empty($row['mb_email']) ? _fn_safe_dec_name($row['mb_email']) : '';
+                          $decPhone = !empty($row['mb_cellphone']) ? _fn_safe_dec_name($row['mb_cellphone']) : '-';
                           $paySta   = (int)($row['enr_pay_status'] ?? 0);
                           $enrSta   = (int)($row['enr_status'] ?? 1);
                           $doneLsn  = (int)($row['enr_done_lessons'] ?? 0);
@@ -192,62 +203,62 @@ $statusMap = array(
                           $totLsn   = ($actLsn > 0) ? $actLsn : max(1, (int)($row['sess_lesson'] ?? $row['course_lesson'] ?? 1));
                           $pct      = min(100, round(($doneLsn / $totLsn) * 100));
                         ?>
-                        <tr style="cursor: pointer;" onclick="window.location.href='enr_detail.php?currID=<?php echo $eid; ?>';">
-                          <td class="text-center fw-bold">#<?php echo $eid; ?></td>
-                          <td>
-                            <div class="fw-bold text-dark"><?php echo htmlspecialchars($decName); ?></div>
-                            <div class="text-muted" style="font-size: 0.75rem;"><?php echo htmlspecialchars($decMail); ?></div>
-                            <div class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-phone me-1"></i><?php echo htmlspecialchars($decPhone); ?></div>
-                          </td>
-                          <td>
-                            <div class="fw-bold text-primary">
-                              <?php if ((int)($row['course_type'] ?? 1) === 2): ?>
-                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle me-1">1對1顧問</span>
-                              <?php endif; ?>
-                              <?php echo htmlspecialchars($row['course_title'] ?? '課程已下架'); ?>
-                            </div>
-                            <div class="text-muted" style="font-size: 0.78rem;">
-                              <?php if (!empty($row['sess_startdate'])): ?>
-                                <span class="badge text-bg-dark me-1">第 <?php echo (int)$row['sess_batch']; ?> 梯</span>
-                                <?php echo $row['sess_startdate'] . ' ' . substr($row['sess_starttime'], 0, 5); ?>
-                              <?php else: ?>
-                                隨報隨上 / 尚未排定梯次
-                              <?php endif; ?>
-                            </div>
-                          </td>
-                          <td>
-                            <?php if (!empty($row['ord_no'])): ?>
-                              <div class="fw-semibold text-dark"><?php echo htmlspecialchars($row['ord_no']); ?></div>
-                              <div class="text-muted" style="font-size: 0.75rem;">
-                                NT$ <?php echo number_format((float)$row['ord_total']); ?>
-                                • <?php echo !empty($row['inv_no']) ? ('發票 ' . htmlspecialchars($row['inv_no'])) : '發票未開'; ?>
+                          <tr style="cursor: pointer;" onclick="window.location.href='enr_detail.php?currID=<?php echo $eid; ?>';">
+                            <td class="text-center fw-bold">#<?php echo $eid; ?></td>
+                            <td>
+                              <div class="fw-bold text-dark"><?php echo htmlspecialchars($decName); ?></div>
+                              <div class="text-muted" style="font-size: 0.75rem;"><?php echo htmlspecialchars($decMail); ?></div>
+                              <div class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-phone me-1"></i><?php echo htmlspecialchars($decPhone); ?></div>
+                            </td>
+                            <td>
+                              <div class="fw-bold text-primary">
+                                <?php if ((int)($row['course_type'] ?? 1) === 2): ?>
+                                  <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle me-1">1對1顧問</span>
+                                <?php endif; ?>
+                                <?php echo htmlspecialchars($row['course_title'] ?? '課程已下架'); ?>
                               </div>
-                            <?php else: ?>
-                              <span class="badge bg-light text-secondary border">後台手動補登 / VIP額度</span>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center"><?php echo $payMap[$paySta] ?? $payMap[0]; ?></td>
-                          <td class="text-center">
-                            <div class="mb-1"><?php echo $statusMap[$enrSta] ?? $statusMap[1]; ?></div>
-                            <div class="progress" style="height: 6px;" title="完成度 <?php echo $pct; ?>% (<?php echo $doneLsn; ?>/<?php echo $totLsn; ?>堂)">
-                              <div class="progress-bar bg-success" style="width: <?php echo $pct; ?>%;"></div>
-                            </div>
-                            <div class="text-muted mt-1" style="font-size: 0.7rem;"><?php echo $doneLsn; ?> / <?php echo $totLsn; ?> 堂 (<?php echo $pct; ?>%)</div>
-                          </td>
-                          <td class="text-center" style="font-size: 0.75rem;">
-                            <?php if (!empty($row['enr_link_sent_at'])): ?>
-                              <span class="text-success d-block"><i class="bi bi-send-check me-1"></i>已發上課連結</span>
-                            <?php else: ?>
-                              <span class="text-warning-emphasis d-block"><i class="bi bi-exclamation-circle me-1"></i>尚未發連結</span>
-                            <?php endif; ?>
-                            <?php if (!empty($row['enr_note'])): ?>
-                              <span class="badge bg-info-subtle text-info-emphasis border mt-1"><i class="bi bi-chat-left-text me-1"></i>有追蹤紀錄</span>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center text-muted" style="font-size: 0.78rem;">
-                            <?php echo !empty($row['enr_created']) ? date('Y-m-d H:i', strtotime($row['enr_created'])) : '-'; ?>
-                          </td>
-                        </tr>
+                              <div class="text-muted" style="font-size: 0.78rem;">
+                                <?php if (!empty($row['sess_startdate'])): ?>
+                                  <span class="badge text-bg-dark me-1">第 <?php echo (int)$row['sess_batch']; ?> 梯</span>
+                                  <?php echo $row['sess_startdate'] . ' ' . substr($row['sess_starttime'], 0, 5); ?>
+                                <?php else: ?>
+                                  隨報隨上 / 尚未排定梯次
+                                <?php endif; ?>
+                              </div>
+                            </td>
+                            <td>
+                              <?php if (!empty($row['ord_no'])): ?>
+                                <div class="fw-semibold text-dark"><?php echo htmlspecialchars($row['ord_no']); ?></div>
+                                <div class="text-muted" style="font-size: 0.75rem;">
+                                  NT$ <?php echo number_format((float)$row['ord_total']); ?>
+                                  • <?php echo !empty($row['inv_no']) ? ('發票 ' . htmlspecialchars($row['inv_no'])) : '發票未開'; ?>
+                                </div>
+                              <?php else: ?>
+                                <span class="badge bg-light text-secondary border">後台手動補登 / VIP額度</span>
+                              <?php endif; ?>
+                            </td>
+                            <td class="text-center"><?php echo $payMap[$paySta] ?? $payMap[0]; ?></td>
+                            <td class="text-center">
+                              <div class="mb-1"><?php echo $statusMap[$enrSta] ?? $statusMap[1]; ?></div>
+                              <div class="progress" style="height: 6px;" title="完成度 <?php echo $pct; ?>% (<?php echo $doneLsn; ?>/<?php echo $totLsn; ?>堂)">
+                                <div class="progress-bar bg-success" style="width: <?php echo $pct; ?>%;"></div>
+                              </div>
+                              <div class="text-muted mt-1" style="font-size: 0.7rem;"><?php echo $doneLsn; ?> / <?php echo $totLsn; ?> 堂 (<?php echo $pct; ?>%)</div>
+                            </td>
+                            <td class="text-center" style="font-size: 0.75rem;">
+                              <?php if (!empty($row['enr_link_sent_at'])): ?>
+                                <span class="text-success d-block"><i class="bi bi-send-check me-1"></i>已發上課連結</span>
+                              <?php else: ?>
+                                <span class="text-warning-emphasis d-block"><i class="bi bi-exclamation-circle me-1"></i>尚未發連結</span>
+                              <?php endif; ?>
+                              <?php if (!empty($row['enr_note'])): ?>
+                                <span class="badge bg-info-subtle text-info-emphasis border mt-1"><i class="bi bi-chat-left-text me-1"></i>有追蹤紀錄</span>
+                              <?php endif; ?>
+                            </td>
+                            <td class="text-center text-muted" style="font-size: 0.78rem;">
+                              <?php echo !empty($row['enr_created']) ? date('Y-m-d H:i', strtotime($row['enr_created'])) : '-'; ?>
+                            </td>
+                          </tr>
                         <?php endforeach; ?>
                       </tbody>
                     </table>
@@ -319,48 +330,66 @@ $statusMap = array(
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function doButAdd() { window.location.href = 'enr_detail.php?currID=0'; }
-  function doButReset() { window.location.replace('enr_list.php'); }
-  function doButSerach() {
-    const offcanvasEl = document.getElementById('offcanvasSearch');
-    if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
-  }
-  function doButExcel() { $('.buttons-excel').click(); }
-  function doButPrint() { $('.buttons-print').click(); }
-
-  $(document).ready(function() {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
-
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
-
-    var enrlistTB = datatableCreate('dataTable_enrlist');
-
-    $('#dataSearch').on('keyup search input paste cut', function() {
-      if ($(this).is(':focus') || this.value !== '') {
-        enrlistTB.search(this.value).draw();
-      }
-    });
-
-    $('#searchReset').click(function() {
-      if ($('#dataSearch').val() !== '') {
-        $('#dataSearch').val('');
-        enrlistTB.search('').draw();
-      } else {
-        window.location.replace('enr_list.php');
-      }
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+    function doReDirect() {
+      window.history.back();
     }
-  });
+
+    function doButAdd() {
+      window.location.href = 'enr_detail.php?currID=0';
+    }
+
+    function doButReset() {
+      window.location.replace('enr_list.php');
+    }
+
+    function doButSerach() {
+      const offcanvasEl = document.getElementById('offcanvasSearch');
+      if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+    }
+
+    function doButExcel() {
+      $('.buttons-excel').click();
+    }
+
+    function doButPrint() {
+      $('.buttons-print').click();
+    }
+
+    $(document).ready(function() {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      var enrlistTB = datatableCreate('dataTable_enrlist');
+
+      $('#dataSearch').on('keyup search input paste cut', function() {
+        if ($(this).is(':focus') || this.value !== '') {
+          enrlistTB.search(this.value).draw();
+        }
+      });
+
+      $('#searchReset').click(function() {
+        if ($('#dataSearch').val() !== '') {
+          $('#dataSearch').val('');
+          enrlistTB.search('').draw();
+        } else {
+          window.location.replace('enr_list.php');
+        }
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+      }
+    });
   </script>
 </body>
+
 </html>

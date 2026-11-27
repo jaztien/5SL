@@ -60,17 +60,9 @@
           "default": "1000"
         },
         {
-          "title": "管理人員操作記錄",
-          "pagecode": "PG_ADLOGS",
-          "url": "ad_loglist.php",
-          "badgeClass": "",
-          "badgeNum": "",
-          "default": "1000"
-        },
-        {
           "title": "全系統操作記錄",
-          "pagecode": "PG_SYSLOGS",
-          "url": "sys_loglist.php",
+          "pagecode": "PG_SYS_OPLOG",
+          "url": "sys_op_log_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
@@ -85,8 +77,8 @@
         },
         {
           "title": "資料表維護管理",
-          "pagecode": "PG_DATABASE",
-          "url": "sys_database.php",
+          "pagecode": "PG_SYS_DB",
+          "url": "sys_db_maint.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
@@ -278,14 +270,6 @@
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
-        },
-        {
-          "title": "文詞過濾列表",
-          "pagecode": "PG_FILTER",
-          "url": "mess_filterlist.php",
-          "badgeClass": "",
-          "badgeNum": "",
-          "default": "1000"
         }
       ]
     },
@@ -316,7 +300,7 @@
         {
           "title": "預約排程申請審核",
           "pagecode": "PG_LECTURE",
-          "url": "sch_cal_list2.php",
+          "url": "@@sch_cal_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
@@ -325,32 +309,42 @@
     },
     {
       "title": "財務會計資料管理",
-      "pagecode": "ITEM_FINA",
+      "pagecode": "ITEM_FIN",
       "url": "#",
       "badgeClass": "",
       "badgeNum": "",
       "icon": "bi-cash-coin",
       "subgroup": [
         {
-          "title": "線上支付紀錄",
-          "pagecode": "PG_FNPAID",
-          "url": "fn_paidlist.php",
+          "title": "進出總帳列表",
+          "pagecode": "PG_FIN_LEDGER",
+          "url": "fin_ledger_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
         },
         {
-          "title": "退款紀錄",
-          "pagecode": "PG_REFUND",
-          "url": "fn_refundlist.php",
+          "title": "發票與對帳管理",
+          "pagecode": "PG_FIN_INVOICE",
+          "url": "fin_invoice_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
-        },
+        }
+      ]
+    },
+    {
+      "title": "服務工單中心",
+      "pagecode": "ITEM_SRV",
+      "url": "#",
+      "badgeClass": "",
+      "badgeNum": "",
+      "icon": "bi-tools",
+      "subgroup": [
         {
-          "title": "電子發票紀錄",
-          "pagecode": "PG_EINVO",
-          "url": "fn_invoicelist.php",
+          "title": "服務工單接收列表",
+          "pagecode": "PG_SRV_TICKET",
+          "url": "srv_ticket_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
@@ -366,51 +360,9 @@
       "icon": "bi-tools",
       "subgroup": [
         {
-          "title": "基礎結構數據",
-          "pagecode": "ITEM_DATAS",
-          "url": "#",
-          "badgeClass": "",
-          "badgeNum": "",
-          "icon": "bi-database",
-          "subgroup": [
-            {
-              "title": "行政區劃資料表",
-              "pagecode": "PG_LOCALS",
-              "url": "data_locations.php",
-              "badgeClass": "",
-              "badgeNum": "",
-              "default": "1100"
-            },
-            {
-              "title": "交通節點資料表",
-              "pagecode": "PG_NODES",
-              "url": "data_trafficnodes.php",
-              "badgeClass": "",
-              "badgeNum": "",
-              "default": "1100"
-            },
-            {
-              "title": "特定區域資料表",
-              "pagecode": "PG_SCIRCLE",
-              "url": "data_socialcircle.php",
-              "badgeClass": "",
-              "badgeNum": "",
-              "default": "1100"
-            }
-          ]
-        },
-        {
           "title": "CSV檔案匯入匯出器",
           "pagecode": "PG_CSVIO",
           "url": "tool_csvio.php",
-          "badgeClass": "",
-          "badgeNum": "",
-          "default": "1100"
-        },
-        {
-          "title": "排程計畫行事曆",
-          "pagecode": "PG_SCHD",
-          "url": "tool_calendar.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1100"
@@ -422,42 +374,6 @@
           "badgeClass": "",
           "badgeNum": "",
           "default": "1100"
-        }
-      ]
-    },
-    {
-      "title": "資料後備作業管理",
-      "pagecode": "ITEM_PREPARE",
-      "url": "#",
-      "badgeClass": "",
-      "badgeNum": "",
-      "icon": "bi-layers",
-      "subgroup": [
-        {
-          "title": "命名規則化分析工具",
-          "pagecode": "ITEM_NORMALIZER",
-          "url": "#",
-          "badgeClass": "",
-          "badgeNum": "",
-          "icon": "bi-diagram-3",
-          "subgroup": [
-            {
-              "title": "住址規則化分析",
-              "pagecode": "PG_ADDANA",
-              "url": "../pageFiles/prep_addNormalizer.php",
-              "badgeClass": "",
-              "badgeNum": "",
-              "default": "1100"
-            },
-            {
-              "title": "建案名稱規則化分析",
-              "pagecode": "PG_BCANA",
-              "url": "../pageFiles/prep_bcNormalizer.php",
-              "badgeClass": "",
-              "badgeNum": "",
-              "default": "1100"
-            }
-          ]
         }
       ]
     }

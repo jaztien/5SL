@@ -35,7 +35,7 @@ if (is_array($mList)) {
   foreach ($mList as $ml) {
     $memberOptions[] = array(
       'mb_id' => (int)$ml['mb_id'],
-      'label' => '#' . $ml['mb_id'] . ' - ' . _fn_secure_crypto($ml['mb_name'], 'de') . ' (' . _fn_secure_crypto($ml['mb_email'], 'de') . ')'
+      'label' => '#' . $ml['mb_id'] . ' - ' . _fn_safe_dec_name($ml['mb_name']) . ' (' . _fn_safe_dec_name($ml['mb_email']) . ')'
     );
   }
 }
@@ -57,6 +57,7 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -75,6 +76,7 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-teal">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -112,7 +114,7 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
                 <div class="card-body">
                   <div class="text-center mb-3">
                     <div class="d-inline-flex align-items-center justify-content-center rounded-circle text-white mb-2" id="sideColorBadge"
-                         style="width: 64px; height: 64px; background-color: <?php echo htmlspecialchars($res['sch_color'] ?? '#3b82f6'); ?>;">
+                      style="width: 64px; height: 64px; background-color: <?php echo htmlspecialchars($res['sch_color'] ?? '#3b82f6'); ?>;">
                       <i class="bi bi-alarm-fill fs-2"></i>
                     </div>
                     <h5 class="fw-bold mb-1" id="sideSchTitle"><?php echo !empty($res['sch_title']) ? htmlspecialchars($res['sch_title']) : ($schID > 0 ? '未命名排程' : '新建立排程'); ?></h5>
@@ -130,10 +132,10 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
                       <b>執行狀態</b>
                       <span>
                         <?php
-                          $eSt = (int)($res['sch_exec_status'] ?? 0);
-                          if ($eSt === 1) echo '<span class="text-success fw-bold">已執行完成</span>';
-                          elseif ($eSt === 2) echo '<span class="text-danger fw-bold">部分失敗</span>';
-                          else echo '<span class="text-warning-emphasis fw-bold">待執行</span>';
+                        $eSt = (int)($res['sch_exec_status'] ?? 0);
+                        if ($eSt === 1) echo '<span class="text-success fw-bold">已執行完成</span>';
+                        elseif ($eSt === 2) echo '<span class="text-danger fw-bold">部分失敗</span>';
+                        else echo '<span class="text-warning-emphasis fw-bold">待執行</span>';
                         ?>
                       </span>
                     </li>
@@ -148,11 +150,11 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
                   </ul>
 
                   <?php if ($schID > 0 && (int)($res['sch_trigger_enable'] ?? 0) === 1): ?>
-                  <div class="d-grid">
-                    <button type="button" class="btn btn-warning btn-sm fw-bold" id="btnManualTriggerNow">
-                      <i class="bi bi-send-fill me-1"></i>立即手動觸發執行發送
-                    </button>
-                  </div>
+                    <div class="d-grid">
+                      <button type="button" class="btn btn-warning btn-sm fw-bold" id="btnManualTriggerNow">
+                        <i class="bi bi-send-fill me-1"></i>立即手動觸發執行發送
+                      </button>
+                    </div>
                   <?php endif; ?>
                 </div>
               </div>
@@ -173,11 +175,11 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
                       </a>
                     </li>
                     <?php if ($schID > 0): ?>
-                    <li class="nav-item" role="presentation">
-                      <a class="nav-link" href="#tabMenu3" data-index="3" data-bs-toggle="tab" data-topbut="0" role="tab">
-                        <i class="bi bi-list-check me-1"></i>發送執行明細紀錄 (<?php echo count($logRows); ?>)
-                      </a>
-                    </li>
+                      <li class="nav-item" role="presentation">
+                        <a class="nav-link" href="#tabMenu3" data-index="3" data-bs-toggle="tab" data-topbut="0" role="tab">
+                          <i class="bi bi-list-check me-1"></i>發送執行明細紀錄 (<?php echo count($logRows); ?>)
+                        </a>
+                      </li>
                     <?php endif; ?>
                   </ul>
                 </div>
@@ -194,7 +196,7 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
                           <div class="col-md-6">
                             <label class="form-label small fw-bold">排程事件標題 <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="sch_title" name="sch_title" required
-                                   value="<?php echo htmlspecialchars($res['sch_title'] ?? ''); ?>" placeholder="例如：色彩覺察工作坊（台北場）開課提醒">
+                              value="<?php echo htmlspecialchars($res['sch_title'] ?? ''); ?>" placeholder="例如：色彩覺察工作坊（台北場）開課提醒">
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">事件分類</label>
@@ -208,18 +210,18 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
                           <div class="col-md-2">
                             <label class="form-label small fw-bold">日曆標籤色</label>
                             <input type="color" class="form-control form-control-color w-100" id="sch_color" name="sch_color"
-                                   value="<?php echo htmlspecialchars($res['sch_color'] ?? '#3b82f6'); ?>">
+                              value="<?php echo htmlspecialchars($res['sch_color'] ?? '#3b82f6'); ?>">
                           </div>
 
                           <div class="col-md-5">
                             <label class="form-label small fw-bold">事件開始時間 <span class="text-danger">*</span></label>
                             <input type="text" class="form-control datetime-picker" name="sch_start_at" required
-                                   value="<?php echo htmlspecialchars($defaultStart); ?>">
+                              value="<?php echo htmlspecialchars($defaultStart); ?>">
                           </div>
                           <div class="col-md-5">
                             <label class="form-label small fw-bold">事件結束時間 (選填)</label>
                             <input type="text" class="form-control datetime-picker" name="sch_end_at"
-                                   value="<?php echo htmlspecialchars($res['sch_end_at'] ?? ''); ?>">
+                              value="<?php echo htmlspecialchars($res['sch_end_at'] ?? ''); ?>">
                           </div>
                           <div class="col-md-2">
                             <label class="form-label small fw-bold">全天事件</label>
@@ -264,7 +266,7 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">預定觸發發送時間 (Cron 掃描)</label>
                             <input type="text" class="form-control datetime-picker" name="sch_trigger_at"
-                                   value="<?php echo htmlspecialchars($defaultTrig); ?>">
+                              value="<?php echo htmlspecialchars($defaultTrig); ?>">
                           </div>
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">發送對象類型 (sch_target_type)</label>
@@ -289,170 +291,172 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
                             </select>
                           </div>
 
-                            <div class="col-12 target-box" id="targetBox_2" style="<?php echo ($currTargetType === 2) ? '' : 'display:none;'; ?>">
-                              <label class="form-label small fw-bold">選擇課程群組（系統將自動抓出該課程所有已報名付費學員）</label>
-                              <select class="form-select" id="target_course_id">
-                                <option value="">-- 請選擇課程 --</option>
-                                <?php foreach ($courseOptions as $co):
-                                  $cidStr = (string)$co['course_id'];
-                                  $sel = ($currTargetType === 2 && in_array($cidStr, $selectedTargetIds, true)) ? 'selected' : '';
-                                ?>
-                                  <option value="<?php echo $cidStr; ?>" <?php echo $sel; ?>>#<?php echo $cidStr; ?> - <?php echo htmlspecialchars($co['course_title']); ?></option>
-                                <?php endforeach; ?>
-                              </select>
-                            </div>
+                          <div class="col-12 target-box" id="targetBox_2" style="<?php echo ($currTargetType === 2) ? '' : 'display:none;'; ?>">
+                            <label class="form-label small fw-bold">選擇課程群組（系統將自動抓出該課程所有已報名付費學員）</label>
+                            <select class="form-select" id="target_course_id">
+                              <option value="">-- 請選擇課程 --</option>
+                              <?php foreach ($courseOptions as $co):
+                                $cidStr = (string)$co['course_id'];
+                                $sel = ($currTargetType === 2 && in_array($cidStr, $selectedTargetIds, true)) ? 'selected' : '';
+                              ?>
+                                <option value="<?php echo $cidStr; ?>" <?php echo $sel; ?>>#<?php echo $cidStr; ?> - <?php echo htmlspecialchars($co['course_title']); ?></option>
+                              <?php endforeach; ?>
+                            </select>
+                          </div>
 
-                            <!-- 對象模式 3: 自選多位會員 -->
-                            <div class="col-12 target-box" id="targetBox_3" style="<?php echo ($currTargetType === 3) ? '' : 'display:none;'; ?>">
-                              <label class="form-label small fw-bold">勾選多位指定會員（可複選）</label>
-                              <div class="border rounded-2 p-2 bg-white" style="max-height: 180px; overflow-y: auto;">
-                                <?php foreach ($memberOptions as $mo):
-                                  $midStr = (string)$mo['mb_id'];
-                                  $chk = ($currTargetType === 3 && in_array($midStr, $selectedTargetIds, true)) ? 'checked' : '';
-                                ?>
+                          <!-- 對象模式 3: 自選多位會員 -->
+                          <div class="col-12 target-box" id="targetBox_3" style="<?php echo ($currTargetType === 3) ? '' : 'display:none;'; ?>">
+                            <label class="form-label small fw-bold">勾選多位指定會員（可複選）</label>
+                            <div class="border rounded-2 p-2 bg-white" style="max-height: 180px; overflow-y: auto;">
+                              <?php foreach ($memberOptions as $mo):
+                                $midStr = (string)$mo['mb_id'];
+                                $chk = ($currTargetType === 3 && in_array($midStr, $selectedTargetIds, true)) ? 'checked' : '';
+                              ?>
                                 <div class="form-check py-1 border-bottom">
                                   <input class="form-check-input chk-target-mb" type="checkbox" value="<?php echo $midStr; ?>" id="tmb_<?php echo $midStr; ?>" name="tmb_<?php echo $midStr; ?>" <?php echo $chk; ?>>
                                   <label class="form-check-label small" for="tmb_<?php echo $midStr; ?>"><?php echo htmlspecialchars($mo['label']); ?></label>
                                 </div>
-                                <?php endforeach; ?>
-                              </div>
+                              <?php endforeach; ?>
                             </div>
+                          </div>
 
-                            <!-- 對象模式 4: 關係管理者或講師發送 -->
-                            <div class="col-12 target-box" id="targetBox_4" style="<?php echo ($currTargetType === 4) ? '' : 'display:none;'; ?>">
-                              <label class="form-label small fw-bold">勾選接收通知的管理者 / 講師（可複選）</label>
-                              <div class="border rounded-2 p-2 bg-white" style="max-height: 160px; overflow-y: auto;">
-                                <?php foreach ($adminOptions as $ao):
-                                  $aidStr = (string)$ao['ad_id'];
-                                  $chk = ($currTargetType === 4 && in_array($aidStr, $selectedTargetIds, true)) ? 'checked' : '';
-                                ?>
+                          <!-- 對象模式 4: 關係管理者或講師發送 -->
+                          <div class="col-12 target-box" id="targetBox_4" style="<?php echo ($currTargetType === 4) ? '' : 'display:none;'; ?>">
+                            <label class="form-label small fw-bold">勾選接收通知的管理者 / 講師（可複選）</label>
+                            <div class="border rounded-2 p-2 bg-white" style="max-height: 160px; overflow-y: auto;">
+                              <?php foreach ($adminOptions as $ao):
+                                $aidStr = (string)$ao['ad_id'];
+                                $chk = ($currTargetType === 4 && in_array($aidStr, $selectedTargetIds, true)) ? 'checked' : '';
+                              ?>
                                 <div class="form-check py-1 border-bottom">
                                   <input class="form-check-input chk-target-ad" type="checkbox" value="<?php echo $aidStr; ?>" id="tad_<?php echo $aidStr; ?>" name="tad_<?php echo $aidStr; ?>" <?php echo $chk; ?>>
                                   <label class="form-check-label small" for="tad_<?php echo $aidStr; ?>">
                                     #<?php echo $aidStr; ?> - <?php echo htmlspecialchars($ao['ad_name']); ?> (<?php echo htmlspecialchars($ao['ad_account']); ?>)
                                   </label>
                                 </div>
-                                <?php endforeach; ?>
-                              </div>
-                            </div>
-
-                            <input type="hidden" name="sch_target_ids" id="sch_target_ids" value="<?php echo htmlspecialchars($res['sch_target_ids'] ?? ''); ?>">
-
-                            <!-- 多通路勾選 (noti / email / sms / line) -->
-                            <div class="col-12">
-                              <label class="form-label small fw-bold d-block">發送通路選擇 (可複選，預留簡訊與 LINE 串接介面)</label>
-                              <div class="d-flex flex-wrap gap-3 p-2 px-3 bg-light border rounded-2 small">
-                                <div class="form-check">
-                                  <input class="form-check-input chk-sch-channel" type="checkbox" value="noti" id="ch_noti" name="ch_noti" <?php echo in_array('noti', $selectedChannels, true) ? 'checked' : ''; ?>>
-                                  <label class="form-check-label fw-bold text-primary" for="ch_noti"><i class="bi bi-bell-fill me-1"></i>會員站內通知 (noti)</label>
-                                </div>
-                                <div class="form-check">
-                                  <input class="form-check-input chk-sch-channel" type="checkbox" value="email" id="ch_email" name="ch_email" <?php echo in_array('email', $selectedChannels, true) ? 'checked' : ''; ?>>
-                                  <label class="form-check-label fw-bold text-success" for="ch_email"><i class="bi bi-envelope-fill me-1"></i>電子郵件 (email)</label>
-                                </div>
-                                <div class="form-check">
-                                  <input class="form-check-input chk-sch-channel" type="checkbox" value="sms" id="ch_sms" name="ch_sms" <?php echo in_array('sms', $selectedChannels, true) ? 'checked' : ''; ?>>
-                                  <label class="form-check-label fw-bold text-warning-emphasis" for="ch_sms"><i class="bi bi-chat-dots-fill me-1"></i>手機簡訊 (sms 預留)</label>
-                                </div>
-                                <div class="form-check">
-                                  <input class="form-check-input chk-sch-channel" type="checkbox" value="line" id="ch_line" name="ch_line" <?php echo in_array('line', $selectedChannels, true) ? 'checked' : ''; ?>>
-                                  <label class="form-check-label fw-bold text-info-emphasis" for="ch_line"><i class="bi bi-line me-1"></i>LINE 官方推播 (line 預留)</label>
-                                </div>
-                              </div>
-                              <input type="hidden" name="sch_channels" id="sch_channels" value="<?php echo htmlspecialchars($res['sch_channels'] ?? 'noti,email'); ?>">
-                            </div>
-
-                            <div class="col-md-6">
-                              <label class="form-label small fw-bold">關聯動態變數模板 (arti_keycode，選填)</label>
-                              <select class="form-select" name="arti_keycode">
-                                <option value="">-- 不套用模板（使用下方自訂主旨與內容） --</option>
-                                <?php foreach ($tplOptions as $to): ?>
-                                  <option value="<?php echo htmlspecialchars($to['arti_keycode']); ?>" <?php echo (($res['arti_keycode'] ?? '') === $to['arti_keycode']) ? 'selected' : ''; ?>>
-                                    [<?php echo htmlspecialchars($to['arti_keycode']); ?>] <?php echo htmlspecialchars($to['arti_title']); ?>
-                                  </option>
-                                <?php endforeach; ?>
-                              </select>
-                            </div>
-                            <div class="col-md-6">
-                              <label class="form-label small fw-bold">自訂通知 / 郵件主旨 (支援 {{member_name}}, {{course_title}}, {{date}})</label>
-                              <input type="text" class="form-control" name="sch_msg_title" value="<?php echo htmlspecialchars($res['sch_msg_title'] ?? ''); ?>" placeholder="若未選擇動態模板則使用此主旨">
-                            </div>
-                            <div class="col-12">
-                              <label class="form-label small fw-bold">自訂通知 / 郵件內容 (支援 {{member_name}}, {{course_title}}, {{date}} 變數替換)</label>
-                              <textarea class="form-control" name="sch_msg_body" rows="4"><?php echo htmlspecialchars($res['sch_msg_body'] ?? ''); ?></textarea>
+                              <?php endforeach; ?>
                             </div>
                           </div>
-                        </form>
-                      </div>
-                      <!-- Tab 3: 發送執行明細子表 (fsl_schedule_logs) -->
-                      <?php if ($schID > 0): ?>
-                      <div class="tab-pane fade" id="tabMenu3" role="tabpanel">
-                        <div class="table-responsive">
-                          <table id="dataTable_schlogs" class="table table-striped table-sm table-bordered table-hover align-middle w-100 small" data-search="1">
-                            <thead class="table-light text-nowrap">
-                              <tr>
-                                <th>流水ID</th>
-                                <th>發送時間</th>
-                                <th class="text-center">接收者身分</th>
-                                <th>接收者 ID</th>
-                                <th class="text-center">發送通路</th>
-                                <th class="text-center">發送狀態</th>
-                                <th>回傳訊息 / 佇列備註</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <?php foreach ($logRows as $lg):
-                                $rType = (int)($lg['recipient_type'] ?? 1);
-                                $sSta  = (int)($lg['send_status'] ?? 1);
-                              ?>
-                              <tr>
-                                <td class="fw-bold">#<?php echo (int)$lg['slog_id']; ?></td>
-                                <td class="text-muted"><?php echo $lg['slog_created']; ?></td>
-                                <td class="text-center">
-                                  <?php echo ($rType === 1) ? '<span class="badge bg-primary-subtle text-primary border">前台會員</span>' : '<span class="badge bg-dark text-white">管理者/講師</span>'; ?>
-                                </td>
-                                <td class="fw-bold">#<?php echo (int)$lg['recipient_id']; ?></td>
-                                <td class="text-center"><code class="text-uppercase fw-bold"><?php echo htmlspecialchars($lg['channel']); ?></code></td>
-                                <td class="text-center">
-                                  <?php
-                                    if ($sSta === 1) echo '<span class="badge text-bg-success">1 - 發送成功</span>';
-                                    elseif ($sSta === 2) echo '<span class="badge text-bg-warning">2 - 待外部API佇列</span>';
-                                    else echo '<span class="badge text-bg-danger">0 - 發送失敗</span>';
-                                  ?>
-                                </td>
-                                <td class="text-muted"><?php echo htmlspecialchars($lg['send_note'] ?? '-'); ?></td>
-                              </tr>
+
+                          <input type="hidden" name="sch_target_ids" id="sch_target_ids" value="<?php echo htmlspecialchars($res['sch_target_ids'] ?? ''); ?>">
+
+                          <!-- 多通路勾選 (noti / email / sms / line) -->
+                          <div class="col-12">
+                            <label class="form-label small fw-bold d-block">發送通路選擇 (可複選，預留簡訊與 LINE 串接介面)</label>
+                            <div class="d-flex flex-wrap gap-3 p-2 px-3 bg-light border rounded-2 small">
+                              <div class="form-check">
+                                <input class="form-check-input chk-sch-channel" type="checkbox" value="noti" id="ch_noti" name="ch_noti" <?php echo in_array('noti', $selectedChannels, true) ? 'checked' : ''; ?>>
+                                <label class="form-check-label fw-bold text-primary" for="ch_noti"><i class="bi bi-bell-fill me-1"></i>會員站內通知 (noti)</label>
+                              </div>
+                              <div class="form-check">
+                                <input class="form-check-input chk-sch-channel" type="checkbox" value="email" id="ch_email" name="ch_email" <?php echo in_array('email', $selectedChannels, true) ? 'checked' : ''; ?>>
+                                <label class="form-check-label fw-bold text-success" for="ch_email"><i class="bi bi-envelope-fill me-1"></i>電子郵件 (email)</label>
+                              </div>
+                              <div class="form-check">
+                                <input class="form-check-input chk-sch-channel" type="checkbox" value="sms" id="ch_sms" name="ch_sms" <?php echo in_array('sms', $selectedChannels, true) ? 'checked' : ''; ?>>
+                                <label class="form-check-label fw-bold text-warning-emphasis" for="ch_sms"><i class="bi bi-chat-dots-fill me-1"></i>手機簡訊 (sms 預留)</label>
+                              </div>
+                              <div class="form-check">
+                                <input class="form-check-input chk-sch-channel" type="checkbox" value="line" id="ch_line" name="ch_line" <?php echo in_array('line', $selectedChannels, true) ? 'checked' : ''; ?>>
+                                <label class="form-check-label fw-bold text-info-emphasis" for="ch_line"><i class="bi bi-line me-1"></i>LINE 官方推播 (line 預留)</label>
+                              </div>
+                            </div>
+                            <input type="hidden" name="sch_channels" id="sch_channels" value="<?php echo htmlspecialchars($res['sch_channels'] ?? 'noti,email'); ?>">
+                          </div>
+
+                          <div class="col-md-6">
+                            <label class="form-label small fw-bold">關聯動態變數模板 (arti_keycode，選填)</label>
+                            <select class="form-select" name="arti_keycode">
+                              <option value="">-- 不套用模板（使用下方自訂主旨與內容） --</option>
+                              <?php foreach ($tplOptions as $to): ?>
+                                <option value="<?php echo htmlspecialchars($to['arti_keycode']); ?>" <?php echo (($res['arti_keycode'] ?? '') === $to['arti_keycode']) ? 'selected' : ''; ?>>
+                                  [<?php echo htmlspecialchars($to['arti_keycode']); ?>] <?php echo htmlspecialchars($to['arti_title']); ?>
+                                </option>
                               <?php endforeach; ?>
-                            </tbody>
-                          </table>
+                            </select>
+                          </div>
+                          <div class="col-md-6">
+                            <label class="form-label small fw-bold">自訂通知 / 郵件主旨 (支援 {{member_name}}, {{course_title}}, {{date}})</label>
+                            <input type="text" class="form-control" name="sch_msg_title" value="<?php echo htmlspecialchars($res['sch_msg_title'] ?? ''); ?>" placeholder="若未選擇動態模板則使用此主旨">
+                          </div>
+                          <div class="col-12">
+                            <label class="form-label small fw-bold">自訂通知 / 郵件內容 (支援 {{member_name}}, {{course_title}}, {{date}} 變數替換)</label>
+                            <textarea class="form-control" name="sch_msg_body" rows="4"><?php echo htmlspecialchars($res['sch_msg_body'] ?? ''); ?></textarea>
+                          </div>
                         </div>
-                      </div>
-                      <?php endif; ?>
+                  </form>
+                </div>
+                <!-- Tab 3: 發送執行明細子表 (fsl_schedule_logs) -->
+                <?php if ($schID > 0): ?>
+                  <div class="tab-pane fade" id="tabMenu3" role="tabpanel">
+                    <div class="table-responsive">
+                      <table id="dataTable_schlogs" class="table table-striped table-sm table-bordered table-hover align-middle w-100 small" data-search="1">
+                        <thead class="table-light text-nowrap">
+                          <tr>
+                            <th>流水ID</th>
+                            <th>發送時間</th>
+                            <th class="text-center">接收者身分</th>
+                            <th>接收者 ID</th>
+                            <th class="text-center">發送通路</th>
+                            <th class="text-center">發送狀態</th>
+                            <th>回傳訊息 / 佇列備註</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <?php foreach ($logRows as $lg):
+                            $rType = (int)($lg['recipient_type'] ?? 1);
+                            $sSta  = (int)($lg['send_status'] ?? 1);
+                          ?>
+                            <tr>
+                              <td class="fw-bold">#<?php echo (int)$lg['slog_id']; ?></td>
+                              <td class="text-muted"><?php echo $lg['slog_created']; ?></td>
+                              <td class="text-center">
+                                <?php echo ($rType === 1) ? '<span class="badge bg-primary-subtle text-primary border">前台會員</span>' : '<span class="badge bg-dark text-white">管理者/講師</span>'; ?>
+                              </td>
+                              <td class="fw-bold">#<?php echo (int)$lg['recipient_id']; ?></td>
+                              <td class="text-center"><code class="text-uppercase fw-bold"><?php echo htmlspecialchars($lg['channel']); ?></code></td>
+                              <td class="text-center">
+                                <?php
+                                if ($sSta === 1) echo '<span class="badge text-bg-success">1 - 發送成功</span>';
+                                elseif ($sSta === 2) echo '<span class="badge text-bg-warning">2 - 待外部API佇列</span>';
+                                else echo '<span class="badge text-bg-danger">0 - 發送失敗</span>';
+                                ?>
+                              </td>
+                              <td class="text-muted"><?php echo htmlspecialchars($lg['send_note'] ?? '-'); ?></td>
+                            </tr>
+                          <?php endforeach; ?>
+                        </tbody>
+                      </table>
                     </div>
                   </div>
-                </div>
+                <?php endif; ?>
               </div>
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+  </div>
+  </div>
+  </main>
+  </div>
 
-    <script src="../pluginFiles/jquery/jquery-4.0.0.min.js"></script>
-    <script src="../pluginFiles/bootstrap5/bootstrap.bundle.min.js"></script>
-    <script src="../pluginFiles/datatables3/datatables.min.js"></script>
-    <script src="../pluginFiles/flatpickr/flatpickr.min.js"></script>
-    <script src="../pluginFiles/flatpickr/location/zh_tw.js"></script>
-    <script src="../scriptFiles/adminlte.js"></script>
-    <script src="../scriptFiles/page.basic.js"></script>
-    <script src="../scriptFiles/iframe-state-keeper.js"></script>
-    <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../pluginFiles/jquery/jquery-4.0.0.min.js"></script>
+  <script src="../pluginFiles/bootstrap5/bootstrap.bundle.min.js"></script>
+  <script src="../pluginFiles/datatables3/datatables.min.js"></script>
+  <script src="../pluginFiles/flatpickr/flatpickr.min.js"></script>
+  <script src="../pluginFiles/flatpickr/location/zh_tw.js"></script>
+  <script src="../scriptFiles/adminlte.js"></script>
+  <script src="../scriptFiles/page.basic.js"></script>
+  <script src="../scriptFiles/iframe-state-keeper.js"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
-    <script type="text/javascript">
+  <script type="text/javascript">
     function syncScheduleHiddenFields() {
       // 1. 同步多通路複選值
       const chs = [];
-      $('.chk-sch-channel:checked').each(function() { chs.push($(this).val()); });
+      $('.chk-sch-channel:checked').each(function() {
+        chs.push($(this).val());
+      });
       $('#sch_channels').val(chs.join(','));
 
       // 2. 依發送對象類型同步 sch_target_ids
@@ -464,17 +468,23 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
         tIds = $('#target_course_id').val() || '';
       } else if (tType === '3') {
         const arr = [];
-        $('.chk-target-mb:checked').each(function() { arr.push($(this).val()); });
+        $('.chk-target-mb:checked').each(function() {
+          arr.push($(this).val());
+        });
         tIds = arr.join(',');
       } else if (tType === '4') {
         const arr = [];
-        $('.chk-target-ad:checked').each(function() { arr.push($(this).val()); });
+        $('.chk-target-ad:checked').each(function() {
+          arr.push($(this).val());
+        });
         tIds = arr.join(',');
       }
       $('#sch_target_ids').val(tIds);
     }
 
-    function doReDirect() { window.history.back(); }
+    function doReDirect() {
+      window.history.back();
+    }
 
     function doButSave() {
       syncScheduleHiddenFields();
@@ -530,11 +540,20 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
       }, 'json');
     }
 
-    function doButReset() { location.reload(true); }
+    function doButReset() {
+      location.reload(true);
+    }
 
     $(document).ready(function() {
       if (typeof flatpickr !== 'undefined') {
-        flatpickr($('.datetime-picker'), { locale: 'zh_tw', enableTime: true, enableSeconds: true, dateFormat: 'Y-m-d H:i:S', time_24hr: true, allowInput: true });
+        flatpickr($('.datetime-picker'), {
+          locale: 'zh_tw',
+          enableTime: true,
+          enableSeconds: true,
+          dateFormat: 'Y-m-d H:i:S',
+          time_24hr: true,
+          allowInput: true
+        });
       }
       if ($('#dataTable_schlogs').length) datatableCreate('dataTable_schlogs');
 
@@ -572,6 +591,7 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
         window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
       }
     });
-    </script>
-  </body>
+  </script>
+</body>
+
 </html>

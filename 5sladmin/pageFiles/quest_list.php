@@ -9,10 +9,18 @@ $searchGrand  = isset($_REQUEST['searchGrand']) ? trim($_REQUEST['searchGrand'])
 $searchStatus = isset($_REQUEST['searchStatus']) ? trim($_REQUEST['searchStatus']) : '';
 
 $searchURI = "";
-if ($searchText !== '')   { $searchURI .= "&searchText=" . rawurlencode($searchText); }
-if ($searchTier !== '')   { $searchURI .= "&searchTier=" . rawurlencode($searchTier); }
-if ($searchGrand !== '')  { $searchURI .= "&searchGrand=" . rawurlencode($searchGrand); }
-if ($searchStatus !== '') { $searchURI .= "&searchStatus=" . rawurlencode($searchStatus); }
+if ($searchText !== '') {
+  $searchURI .= "&searchText=" . rawurlencode($searchText);
+}
+if ($searchTier !== '') {
+  $searchURI .= "&searchTier=" . rawurlencode($searchTier);
+}
+if ($searchGrand !== '') {
+  $searchURI .= "&searchGrand=" . rawurlencode($searchGrand);
+}
+if ($searchStatus !== '') {
+  $searchURI .= "&searchStatus=" . rawurlencode($searchStatus);
+}
 if (!empty($searchURI)) {
   $searchURI = substr($searchURI, 1);
 }
@@ -78,6 +86,7 @@ $statusMap = array(
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -95,6 +104,7 @@ $statusMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-purple">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -158,37 +168,37 @@ $statusMap = array(
                           $isGrand = (int)($row['quest_is_grand'] ?? 0);
                           $sta     = (int)($row['quest_status'] ?? 1);
                         ?>
-                        <tr style="cursor: pointer;" onclick="window.location.href='quest_detail.php?currID=<?php echo $qid; ?>';">
-                          <td class="text-center fw-bold"><?php echo $qid; ?></td>
-                          <td class="text-center">
-                            <div><?php echo $tierMap[$tier] ?? $tierMap[1]; ?></div>
-                            <div class="text-muted mt-1" style="font-size: 0.72rem;">排序 #<?php echo (int)$row['quest_sort']; ?></div>
-                          </td>
-                          <td>
-                            <div class="fw-bold text-dark">
-                              <?php if ($isGrand === 1): ?>
-                                <span class="badge text-bg-danger me-1"><i class="bi bi-trophy-fill me-1"></i>全通關終極大禮</span>
+                          <tr style="cursor: pointer;" onclick="window.location.href='quest_detail.php?currID=<?php echo $qid; ?>';">
+                            <td class="text-center fw-bold"><?php echo $qid; ?></td>
+                            <td class="text-center">
+                              <div><?php echo $tierMap[$tier] ?? $tierMap[1]; ?></div>
+                              <div class="text-muted mt-1" style="font-size: 0.72rem;">排序 #<?php echo (int)$row['quest_sort']; ?></div>
+                            </td>
+                            <td>
+                              <div class="fw-bold text-dark">
+                                <?php if ($isGrand === 1): ?>
+                                  <span class="badge text-bg-danger me-1"><i class="bi bi-trophy-fill me-1"></i>全通關終極大禮</span>
+                                <?php endif; ?>
+                                <code class="me-1 text-primary">[<?php echo htmlspecialchars($row['quest_code']); ?>]</code>
+                                <?php echo htmlspecialchars($row['quest_title']); ?>
+                              </div>
+                              <?php if (!empty($row['quest_desc'])): ?>
+                                <div class="text-muted text-truncate" style="max-width: 360px; font-size: 0.78rem;"><?php echo htmlspecialchars($row['quest_desc']); ?></div>
                               <?php endif; ?>
-                              <code class="me-1 text-primary">[<?php echo htmlspecialchars($row['quest_code']); ?>]</code>
-                              <?php echo htmlspecialchars($row['quest_title']); ?>
-                            </div>
-                            <?php if (!empty($row['quest_desc'])): ?>
-                              <div class="text-muted text-truncate" style="max-width: 360px; font-size: 0.78rem;"><?php echo htmlspecialchars($row['quest_desc']); ?></div>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center fw-bold text-primary">
-                            <?php echo number_format((int)$row['quest_target_val']) . ' ' . htmlspecialchars($row['quest_unit']); ?>
-                          </td>
-                          <td style="font-size: 0.78rem;">
-                            <div class="fw-bold text-danger"><?php echo htmlspecialchars($row['quest_reward_label']); ?></div>
-                            <div class="text-muted">禮品：#<?php echo (int)$row['gift_id']; ?> <?php echo htmlspecialchars($row['gift_title'] ?? ''); ?></div>
-                          </td>
-                          <td class="text-center">
-                            <span class="badge text-bg-success"><?php echo number_format((int)$row['done_cnt']); ?> 人達成</span>
-                            <span class="badge text-bg-light border text-dark"><?php echo number_format((int)$row['track_cnt']); ?> 人參與</span>
-                          </td>
-                          <td class="text-center"><?php echo $statusMap[$sta] ?? '<span class="badge text-bg-secondary">未知</span>'; ?></td>
-                        </tr>
+                            </td>
+                            <td class="text-center fw-bold text-primary">
+                              <?php echo number_format((int)$row['quest_target_val']) . ' ' . htmlspecialchars($row['quest_unit']); ?>
+                            </td>
+                            <td style="font-size: 0.78rem;">
+                              <div class="fw-bold text-danger"><?php echo htmlspecialchars($row['quest_reward_label']); ?></div>
+                              <div class="text-muted">禮品：#<?php echo (int)$row['gift_id']; ?> <?php echo htmlspecialchars($row['gift_title'] ?? ''); ?></div>
+                            </td>
+                            <td class="text-center">
+                              <span class="badge text-bg-success"><?php echo number_format((int)$row['done_cnt']); ?> 人達成</span>
+                              <span class="badge text-bg-light border text-dark"><?php echo number_format((int)$row['track_cnt']); ?> 人參與</span>
+                            </td>
+                            <td class="text-center"><?php echo $statusMap[$sta] ?? '<span class="badge text-bg-secondary">未知</span>'; ?></td>
+                          </tr>
                         <?php endforeach; ?>
                       </tbody>
                     </table>
@@ -254,48 +264,66 @@ $statusMap = array(
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function doButAdd() { window.location.href = 'quest_detail.php?currID=0'; }
-  function doButReset() { window.location.replace('quest_list.php'); }
-  function doButSerach() {
-    const offcanvasEl = document.getElementById('offcanvasSearch');
-    if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
-  }
-  function doButExcel() { $('.buttons-excel').click(); }
-  function doButPrint() { $('.buttons-print').click(); }
-
-  $(document).ready(function() {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
-
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
-
-    var questlistTB = datatableCreate('dataTable_questlist');
-
-    $('#dataSearch').on('keyup search input paste cut', function() {
-      if ($(this).is(':focus') || this.value !== '') {
-        questlistTB.search(this.value).draw();
-      }
-    });
-
-    $('#searchReset').click(function() {
-      if ($('#dataSearch').val() !== '') {
-        $('#dataSearch').val('');
-        questlistTB.search('').draw();
-      } else {
-        window.location.replace('quest_list.php');
-      }
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+    function doReDirect() {
+      window.history.back();
     }
-  });
+
+    function doButAdd() {
+      window.location.href = 'quest_detail.php?currID=0';
+    }
+
+    function doButReset() {
+      window.location.replace('quest_list.php');
+    }
+
+    function doButSerach() {
+      const offcanvasEl = document.getElementById('offcanvasSearch');
+      if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+    }
+
+    function doButExcel() {
+      $('.buttons-excel').click();
+    }
+
+    function doButPrint() {
+      $('.buttons-print').click();
+    }
+
+    $(document).ready(function() {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      var questlistTB = datatableCreate('dataTable_questlist');
+
+      $('#dataSearch').on('keyup search input paste cut', function() {
+        if ($(this).is(':focus') || this.value !== '') {
+          questlistTB.search(this.value).draw();
+        }
+      });
+
+      $('#searchReset').click(function() {
+        if ($('#dataSearch').val() !== '') {
+          $('#dataSearch').val('');
+          questlistTB.search('').draw();
+        } else {
+          window.location.replace('quest_list.php');
+        }
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+      }
+    });
   </script>
 </body>
+
 </html>

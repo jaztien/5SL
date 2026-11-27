@@ -9,10 +9,18 @@ $searchInv    = isset($_REQUEST['searchInv']) ? trim($_REQUEST['searchInv']) : '
 $searchRefund = isset($_REQUEST['searchRefund']) ? trim($_REQUEST['searchRefund']) : '';
 
 $searchURI = "";
-if ($searchText !== '')   { $searchURI .= "&searchText=" . rawurlencode($searchText); }
-if ($searchStatus !== '') { $searchURI .= "&searchStatus=" . rawurlencode($searchStatus); }
-if ($searchInv !== '')    { $searchURI .= "&searchInv=" . rawurlencode($searchInv); }
-if ($searchRefund !== '') { $searchURI .= "&searchRefund=" . rawurlencode($searchRefund); }
+if ($searchText !== '') {
+  $searchURI .= "&searchText=" . rawurlencode($searchText);
+}
+if ($searchStatus !== '') {
+  $searchURI .= "&searchStatus=" . rawurlencode($searchStatus);
+}
+if ($searchInv !== '') {
+  $searchURI .= "&searchInv=" . rawurlencode($searchInv);
+}
+if ($searchRefund !== '') {
+  $searchURI .= "&searchRefund=" . rawurlencode($searchRefund);
+}
 if (!empty($searchURI)) {
   $searchURI = substr($searchURI, 1);
 }
@@ -25,6 +33,7 @@ define('PAGE_ITEM', 'ITEM_MERCH');
 define('PAGE_OPANEL', 9); // 9-列表無新增按鈕(訂單由前台產生)
 define('DRAWER_OPANEL', !empty($searchURI) ? 2 : 1);
 define('EXPORT_OPANEL', 3); // 3-Excel+Print
+define('bkRedir', 1);
 
 require_once('../includeFiles/page.basic.inc.php');
 require_once('../includeFiles/common.lib.php');
@@ -100,6 +109,7 @@ $refStatusMap = array(
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -117,6 +127,7 @@ $refStatusMap = array(
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-gray">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -176,52 +187,52 @@ $refStatusMap = array(
                       <tbody>
                         <?php foreach ($ordList as $row):
                           $oid      = (int)$row['ord_id'];
-                          $decName  = !empty($row['mb_name']) ? _fn_secure_crypto($row['mb_name'], 'de') : '會員 #' . $row['mb_id'];
-                          $decEmail = !empty($row['mb_email']) ? _fn_secure_crypto($row['mb_email'], 'de') : '';
+                          $decName  = !empty($row['mb_name']) ? _fn_safe_dec_name($row['mb_name']) : '會員 #' . $row['mb_id'];
+                          $decEmail = !empty($row['mb_email']) ? _fn_safe_dec_name($row['mb_email']) : '';
                           $oSta     = (int)($row['ord_status'] ?? 1);
                           $iSta     = (int)($row['inv_status'] ?? 0);
                           $rSta     = (int)($row['ref_status'] ?? 0);
                         ?>
-                        <tr style="cursor: pointer;" onclick="window.location.href='ord_detail.php?currID=<?php echo $oid; ?>';">
-                          <td>
-                            <div class="fw-bold text-primary"><?php echo htmlspecialchars($row['ord_no']); ?></div>
-                            <div class="text-muted" style="font-size: 0.74rem;"><?php echo substr($row['ord_created'], 0, 16); ?></div>
-                          </td>
-                          <td>
-                            <div class="fw-bold text-dark"><?php echo htmlspecialchars($decName); ?></div>
-                            <div class="text-muted" style="font-size: 0.74rem;"><?php echo htmlspecialchars($decEmail); ?></div>
-                          </td>
-                          <td class="text-center">
-                            <span class="badge bg-light text-dark border"><?php echo (int)$row['item_cnt']; ?> 項</span>
-                          </td>
-                          <td class="text-end">
-                            <div class="fw-bold text-dark">NT$ <?php echo number_format((float)$row['ord_total']); ?></div>
-                            <?php if ((int)($row['ord_pts_used'] ?? 0) > 0): ?>
-                              <div class="text-warning-emphasis" style="font-size: 0.72rem;">折抵 <?php echo number_format((int)$row['ord_pts_used']); ?> PTS</div>
-                            <?php endif; ?>
-                          </td>
-                          <td>
-                            <div class="fw-semibold">
-                              <?php echo !empty($row['inv_no']) ? htmlspecialchars($row['inv_no']) : '<span class="text-muted">尚未開立</span>'; ?>
-                              <?php echo $invStatusMap[$iSta] ?? ''; ?>
-                            </div>
-                            <div class="text-muted" style="font-size: 0.74rem;"><?php echo htmlspecialchars($row['inv_pay_gateway'] ?? '-'); ?></div>
-                          </td>
-                          <td class="text-center">
-                            <div><?php echo $ordStatusMap[$oSta] ?? $ordStatusMap; ?></div>
-                            <?php if (!empty($row['ord_shipping_no'])): ?>
-                              <div class="text-muted mt-1" style="font-size: 0.72rem;"><i class="bi bi-truck me-1"></i><?php echo htmlspecialchars($row['ord_shipping_no']); ?></div>
-                            <?php endif; ?>
-                          </td>
-                          <td class="text-center">
-                            <?php if (!empty($row['ref_id'])): ?>
-                              <?php echo $refStatusMap[$rSta] ?? ''; ?>
-                              <div class="text-muted mt-1" style="font-size: 0.7rem;"><?php echo htmlspecialchars($row['ref_no'] ?? ''); ?></div>
-                            <?php else: ?>
-                              <span class="text-muted">-</span>
-                            <?php endif; ?>
-                          </td>
-                        </tr>
+                          <tr style="cursor: pointer;" onclick="window.location.href='ord_detail.php?currID=<?php echo $oid; ?>';">
+                            <td>
+                              <div class="fw-bold text-primary"><?php echo htmlspecialchars($row['ord_no']); ?></div>
+                              <div class="text-muted" style="font-size: 0.74rem;"><?php echo substr($row['ord_created'], 0, 16); ?></div>
+                            </td>
+                            <td>
+                              <div class="fw-bold text-dark"><?php echo htmlspecialchars($decName); ?></div>
+                              <div class="text-muted" style="font-size: 0.74rem;"><?php echo htmlspecialchars($decEmail); ?></div>
+                            </td>
+                            <td class="text-center">
+                              <span class="badge bg-light text-dark border"><?php echo (int)$row['item_cnt']; ?> 項</span>
+                            </td>
+                            <td class="text-end">
+                              <div class="fw-bold text-dark">NT$ <?php echo number_format((float)$row['ord_total']); ?></div>
+                              <?php if ((int)($row['ord_pts_used'] ?? 0) > 0): ?>
+                                <div class="text-warning-emphasis" style="font-size: 0.72rem;">折抵 <?php echo number_format((int)$row['ord_pts_used']); ?> PTS</div>
+                              <?php endif; ?>
+                            </td>
+                            <td>
+                              <div class="fw-semibold">
+                                <?php echo !empty($row['inv_no']) ? htmlspecialchars($row['inv_no']) : '<span class="text-muted">尚未開立</span>'; ?>
+                                <?php echo $invStatusMap[$iSta] ?? ''; ?>
+                              </div>
+                              <div class="text-muted" style="font-size: 0.74rem;"><?php echo htmlspecialchars($row['inv_pay_gateway'] ?? '-'); ?></div>
+                            </td>
+                            <td class="text-center">
+                              <div><?php echo $ordStatusMap[$oSta] ?? $ordStatusMap; ?></div>
+                              <?php if (!empty($row['ord_shipping_no'])): ?>
+                                <div class="text-muted mt-1" style="font-size: 0.72rem;"><i class="bi bi-truck me-1"></i><?php echo htmlspecialchars($row['ord_shipping_no']); ?></div>
+                              <?php endif; ?>
+                            </td>
+                            <td class="text-center">
+                              <?php if (!empty($row['ref_id'])): ?>
+                                <?php echo $refStatusMap[$rSta] ?? ''; ?>
+                                <div class="text-muted mt-1" style="font-size: 0.7rem;"><?php echo htmlspecialchars($row['ref_no'] ?? ''); ?></div>
+                              <?php else: ?>
+                                <span class="text-muted">-</span>
+                              <?php endif; ?>
+                            </td>
+                          </tr>
                         <?php endforeach; ?>
                       </tbody>
                     </table>
@@ -288,47 +299,62 @@ $refStatusMap = array(
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function doButReset() { window.location.replace('ord_list.php'); }
-  function doButSerach() {
-    const offcanvasEl = document.getElementById('offcanvasSearch');
-    if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
-  }
-  function doButExcel() { $('.buttons-excel').click(); }
-  function doButPrint() { $('.buttons-print').click(); }
-
-  $(document).ready(function() {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
-
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
-
-    var ordlistTB = datatableCreate('dataTable_ordlist');
-
-    $('#dataSearch').on('keyup search input paste cut', function() {
-      if ($(this).is(':focus') || this.value !== '') {
-        ordlistTB.search(this.value).draw();
-      }
-    });
-
-    $('#searchReset').click(function() {
-      if ($('#dataSearch').val() !== '') {
-        $('#dataSearch').val('');
-        ordlistTB.search('').draw();
-      } else {
-        window.location.replace('ord_list.php');
-      }
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+    function doReDirect() {
+      window.history.back();
     }
-  });
+
+    function doButReset() {
+      window.location.replace('ord_list.php');
+    }
+
+    function doButSerach() {
+      const offcanvasEl = document.getElementById('offcanvasSearch');
+      if (offcanvasEl) bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).toggle();
+    }
+
+    function doButExcel() {
+      $('.buttons-excel').click();
+    }
+
+    function doButPrint() {
+      $('.buttons-print').click();
+    }
+
+    $(document).ready(function() {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      var ordlistTB = datatableCreate('dataTable_ordlist');
+
+      $('#dataSearch').on('keyup search input paste cut', function() {
+        if ($(this).is(':focus') || this.value !== '') {
+          ordlistTB.search(this.value).draw();
+        }
+      });
+
+      $('#searchReset').click(function() {
+        if ($('#dataSearch').val() !== '') {
+          $('#dataSearch').val('');
+          ordlistTB.search('').draw();
+        } else {
+          window.location.replace('ord_list.php');
+        }
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
+      }
+    });
   </script>
 </body>
+
 </html>

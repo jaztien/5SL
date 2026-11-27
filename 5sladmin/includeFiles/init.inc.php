@@ -127,18 +127,4 @@ if(isset($_SERVER['HTTP_REFERER'])){
 }
 //在定義前一頁 PAGEURL_BACK 之後，更新 $_SESSION['SESS_PAGEBACK'] 到現在所在頁面，留待轉頁後處理
 $_SESSION['SESS_PAGEBACK'] = PAGEURL_NOW;
-//若有 TOKEN 驗證要求時，進行雙重認證。
-/*
-if(isset($_POST['token']) && $_POST['token']!=''){
-    if($_POST['token'] != $_SESSION['token']){
-        if(PAGEURL_BACK != PAGEURL_NOW){//避免前後頁都是同一頁時，造成的無限迴圈
-        	//header('Location: ' . PAGEURL_BACK . '?msg=2');
-            //die();
-			//echo "<script type='text/javascript'>window.top.location='".PAGEURL_BACK."?msg=2';</script>"; 
-			//exit();
-        }
-		
-    }
-}
-*/
 ?>

@@ -74,6 +74,7 @@ $periodLabels = array(0 => '活動期間總計', 1 => '每日重置', 2 => '每�
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -92,6 +93,7 @@ $periodLabels = array(0 => '活動期間總計', 1 => '每日重置', 2 => '每�
   <link rel="stylesheet" href="../cssFiles/5sl.formaccess.css?t=<?php echo time(); ?>">
   <link rel="stylesheet" href="../cssFiles/5sl_iniframe.css?t=<?php echo time(); ?>">
 </head>
+
 <body class="bg-body-tertiary theme-pink">
   <div class="text-muted text-end fs-7 position-absolute top-0 end-0 pe-4 pt-1 ms-2"><i class="bi bi-file-earmark-code"></i> <?php echo basename(__FILE__); ?></div>
   <div class="app-wrapper">
@@ -177,21 +179,21 @@ $periodLabels = array(0 => '活動期間總計', 1 => '每日重置', 2 => '每�
                       </a>
                     </li>
                     <?php if ($lotID > 0): ?>
-                    <li class="nav-item" role="presentation">
-                      <a class="nav-link" href="#tabMenu2" data-index="2" data-bs-toggle="tab" data-topbut="0" role="tab">
-                        <i class="bi bi-pie-chart-fill me-1"></i>格位與機率 (<?php echo count($itemRows); ?>)
-                      </a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                      <a class="nav-link" href="#tabMenu3" data-index="3" data-bs-toggle="tab" data-topbut="0" role="tab">
-                        <i class="bi bi-shield-check me-1"></i>資格條件規則 (<?php echo count($ruleRows); ?>)
-                      </a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                      <a class="nav-link" href="#tabMenu4" data-index="4" data-bs-toggle="tab" data-topbut="0" role="tab">
-                        <i class="bi bi-trophy me-1"></i>中獎領收紀錄 (<?php echo count($winLogRows); ?>)
-                      </a>
-                    </li>
+                      <li class="nav-item" role="presentation">
+                        <a class="nav-link" href="#tabMenu2" data-index="2" data-bs-toggle="tab" data-topbut="0" role="tab">
+                          <i class="bi bi-pie-chart-fill me-1"></i>格位與機率 (<?php echo count($itemRows); ?>)
+                        </a>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <a class="nav-link" href="#tabMenu3" data-index="3" data-bs-toggle="tab" data-topbut="0" role="tab">
+                          <i class="bi bi-shield-check me-1"></i>資格條件規則 (<?php echo count($ruleRows); ?>)
+                        </a>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <a class="nav-link" href="#tabMenu4" data-index="4" data-bs-toggle="tab" data-topbut="0" role="tab">
+                          <i class="bi bi-trophy me-1"></i>中獎領收紀錄 (<?php echo count($winLogRows); ?>)
+                        </a>
+                      </li>
                     <?php endif; ?>
                   </ul>
                 </div>
@@ -205,12 +207,12 @@ $periodLabels = array(0 => '活動期間總計', 1 => '每日重置', 2 => '每�
                           <div class="col-md-4">
                             <label class="form-label small fw-bold">活動呼叫代碼 (lot_keycode) <span class="text-danger">*</span></label>
                             <input type="text" class="form-control text-uppercase" id="lot_keycode" name="lot_keycode" required
-                                   value="<?php echo htmlspecialchars($res['lot_keycode'] ?? ''); ?>" placeholder="如：LUCKY_WHEEL_2026">
+                              value="<?php echo htmlspecialchars($res['lot_keycode'] ?? ''); ?>" placeholder="如：LUCKY_WHEEL_2026">
                           </div>
                           <div class="col-md-5">
                             <label class="form-label small fw-bold">抽獎活動名稱 <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="lot_title" name="lot_title" required
-                                   value="<?php echo htmlspecialchars($res['lot_title'] ?? ''); ?>" placeholder="如：人生第五季向光幸運輪盤">
+                              value="<?php echo htmlspecialchars($res['lot_title'] ?? ''); ?>" placeholder="如：人生第五季向光幸運輪盤">
                           </div>
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">活動狀態</label>
@@ -232,31 +234,34 @@ $periodLabels = array(0 => '活動期間總計', 1 => '每日重置', 2 => '每�
                           <div class="col-md-8">
                             <label class="form-label small fw-bold">活動副標說明</label>
                             <input type="text" class="form-control" name="lot_subtitle"
-                                   value="<?php echo htmlspecialchars($res['lot_subtitle'] ?? ''); ?>" placeholder="顯示於抽獎視窗上方的活動說明">
+                              value="<?php echo htmlspecialchars($res['lot_subtitle'] ?? ''); ?>" placeholder="顯示於抽獎視窗上方的活動說明">
                           </div>
 
-                          <div class="col-12"><div class="hr-more">活動起訖期程、點數消耗與參加次數限制</div><hr class="my-1"></div>
+                          <div class="col-12">
+                            <div class="hr-more">活動起訖期程、點數消耗與參加次數限制</div>
+                            <hr class="my-1">
+                          </div>
 
                           <div class="col-md-6">
                             <label class="form-label small fw-bold">活動開始時間 (留空代表立即開始)</label>
                             <input type="text" class="form-control datetime-picker" name="lot_start_at"
-                                   value="<?php echo htmlspecialchars($res['lot_start_at'] ?? ''); ?>" placeholder="YYYY-MM-DD HH:mm:ss">
+                              value="<?php echo htmlspecialchars($res['lot_start_at'] ?? ''); ?>" placeholder="YYYY-MM-DD HH:mm:ss">
                           </div>
                           <div class="col-md-6">
                             <label class="form-label small fw-bold">活動結束時間 (留空代表常駐活動)</label>
                             <input type="text" class="form-control datetime-picker" name="lot_end_at"
-                                   value="<?php echo htmlspecialchars($res['lot_end_at'] ?? ''); ?>" placeholder="YYYY-MM-DD HH:mm:ss">
+                              value="<?php echo htmlspecialchars($res['lot_end_at'] ?? ''); ?>" placeholder="YYYY-MM-DD HH:mm:ss">
                           </div>
 
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">每次消耗 PTS (0=免費)</label>
                             <input type="number" class="form-control" name="lot_cost_pts" min="0" step="1"
-                                   value="<?php echo (int)($res['lot_cost_pts'] ?? 0); ?>">
+                              value="<?php echo (int)($res['lot_cost_pts'] ?? 0); ?>">
                           </div>
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">每人參加次數上限 (0=不限)</label>
                             <input type="number" class="form-control" name="lot_limit_per_user" min="0" step="1"
-                                   value="<?php echo (int)($res['lot_limit_per_user'] ?? 1); ?>">
+                              value="<?php echo (int)($res['lot_limit_per_user'] ?? 1); ?>">
                           </div>
                           <div class="col-md-3">
                             <label class="form-label small fw-bold">次數限制重置週期</label>
@@ -282,224 +287,230 @@ $periodLabels = array(0 => '活動期間總計', 1 => '每日重置', 2 => '每�
 
                     <!-- Tab 2: 獎項池格位與權重機率設定 (fsl_lottery_items) -->
                     <?php if ($lotID > 0): ?>
-                    <div class="tab-pane fade" id="tabMenu2" role="tabpanel">
-                      <form id="form_add_lotitem" class="row g-2 align-items-end p-3 bg-light border rounded-3 mb-4">
-                        <div class="col-md-1">
-                          <label class="form-label small fw-bold">格位</label>
-                          <input type="number" class="form-control form-control-sm" id="newSlotOrder" min="1" max="12" value="<?php echo count($itemRows) + 1; ?>" required>
-                        </div>
-                        <div class="col-md-3">
-                          <label class="form-label small fw-bold">輪盤短標名稱 <span class="text-danger">*</span></label>
-                          <input type="text" class="form-control form-control-sm" id="newSlotLabel" placeholder="如：500 PTS / 銘謝惠顧" required>
-                        </div>
-                        <div class="col-md-3">
-                          <label class="form-label small fw-bold">關聯禮品 (空=銘謝惠顧)</label>
-                          <select class="form-select form-select-sm" id="newSlotGift">
-                            <option value="">-- 銘謝惠顧 / 再接再厲 --</option>
-                            <?php foreach ($giftOptions as $go): ?>
-                              <option value="<?php echo (int)$go['gift_id']; ?>">
-                                #<?php echo (int)$go['gift_id']; ?> - <?php echo htmlspecialchars($go['gift_title']); ?>
-                              </option>
-                            <?php endforeach; ?>
-                          </select>
-                        </div>
-                        <div class="col-md-1">
-                          <label class="form-label small fw-bold">底色</label>
-                          <input type="color" class="form-control form-control-color form-control-sm w-100" id="newSlotColor" value="#ffc107">
-                        </div>
-                        <div class="col-md-2">
-                          <label class="form-label small fw-bold">權重值</label>
-                          <input type="number" class="form-control form-control-sm" id="newSlotWeight" min="1" value="100" required>
-                        </div>
-                        <div class="col-md-1">
-                          <label class="form-label small fw-bold">名額(-1無限)</label>
-                          <input type="number" class="form-control form-control-sm" id="newSlotQuota" min="-1" value="-1" required>
-                        </div>
-                        <div class="col-md-1 d-grid">
-                          <button type="submit" class="btn btn-danger btn-sm fw-bold" title="新增格位"><i class="bi bi-plus-lg"></i></button>
-                        </div>
-                      </form>
+                      <div class="tab-pane fade" id="tabMenu2" role="tabpanel">
+                        <form id="form_add_lotitem" class="row g-2 align-items-end p-3 bg-light border rounded-3 mb-4">
+                          <div class="col-md-1">
+                            <label class="form-label small fw-bold">格位</label>
+                            <input type="number" class="form-control form-control-sm" id="newSlotOrder" min="1" max="12" value="<?php echo count($itemRows) + 1; ?>" required>
+                          </div>
+                          <div class="col-md-3">
+                            <label class="form-label small fw-bold">輪盤短標名稱 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="newSlotLabel" placeholder="如：500 PTS / 銘謝惠顧" required>
+                          </div>
+                          <div class="col-md-3">
+                            <label class="form-label small fw-bold">關聯禮品 (空=銘謝惠顧)</label>
+                            <select class="form-select form-select-sm" id="newSlotGift">
+                              <option value="">-- 銘謝惠顧 / 再接再厲 --</option>
+                              <?php foreach ($giftOptions as $go): ?>
+                                <option value="<?php echo (int)$go['gift_id']; ?>">
+                                  #<?php echo (int)$go['gift_id']; ?> - <?php echo htmlspecialchars($go['gift_title']); ?>
+                                </option>
+                              <?php endforeach; ?>
+                            </select>
+                          </div>
+                          <div class="col-md-1">
+                            <label class="form-label small fw-bold">底色</label>
+                            <input type="color" class="form-control form-control-color form-control-sm w-100" id="newSlotColor" value="#ffc107">
+                          </div>
+                          <div class="col-md-2">
+                            <label class="form-label small fw-bold">權重值</label>
+                            <input type="number" class="form-control form-control-sm" id="newSlotWeight" min="1" value="100" required>
+                          </div>
+                          <div class="col-md-1">
+                            <label class="form-label small fw-bold">名額(-1無限)</label>
+                            <input type="number" class="form-control form-control-sm" id="newSlotQuota" min="-1" value="-1" required>
+                          </div>
+                          <div class="col-md-1 d-grid">
+                            <button type="submit" class="btn btn-danger btn-sm fw-bold" title="新增格位"><i class="bi bi-plus-lg"></i></button>
+                          </div>
+                        </form>
 
-                      <div class="table-responsive">
-                        <table class="table table-sm table-bordered table-hover align-middle w-100 small">
-                          <thead class="table-light text-nowrap">
-                            <tr>
-                              <th class="text-center">格位</th>
-                              <th>輪盤顯示短標 / 底色</th>
-                              <th>關聯禮品 (fsl_gifts)</th>
-                              <th class="text-center">權重比重</th>
-                              <th class="text-center">即時中獎機率</th>
-                              <th class="text-center">已抽出 / 名額上限</th>
-                              <th class="text-center" style="width: 65px;">刪除</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <?php if (empty($itemRows)): ?>
-                              <tr><td colspan="7" class="text-center text-muted py-3">尚未設定任何輪盤格位獎項（建議設定 6～8 個格位）</td></tr>
-                            <?php else: foreach ($itemRows as $ir):
-                              $iid    = (int)$ir['loti_id'];
-                              $wVal   = (int)$ir['loti_weight'];
-                              $qVal   = (int)$ir['loti_quota'];
-                              $prob   = ($totalWeight > 0 && $qVal !== 0) ? round(($wVal / $totalWeight) * 100, 2) : 0;
-                              $bgHex  = !empty($ir['loti_color']) ? $ir['loti_color'] : '#6c757d';
-                            ?>
-                              <tr id="lotiRow_<?php echo $iid; ?>">
-                                <td class="text-center fw-bold">#<?php echo (int)$ir['loti_slot_order']; ?></td>
-                                <td>
-                                  <span class="d-inline-block rounded-circle border me-1 align-middle" style="width: 14px; height: 14px; background-color: <?php echo htmlspecialchars($bgHex); ?>;"></span>
-                                  <strong><?php echo htmlspecialchars($ir['loti_label']); ?></strong>
-                                </td>
-                                <td>
-                                  <?php if (!empty($ir['gift_id'])): ?>
-                                    <a href="gift_detail.php?currID=<?php echo (int)$ir['gift_id']; ?>" class="badge bg-danger-subtle text-danger-emphasis border text-decoration-none">
-                                      <i class="bi bi-gift me-1"></i>#<?php echo (int)$ir['gift_id']; ?> <?php echo htmlspecialchars($ir['gift_title'] ?? ''); ?>
-                                    </a>
-                                  <?php else: ?>
-                                    <span class="badge bg-light text-secondary border">銘謝惠顧（無實體/點數獎勵）</span>
-                                  <?php endif; ?>
-                                </td>
-                                <td class="text-center fw-bold"><?php echo number_format($wVal); ?></td>
-                                <td class="text-center">
-                                  <?php if ($qVal === 0): ?>
-                                    <span class="badge text-bg-secondary">0% (已抽完)</span>
-                                  <?php else: ?>
-                                    <span class="badge text-bg-primary"><?php echo $prob; ?> %</span>
-                                  <?php endif; ?>
-                                </td>
-                                <td class="text-center">
-                                  <span class="fw-bold text-success"><?php echo number_format((int)$ir['loti_won_count']); ?></span>
-                                  / <?php echo ($qVal < 0) ? '無上限' : number_format($qVal); ?>
-                                </td>
-                                <td class="text-center">
-                                  <button type="button" class="btn btn-outline-danger btn-xs py-0 px-2 btn-del-loti" data-iid="<?php echo $iid; ?>">
-                                    <i class="bi bi-trash3"></i>
-                                  </button>
-                                </td>
+                        <div class="table-responsive">
+                          <table class="table table-sm table-bordered table-hover align-middle w-100 small">
+                            <thead class="table-light text-nowrap">
+                              <tr>
+                                <th class="text-center">格位</th>
+                                <th>輪盤顯示短標 / 底色</th>
+                                <th>關聯禮品 (fsl_gifts)</th>
+                                <th class="text-center">權重比重</th>
+                                <th class="text-center">即時中獎機率</th>
+                                <th class="text-center">已抽出 / 名額上限</th>
+                                <th class="text-center" style="width: 65px;">刪除</th>
                               </tr>
-                            <?php endforeach; endif; ?>
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              <?php if (empty($itemRows)): ?>
+                                <tr>
+                                  <td colspan="7" class="text-center text-muted py-3">尚未設定任何輪盤格位獎項（建議設定 6～8 個格位）</td>
+                                </tr>
+                                <?php else: foreach ($itemRows as $ir):
+                                  $iid    = (int)$ir['loti_id'];
+                                  $wVal   = (int)$ir['loti_weight'];
+                                  $qVal   = (int)$ir['loti_quota'];
+                                  $prob   = ($totalWeight > 0 && $qVal !== 0) ? round(($wVal / $totalWeight) * 100, 2) : 0;
+                                  $bgHex  = !empty($ir['loti_color']) ? $ir['loti_color'] : '#6c757d';
+                                ?>
+                                  <tr id="lotiRow_<?php echo $iid; ?>">
+                                    <td class="text-center fw-bold">#<?php echo (int)$ir['loti_slot_order']; ?></td>
+                                    <td>
+                                      <span class="d-inline-block rounded-circle border me-1 align-middle" style="width: 14px; height: 14px; background-color: <?php echo htmlspecialchars($bgHex); ?>;"></span>
+                                      <strong><?php echo htmlspecialchars($ir['loti_label']); ?></strong>
+                                    </td>
+                                    <td>
+                                      <?php if (!empty($ir['gift_id'])): ?>
+                                        <a href="gift_detail.php?currID=<?php echo (int)$ir['gift_id']; ?>" class="badge bg-danger-subtle text-danger-emphasis border text-decoration-none">
+                                          <i class="bi bi-gift me-1"></i>#<?php echo (int)$ir['gift_id']; ?> <?php echo htmlspecialchars($ir['gift_title'] ?? ''); ?>
+                                        </a>
+                                      <?php else: ?>
+                                        <span class="badge bg-light text-secondary border">銘謝惠顧（無實體/點數獎勵）</span>
+                                      <?php endif; ?>
+                                    </td>
+                                    <td class="text-center fw-bold"><?php echo number_format($wVal); ?></td>
+                                    <td class="text-center">
+                                      <?php if ($qVal === 0): ?>
+                                        <span class="badge text-bg-secondary">0% (已抽完)</span>
+                                      <?php else: ?>
+                                        <span class="badge text-bg-primary"><?php echo $prob; ?> %</span>
+                                      <?php endif; ?>
+                                    </td>
+                                    <td class="text-center">
+                                      <span class="fw-bold text-success"><?php echo number_format((int)$ir['loti_won_count']); ?></span>
+                                      / <?php echo ($qVal < 0) ? '無上限' : number_format($qVal); ?>
+                                    </td>
+                                    <td class="text-center">
+                                      <button type="button" class="btn btn-outline-danger btn-xs py-0 px-2 btn-del-loti" data-iid="<?php echo $iid; ?>">
+                                        <i class="bi bi-trash3"></i>
+                                      </button>
+                                    </td>
+                                  </tr>
+                              <?php endforeach;
+                              endif; ?>
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                    </div>
                     <?php endif; ?>
                     <!-- Tab 3: 參加資格條件規則 (共用 fsl_eligibility_rules, target_type=3) -->
                     <?php if ($lotID > 0): ?>
-                    <div class="tab-pane fade" id="tabMenu3" role="tabpanel">
-                      <form id="form_add_lot_rule" class="row g-2 align-items-end p-3 bg-light border rounded-3 mb-4">
-                        <div class="col-md-3">
-                          <label class="form-label small fw-bold">條件判斷類型</label>
-                          <select class="form-select form-select-sm" id="lRuleType">
-                            <option value="gender">會員性別 (F / M)</option>
-                            <option value="time_range">參加時間區間 (起,迄)</option>
-                            <option value="birthday_month">當月壽星限定 (1)</option>
-                            <option value="city">居住城市代碼 (如 01,02)</option>
-                            <option value="mb_level">會員等級門檻 (1/2/3)</option>
-                            <option value="total_spent">累計消費金額門檻</option>
-                            <option value="id_last_digit">身分證尾數 (如 1,3,5,7,9)</option>
-                          </select>
-                        </div>
-                        <div class="col-md-2">
-                          <label class="form-label small fw-bold">比對運算子</label>
-                          <select class="form-select form-select-sm" id="lRuleOp">
-                            <option value="=">= (等於)</option>
-                            <option value="IN">IN (包含於清單)</option>
-                            <option value="BETWEEN">BETWEEN (區間)</option>
-                            <option value=">=">&gt;= (大於等於)</option>
-                            <option value="<=">&lt;= (小於等於)</option>
-                            <option value="!=">!= (不等於)</option>
-                          </select>
-                        </div>
-                        <div class="col-md-3">
-                          <label class="form-label small fw-bold">條件值 <span class="text-danger">*</span></label>
-                          <input type="text" class="form-control form-control-sm" id="lRuleVal" placeholder="如：1 或 2026-11-01 00:00:00,2026-12-31 23:59:59" required>
-                        </div>
-                        <div class="col-md-3">
-                          <label class="form-label small fw-bold">不符資格提示警語 <span class="text-danger">*</span></label>
-                          <input type="text" class="form-control form-control-sm" id="lRuleMsg" placeholder="顯示給會員的提示訊息" required>
-                        </div>
-                        <div class="col-md-1 d-grid">
-                          <button type="submit" class="btn btn-danger btn-sm fw-bold" title="新增資格規則"><i class="bi bi-plus-lg"></i></button>
-                        </div>
-                      </form>
+                      <div class="tab-pane fade" id="tabMenu3" role="tabpanel">
+                        <form id="form_add_lot_rule" class="row g-2 align-items-end p-3 bg-light border rounded-3 mb-4">
+                          <div class="col-md-3">
+                            <label class="form-label small fw-bold">條件判斷類型</label>
+                            <select class="form-select form-select-sm" id="lRuleType">
+                              <option value="gender">會員性別 (F / M)</option>
+                              <option value="time_range">參加時間區間 (起,迄)</option>
+                              <option value="birthday_month">當月壽星限定 (1)</option>
+                              <option value="city">居住城市代碼 (如 01,02)</option>
+                              <option value="mb_level">會員等級門檻 (1/2/3)</option>
+                              <option value="total_spent">累計消費金額門檻</option>
+                              <option value="id_last_digit">身分證尾數 (如 1,3,5,7,9)</option>
+                            </select>
+                          </div>
+                          <div class="col-md-2">
+                            <label class="form-label small fw-bold">比對運算子</label>
+                            <select class="form-select form-select-sm" id="lRuleOp">
+                              <option value="=">= (等於)</option>
+                              <option value="IN">IN (包含於清單)</option>
+                              <option value="BETWEEN">BETWEEN (區間)</option>
+                              <option value=">=">&gt;= (大於等於)</option>
+                              <option value="<=">&lt;= (小於等於)</option>
+                              <option value="!=">!= (不等於)</option>
+                            </select>
+                          </div>
+                          <div class="col-md-3">
+                            <label class="form-label small fw-bold">條件值 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="lRuleVal" placeholder="如：1 或 2026-11-01 00:00:00,2026-12-31 23:59:59" required>
+                          </div>
+                          <div class="col-md-3">
+                            <label class="form-label small fw-bold">不符資格提示警語 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="lRuleMsg" placeholder="顯示給會員的提示訊息" required>
+                          </div>
+                          <div class="col-md-1 d-grid">
+                            <button type="submit" class="btn btn-danger btn-sm fw-bold" title="新增資格規則"><i class="bi bi-plus-lg"></i></button>
+                          </div>
+                        </form>
 
-                      <div class="table-responsive">
-                        <table class="table table-sm table-bordered align-middle w-100 small">
-                          <thead class="table-light">
-                            <tr>
-                              <th>ID</th>
-                              <th>條件類型</th>
-                              <th>運算子</th>
-                              <th>比對值</th>
-                              <th>不符資格提示警語</th>
-                              <th class="text-center" style="width: 70px;">刪除</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <?php if (empty($ruleRows)): ?>
-                              <tr><td colspan="6" class="text-center text-muted py-3">尚未設定額外參加資格限制（僅依 Tab 1 最低會員等級限制）</td></tr>
-                            <?php else: foreach ($ruleRows as $rl):
-                              $rid = (int)$rl['erule_id'];
-                            ?>
-                              <tr id="lRuleRow_<?php echo $rid; ?>">
-                                <td><?php echo $rid; ?></td>
-                                <td class="fw-bold text-danger"><?php echo htmlspecialchars($rl['erule_type']); ?></td>
-                                <td><code><?php echo htmlspecialchars($rl['erule_operator']); ?></code></td>
-                                <td><?php echo htmlspecialchars($rl['erule_val']); ?></td>
-                                <td><?php echo htmlspecialchars($rl['erule_fail_msg']); ?></td>
-                                <td class="text-center">
-                                  <button type="button" class="btn btn-outline-danger btn-xs py-0 px-2 btn-del-lot-rule" data-rid="<?php echo $rid; ?>">
-                                    <i class="bi bi-trash3"></i>
-                                  </button>
-                                </td>
+                        <div class="table-responsive">
+                          <table class="table table-sm table-bordered align-middle w-100 small">
+                            <thead class="table-light">
+                              <tr>
+                                <th>ID</th>
+                                <th>條件類型</th>
+                                <th>運算子</th>
+                                <th>比對值</th>
+                                <th>不符資格提示警語</th>
+                                <th class="text-center" style="width: 70px;">刪除</th>
                               </tr>
-                            <?php endforeach; endif; ?>
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              <?php if (empty($ruleRows)): ?>
+                                <tr>
+                                  <td colspan="6" class="text-center text-muted py-3">尚未設定額外參加資格限制（僅依 Tab 1 最低會員等級限制）</td>
+                                </tr>
+                                <?php else: foreach ($ruleRows as $rl):
+                                  $rid = (int)$rl['erule_id'];
+                                ?>
+                                  <tr id="lRuleRow_<?php echo $rid; ?>">
+                                    <td><?php echo $rid; ?></td>
+                                    <td class="fw-bold text-danger"><?php echo htmlspecialchars($rl['erule_type']); ?></td>
+                                    <td><code><?php echo htmlspecialchars($rl['erule_operator']); ?></code></td>
+                                    <td><?php echo htmlspecialchars($rl['erule_val']); ?></td>
+                                    <td><?php echo htmlspecialchars($rl['erule_fail_msg']); ?></td>
+                                    <td class="text-center">
+                                      <button type="button" class="btn btn-outline-danger btn-xs py-0 px-2 btn-del-lot-rule" data-rid="<?php echo $rid; ?>">
+                                        <i class="bi bi-trash3"></i>
+                                      </button>
+                                    </td>
+                                  </tr>
+                              <?php endforeach;
+                              endif; ?>
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                    </div>
 
-                    <!-- Tab 4: 會員中獎領收明細紀錄 (fsl_gift_records, grec_source_type=2) -->
-                    <div class="tab-pane fade" id="tabMenu4" role="tabpanel">
-                      <div class="table-responsive">
-                        <table id="dataTable_lotwins" class="table table-striped table-sm table-bordered table-hover align-middle w-100 small" data-search="1">
-                          <thead class="table-light text-nowrap">
-                            <tr>
-                              <th>領收ID</th>
-                              <th>中獎會員</th>
-                              <th>獲得禮品 / 獎項</th>
-                              <th class="text-center">領取狀態</th>
-                              <th>中獎時間</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <?php
-                            $gStaMap = array(
-                              0 => '<span class="badge text-bg-warning">未拆封領取</span>',
-                              1 => '<span class="badge text-bg-success">已領取入帳</span>',
-                              2 => '<span class="badge text-bg-primary">實體寄送中</span>',
-                              3 => '<span class="badge text-bg-secondary">已使用完畢</span>',
-                              9 => '<span class="badge text-bg-dark">已逾期失效</span>'
-                            );
-                            foreach ($winLogRows as $wl):
-                              $decWName = !empty($wl['mb_name']) ? _fn_secure_crypto($wl['mb_name'], 'de') : '會員 #' . $wl['mb_id'];
-                              $decWMail = !empty($wl['mb_email']) ? _fn_secure_crypto($wl['mb_email'], 'de') : '';
-                              $wSta     = (int)($wl['grec_status'] ?? 0);
-                            ?>
-                            <tr>
-                              <td class="fw-bold">#<?php echo (int)$wl['grec_id']; ?></td>
-                              <td>
-                                <a href="mb_detail.php?currID=<?php echo (int)$wl['mb_id']; ?>" class="fw-bold text-decoration-none"><?php echo htmlspecialchars($decWName); ?></a>
-                                <div class="text-muted" style="font-size: 0.72rem;"><?php echo htmlspecialchars($decWMail); ?></div>
-                              </td>
-                              <td class="fw-bold text-danger"><?php echo htmlspecialchars($wl['gift_title'] ?? '禮品 #' . $wl['gift_id']); ?></td>
-                              <td class="text-center"><?php echo $gStaMap[$wSta] ?? ''; ?></td>
-                              <td class="text-muted"><?php echo $wl['grec_created']; ?></td>
-                            </tr>
-                            <?php endforeach; ?>
-                          </tbody>
-                        </table>
+                      <!-- Tab 4: 會員中獎領收明細紀錄 (fsl_gift_records, grec_source_type=2) -->
+                      <div class="tab-pane fade" id="tabMenu4" role="tabpanel">
+                        <div class="table-responsive">
+                          <table id="dataTable_lotwins" class="table table-striped table-sm table-bordered table-hover align-middle w-100 small" data-search="1">
+                            <thead class="table-light text-nowrap">
+                              <tr>
+                                <th>領收ID</th>
+                                <th>中獎會員</th>
+                                <th>獲得禮品 / 獎項</th>
+                                <th class="text-center">領取狀態</th>
+                                <th>中獎時間</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <?php
+                              $gStaMap = array(
+                                0 => '<span class="badge text-bg-warning">未拆封領取</span>',
+                                1 => '<span class="badge text-bg-success">已領取入帳</span>',
+                                2 => '<span class="badge text-bg-primary">實體寄送中</span>',
+                                3 => '<span class="badge text-bg-secondary">已使用完畢</span>',
+                                9 => '<span class="badge text-bg-dark">已逾期失效</span>'
+                              );
+                              foreach ($winLogRows as $wl):
+                                $decWName = !empty($wl['mb_name']) ? _fn_safe_dec_name($wl['mb_name']) : '會員 #' . $wl['mb_id'];
+                                $decWMail = !empty($wl['mb_email']) ? _fn_safe_dec_name($wl['mb_email']) : '';
+                                $wSta     = (int)($wl['grec_status'] ?? 0);
+                              ?>
+                                <tr>
+                                  <td class="fw-bold">#<?php echo (int)$wl['grec_id']; ?></td>
+                                  <td>
+                                    <a href="mb_detail.php?currID=<?php echo (int)$wl['mb_id']; ?>" class="fw-bold text-decoration-none"><?php echo htmlspecialchars($decWName); ?></a>
+                                    <div class="text-muted" style="font-size: 0.72rem;"><?php echo htmlspecialchars($decWMail); ?></div>
+                                  </td>
+                                  <td class="fw-bold text-danger"><?php echo htmlspecialchars($wl['gift_title'] ?? '禮品 #' . $wl['gift_id']); ?></td>
+                                  <td class="text-center"><?php echo $gStaMap[$wSta] ?? ''; ?></td>
+                                  <td class="text-muted"><?php echo $wl['grec_created']; ?></td>
+                                </tr>
+                              <?php endforeach; ?>
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                    </div>
                     <?php endif; ?>
                   </div>
                 </div>
@@ -519,162 +530,179 @@ $periodLabels = array(0 => '活動期間總計', 1 => '每日重置', 2 => '每�
   <script src="../scriptFiles/adminlte.js"></script>
   <script src="../scriptFiles/page.basic.js"></script>
   <script src="../scriptFiles/iframe-state-keeper.js"></script>
-  <script src="../scriptFiles/form.init.inc.js<?php echo '?t='.time(); ?>"></script>
+  <script src="../scriptFiles/form.init.inc.js<?php echo '?t=' . time(); ?>"></script>
 
   <script type="text/javascript">
-  function validateBS5Form($form) {
-    if (!$form || $form.length === 0) return true;
-    const formEl = $form[0];
-    const isValid = formEl.checkValidity();
-    formEl.classList.add('was-validated');
-    return isValid;
-  }
-
-  function doReDirect() { window.history.back(); }
-
-  function doButSave() {
-    var frm = $('#form_' + $('.tab-pane.active').prop("id"));
-    if (!frm.length) return false;
-    if (!validateBS5Form(frm)) {
-      window.parent.toastr['warning']('請檢查標示紅框的必填欄位！');
-      return false;
+    function validateBS5Form($form) {
+      if (!$form || $form.length === 0) return true;
+      const formEl = $form[0];
+      const isValid = formEl.checkValidity();
+      formEl.classList.add('was-validated');
+      return isValid;
     }
-    ajaxPOST(frm);
-  }
 
-  function doButDelete() {
-    if (0 == parseInt('<?php echo $lotID; ?>')) return false;
-    $.post('../funcFiles/lot_act_func.php', {
-      'formAcce': 'func_lot_delete',
-      'token': getTokenVal(),
-      'lotID': '<?php echo $lotID; ?>'
-    }, function(data) {
-      if (data['RTN'] == 1) {
-        window.parent.toastr['success'](data['msgStr']);
-        window.location.replace('lot_list.php');
-      } else {
-        window.parent.toastr['error'](data['msgStr'] || '刪除失敗');
+    function doReDirect() {
+      window.history.back();
+    }
+
+    function doButSave() {
+      var frm = $('#form_' + $('.tab-pane.active').prop("id"));
+      if (!frm.length) return false;
+      if (!validateBS5Form(frm)) {
+        window.parent.toastr['warning']('請檢查標示紅框的必填欄位！');
+        return false;
       }
-    }, 'json');
-  }
+      ajaxPOST(frm);
+    }
 
-  function doButReset() { location.reload(true); }
-
-  function ajaxPOST(frm) {
-    var $frm = frm || $('#form_tabMenu1');
-    var accE = (0 == parseInt('<?php echo $lotID; ?>')) ? 'func_lot_addnew' : $frm.data('func');
-    var datA = getFormObjects($frm);
-
-    $.ajax({
-      type: 'post',
-      url: '../funcFiles/lot_act_func.php',
-      data: {
-        'arrDatA': datA,
-        'formAcce': accE,
+    function doButDelete() {
+      if (0 == parseInt('<?php echo $lotID; ?>')) return false;
+      $.post('../funcFiles/lot_act_func.php', {
+        'formAcce': 'func_lot_delete',
         'token': getTokenVal(),
         'lotID': '<?php echo $lotID; ?>'
-      },
-      dataType: 'json',
-      success: function(data) {
-        if (accE == 'func_lot_addnew' && data['RTN'] == 1) {
-          window.parent.toastr['success'](data['msgStr']);
-          window.location.replace('lot_detail.php?currID=' + data['newID']);
-          return false;
-        }
-        if (window.parent && window.parent.toastr) {
-          window.parent.toastr[data['msgType']](data['msgStr']);
-        }
+      }, function(data) {
         if (data['RTN'] == 1) {
-          $frm.removeClass('was-validated');
-          $('#sideLotTitle').text($('#lot_title').val() || '未命名活動');
-          $('#sideLotCode').text($('#lot_keycode').val().toUpperCase() || '');
-          const stVal = $('#lot_status').val();
-          $('#sideLotStatus').text(stVal === '1' ? '進行中' : '已關閉').toggleClass('text-success fw-bold', stVal === '1').toggleClass('text-secondary', stVal !== '1');
-          if (data['upTime']) $('#sideLotUpdated').text(data['upTime']);
-          if (typeof doSerialize === 'function') doSerialize();
+          window.parent.toastr['success'](data['msgStr']);
+          window.location.replace('lot_list.php');
+        } else {
+          window.parent.toastr['error'](data['msgStr'] || '刪除失敗');
         }
+      }, 'json');
+    }
+
+    function doButReset() {
+      location.reload(true);
+    }
+
+    function ajaxPOST(frm) {
+      var $frm = frm || $('#form_tabMenu1');
+      var accE = (0 == parseInt('<?php echo $lotID; ?>')) ? 'func_lot_addnew' : $frm.data('func');
+      var datA = getFormObjects($frm);
+
+      $.ajax({
+        type: 'post',
+        url: '../funcFiles/lot_act_func.php',
+        data: {
+          'arrDatA': datA,
+          'formAcce': accE,
+          'token': getTokenVal(),
+          'lotID': '<?php echo $lotID; ?>'
+        },
+        dataType: 'json',
+        success: function(data) {
+          if (accE == 'func_lot_addnew' && data['RTN'] == 1) {
+            window.parent.toastr['success'](data['msgStr']);
+            window.location.replace('lot_detail.php?currID=' + data['newID']);
+            return false;
+          }
+          if (window.parent && window.parent.toastr) {
+            window.parent.toastr[data['msgType']](data['msgStr']);
+          }
+          if (data['RTN'] == 1) {
+            $frm.removeClass('was-validated');
+            $('#sideLotTitle').text($('#lot_title').val() || '未命名活動');
+            $('#sideLotCode').text($('#lot_keycode').val().toUpperCase() || '');
+            const stVal = $('#lot_status').val();
+            $('#sideLotStatus').text(stVal === '1' ? '進行中' : '已關閉').toggleClass('text-success fw-bold', stVal === '1').toggleClass('text-secondary', stVal !== '1');
+            if (data['upTime']) $('#sideLotUpdated').text(data['upTime']);
+            if (typeof doSerialize === 'function') doSerialize();
+          }
+        }
+      });
+    }
+
+    $(document).ready(function() {
+      if (typeof flatpickr !== 'undefined') {
+        flatpickr($('.datetime-picker'), {
+          locale: 'zh_tw',
+          enableTime: true,
+          enableSeconds: true,
+          dateFormat: 'Y-m-d H:i:S',
+          time_24hr: true,
+          allowInput: true
+        });
+      }
+      if ($('#dataTable_lotwins').length) datatableCreate('dataTable_lotwins');
+
+      // 新增 / 刪除獎項池格位
+      $('#form_add_lotitem').on('submit', function(e) {
+        e.preventDefault();
+        $.post('../funcFiles/lot_act_func.php', {
+          'formAcce': 'func_lot_item_add',
+          'token': getTokenVal(),
+          'lotID': '<?php echo $lotID; ?>',
+          'loti_slot_order': $('#newSlotOrder').val(),
+          'loti_label': $('#newSlotLabel').val().trim(),
+          'gift_id': $('#newSlotGift').val(),
+          'loti_color': $('#newSlotColor').val(),
+          'loti_weight': $('#newSlotWeight').val(),
+          'loti_quota': $('#newSlotQuota').val()
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) location.reload(true);
+        }, 'json');
+      });
+
+      $(document).on('click', '.btn-del-loti', function() {
+        if (!confirm('確定要刪除此獎項池格位嗎？')) return;
+        const iid = $(this).data('iid');
+        $.post('../funcFiles/lot_act_func.php', {
+          'formAcce': 'func_lot_item_delete',
+          'token': getTokenVal(),
+          'lotiID': iid
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) location.reload(true);
+        }, 'json');
+      });
+
+      // 新增 / 刪除參加資格條件規則 (target_type=3)
+      $('#form_add_lot_rule').on('submit', function(e) {
+        e.preventDefault();
+        $.post('../funcFiles/lot_act_func.php', {
+          'formAcce': 'func_lot_rule_add',
+          'token': getTokenVal(),
+          'lotID': '<?php echo $lotID; ?>',
+          'erule_type': $('#lRuleType').val(),
+          'erule_operator': $('#lRuleOp').val(),
+          'erule_val': $('#lRuleVal').val().trim(),
+          'erule_fail_msg': $('#lRuleMsg').val().trim()
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) location.reload(true);
+        }, 'json');
+      });
+
+      $(document).on('click', '.btn-del-lot-rule', function() {
+        if (!confirm('確定要刪除此參加資格條件嗎？')) return;
+        const rid = $(this).data('rid');
+        $.post('../funcFiles/lot_act_func.php', {
+          'formAcce': 'func_lot_rule_delete',
+          'token': getTokenVal(),
+          'eruleID': rid
+        }, function(data) {
+          window.parent.toastr[data['msgType']](data['msgStr']);
+          if (data['RTN'] == 1) $('#lRuleRow_' + rid).fadeOut(250, function() {
+            $(this).remove();
+          });
+        }, 'json');
+      });
+
+      $('li.prevLink').on('click', function() {
+        window.location.replace(getCurrentURI('', 'lot_list.php'));
+      });
+      $('body').on('keypress click', function() {
+        let timerElm = window.parent.$('#timer_on_exhausted');
+        if (timerElm.length) timerElm.backward_timer('reset');
+      });
+
+      //-------- 加載完成後更改外框主頁中樹狀目錄開合狀態 --------//
+      if (window.parent && typeof window.parent.treeviewCheck === 'function') {
+        window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
       }
     });
-  }
-
-  $(document).ready(function() {
-    if (typeof flatpickr !== 'undefined') {
-      flatpickr($('.datetime-picker'), { locale: 'zh_tw', enableTime: true, enableSeconds: true, dateFormat: 'Y-m-d H:i:S', time_24hr: true, allowInput: true });
-    }
-    if ($('#dataTable_lotwins').length) datatableCreate('dataTable_lotwins');
-
-    // 新增 / 刪除獎項池格位
-    $('#form_add_lotitem').on('submit', function(e) {
-      e.preventDefault();
-      $.post('../funcFiles/lot_act_func.php', {
-        'formAcce': 'func_lot_item_add',
-        'token': getTokenVal(),
-        'lotID': '<?php echo $lotID; ?>',
-        'loti_slot_order': $('#newSlotOrder').val(),
-        'loti_label': $('#newSlotLabel').val().trim(),
-        'gift_id': $('#newSlotGift').val(),
-        'loti_color': $('#newSlotColor').val(),
-        'loti_weight': $('#newSlotWeight').val(),
-        'loti_quota': $('#newSlotQuota').val()
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) location.reload(true);
-      }, 'json');
-    });
-
-    $(document).on('click', '.btn-del-loti', function() {
-      if (!confirm('確定要刪除此獎項池格位嗎？')) return;
-      const iid = $(this).data('iid');
-      $.post('../funcFiles/lot_act_func.php', {
-        'formAcce': 'func_lot_item_delete',
-        'token': getTokenVal(),
-        'lotiID': iid
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) location.reload(true);
-      }, 'json');
-    });
-
-    // 新增 / 刪除參加資格條件規則 (target_type=3)
-    $('#form_add_lot_rule').on('submit', function(e) {
-      e.preventDefault();
-      $.post('../funcFiles/lot_act_func.php', {
-        'formAcce': 'func_lot_rule_add',
-        'token': getTokenVal(),
-        'lotID': '<?php echo $lotID; ?>',
-        'erule_type': $('#lRuleType').val(),
-        'erule_operator': $('#lRuleOp').val(),
-        'erule_val': $('#lRuleVal').val().trim(),
-        'erule_fail_msg': $('#lRuleMsg').val().trim()
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) location.reload(true);
-      }, 'json');
-    });
-
-    $(document).on('click', '.btn-del-lot-rule', function() {
-      if (!confirm('確定要刪除此參加資格條件嗎？')) return;
-      const rid = $(this).data('rid');
-      $.post('../funcFiles/lot_act_func.php', {
-        'formAcce': 'func_lot_rule_delete',
-        'token': getTokenVal(),
-        'eruleID': rid
-      }, function(data) {
-        window.parent.toastr[data['msgType']](data['msgStr']);
-        if (data['RTN'] == 1) $('#lRuleRow_' + rid).fadeOut(250, function() { $(this).remove(); });
-      }, 'json');
-    });
-
-    $('li.prevLink').on('click', function() { window.location.replace(getCurrentURI('', 'lot_list.php')); });
-    $('body').on('keypress click', function() {
-      let timerElm = window.parent.$('#timer_on_exhausted');
-      if (timerElm.length) timerElm.backward_timer('reset');
-    });
-
-    if (window.parent && typeof window.parent.treeviewCheck === 'function') {
-      window.parent.treeviewCheck('<?php echo PAGE_ITEM; ?>', '<?php echo PAGE_MARK; ?>', '');
-    }
-  });
   </script>
 </body>
+
 </html>
