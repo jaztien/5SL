@@ -13,12 +13,15 @@ if (!empty($iFrameURI) && strlen($iFrameURI) % 2 === 0) {
 $currAdId = (int)($_SESSION['SESS_AD_ID'] ?? 0);
 
 // =========================================================================
-// 1. 計算各子頁面待辦事件數量與顏色等級（common=紅色 text-bg-danger / personal=綠色 text-bg-success）
+// 1. 計算各子頁面待辦事件數量與顏色分類
+//    - 紅色 (text-bg-danger, prio=3) ：工作預約類、雙向訊息、服務工單、資料表維護
+//    - 綠色 (text-bg-success, prio=2)：指定管理類（通知給當前登入管理員的未讀訊息）
+//    - 黃色 (text-bg-warning, prio=1)：系統通知與待審類（圖文模版待審等）
 // =========================================================================
-// (1) PG_MSG：雙向訊息待人工回覆數（共同處理 - 紅）
+// (1) PG_MSG：雙向訊息待人工回覆數（紅）
 $pendingMsgCount = (int)DB->single("SELECT COUNT(*) FROM fsl_messages WHERE parent_id = 0 AND msg_status = 1 AND msg_reply_status = 0");
 
-// (2) PG_ROBOT：自動應答機器人未命中 / 轉人工待優化對話數（共同處理 - 紅）
+// (2) PG_ROBOT：自動應答未命中待優化對話數（紅）
 $pendingRobotCount = 0;
 try {
   $pendingRobotCount = (int)DB->single("SELECT COUNT(*) FROM fsl_messages WHERE parent_id = 0 AND msg_status = 1 AND msg_reply_status = 0 AND msg_bot_handled = 0");
@@ -26,7 +29,7 @@ try {
   $pendingRobotCount = 0;
 }
 
-// (3) PG_SYS_DB：資料表維護管理（碎片 >= 64KB 需最佳化之資料表數，共同處理 - 紅）
+// (3) PG_SYS_DB：資料表維護管理（碎片 >= 64KB 需最佳化之資料表數，紅）
 $fragTableCount = 0;
 try {
   foreach ((DB->query("SHOW TABLE STATUS") ?: []) as $ts) {
@@ -36,18 +39,19 @@ try {
   $fragTableCount = 0;
 }
 
-// (4) PG_NOTIFY：站內通知管理（通知給當前登入管理員且未讀數，指定登入管理者 - 綠）
+// (4) PG_NOTIFY：指定管理類（指派/通知給當前登入管理員且未讀數，綠）
 $unreadAdminNotiCount = 0;
+$personalNotiItems    = array();
 if ($currAdId > 0) {
   try {
-    // 優先檢查後台管理員專屬通知或指定 ad_id 未讀通知
     $unreadAdminNotiCount = (int)DB->single("SELECT COUNT(*) FROM fsl_schedule_logs WHERE recipient_type = 2 AND recipient_id = ? AND channel = 'noti' AND send_status = 0", [$currAdId]);
+    $personalNotiItems    = DB->query("SELECT slog_id, slog_created, send_note FROM fsl_schedule_logs WHERE recipient_type = 2 AND recipient_id = ? AND channel = 'noti' AND send_status = 0 ORDER BY slog_id DESC LIMIT 5", [$currAdId]) ?: array();
   } catch (Throwable $e) {
     $unreadAdminNotiCount = 0;
   }
 }
 
-// (5) PG_LECTURE：預約排程申請審核（已有申請待審但尚未確認歸屬之諮詢時段數，共同處理 - 紅）
+// (5) PG_SCH_CONSULT：工作預約排程申請審核（已有申請待審但尚未確認歸屬之諮詢時段數，紅）
 $pendingConsultCount = 0;
 try {
   $pendingConsultCount = (int)DB->single("
@@ -61,7 +65,7 @@ try {
   $pendingConsultCount = 0;
 }
 
-// (6) PG_SRV_TICKET：服務工單接收列表（待受理 + 處理中之工單數，共同處理 - 紅）
+// (6) PG_SRV_TICKET：服務工單接收列表（待受理 + 處理中之工單數，紅）
 $pendingTicketCount = 0;
 try {
   $pendingTicketCount = (int)DB->single("SELECT COUNT(*) FROM fsl_service_tickets WHERE tkt_status IN (0, 1)");
@@ -69,18 +73,24 @@ try {
   $pendingTicketCount = 0;
 }
 
-// (7) PG_ARTI_LIST / ITEM_ARTI：圖文模版待辦案件數量（沿用既有邏輯 - 黃）
+// (7) PG_ARTI / ITEM_ARTI：通知與待審類（圖文模版待辦案件數量，黃）
 $pendingArtiCount = (int)DB->single("SELECT COUNT(arti_id) FROM fsl_articles WHERE arti_status = ?", array(6));
 
-// 建立子頁面代碼 => [數量, 樣式Class, 優先權(3紅 > 2綠 > 1黃)] 對照表
+// 頂部右側雙向訊息下拉選單加總（紅色 Badge：雙向訊息 + 自動應答 + 服務工單）
+$topRedMsgTotal = $pendingMsgCount + $pendingRobotCount + $pendingTicketCount;
+
+// 頂部右側站內通知下拉選單加總（黃色 Badge：工作預約待審 + 指定管理未讀 + 圖文待審 + 資料庫維護）
+$topYellowNotiTotal = $pendingConsultCount + $unreadAdminNotiCount + $pendingArtiCount + $fragTableCount;
+
+// 左側樹狀選單子項目 Badge 定義（工作預約/雙向訊息=紅、指定管理=綠、通知類=黃）
 $leafBadges = array(
-  'PG_SYS_DB'     => array('num' => $fragTableCount,       'cls' => 'text-bg-danger',  'prio' => 3),
-  'PG_MSG'        => array('num' => $pendingMsgCount,      'cls' => 'text-bg-danger',  'prio' => 3),
-  'PG_ROBOT'      => array('num' => $pendingRobotCount,    'cls' => 'text-bg-danger',  'prio' => 3),
-  'PG_NOTIFY'     => array('num' => $unreadAdminNotiCount, 'cls' => 'text-bg-success', 'prio' => 2),
-  'PG_LECTURE'    => array('num' => $pendingConsultCount,  'cls' => 'text-bg-danger',  'prio' => 3),
-  'PG_SRV_TICKET' => array('num' => $pendingTicketCount,   'cls' => 'text-bg-danger',  'prio' => 3),
-  'PG_ARTI_LIST'  => array('num' => $pendingArtiCount,     'cls' => 'text-bg-warning', 'prio' => 1)
+  'PG_SYS_DB'      => array('num' => $fragTableCount,       'cls' => 'text-bg-danger',  'prio' => 3),
+  'PG_MSG'         => array('num' => $pendingMsgCount,      'cls' => 'text-bg-danger',  'prio' => 3),
+  'PG_ROBOT'       => array('num' => $pendingRobotCount,    'cls' => 'text-bg-danger',  'prio' => 3),
+  'PG_NOTIFY'      => array('num' => $unreadAdminNotiCount, 'cls' => 'text-bg-success', 'prio' => 2),
+  'PG_SCH_CONSULT' => array('num' => $pendingConsultCount,  'cls' => 'text-bg-danger',  'prio' => 3),
+  'PG_SRV_TICKET'  => array('num' => $pendingTicketCount,   'cls' => 'text-bg-danger',  'prio' => 3),
+  'PG_ARTI'        => array('num' => $pendingArtiCount,     'cls' => 'text-bg-warning', 'prio' => 1)
 );
 
 /* [*] TreeMenu 左側選單佈局，自動注入子分類 Badge 並向上加總至主分類 ------------ */
@@ -99,7 +109,6 @@ foreach ($sidebar as $i => &$lv1) {
       $lv2Prio = 0;
       $lv2Cls  = '';
 
-      // 若有第 3 層子選單，先統計第 3 層並加總至第 2 層
       if (!empty($lv2['subgroup']) && is_array($lv2['subgroup'])) {
         foreach ($lv2['subgroup'] as $ti => &$lv3) {
           $lv3Code = $lv3['pagecode'] ?? '';
@@ -119,13 +128,6 @@ foreach ($sidebar as $i => &$lv1) {
         $lv2Cls  = $b['cls'];
       }
 
-      // 相容舊版 ITEM_ARTI 掛在第一個子項目的邏輯
-      if (($lv1['pagecode'] ?? '') === 'ITEM_ARTI' && $si === 0 && $lv2Sum === 0 && $pendingArtiCount > 0) {
-        $lv2Sum  = $pendingArtiCount;
-        $lv2Prio = 1;
-        $lv2Cls  = 'text-bg-warning';
-      }
-
       if ($lv2Sum > 0) {
         $lv2['badgeNum']   = $lv2Sum;
         $lv2['badgeClass'] = $lv2Cls;
@@ -136,7 +138,6 @@ foreach ($sidebar as $i => &$lv1) {
     unset($lv2);
   }
 
-  // 主分類顯示所有子分類的加總數量
   if ($lv1Sum > 0) {
     $lv1['badgeNum']   = $lv1Sum;
     $lv1['badgeClass'] = $lv1Cls;
@@ -187,7 +188,7 @@ unset($lv1);
   </style>
 </head>
 
-<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+<body class="layout-fixed sidebar-expand-lg sidebar-mini bg-body-tertiary">
   <div class="app-wrapper">
 
     <!-- ==================== 1. 頂部導覽列 (.app-header) ==================== -->
@@ -249,24 +250,81 @@ unset($lv1);
         <!-- 右側功能連結區 -->
         <ul class="navbar-nav ms-auto align-items-center" style="height:32px;">
 
-          <!-- 雙向訊息下拉選單 -->
+          <!-- 雙向訊息下拉選單（紅色 Badge 加總：雙向留言 + 自動應答 + 服務工單） -->
           <li class="nav-item dropdown">
-            <a class="nav-link" data-bs-toggle="dropdown" href="#" title="雙向訊息管理">
+            <a class="nav-link" data-bs-toggle="dropdown" href="#" title="雙向訊息與客服待辦">
               <i class="bi bi-chat-dots"></i>
-              <span id="badge_NAVBAR_MESS" class="badge text-bg-danger navbar-badge" style="margin-top:-5px;margin-right:-3px;"><?php echo $pendingMsgCount > 0 ? $pendingMsgCount : ''; ?></span>
+              <span id="badge_NAVBAR_MESS" class="badge text-bg-danger navbar-badge" style="margin-top:-5px;margin-right:-3px;"><?php echo $topRedMsgTotal > 0 ? $topRedMsgTotal : ''; ?></span>
             </a>
             <div id="messDropdown" class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+              <span class="dropdown-item dropdown-header fw-bold">
+                <?php echo $topRedMsgTotal > 0 ? "共 {$topRedMsgTotal} 項訊息與客服待辦" : "目前無待處理訊息"; ?>
+              </span>
+              <?php if ($pendingMsgCount > 0): ?>
+                <div class="dropdown-divider"></div>
+                <a href="msg_list.php" target="iFrame_main" class="dropdown-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-chat-left-text text-danger me-2"></i>會員雙向留言待回覆</span>
+                  <span class="badge text-bg-danger rounded-pill"><?php echo $pendingMsgCount; ?></span>
+                </a>
+              <?php endif; ?>
+              <?php if ($pendingRobotCount > 0): ?>
+                <div class="dropdown-divider"></div>
+                <a href="robot_list.php" target="iFrame_main" class="dropdown-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-robot text-danger me-2"></i>自動應答待優化對話</span>
+                  <span class="badge text-bg-danger rounded-pill"><?php echo $pendingRobotCount; ?></span>
+                </a>
+              <?php endif; ?>
+              <?php if ($pendingTicketCount > 0): ?>
+                <div class="dropdown-divider"></div>
+                <a href="srv_ticket_list.php" target="iFrame_main" class="dropdown-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-headset text-danger me-2"></i>服務工單待受理/處理</span>
+                  <span class="badge text-bg-danger rounded-pill"><?php echo $pendingTicketCount; ?></span>
+                </a>
+              <?php endif; ?>
+              <div class="dropdown-divider"></div>
               <a href="msg_list.php" target="iFrame_main" class="dropdown-item dropdown-footer">瀏覽所有前後台雙向訊息</a>
             </div>
           </li>
 
-          <!-- 站內通知下拉選單 -->
+          <!-- 站內通知下拉選單（黃色 Badge 加總：工作預約 + 指定管理 + 圖文待審 + 資料庫維護） -->
           <li class="nav-item dropdown">
-            <a class="nav-link" data-bs-toggle="dropdown" href="#" title="站內通知管理">
+            <a class="nav-link" data-bs-toggle="dropdown" href="#" title="站內通知與預約審核待辦">
               <i class="bi bi-bell"></i>
-              <span id="badge_notify" class="badge text-bg-warning navbar-badge" style="margin-top:-5px;margin-right:-3px;"></span>
+              <span id="badge_notify" class="badge text-bg-warning navbar-badge" style="margin-top:-5px;margin-right:-3px;"><?php echo $topYellowNotiTotal > 0 ? $topYellowNotiTotal : ''; ?></span>
             </a>
             <div id="notifyDropdown" class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+              <span class="dropdown-item dropdown-header fw-bold">
+                <?php echo $topYellowNotiTotal > 0 ? "共 {$topYellowNotiTotal} 項通知與排程審核待辦" : "目前無未讀站內通知"; ?>
+              </span>
+              <?php if ($pendingConsultCount > 0): ?>
+                <div class="dropdown-divider"></div>
+                <a href="consult_booking_list.php" target="iFrame_main" class="dropdown-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-calendar-check text-danger me-2"></i>一對一諮詢預約待審核</span>
+                  <span class="badge text-bg-danger rounded-pill"><?php echo $pendingConsultCount; ?></span>
+                </a>
+              <?php endif; ?>
+              <?php if ($unreadAdminNotiCount > 0): ?>
+                <div class="dropdown-divider"></div>
+                <a href="noti_list.php" target="iFrame_main" class="dropdown-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-person-check-fill text-success me-2"></i>指派給您的未讀通知</span>
+                  <span class="badge text-bg-success rounded-pill"><?php echo $unreadAdminNotiCount; ?></span>
+                </a>
+              <?php endif; ?>
+              <?php if ($pendingArtiCount > 0): ?>
+                <div class="dropdown-divider"></div>
+                <a href="art_list.php" target="iFrame_main" class="dropdown-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-file-earmark-richtext text-warning me-2"></i>圖文模板待審案件</span>
+                  <span class="badge text-bg-warning rounded-pill"><?php echo $pendingArtiCount; ?></span>
+                </a>
+              <?php endif; ?>
+              <?php if ($fragTableCount > 0): ?>
+                <div class="dropdown-divider"></div>
+                <a href="sys_db_maint.php" target="iFrame_main" class="dropdown-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-database-gear text-danger me-2"></i>資料表建議最佳化維護</span>
+                  <span class="badge text-bg-danger rounded-pill"><?php echo $fragTableCount; ?></span>
+                </a>
+              <?php endif; ?>
+              <div class="dropdown-divider"></div>
               <a href="noti_list.php" target="iFrame_main" class="dropdown-item dropdown-footer">瀏覽所有站內通知紀錄</a>
             </div>
           </li>

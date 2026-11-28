@@ -133,7 +133,7 @@
       "url": "#",
       "badgeClass": "",
       "badgeNum": "",
-      "icon": "bi-box-seam",
+      "icon": "bi-mortarboard",
       "subgroup": [
         {
           "title": "課程資料紀錄",
@@ -167,7 +167,7 @@
       "url": "#",
       "badgeClass": "",
       "badgeNum": "",
-      "icon": "bi-file-earmark-richtext",
+      "icon": "bi-bag-check",
       "subgroup": [
         {
           "title": "商品&贈品管理",
@@ -201,7 +201,7 @@
       "url": "#",
       "badgeClass": "",
       "badgeNum": "",
-      "icon": "bi-file-earmark-richtext",
+      "icon": "bi-trophy",
       "subgroup": [
         {
           "title": "輪盤與抽獎管理",
@@ -339,7 +339,7 @@
       "url": "#",
       "badgeClass": "",
       "badgeNum": "",
-      "icon": "bi-tools",
+      "icon": "bi-headset",
       "subgroup": [
         {
           "title": "服務工單接收列表",

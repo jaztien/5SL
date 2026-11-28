@@ -420,17 +420,41 @@ $(document).ready(function() {
         }
     });
 
-    // 安全滯留倒數計時器
+    // 安全滯留倒數計時器（側邊欄收合時自動裁去小時只顯示 mm:ss）
     let countdownSec = (typeof window.SYS_IDLEOUT !== 'undefined') ? parseInt(window.SYS_IDLEOUT) : 600;
-    if ($('#timer_on_exhausted').length && typeof $('#timer_on_exhausted').backward_timer === 'function') {
-        $('#timer_on_exhausted').backward_timer({
+    const timerNode = document.getElementById('timer_on_exhausted');
+    if (timerNode && typeof $(timerNode).backward_timer === 'function') {
+        let fullTimeStr = '';
+        const applyTimerDisplay = () => {
+            if (!fullTimeStr) return;
+            const isMini = $('body').hasClass('sidebar-collapse') && !$('body').hasClass('sidebar-open') && !$('.app-sidebar').is(':hover');
+            const targetText = isMini ? fullTimeStr.replace(/^\d{2}:/, '') : fullTimeStr;
+            if (timerNode.textContent !== targetText) {
+                timerNode.textContent = targetText;
+            }
+        };
+
+        // 監聽計時器每秒寫入的新時間，收合狀態下自動只留 mm:ss
+        new MutationObserver(() => {
+            const cur = timerNode.textContent.trim();
+            if (/^\d{2}:\d{2}:\d{2}$/.test(cur)) {
+                fullTimeStr = cur;
+                applyTimerDisplay();
+            }
+        }).observe(timerNode, { childList: true, characterData: true, subtree: true });
+
+        // 側邊欄展開/收合或滑鼠移入移出時即時切換格式
+        new MutationObserver(applyTimerDisplay).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        $('.app-sidebar').on('mouseenter mouseleave', () => setTimeout(applyTimerDisplay, 30));
+
+        $(timerNode).backward_timer({
             seconds: countdownSec,
             format: 'h%:m%:s%',
             on_exhausted: function(timer) {
                 window.location.assign("../lockscreen.php?backURI=" + getUrlHex());
             }
         });
-        $('#timer_on_exhausted').backward_timer('start');
+        $(timerNode).backward_timer('start');
     }
 
     $('body').on('keypress click', function() {

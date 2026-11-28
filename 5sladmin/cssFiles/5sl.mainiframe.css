@@ -265,17 +265,23 @@
   visibility: hidden;
 }
 
-/* 左側導航列：保持右側箭頭絕對位置對齊，所有待辦 Badge 統一貼齊極右側固定基準線 */
+
+
+
+
+/* AdminLTE 4 sidebar-mini 收合為小圖示模式時的視覺適配（突破 AdminLTE 預設 overflow:hidden 與 opacity:0 限制） */
+/* AdminLTE 4 sidebar-mini 展開靠右對齊與收合小圖示角標完整適配 */
+/* 1. 展開狀態：所有 Badge 統一貼齊極右側基準線，右側箭頭與三角形保持垂直對齊 */
 #sidebarL .nav-link {
   position: relative;
   display: flex !important;
   align-items: center;
-  padding-right: 2.1rem !important; /* 為最右側箭頭與選中三角留出統一固定寬度 */
+  padding-right: 2.1rem !important;
 }
 #sidebarL .nav-link > p {
   display: flex !important;
   align-items: center;
-  flex: 1 1 auto;
+  flex: 1 1 auto !important;
   min-width: 0;
   margin-bottom: 0;
 }
@@ -285,18 +291,85 @@
   margin-right: 0 !important;
   flex-shrink: 0;
 }
-/* 維持 AdminLTE 原本右側箭頭的絕對位置，確保所有列的箭頭垂直完全對齊 */
 #sidebarL .nav-link > p > .nav-arrow {
   position: absolute !important;
   right: 0.75rem !important;
   top: 50% !important;
   margin-top: -0.5em;
 }
-/* 選中項目的右側三角形指示圖示也固定在同一條垂直線上 */
 #sidebarL .nav-link > p > i.activeicon {
   position: absolute !important;
   right: 0.75rem !important;
   float: none !important;
+}
+
+/* 2. 收合為小圖示模式（sidebar-mini）：保留不透明並將主分類加總角標貼齊圖示右上角 */
+/* 收合為小圖示模式時：保留安全停滯倒數並縮小為細體置中顯示 */
+body.sidebar-collapse:not(.sidebar-open) .app-sidebar:not(:hover) .user-panel {
+  height: 36px !important;
+  padding: 6px 0 !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+body.sidebar-collapse:not(.sidebar-open) .app-sidebar:not(:hover) .user-panel .container {
+  padding-left: 2px !important;
+  padding-right: 2px !important;
+}
+body.sidebar-collapse:not(.sidebar-open) .app-sidebar:not(:hover) .fliptimer {
+  font-size: 15px !important;
+  font-weight: 300 !important;
+  letter-spacing: 0.5px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+/* /迷你顯示 */
+body.sidebar-collapse:not(.sidebar-open) .app-sidebar:not(:hover) #sidebarL .nav-link {
+  position: relative !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  justify-content: center !important;
+  overflow: visible !important;
+}
+body.sidebar-collapse:not(.sidebar-open) .app-sidebar:not(:hover) #sidebarL .nav-link > i.nav-icon {
+  margin-right: 0 !important;
+  font-size: 1.15rem;
+}
+body.sidebar-collapse:not(.sidebar-open) .app-sidebar:not(:hover) #sidebarL .nav-link > p {
+  position: static !important;
+  display: block !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  overflow: visible !important;
+  font-size: 0 !important;
+  color: transparent !important;
+  flex: 0 0 0 !important;
+}
+body.sidebar-collapse:not(.sidebar-open) .app-sidebar:not(:hover) #sidebarL .nav-link > p > .nav-arrow,
+body.sidebar-collapse:not(.sidebar-open) .app-sidebar:not(:hover) #sidebarL .nav-link > p > i.activeicon {
+  display: none !important;
+}
+body.sidebar-collapse:not(.sidebar-open) .app-sidebar:not(:hover) #sidebarL > ul > li > a.nav-link > p > span.badge {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: absolute !important;
+  top: 4px !important;
+  right: 12px !important;
+  margin-left: 0 !important;
+  font-size: 0.65rem !important;
+  line-height: 1 !important;
+  padding: 2px 5px !important;
+  border-radius: 999px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  z-index: 10;
+}
+body.sidebar-collapse:not(.sidebar-open) .app-sidebar:not(:hover) #sidebarL .nav-treeview span.badge {
+  display: none !important;
 }
 
 
