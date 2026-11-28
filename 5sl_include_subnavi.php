@@ -10,12 +10,14 @@ $mb_id = (int)($_SESSION['mbID'] ?? $_SESSION['user_id'] ?? 0);
 // 定義會員中心六大核心導航項目
 $subnavi_items = [
     [
-        'key'      => 'myConsole',
-        'url'      => '5sl_myConsole.php',
-        'icon'     => 'bi-grid-1x2-fill',
-        'label'    => '訊息中心',
-        'sub'      => '通知與客服主控台',
-        'badge_id' => 'fslBadge_myConsole'
+        'key'       => 'myConsole',
+        'url'       => '5sl_myConsole.php',
+        'icon'      => 'bi-grid-1x2-fill',
+        'label'     => '訊息中心',
+        'sub'       => '通知與客服主控台',
+        'badge_id'  => 'fslBadge_myConsole',
+        'badge_val' => (int)($global_unread_msg ?? 0),
+        'badge_cls' => 'bg-danger'
     ],
     [
         'key'      => 'myAccount',
@@ -39,7 +41,9 @@ $subnavi_items = [
         'icon'     => 'bi-gift-fill',
         'label'    => '禮物與點券',
         'sub'      => 'VIP 等級與紅利錢包',
-        'badge_id' => 'fslBadge_myGifts'
+        'badge_id' => 'fslBadge_myGifts',
+        'badge_val' => (int)($pending_gifts ?? 0),
+        'badge_cls' => 'bg-warning text-dark'
     ],
     [
         'key'      => 'myOrders',
@@ -47,7 +51,6 @@ $subnavi_items = [
         'icon'     => 'bi-receipt-cutoff',
         'label'    => '我的訂購',
         'sub'      => '歷史訂單與售後申請',
-        //'badge_id' => 'fslBadge_myOrders'
         'badge_id' => 'fslBadge_myOrders'
     ],
     [
@@ -56,7 +59,9 @@ $subnavi_items = [
         'icon'     => 'bi-trophy-fill',
         'label'    => '我的任務',
         'sub'      => '等級挑戰與通關大禮',
-        'badge_id' => 'fslBadge_myQuests'
+        'badge_id' => 'fslBadge_myQuests',
+        'badge_val' => (int)($pending_quests ?? 0),
+        'badge_cls' => 'bg-warning text-dark'
     ]
 ];
 ?>
@@ -116,7 +121,10 @@ $subnavi_items = [
                         <div class="text-white-50" style="font-size: 0.72rem;"><?php echo $item['sub']; ?></div>
                     </div>
                 </div>
-                <span class="badge rounded-pill bg-danger" id="<?php echo $item['badge_id']; ?>" style="display: none;">0</span>
+                <?php $bVal = (int)($item['badge_val'] ?? 0); $bCls = $item['badge_cls'] ?? 'bg-danger'; ?>
+                <span class="badge rounded-pill <?php echo $bCls; ?>" id="<?php echo $item['badge_id']; ?>" style="<?php echo $bVal > 0 ? '' : 'display: none;'; ?>">
+                    <?php echo $bVal; ?>
+                </span>
             </a>
             <?php endforeach; ?>
 

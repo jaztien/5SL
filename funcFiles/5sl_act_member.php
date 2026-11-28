@@ -26,9 +26,6 @@ if ($datapass == false) {
 $mb_id  = isset($_SESSION['mbID']) ? (int)$_SESSION['mbID'] : 0;
 $mb_lvl = isset($_SESSION['mbLevel']) ? (int)$_SESSION['mbLevel'] : 3; // 預設黃金VIP等級3
 
-
-
-
 try {
 
     $guest_allowed = [
@@ -172,7 +169,7 @@ try {
                 $Note3rd = '會員 ' . $res['mb_title'] . ' 登入成功';
                 $Note3rd .= (!empty($toTable) && !empty($toSUB) && !empty($subUp)) ? "；並同時綁定{$from3rd}帳號！！"
                          : ((!empty($isLine) || !empty($isGoogle)) && empty($subUp) ? "；但{$from3rd}帳號綁定失敗！！" : '！！');
-
+                _fn_write_op_log(1, 101, [], 1, (int)$res['mb_id']);
                 echo json_encode([
                     'success'     => 1,
                     'code'        => '[@-successcode-@]',
@@ -213,6 +210,7 @@ try {
             }
             // 💡 4. 清除完畢後，透過 PHP 後端 header 重新導向回網站首頁
             // 加上 exit 防止後續的程式碼在背景繼續執行，確保資安安全
+            if ($mb_id > 0) _fn_write_op_log(1, 102, [], 1, $mb_id);
             echo json_encode([
                 'success'=>1, 
                 'msgType'=>'error', 
@@ -273,7 +271,6 @@ try {
                     'mb_title'          => $getTitle,
                     'mb_gender'         => $getGender,
                     'mb_birth'          => $getBirth,
-                    'mb_email'          => $enAccount,
                     'mb_cellphone'      => !empty($userFormARR['mb_cellphone']) ? _fn_secure_crypto(trim((string)$userFormARR['mb_cellphone']), 'en') : null,
                     'mb_add'            => !empty($userFormARR['mb_add']) ? _fn_secure_crypto(trim((string)$userFormARR['mb_add']), 'en') : null,
                     'mb_linesub'        => !empty($userFormARR['mb_linesub']) ? trim((string)$userFormARR['mb_linesub']) : null,
@@ -623,6 +620,7 @@ try {
             $tip_msg = ($orig_status === 2 && !$has_avatar)
             ? '個人資料已加密更新！（提示：上傳您的專屬個人頭像並補齊所有欄位，即可正式啟用帳戶並領取 ' . $profile_bonus . ' PTS 獎勵！）'
             : '個人資料已加密更新，頭像亦已同步裁切儲存！';
+            _fn_write_op_log(10, 1001, ['個人基本資料與聯絡資訊']);
             echo json_encode([
                 'success'          => 1,
                 'code'             => '[@-successcode-@]',
@@ -682,7 +680,7 @@ try {
             // 2. 使用安全雜湊加密新密碼並寫入資料庫
             $new_hash = password_hash($new_pwd, PASSWORD_DEFAULT);
             DB->query("UPDATE fsl_members SET mb_password = ? WHERE mb_id = ?", [$new_hash, $mb_id]);
-
+            _fn_write_op_log(1, 103);
             echo json_encode([
                 'success' => 1,
                 'code'    => '[@-successcode-@]',
@@ -838,7 +836,7 @@ try {
             exit;
         break;
         // =========================================================================
-        // 動作 act_submit_ticket ：送出客服諮詢工單（寫入主表 + 明細表）
+        // 動作 act_submit_ticket ：送出客服諮詢工單（同步寫入前台問答表 + 後台服務工單中心表）
         // =========================================================================
         case "act_submit_ticket":
             $category = trim($_POST['category'] ?? '');
@@ -850,30 +848,48 @@ try {
                 exit;
             }
 
-            // 產生唯一工單編號（如 TKT-20261116-842）
+            // 產生唯一工單編號（如 TKT-20261128-842）
             $ticket_no = 'TKT-' . date('Ymd') . '-' . str_pad(mt_rand(1, 999), 3, '0', STR_PAD_LEFT);
 
-            // 1. 寫入客服工單主表 (spt_status = 2 代表處理中)
+            // 1. 寫入前台歷史問答主表與明細表 (fsl_support_tickets + fsl_support_replies)
             $sql_ticket = "
                 INSERT INTO fsl_support_tickets (spt_ticketno, mb_id, spt_category, spt_subject, spt_status)
                 VALUES (?, ?, ?, ?, 2)
             ";
             $insert_res = DB->query($sql_ticket, [$ticket_no, $mb_id, $category, $subject]);
-            
-            // 取得剛新增的 spt_id（兼容回傳 ID 或需透過 single 查詢的 PDO 封裝）
             $spt_id = is_numeric($insert_res) && $insert_res > 0 
                 ? (int)$insert_res 
                 : (int)DB->single("SELECT spt_id FROM fsl_support_tickets WHERE spt_ticketno = ?", [$ticket_no]);
 
-            // 2. 寫入第一則會員提問明細 (spr_sender = 1 代表會員)
-            $sql_reply = "
-                INSERT INTO fsl_support_replies (spt_id, spr_sender, spr_senderid, spr_message)
-                VALUES (?, 1, ?, ?)
-            ";
-            DB->query($sql_reply, [$spt_id, $mb_id, $message]);
+            DB->query(
+                "INSERT INTO fsl_support_replies (spt_id, spr_sender, spr_senderid, spr_message) VALUES (?, 1, ?, ?)",
+                [$spt_id, $mb_id, $message]
+            );
+
+            // 2. 同步雙寫入後台「服務工單中心」資料表 (fsl_service_tickets)，讓後台紅燈徽章與受理列表即時收到
+            $tktTypeMap = [
+                '課程與觀看權限'     => 1,
+                '訂單、發票與帳務'   => 2,
+                '客製化專案技術諮詢' => 4,
+                '帳號安全與其他建議' => 3
+            ];
+            $tktType = $tktTypeMap[$category] ?? 4;
+
+            try {
+                DB->query(
+                    "INSERT INTO fsl_service_tickets (tkt_no, mb_id, tkt_type, tkt_priority, tkt_subject, tkt_content, tkt_status)
+                     VALUES (?, ?, ?, 2, ?, ?, 0)",
+                    [$ticket_no, $mb_id, $tktType, "[{$category}] {$subject}", $message]
+                );
+            } catch (Throwable $e) {}
+
+            // 3. 寫入全站操作紀錄 (9-901 工單立案)
+            if (function_exists('_fn_write_op_log')) {
+                _fn_write_op_log(9, 901, [$ticket_no, $category, $subject]);
+            }
 
             echo json_encode([
-                'success'    => 1,
+                'success'   => 1,
                 'code'      => '[@-successcode-@]',
                 'message'   => '客服工單已成功送出！',
                 'ticket_no' => $ticket_no,
@@ -1143,7 +1159,7 @@ try {
                 ";
                 DB->query($sql_mbp, [$mb_id, $grec_id, $add_pts, $add_pts, $new_pts, $memo]);
             }
-
+            _fn_write_op_log(4, 401, [$rec['gift_title'], $grec_id]);
             echo json_encode([
                 'success'       => 1,
                 'code'          => '[@-successcode-@]',
@@ -1237,7 +1253,7 @@ try {
                     [$mb_id, $grec_id, $add_pts, $add_pts, $new_pts, $memo]
                 );
             }
-
+            _fn_write_op_log(4, 401, [$gift['gift_title'], $grec_id]);
             echo json_encode([
                 'success'      => 1,
                 'code'         => '[@-successcode-@]',
@@ -1341,7 +1357,7 @@ try {
                     [$mb_id, $grec_id, $add_pts, $add_pts, $new_pts, $memo]
                 );
             }
-
+            _fn_write_op_log(4, 401, [$gift['gift_title'], $grec_id]);
             echo json_encode([
                 'success'    => 1,
                 'code'       => '[@-successcode-@]',
@@ -1412,7 +1428,7 @@ try {
 
             // 3. 同步將原訂單狀態更新為 5-退費申請中
             DB->query("UPDATE fsl_orders SET ord_status = 5 WHERE ord_id = ? AND mb_id = ?", [$ord_id, $mb_id]);
-
+            _fn_write_op_log(7, 702, [$ord['ord_no'], $ref_no]);
             echo json_encode([
                 'success'      => 1,
                 'code'         => '[@-successcode-@]',
@@ -2048,6 +2064,13 @@ try {
                         );
                         if ($final_total <= 0) {
                             DB->query("UPDATE fsl_course_sessions SET sess_enrollee = sess_enrollee + 1 WHERE sess_id = ?", [$snap['sess_id']]);
+                            $newEnrId = (int)DB->single(
+                                "SELECT enr_id FROM fsl_course_enrolls WHERE mb_id = ? AND course_id = ? AND sess_id = ? ORDER BY enr_id DESC LIMIT 1",
+                                [$mb_id, $snap['master_course_id'], $snap['sess_id']]
+                            );
+                            if ($newEnrId > 0 && function_exists('_fn_enroll_register_zoom')) {
+                                _fn_enroll_register_zoom($newEnrId, true);
+                            }
                         }
                     } elseif ($snap['ordi_type'] === 2 && !empty($snap['merch_id'])) {
                         DB->query("UPDATE fsl_merchandise SET merch_sold = merch_sold + ? WHERE merch_id = ?", [$snap['ordi_qty'], $snap['merch_id']]);
@@ -2090,6 +2113,7 @@ try {
                          VALUES (?, 0, 3, 2, ?, ?, 0, 0, ?, ?, 1)",
                         [$mb_id, $ord_id, -$actual_pts_used, $new_pts, $memo]
                     );
+                    _fn_write_op_log(3, 302, [$ord_no, $actual_pts_used, $curr_pts, $new_pts]);
                 }
 
                 // 11. 清空該會員購物車
@@ -2100,7 +2124,7 @@ try {
                 DB->rollBack();
                 throw $e;
             }
-
+            _fn_write_op_log(2, 203, [$ord_no]);
             echo json_encode([
                 'success'     => 1,
                 'code'        => '[@-successcode-@]',
@@ -2388,7 +2412,7 @@ try {
             DB->query("UPDATE fsl_resources SET res_count = res_count + 1 WHERE res_id = ?", [$res_id]);
 
             $remain_str = ($max_allowed > 0) ? max(0, $max_allowed - $next_used) . ' 次' : '不限次數';
-
+            _fn_write_op_log(5, 501, [$resRow['res_title'], $resRow['res_group_title'] ?: '限定內容專區']);
             echo json_encode([
                 'success'       => 1,
                 'code'          => '[@-successcode-@]',
@@ -2592,7 +2616,209 @@ try {
             exit();
         break;
 
+        // =========================================================================
+        // 動作 act_chat_send ：會員發送雙向即時訊息 + 觸發自動應答機器人 (fsl_messages)
+        // =========================================================================
+        case "act_chat_send":
+            $parent_id = (int)($_POST['parent_id'] ?? 0);
+            $content   = trim((string)($_POST['content'] ?? ''));
 
+            if ($content === '') {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '請輸入訊息內容！']);
+                exit();
+            }
+
+            $nowStr = date('Y-m-d H:i:s');
+
+            // 1. 取得或建立會員專屬對話主串 (parent_id = 0)
+            if ($parent_id <= 0) {
+                $parent_id = (int)DB->single(
+                    "SELECT msg_id FROM fsl_messages WHERE mb_id = ? AND parent_id = 0 AND msg_status = 1 ORDER BY msg_id DESC LIMIT 1",
+                    [$mb_id]
+                );
+            }
+
+            if ($parent_id <= 0) {
+                // 首次建立對話主串
+                DB->query(
+                    "INSERT INTO fsl_messages (parent_id, mb_id, msg_sender, msg_subject, msg_content, msg_is_read, msg_reply_status, msg_bot_handled, msg_status, msg_created)
+                     VALUES (0, ?, 1, '會員線上諮詢對話', ?, 0, 0, 0, 1, ?)",
+                    [$mb_id, $content, $nowStr]
+                );
+                $parent_id = (int)DB->lastInsertId();
+            } else {
+                // 寫入回覆子訊息，並將主串標記為未讀/待回覆
+                DB->query(
+                    "INSERT INTO fsl_messages (parent_id, mb_id, msg_sender, msg_content, msg_is_read, msg_status, msg_created)
+                     VALUES (?, ?, 1, ?, 0, 1, ?)",
+                    [$parent_id, $mb_id, $content, $nowStr]
+                );
+                DB->query(
+                    "UPDATE fsl_messages SET msg_is_read = 0, msg_reply_status = 0, msg_bot_handled = 0 WHERE msg_id = ?",
+                    [$parent_id]
+                );
+            }
+
+            // 2. 比對自動應答知識庫 (fsl_auto_replies)
+            $botReplyText = '';
+            $matchedArId  = 0;
+            try {
+                $arRows = DB->query("SELECT ar_id, ar_keywords, ar_answer FROM fsl_auto_replies WHERE ar_status = 1 ORDER BY ar_sort ASC, ar_id ASC") ?: [];
+                $lowerMsg = mb_strtolower($content, 'UTF-8');
+                foreach ($arRows as $ar) {
+                    $kws = array_filter(array_map('trim', explode(',', (string)$ar['ar_keywords'])));
+                    foreach ($kws as $kw) {
+                        if ($kw !== '' && mb_stripos($lowerMsg, mb_strtolower($kw, 'UTF-8')) !== false) {
+                            $botReplyText = (string)$ar['ar_answer'];
+                            $matchedArId  = (int)$ar['ar_id'];
+                            break 2;
+                        }
+                    }
+                }
+            } catch (Throwable $e) {}
+
+            // 3. 若命中自動應答，立即寫入機器人回覆 (msg_sender = 3) 並累計命中次數
+            if ($botReplyText !== '' && $matchedArId > 0) {
+                $botTime = date('Y-m-d H:i:s');
+                DB->query(
+                    "INSERT INTO fsl_messages (parent_id, mb_id, msg_sender, msg_content, msg_is_read, msg_status, msg_created)
+                     VALUES (?, ?, 3, ?, 1, 1, ?)",
+                    [$parent_id, $mb_id, $botReplyText, $botTime]
+                );
+                DB->query("UPDATE fsl_messages SET msg_bot_handled = 1 WHERE msg_id = ?", [$parent_id]);
+                DB->query("UPDATE fsl_auto_replies SET ar_hit_count = ar_hit_count + 1 WHERE ar_id = ?", [$matchedArId]);
+            }
+
+            echo json_encode([
+                'success'     => 1,
+                'code'        => '[@-successcode-@]',
+                'parent_id'   => $parent_id,
+                'user_time'   => date('m/d H:i', strtotime($nowStr)),
+                'bot_replied' => ($botReplyText !== '') ? 1 : 0,
+                'bot_text'    => $botReplyText,
+                'bot_time'    => date('m/d H:i')
+            ]);
+            exit();
+        break;
+
+        // =========================================================================
+        // 動作 act_chat_mark_read ：會員開啟對話框時將客服/機器人回覆標記為已讀
+        // =========================================================================
+        case "act_chat_mark_read":
+            DB->query(
+                "UPDATE fsl_messages SET msg_is_read = 1 WHERE mb_id = ? AND msg_sender IN (2, 3) AND msg_is_read = 0",
+                [$mb_id]
+            );
+            echo json_encode(['success' => 1]);
+            exit();
+        break;
+
+        // =========================================================================
+        // 動作 act_consult_apply ：會員申請一對一顧問諮詢開放時段 (fsl_schedules sch_source=3 + fsl_consult_bookings)
+        // =========================================================================
+        case "act_consult_apply":
+            $sch_id = (int)($_POST['sch_id'] ?? 0);
+            $topic  = trim((string)($_POST['bkg_topic'] ?? ''));
+            $note   = trim((string)($_POST['bkg_note'] ?? ''));
+
+            if ($sch_id <= 0 || $topic === '') {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '請選擇諮詢時段並填寫您想諮詢的主題！']);
+                exit();
+            }
+
+            // 1. 檢查開放時段是否存在且尚未確認人選
+            $slot = DB->row("SELECT * FROM fsl_schedules WHERE sch_id = ? AND sch_source = 3 AND sch_exec_status = 0", [$sch_id]);
+            if (!$slot) {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '此時段不存在或已關閉預約！']);
+                exit();
+            }
+            $confirmedCnt = (int)DB->single("SELECT COUNT(*) FROM fsl_consult_bookings WHERE sch_id = ? AND bkg_status = 1", [$sch_id]);
+            if ($confirmedCnt > 0) {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '此時段剛剛已由顧問確認人選，請改選其他開放時段！']);
+                exit();
+            }
+
+            // 2. 檢核 fsl_eligibility_rules (erule_target_type = 4) 資格條件
+            $rules = DB->query(
+                "SELECT * FROM fsl_eligibility_rules WHERE erule_target_type = 4 AND erule_target_id = ? AND erule_status = 1 ORDER BY erule_sort ASC",
+                [$sch_id]
+            ) ?: [];
+
+            if (!empty($rules)) {
+                $mbRow = DB->row("SELECT * FROM fsl_members WHERE mb_id = ?", [$mb_id]);
+                $spent = null;
+                foreach ($rules as $rl) {
+                    $rType = trim((string)$rl['erule_type']);
+                    $rOp   = strtoupper(trim((string)$rl['erule_operator']));
+                    $rVal  = trim((string)$rl['erule_val']);
+                    $rFail = $rl['erule_fail_msg'] ?: '您目前尚未符合此時段的預約資格條件';
+                    $pass  = true;
+
+                    if ($rType === 'mb_level') {
+                        $list = array_map('trim', explode(',', $rVal));
+                        $pass = ($rOp === 'IN') ? in_array((string)($mbRow['mb_level'] ?? 1), $list, true) : ((string)($mbRow['mb_level'] ?? 1) === $rVal);
+                    } elseif ($rType === 'total_spent') {
+                        if ($spent === null) {
+                            $spent = (float)DB->single("SELECT COALESCE(SUM(ord_total), 0) FROM fsl_orders WHERE mb_id = ? AND ord_status IN (2,3,4)", [$mb_id]);
+                        }
+                        $pass = ($spent >= (float)$rVal);
+                    } elseif ($rType === 'gender') {
+                        $pass = ((string)($mbRow['mb_gender'] ?? '') === $rVal);
+                    } elseif ($rType === 'city') {
+                        $list = array_map('trim', explode(',', $rVal));
+                        $pass = in_array((string)($mbRow['mb_city'] ?? ''), $list, true);
+                    }
+
+                    if (!$pass) {
+                        echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => $rFail]);
+                        exit();
+                    }
+                }
+            }
+
+            // 3. 檢查是否重複申請同一時段
+            $dup = (int)DB->single("SELECT COUNT(*) FROM fsl_consult_bookings WHERE sch_id = ? AND mb_id = ? AND bkg_status IN (0,1)", [$sch_id, $mb_id]);
+            if ($dup > 0) {
+                echo json_encode(['success' => 0, 'code' => '[@-errorcode-@]', 'message' => '您已提出過此時段的預約申請，請靜候顧問審核通知！']);
+                exit();
+            }
+
+            $hostAdId = (int)($slot['sch_target_ids'] ?? 0);
+            $bkgNo    = 'BKG-' . date('Ymd') . '-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
+
+            DB->query(
+                "INSERT INTO fsl_consult_bookings (bkg_no, sch_id, mb_id, host_ad_id, bkg_topic, bkg_note, bkg_status)
+                 VALUES (?, ?, ?, ?, ?, ?, 0)",
+                [$bkgNo, $sch_id, $mb_id, ($hostAdId > 0 ? $hostAdId : null), $topic, ($note !== '' ? $note : null)]
+            );
+
+            // 4. 通知負責管理人 (Email + 操作紀錄)
+            $slotStr = date('Y-m-d H:i', strtotime($slot['sch_start_at']));
+            if ($hostAdId > 0) {
+                $adm = DB->row("SELECT ad_name, ad_email FROM fsl_administrator WHERE ad_id = ?", [$hostAdId]);
+                if ($adm && !empty($adm['ad_email'])) {
+                    $mTitle = $_SESSION['mbTitle'] ?? "會員 #{$mb_id}";
+                    @mail(
+                        $adm['ad_email'],
+                        "【一對一諮詢新預約申請】{$mTitle} 申請預約 {$slotStr}",
+                        "您好 {$adm['ad_name']}：\n會員 {$mTitle} 提出了預約申請（單號：{$bkgNo}，時段：{$slotStr}，主題：{$topic}），請登入後台審核確認。",
+                        "From: noreply@5sl-studio.com\r\nContent-Type: text/plain; charset=UTF-8\r\n"
+                    );
+                }
+            }
+
+            if (function_exists('_fn_write_op_log')) {
+                _fn_write_op_log(9, 901, [$bkgNo, '一對一顧問諮詢預約', "{$slotStr} - {$topic}"]);
+            }
+
+            echo json_encode([
+                'success' => 1,
+                'code'    => '[@-successcode-@]',
+                'message' => "預約申請【{$bkgNo}】已成功送出！顧問審核確認最終歸屬後，系統將立即推播 Zoom 會議室連結給您。",
+                'bkg_no'  => $bkgNo
+                ]);
+            exit();
+        break;
 
 
 

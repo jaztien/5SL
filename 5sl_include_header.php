@@ -23,19 +23,31 @@ if ($mb_id > 0 && isset($DB)) {
             [$mb_id]
         );
 
-        // 2. 未讀系統通知（與 5sl_myConsole.php 完全一致：nor_id 為 NULL 代表未讀）
+        // 2. 未讀系統通知（對齊 fsl_notifications 實際欄位 no_id / mb_id / no_minlvl）
         $unread_ntf = (int)DB->single(
             "SELECT COUNT(*)
              FROM fsl_notifications n
-             LEFT JOIN fsl_notification_reads nr ON n.noti_id = nr.noti_id AND nr.mb_id = ?
-             WHERE n.noti_status = 1
-               AND (n.noti_target_type = 0 OR (n.noti_target_type = 1 AND n.noti_target_val = ?) OR (n.noti_target_type = 2 AND n.noti_target_val <= ?))
-               AND nr.nor_id IS NULL",
+             LEFT JOIN fsl_notification_reads r ON n.no_id = r.no_id AND r.mb_id = ?
+             WHERE (n.mb_id = ? OR n.mb_id IS NULL)
+               AND n.no_minlvl <= ?
+               AND r.nor_id IS NULL",
             [$mb_id, $mb_id, $mb_lvl]
         );
-        $global_unread_msg = $unread_ntf;
 
-        // 3. 待領取禮品 + 已達成待領取任務獎勵
+        // 3. 未讀雙向客服回覆數 (fsl_messages 中管理員或機器人回覆且會員尚未讀取)
+        $unread_chat = 0;
+        try {
+            $unread_chat = (int)DB->single(
+                "SELECT COUNT(*) FROM fsl_messages WHERE mb_id = ? AND msg_sender IN (2, 3) AND msg_is_read = 0 AND msg_status = 1",
+                [$mb_id]
+            );
+        } catch (Throwable $e) {
+            $unread_chat = 0;
+        }
+
+        $global_unread_msg = $unread_ntf + $unread_chat;
+
+        // 4. 待領取禮品 + 已達成待領取任務獎勵
         $pending_gifts = (int)DB->single(
             "SELECT COUNT(*) FROM fsl_gift_records WHERE mb_id = ? AND grec_status = 0",
             [$mb_id]
@@ -46,11 +58,12 @@ if ($mb_id > 0 && isset($DB)) {
         );
         $global_claim_count = $pending_gifts + $pending_quests;
 
-        // 4. 全站待處理總數
+        // 5. 全站待處理總數
         $global_todo_count = $global_cart_count + $global_unread_msg + $global_claim_count;
     } catch (Throwable $e) {
         $global_todo_count = $global_cart_count;
     }
+
 }
 
 $mbJS=_fn_getCachedJsonData("./5sladmin/jsonFiles/member.json");
