@@ -67,7 +67,8 @@ $cateMap = array(
   'course'    => '<span class="badge bg-primary-subtle text-primary-emphasis border">課程梯次</span>',
   'remind'    => '<span class="badge bg-warning-subtle text-warning-emphasis border">課前提醒</span>',
   'marketing' => '<span class="badge bg-danger-subtle text-danger-emphasis border">行銷 EDM</span>',
-  'admin'     => '<span class="badge bg-secondary-subtle text-secondary-emphasis border">內部記事</span>'
+  'admin'     => '<span class="badge bg-secondary-subtle text-secondary-emphasis border">內部記事</span>',
+  'consult'   => '<span class="badge bg-info-subtle text-info-emphasis border">一對一諮詢</span>'
 );
 $targetMap = array(
   1 => '會員個別發送',
@@ -255,6 +256,7 @@ $execMap = array(
               <option value="remind" <?php echo ($searchCate === 'remind') ? 'selected' : ''; ?>>課前提醒</option>
               <option value="marketing" <?php echo ($searchCate === 'marketing') ? 'selected' : ''; ?>>行銷 EDM</option>
               <option value="admin" <?php echo ($searchCate === 'admin') ? 'selected' : ''; ?>>內部記事</option>
+              <option value="consult" <?php echo ($searchCate === 'consult') ? 'selected' : ''; ?>>一對一顧問諮詢</option>
             </select>
           </div>
           <div class="mb-4">

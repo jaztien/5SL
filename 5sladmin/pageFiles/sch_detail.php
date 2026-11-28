@@ -118,7 +118,14 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
                       <i class="bi bi-alarm-fill fs-2"></i>
                     </div>
                     <h5 class="fw-bold mb-1" id="sideSchTitle"><?php echo !empty($res['sch_title']) ? htmlspecialchars($res['sch_title']) : ($schID > 0 ? '未命名排程' : '新建立排程'); ?></h5>
-                    <span class="badge bg-light text-dark border"><?php echo ((int)($res['sch_source'] ?? 1) === 2) ? '課程梯次自動同步' : '手動建立排程'; ?></span>
+                    <span class="badge bg-light text-dark border">
+                      <?php
+                        $srcVal = (int)($res['sch_source'] ?? 1);
+                        if ($srcVal === 2) echo '課程梯次自動同步';
+                        elseif ($srcVal === 3) echo '一對一顧問諮詢';
+                        else echo '手動建立排程';
+                      ?>
+                    </span>
                   </div>
 
                   <ul class="list-group list-group-flush small mb-3">
@@ -205,6 +212,7 @@ $defaultTrig  = !empty($res['sch_trigger_at']) ? $res['sch_trigger_at'] : $defau
                               <option value="remind" <?php echo (($res['sch_category'] ?? '') === 'remind') ? 'selected' : ''; ?>>remind - 課前提醒</option>
                               <option value="marketing" <?php echo (($res['sch_category'] ?? '') === 'marketing') ? 'selected' : ''; ?>>marketing - 行銷 EDM</option>
                               <option value="admin" <?php echo (($res['sch_category'] ?? '') === 'admin') ? 'selected' : ''; ?>>admin - 內部工作提醒</option>
+                              <option value="consult" <?php echo (($res['sch_category'] ?? '') === 'consult') ? 'selected' : ''; ?>>consult - 一對一顧問諮詢</option>
                             </select>
                           </div>
                           <div class="col-md-2">

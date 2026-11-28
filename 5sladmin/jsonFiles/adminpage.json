@@ -11,7 +11,7 @@
         {
           "title": "重要訊息通知",
           "pagecode": "PG_ADHOME",
-          "url": "ad_home.php",
+          "url": "#",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
@@ -19,7 +19,7 @@
         {
           "title": "數據分析控制台",
           "pagecode": "PG_CONSOLE",
-          "url": "console.php",
+          "url": "#",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"
@@ -27,7 +27,7 @@
         {
           "title": "財會分析控制台",
           "pagecode": "PG_CONSOLE3",
-          "url": "console3.php",
+          "url": "#",
           "badgeClass": "",
           "badgeNum": "",
           "icon": "bi-grid-3x3-gap",
@@ -57,7 +57,7 @@
           "url": "ad_list.php",
           "badgeClass": "",
           "badgeNum": "",
-          "default": "1000"
+          "default": "0000"
         },
         {
           "title": "全系統操作記錄",
@@ -81,7 +81,7 @@
           "url": "sys_db_maint.php",
           "badgeClass": "",
           "badgeNum": "",
-          "default": "1000"
+          "default": "0000"
         }
       ]
     },
@@ -299,8 +299,8 @@
         },
         {
           "title": "預約排程申請審核",
-          "pagecode": "PG_LECTURE",
-          "url": "@@sch_cal_list.php",
+          "pagecode": "PG_SCH_CONSULT",
+          "url": "consult_booking_list.php",
           "badgeClass": "",
           "badgeNum": "",
           "default": "1000"

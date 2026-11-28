@@ -39,6 +39,14 @@ $ptsLogs      = array();
 $enrollRows   = array();
 $orderRows    = array();
 $giftRows     = array();
+$opLogRows = DB->query("
+    SELECT log_id, log_at, log_type, log_code, log_params, log_ip
+    FROM fsl_op_logs
+    WHERE op_role = 1 AND op_id = ?
+    ORDER BY log_id DESC
+    LIMIT 100
+  ", array($mbID));
+if (!is_array($opLogRows)) $opLogRows = array();
 
 if ($mbID > 0) {
   $totalSpent  = (float)DB->single("SELECT COALESCE(SUM(ord_total), 0) FROM fsl_orders WHERE mb_id = ? AND ord_status IN (2, 3, 4)", array($mbID));
@@ -214,19 +222,24 @@ $locJS = _fn_getCachedJsonData("../jsonFiles/locations.json");
                     <?php if ($mbID > 0): ?>
                       <li class="nav-item" role="presentation">
                         <a class="nav-link" href="#tabMenu2" data-index="2" data-bs-toggle="tab" data-topbut="0" role="tab">
-                          <i class="bi bi-coin me-1"></i>PTS 點數調帳 (<?php echo number_format((int)($res['mb_points'] ?? 0)); ?>)
+                          <i class="bi bi-coin me-1"></i>PTS 點數調帳<!--  (<?php //echo number_format((int)($res['mb_points'] ?? 0)); ?>) -->
                         </a>
                       </li>
                       <li class="nav-item" role="presentation">
                         <a class="nav-link" href="#tabMenu3" data-index="3" data-bs-toggle="tab" data-topbut="0" role="tab">
-                          <i class="bi bi-journal-bookmark me-1"></i>修課紀錄 (<?php echo count($enrollRows); ?>)
+                          <i class="bi bi-journal-bookmark me-1"></i>修課紀錄<!--  (<?php //echo count($enrollRows); ?>) -->
                         </a>
                       </li>
                       <li class="nav-item" role="presentation">
                         <a class="nav-link" href="#tabMenu4" data-index="4" data-bs-toggle="tab" data-topbut="0" role="tab">
-                          <i class="bi bi-bag-check me-1"></i>訂單與優惠券 (<?php echo count($orderRows); ?>)
+                          <i class="bi bi-bag-check me-1"></i>訂單與優惠券<!--  (<?php //echo count($orderRows); ?>) -->
                         </a>
                       </li>
+                      <li class="nav-item" role="presentation">
+                        <a class="nav-link" href="#tabMenu5" data-index="5" data-bs-toggle="tab" data-topbut="0" role="tab">
+                          <i class="bi bi-clock-history me-1"></i>操作紀錄<!--  (<?php //echo count($opLogRows); ?>) -->
+                        </a>
+                      </li>                      
                     <?php endif; ?>
                   </ul>
                 </div>
@@ -655,6 +668,58 @@ $locJS = _fn_getCachedJsonData("../jsonFiles/locations.json");
                         </table>
                       </div>
                     </div>
+                    <!-- Tab 5: 會員操作紀錄（最近 100 筆，含分頁與即時搜尋） -->
+                    <div class="tab-pane fade" id="tabMenu5" role="tabpanel">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small text-muted">
+                          <i class="bi bi-shield-check text-primary me-1"></i>僅顯示此會員最近 100 筆系統操作與爭議查證紀錄（完整歷史可至「操作紀錄稽核中心」查詢）
+                        </span>
+                      </div>
+
+                      <div class="table-responsive">
+                        <table id="dataTable_mboplogs" class="table table-sm table-bordered table-hover align-middle w-100 small">
+                          <thead class="table-light">
+                            <tr>
+                              <th style="width: 70px;">ID</th>
+                              <th style="width: 150px;">發生時間</th>
+                              <th style="width: 120px;">業務分類</th>
+                              <th>操作敘述內容（含重要查證標記）</th>
+                              <th style="width: 125px;">來源 IP</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                            $decMemberLabel = (!empty($res['mb_name']) ? _fn_safe_dec_name($res['mb_name']) : '會員') . " (#{$mbID})";
+                            foreach ($opLogRows as $ol):
+                              $rendered = _fn_format_op_log_row(
+                                (int)$ol['log_type'],
+                                (int)$ol['log_code'],
+                                $decMemberLabel,
+                                $ol['log_params'] ?? null
+                              );
+                              $lvl = (int)($rendered['level'] ?? 1);
+                            ?>
+                              <tr class="<?php echo ($lvl === 3) ? 'table-warning' : ''; ?>">
+                                <td class="font-monospace text-muted"><?php echo (int)$ol['log_id']; ?></td>
+                                <td class="font-monospace text-muted"><?php echo htmlspecialchars($ol['log_at'] ?? ''); ?></td>
+                                <td>
+                                  <span class="badge text-bg-light border text-dark"><?php echo htmlspecialchars($rendered['type_name']); ?></span>
+                                </td>
+                                <td>
+                                  <?php if ($lvl === 3): ?>
+                                    <span class="badge text-bg-danger me-1">重要查證</span>
+                                  <?php elseif ($lvl === 2): ?>
+                                    <span class="badge text-bg-info text-dark me-1">關鍵異動</span>
+                                  <?php endif; ?>
+                                  <span><?php echo htmlspecialchars($rendered['text']); ?></span>
+                                </td>
+                                <td class="font-monospace text-muted"><?php echo htmlspecialchars($ol['log_ip'] ?: '—'); ?></td>
+                              </tr>
+                            <?php endforeach; ?>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>                    
                   </div>
                 </div>
               </div>
@@ -799,6 +864,7 @@ $locJS = _fn_getCachedJsonData("../jsonFiles/locations.json");
       if ($('#dataTable_mbpts').length) datatableCreate('dataTable_mbpts');
       if ($('#dataTable_mbenroll').length) datatableCreate('dataTable_mbenroll');
       if ($('#dataTable_mborders').length) datatableCreate('dataTable_mborders');
+      if ($('#dataTable_mboplogs').length) datatableCreate('dataTable_mboplogs');
 
       // 手動調帳 PTS 點數表單送出
       $('#form_adjust_pts').on('submit', function(e) {

@@ -377,6 +377,7 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                                     <option value="remind">課前提醒 (remind)</option>
                                     <option value="marketing">行銷推播 (marketing)</option>
                                     <option value="admin">內部工作 (admin)</option>
+                                    <option value="consult">一對一顧問諮詢 (consult)</option>
                                 </select>
                                 <div class="form-check form-switch mb-0">
                                     <input class="form-check-input" type="checkbox" name="trigger_enable" role="switch" id="appointmentTriggerEnable">
@@ -652,6 +653,12 @@ $csrfToken = function_exists('_fn_genToken') ? _fn_genToken() : ($_SESSION['toke
                     id: 'admin',
                     title: '內部工作',
                     color: 'secondary',
+                    active: true
+                },
+                {
+                    id: 'consult',
+                    title: '一對一顧問諮詢',
+                    color: 'info',
                     active: true
                 }
             ];

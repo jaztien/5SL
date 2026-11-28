@@ -422,7 +422,7 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                           <input type="text" class="form-control form-control-sm" id="newSessTime" value="14:00:00" placeholder="14:00:00" required>
                         </div>
                         <div class="col-md-3">
-                          <label class="form-label small fw-bold">會議室 / 上課地點備註</label>
+                          <label class="form-label small fw-bold">會議室/上課地點備註</label>
                           <input type="text" class="form-control form-control-sm" id="newSessRoom" placeholder="Zoom 線上會議室 / 台北教室">
                         </div>
                         <div class="col-md-2 d-grid">
@@ -699,6 +699,7 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
         },
         dataType: 'json',
         success: function(data) {
+          console.log(data);
           if (accE == 'func_cs_addnew' && data['RTN'] == 1) {
             window.parent.toastr['success'](data['msgStr']);
             window.location.replace("cs_detail.php?currID=" + data['newID']);

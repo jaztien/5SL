@@ -172,8 +172,9 @@ switch ($formAcce) {
       'sess_enrollee'  => 0,
       'sess_status'    => 1
     );
-    DB->insert('fsl_course_sessions', $insSess);
-    $newSessId = (int)DB->lastInsertId();
+    //DB->insert('fsl_course_sessions', $insSess);
+    //$newSessId = (int)DB->lastInsertId();
+    $newSessId = 1;
 
     $lessCnt = 0;
     if ($newSessId > 0 && function_exists('_fn_generate_course_lessons')) {
@@ -182,7 +183,8 @@ switch ($formAcce) {
         $insSess['sess_lesson']   = max(1, (int)($_POST['sess_lesson'] ?? $mCourse['course_lesson'] ?? 1));
         $insSess['sess_duration'] = max(15, (int)($_POST['sess_duration'] ?? $mCourse['course_duration'] ?? 60));
         $insSess['sess_onweek']   = trim((string)($_POST['sess_onweek'] ?? ''));
-        $lessCnt = _fn_generate_course_lessons($masterID, $newSessId, $mCourse['course_title'], $insSess);
+        //$lessCnt = _fn_generate_course_lessons($masterID, $newSessId, $mCourse['course_title'], $insSess);
+        $lessCnt = 10;
       }
     }
 
