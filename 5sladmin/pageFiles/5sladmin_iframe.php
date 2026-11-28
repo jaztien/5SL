@@ -10,43 +10,140 @@ if (!empty($iFrameURI) && strlen($iFrameURI) % 2 === 0) {
   $currURI = hex2bin($iFrameURI);
 }
 
-// 統計待後台人工回覆之雙向訊息數
+$currAdId = (int)($_SESSION['SESS_AD_ID'] ?? 0);
+
+// =========================================================================
+// 1. 計算各子頁面待辦事件數量與顏色等級（common=紅色 text-bg-danger / personal=綠色 text-bg-success）
+// =========================================================================
+// (1) PG_MSG：雙向訊息待人工回覆數（共同處理 - 紅）
 $pendingMsgCount = (int)DB->single("SELECT COUNT(*) FROM fsl_messages WHERE parent_id = 0 AND msg_status = 1 AND msg_reply_status = 0");
 
-/* [*] TreeMenu 左側選單佈局，包含 Badge 計數框 ------------ */
-$admJS      = _fn_getCachedJsonData("../jsonFiles/adminpage.json");
-$sidebar    = $admJS['sidebar'];
-$sideBarIDX = array();
-$ii         = 0;
-while ($ii < count($sidebar)) {
-  $sideBarIDX[$sidebar[$ii]['pagecode']] = $ii;
-  $ii++;
+// (2) PG_ROBOT：自動應答機器人未命中 / 轉人工待優化對話數（共同處理 - 紅）
+$pendingRobotCount = 0;
+try {
+  $pendingRobotCount = (int)DB->single("SELECT COUNT(*) FROM fsl_messages WHERE parent_id = 0 AND msg_status = 1 AND msg_reply_status = 0 AND msg_bot_handled = 0");
+} catch (Throwable $e) {
+  $pendingRobotCount = 0;
 }
 
-// 圖文模版相關待辦案件數量
-if (isset($sideBarIDX['ITEM_ARTI'])) {
-  $sIDX   = $sideBarIDX['ITEM_ARTI'];
-  $getNum = (int)DB->single("SELECT COUNT(arti_id) FROM fsl_articles WHERE arti_status = ?", array(6));
-  if ($getNum > 0) {
-    $sidebar[$sIDX]['badgeClass'] = 'text-bg-warning';
-    $sidebar[$sIDX]['badgeNum']   = $getNum;
-    if (isset($sidebar[$sIDX]['subgroup'][0])) {
-      $sidebar[$sIDX]['subgroup'][0]['badgeClass'] = 'text-bg-warning';
-      $sidebar[$sIDX]['subgroup'][0]['badgeNum']   = $getNum;
+// (3) PG_SYS_DB：資料表維護管理（碎片 >= 64KB 需最佳化之資料表數，共同處理 - 紅）
+$fragTableCount = 0;
+try {
+  foreach ((DB->query("SHOW TABLE STATUS") ?: []) as $ts) {
+    if ((int)($ts['Data_free'] ?? 0) >= 65536) $fragTableCount++;
+  }
+} catch (Throwable $e) {
+  $fragTableCount = 0;
+}
+
+// (4) PG_NOTIFY：站內通知管理（通知給當前登入管理員且未讀數，指定登入管理者 - 綠）
+$unreadAdminNotiCount = 0;
+if ($currAdId > 0) {
+  try {
+    // 優先檢查後台管理員專屬通知或指定 ad_id 未讀通知
+    $unreadAdminNotiCount = (int)DB->single("SELECT COUNT(*) FROM fsl_schedule_logs WHERE recipient_type = 2 AND recipient_id = ? AND channel = 'noti' AND send_status = 0", [$currAdId]);
+  } catch (Throwable $e) {
+    $unreadAdminNotiCount = 0;
+  }
+}
+
+// (5) PG_LECTURE：預約排程申請審核（已有申請待審但尚未確認歸屬之諮詢時段數，共同處理 - 紅）
+$pendingConsultCount = 0;
+try {
+  $pendingConsultCount = (int)DB->single("
+    SELECT COUNT(DISTINCT s.sch_id)
+    FROM fsl_schedules s
+    INNER JOIN fsl_consult_bookings b ON s.sch_id = b.sch_id AND b.bkg_status = 0
+    WHERE s.sch_source = 3 AND s.sch_exec_status = 0
+      AND NOT EXISTS (SELECT 1 FROM fsl_consult_bookings b2 WHERE b2.sch_id = s.sch_id AND b2.bkg_status = 1)
+  ");
+} catch (Throwable $e) {
+  $pendingConsultCount = 0;
+}
+
+// (6) PG_SRV_TICKET：服務工單接收列表（待受理 + 處理中之工單數，共同處理 - 紅）
+$pendingTicketCount = 0;
+try {
+  $pendingTicketCount = (int)DB->single("SELECT COUNT(*) FROM fsl_service_tickets WHERE tkt_status IN (0, 1)");
+} catch (Throwable $e) {
+  $pendingTicketCount = 0;
+}
+
+// (7) PG_ARTI_LIST / ITEM_ARTI：圖文模版待辦案件數量（沿用既有邏輯 - 黃）
+$pendingArtiCount = (int)DB->single("SELECT COUNT(arti_id) FROM fsl_articles WHERE arti_status = ?", array(6));
+
+// 建立子頁面代碼 => [數量, 樣式Class, 優先權(3紅 > 2綠 > 1黃)] 對照表
+$leafBadges = array(
+  'PG_SYS_DB'     => array('num' => $fragTableCount,       'cls' => 'text-bg-danger',  'prio' => 3),
+  'PG_MSG'        => array('num' => $pendingMsgCount,      'cls' => 'text-bg-danger',  'prio' => 3),
+  'PG_ROBOT'      => array('num' => $pendingRobotCount,    'cls' => 'text-bg-danger',  'prio' => 3),
+  'PG_NOTIFY'     => array('num' => $unreadAdminNotiCount, 'cls' => 'text-bg-success', 'prio' => 2),
+  'PG_LECTURE'    => array('num' => $pendingConsultCount,  'cls' => 'text-bg-danger',  'prio' => 3),
+  'PG_SRV_TICKET' => array('num' => $pendingTicketCount,   'cls' => 'text-bg-danger',  'prio' => 3),
+  'PG_ARTI_LIST'  => array('num' => $pendingArtiCount,     'cls' => 'text-bg-warning', 'prio' => 1)
+);
+
+/* [*] TreeMenu 左側選單佈局，自動注入子分類 Badge 並向上加總至主分類 ------------ */
+$admJS   = _fn_getCachedJsonData("../jsonFiles/adminpage.json");
+$sidebar = $admJS['sidebar'] ?? array();
+
+foreach ($sidebar as $i => &$lv1) {
+  $lv1Sum  = 0;
+  $lv1Prio = 0;
+  $lv1Cls  = '';
+
+  if (!empty($lv1['subgroup']) && is_array($lv1['subgroup'])) {
+    foreach ($lv1['subgroup'] as $si => &$lv2) {
+      $lv2Code = $lv2['pagecode'] ?? '';
+      $lv2Sum  = 0;
+      $lv2Prio = 0;
+      $lv2Cls  = '';
+
+      // 若有第 3 層子選單，先統計第 3 層並加總至第 2 層
+      if (!empty($lv2['subgroup']) && is_array($lv2['subgroup'])) {
+        foreach ($lv2['subgroup'] as $ti => &$lv3) {
+          $lv3Code = $lv3['pagecode'] ?? '';
+          if (isset($leafBadges[$lv3Code]) && $leafBadges[$lv3Code]['num'] > 0) {
+            $b = $leafBadges[$lv3Code];
+            $lv3['badgeNum']   = $b['num'];
+            $lv3['badgeClass'] = $b['cls'];
+            $lv2Sum += $b['num'];
+            if ($b['prio'] > $lv2Prio) { $lv2Prio = $b['prio']; $lv2Cls = $b['cls']; }
+          }
+        }
+        unset($lv3);
+      } elseif (isset($leafBadges[$lv2Code]) && $leafBadges[$lv2Code]['num'] > 0) {
+        $b = $leafBadges[$lv2Code];
+        $lv2Sum  = $b['num'];
+        $lv2Prio = $b['prio'];
+        $lv2Cls  = $b['cls'];
+      }
+
+      // 相容舊版 ITEM_ARTI 掛在第一個子項目的邏輯
+      if (($lv1['pagecode'] ?? '') === 'ITEM_ARTI' && $si === 0 && $lv2Sum === 0 && $pendingArtiCount > 0) {
+        $lv2Sum  = $pendingArtiCount;
+        $lv2Prio = 1;
+        $lv2Cls  = 'text-bg-warning';
+      }
+
+      if ($lv2Sum > 0) {
+        $lv2['badgeNum']   = $lv2Sum;
+        $lv2['badgeClass'] = $lv2Cls;
+        $lv1Sum += $lv2Sum;
+        if ($lv2Prio > $lv1Prio) { $lv1Prio = $lv2Prio; $lv1Cls = $lv2Cls; }
+      }
     }
+    unset($lv2);
   }
-}
 
-// 雙向訊息待回覆數量徽章
-if (isset($sideBarIDX['ITEM_MSG']) && $pendingMsgCount > 0) {
-  $mIDX = $sideBarIDX['ITEM_MSG'];
-  $sidebar[$mIDX]['badgeClass'] = 'text-bg-danger';
-  $sidebar[$mIDX]['badgeNum']   = $pendingMsgCount;
-  if (isset($sidebar[$mIDX]['subgroup'][0])) {
-    $sidebar[$mIDX]['subgroup'][0]['badgeClass'] = 'text-bg-danger';
-    $sidebar[$mIDX]['subgroup'][0]['badgeNum']   = $pendingMsgCount;
+  // 主分類顯示所有子分類的加總數量
+  if ($lv1Sum > 0) {
+    $lv1['badgeNum']   = $lv1Sum;
+    $lv1['badgeClass'] = $lv1Cls;
   }
 }
+unset($lv1);
+
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">

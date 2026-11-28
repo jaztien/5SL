@@ -402,33 +402,18 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                     </div>
                     <!-- Tab 2: 開課梯次排程管理 (共用 masterID) -->
                     <div class="tab-pane fade" id="tabMenu2" role="tabpanel">
-                      <?php if ($parentID > 0): ?>
-                        <div class="alert alert-info py-2 small">
-                          <i class="bi bi-info-circle-fill me-1"></i>本方案為特惠子方案，目前直接顯示並共用主課程 <strong>#<?php echo $masterID; ?></strong> 的開課梯次與名額。
+                      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                        <div class="small text-muted">
+                          <?php if ($parentID > 0): ?>
+                            <i class="bi bi-info-circle-fill text-info me-1"></i>本方案為特惠子方案，共用主課程 <strong>#<?php echo $masterID; ?></strong> 的開課梯次與名額。
+                          <?php else: ?>
+                            <i class="bi bi-camera-video-fill text-primary me-1"></i>點擊「新增開課梯次」可建立梯次與 Zoom 會議室；點擊列表列可進入「課堂中控台」管理單堂排課與點名。
+                          <?php endif; ?>
                         </div>
-                      <?php endif; ?>
-
-                      <form id="form_add_session" class="row g-2 align-items-end p-3 bg-light border rounded-3 mb-4">
-                        <div class="col-md-2">
-                          <label class="form-label small fw-bold">梯次編號</label>
-                          <input type="number" class="form-control form-control-sm" id="newSessBatch" min="1" value="<?php echo count($sessionRows) + 1; ?>" required>
-                        </div>
-                        <div class="col-md-3">
-                          <label class="form-label small fw-bold">開課日期</label>
-                          <input type="date" class="form-control form-control-sm" id="newSessDate" value="<?php echo date('Y-m-d', strtotime('+14 days')); ?>" required>
-                        </div>
-                        <div class="col-md-2">
-                          <label class="form-label small fw-bold">上課時間</label>
-                          <input type="text" class="form-control form-control-sm" id="newSessTime" value="14:00:00" placeholder="14:00:00" required>
-                        </div>
-                        <div class="col-md-3">
-                          <label class="form-label small fw-bold">會議室/上課地點備註</label>
-                          <input type="text" class="form-control form-control-sm" id="newSessRoom" placeholder="Zoom 線上會議室 / 台北教室">
-                        </div>
-                        <div class="col-md-2 d-grid">
-                          <button type="submit" class="btn btn-success btn-sm fw-bold"><i class="bi bi-plus-circle me-1"></i>新增梯次</button>
-                        </div>
-                      </form>
+                        <button type="button" class="btn btn-success btn-sm fw-bold" id="btnOpenNewSessModal">
+                          <i class="bi bi-plus-circle me-1"></i>新增開課梯次
+                        </button>
+                      </div>
 
                       <div class="table-responsive">
                         <table id="dataTable_cssess" class="table table-sm table-bordered table-hover align-middle w-100 small">
@@ -436,7 +421,7 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                             <tr>
                               <th class="text-center">梯次</th>
                               <th>開課日期與時間</th>
-                              <th>會議室 / 地點</th>
+                              <th>Zoom 會議室 ID</th>
                               <th class="text-center">已報名 / 上限</th>
                               <th class="text-center">狀態</th>
                               <th class="text-center" style="width: 110px;">操作</th>
@@ -449,20 +434,20 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
                               $sid = (int)$sr['sess_id'];
                               $sst = (int)($sr['sess_status'] ?? 1);
                             ?>
-                              <tr id="sessRow_<?php echo $sid; ?>">
+                              <tr id="sessRow_<?php echo $sid; ?>" style="cursor:pointer;" onclick="window.location.href='sess_detail.php?currID=<?php echo $sid; ?>';">
                                 <td class="text-center fw-bold">第 <?php echo (int)$sr['sess_batch']; ?> 梯</td>
-                                <td><?php echo htmlspecialchars($sr['sess_startdate']) . ' ' . substr($sr['sess_starttime'], 0, 5); ?></td>
-                                <td><?php echo htmlspecialchars($sr['sess_location'] ?? '線上視訊會議室'); ?></td>
+                                <td><?php echo htmlspecialchars($sr['sess_startdate']) . ' ' . substr((string)$sr['sess_starttime'], 0, 5); ?></td>
+                                <td class="font-monospace"><?php echo !empty($sr['sess_meetingid']) ? htmlspecialchars($sr['sess_meetingid']) : '<span class="text-muted">尚未建立</span>'; ?></td>
                                 <td class="text-center">
                                   <span class="badge text-bg-primary"><?php echo (int)$sr['sess_enrollee']; ?> / <?php echo $maxCap; ?> 人</span>
                                 </td>
                                 <td class="text-center">
                                   <?php echo ($sst === 1) ? '<span class="badge text-bg-success">開放報名</span>' : '<span class="badge text-bg-secondary">已額滿/關閉</span>'; ?>
                                 </td>
-                                <td class="text-center">
-                                  <button type="button" class="btn btn-outline-secondary btn-xs py-0 px-2 btn-toggle-sess" data-sid="<?php echo $sid; ?>" data-curr="<?php echo $sst; ?>" title="切換開放/關閉">
-                                    <i class="bi bi-arrow-repeat"></i>
-                                  </button>
+                                <td class="text-center" onclick="event.stopPropagation();">
+                                  <a href="sess_detail.php?currID=<?php echo $sid; ?>" class="btn btn-outline-primary btn-xs py-0 px-2" title="進入課堂中控台">
+                                    <i class="bi bi-sliders"></i>
+                                  </a>
                                   <button type="button" class="btn btn-outline-danger btn-xs py-0 px-2 btn-del-sess" data-sid="<?php echo $sid; ?>" title="刪除梯次">
                                     <i class="bi bi-trash3"></i>
                                   </button>
@@ -622,6 +607,52 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
         </div>
       </div>
     </main>
+
+  <?php if ($csID > 0): ?>
+    <!-- Modal: 新增開課梯次與 Zoom 會議室設定（共用 include_sess_form.php） -->
+    <div class="modal fade" id="modalNewSession" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header bg-success text-white py-2">
+            <h6 class="modal-title fw-bold"><i class="bi bi-plus-circle me-1"></i>新增開課梯次與 Zoom 會議室設定</h6>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <?php
+              $backupRes       = $res;
+              $backupCourses   = $masterCourses;
+              $isModalSessForm = true;
+              $sessID          = 0;
+              $courseID        = $masterID;
+              $onWeekArr       = array();
+              $masterCourses   = DB->query("SELECT course_id, course_title FROM fsl_courses WHERE parent_id = 0 AND course_status != 9 ORDER BY course_sort ASC, course_id ASC");
+              if (!is_array($masterCourses)) $masterCourses = array();
+              $res = array(
+                'sess_batch'     => count($sessionRows) + 1,
+                'sess_startdate' => $backupRes['course_startdate'] ?? date('Y-m-d', strtotime('+14 days')),
+                'sess_starttime' => $backupRes['course_starttime'] ?? '19:30:00',
+                'sess_lesson'    => $backupRes['course_lesson'] ?? 1,
+                'sess_duration'  => $backupRes['course_duration'] ?? 60,
+                'sess_batchmode' => 1,
+                'sess_status'    => 1
+              );
+              include('include_sess_form.php');
+              $res           = $backupRes;
+              $masterCourses = $backupCourses;
+            ?>
+          </div>
+          <div class="modal-footer py-2">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-success btn-sm fw-bold" id="btnSaveModalSession">
+              <i class="bi bi-check-lg me-1"></i>確認建立梯次
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  <?php endif; ?>
+
+
   </div>
 
   <script src="../pluginFiles/jquery/jquery-4.0.0.min.js"></script>
@@ -738,52 +769,57 @@ $statusLabels = array(0 => '下架停售', 1 => '上架販售中', 2 => '草稿�
       if ($('#dataTable_cssess').length) datatableCreate('dataTable_cssess');
       if ($('#dataTable_csenroll').length) datatableCreate('dataTable_csenroll');
 
-      // 新增開課梯次
-      $('#form_add_session').on('submit', function(e) {
-        e.preventDefault();
-        $.post('../funcFiles/cs_act_func.php', {
-          'formAcce': 'func_sess_add',
+      // 開啟新增開課梯次彈窗
+      $('#btnOpenNewSessModal').on('click', function() {
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalNewSession')).show();
+      });
+
+      // 送出彈窗新增梯次（連動 sess_act_func.php）
+      $('#btnSaveModalSession').on('click', function() {
+        const vals = [];
+        $('#form_modal_session .chk-onweek:checked').each(function() {
+          vals.push($(this).val());
+        });
+        $('#form_modal_session #sess_onweek').val(vals.join(','));
+
+        const $frm = $('#form_modal_session');
+        if (!$frm[0].checkValidity()) {
+          $frm[0].classList.add('was-validated');
+          window.parent.toastr['warning']('請檢查標示紅框的必填欄位！');
+          return;
+        }
+
+        const $btn = $(this).prop('disabled', true);
+        $.post('../funcFiles/sess_act_func.php', {
+          'arrDatA': getFormObjects($frm),
+          'formAcce': 'func_sess_addnew',
           'token': getTokenVal(),
-          'masterID': '<?php echo $masterID; ?>',
-          'sess_batch': $('#newSessBatch').val(),
-          'sess_startdate': $('#newSessDate').val(),
-          'sess_starttime': $('#newSessTime').val(),
-          'sess_location': $('#newSessRoom').val().trim()
+          'sessID': 0
         }, function(data) {
+          $btn.prop('disabled', false);
           window.parent.toastr[data['msgType']](data['msgStr']);
           if (data['RTN'] == 1) location.reload(true);
         }, 'json');
       });
 
-      // 切換梯次狀態 / 刪除梯次
-      $(document).on('click', '.btn-toggle-sess', function() {
-        const sid = $(this).data('sid');
-        const nxt = ($(this).data('curr') == 1) ? 0 : 1;
-        $.post('../funcFiles/cs_act_func.php', {
-          'formAcce': 'func_sess_status',
-          'token': getTokenVal(),
-          'sessID': sid,
-          'status': nxt
-        }, function(data) {
-          window.parent.toastr[data['msgType']](data['msgStr']);
-          if (data['RTN'] == 1) location.reload(true);
-        }, 'json');
-      });
-
+      // 刪除梯次（連動 sess_act_func.php）
       $(document).on('click', '.btn-del-sess', function() {
         if (!confirm('確定要刪除此開課梯次嗎？')) return;
         const sid = $(this).data('sid');
-        $.post('../funcFiles/cs_act_func.php', {
+        $.post('../funcFiles/sess_act_func.php', {
           'formAcce': 'func_sess_delete',
           'token': getTokenVal(),
           'sessID': sid
         }, function(data) {
           window.parent.toastr[data['msgType']](data['msgStr']);
-          if (data['RTN'] == 1) $('#sessRow_' + sid).fadeOut(250, function() {
-            $(this).remove();
-          });
+          if (data['RTN'] == 1) {
+            $('#sessRow_' + sid).fadeOut(250, function() {
+              $(this).remove();
+            });
+          }
         }, 'json');
       });
+
 
       // 更新參與學員修課狀態
       $(document).on('change', '.sel-enroll-status', function() {

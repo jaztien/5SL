@@ -16,7 +16,7 @@ $sessID = currID;
 $res    = ($sessID > 0) ? DB->row("SELECT * FROM fsl_course_sessions WHERE sess_id = ? AND sess_status != 9", array($sessID)) : array();
 if (!is_array($res)) $res = array();
 
-$courseID = (int)($res['course_id'] ?? 0);
+$courseID = (int)($res['course_id'] ?? ($_GET['courseID'] ?? 0));
 
 // 取得所有主課程（供選擇所屬課程）
 $masterCourses = DB->query("SELECT course_id, course_title, course_max FROM fsl_courses WHERE parent_id = 0 AND course_status != 9 ORDER BY course_sort ASC, course_id ASC");
@@ -266,174 +266,13 @@ $currLive = (int)($res['sess_live_status'] ?? 0);
 
                 <div class="card-body bg-opacity-50">
                   <div class="tab-content">
-                    <!-- Tab 1: 梯次基本排程、Zoom 會議間建立與安全設定 -->
-                    <div class="tab-pane fade show active" id="tabMenu1" role="tabpanel">
-                      <form id="form_tabMenu1" action="../funcFiles/sess_act_func.php" method="post" data-func="func_sess_infoUpdate" novalidate>
-                        <div class="row g-3">
-                          <div class="col-md-5">
-                            <label class="form-label small fw-bold">所屬主課程 <span class="text-danger">*</span></label>
-                            <select class="form-select" id="course_id" name="course_id" required>
-                              <option value="">-- 請選擇主課程 --</option>
-                              <?php foreach ($masterCourses as $mc): ?>
-                                <option value="<?php echo (int)$mc['course_id']; ?>" <?php echo ($courseID === (int)$mc['course_id']) ? 'selected' : ''; ?>>
-                                  #<?php echo (int)$mc['course_id']; ?> - <?php echo htmlspecialchars($mc['course_title']); ?>
-                                </option>
-                              <?php endforeach; ?>
-                            </select>
-                          </div>
-                          <div class="col-md-2">
-                            <label class="form-label small fw-bold">梯次編號 <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="sess_batch" name="sess_batch" min="1" required
-                              value="<?php echo (int)($res['sess_batch'] ?? 1); ?>">
-                          </div>
-                          <div class="col-md-3">
-                            <label class="form-label small fw-bold">梯次識別代碼</label>
-                            <input type="text" class="form-control text-uppercase" name="sess_keycode"
-                              value="<?php echo htmlspecialchars($res['sess_keycode'] ?? ''); ?>" placeholder="如：FSL26-B01">
-                          </div>
-                          <div class="col-md-2">
-                            <label class="form-label small fw-bold">報名開放狀態</label>
-                            <select class="form-select" name="sess_status">
-                              <option value="1" <?php echo ((int)($res['sess_status'] ?? 1) === 1) ? 'selected' : ''; ?>>1 - 開放報名</option>
-                              <option value="0" <?php echo ((int)($res['sess_status'] ?? 1) === 0) ? 'selected' : ''; ?>>0 - 關閉/額滿</option>
-                            </select>
-                          </div>
-
-                          <div class="col-md-6">
-                            <label class="form-label small fw-bold">梯次專屬別名 (sess_altname)</label>
-                            <input type="text" class="form-control" name="sess_altname"
-                              value="<?php echo htmlspecialchars($res['sess_altname'] ?? ''); ?>" placeholder="例如：2026 冬季平日晚間班">
-                          </div>
-                          <div class="col-md-6">
-                            <label class="form-label small fw-bold">梯次副標說明 (sess_subscript)</label>
-                            <input type="text" class="form-control" name="sess_subscript"
-                              value="<?php echo htmlspecialchars($res['sess_subscript'] ?? ''); ?>" placeholder="例如：每週三晚間 19:30 線上直播陪跑">
-                          </div>
-
-                          <div class="col-md-3">
-                            <label class="form-label small fw-bold">首堂開課日期 <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" name="sess_startdate" required
-                              value="<?php echo htmlspecialchars($res['sess_startdate'] ?? date('Y-m-d', strtotime('+7 days'))); ?>">
-                          </div>
-                          <div class="col-md-3">
-                            <label class="form-label small fw-bold">首堂開課時間 <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="sess_starttime" required
-                              value="<?php echo htmlspecialchars($res['sess_starttime'] ?? '19:30:00'); ?>" placeholder="19:30:00">
-                          </div>
-                          <div class="col-md-3">
-                            <label class="form-label small fw-bold">總堂數</label>
-                            <input type="number" class="form-control" name="sess_lesson" min="1"
-                              value="<?php echo (int)($res['sess_lesson'] ?? 12); ?>">
-                          </div>
-                          <div class="col-md-3">
-                            <label class="form-label small fw-bold">單堂時長 (分鐘)</label>
-                            <input type="number" class="form-control" name="sess_duration" min="15" step="5"
-                              value="<?php echo (int)($res['sess_duration'] ?? 90); ?>">
-                          </div>
-
-                          <!-- 週間固定上課日多選 (sess_onweek: 0~6) -->
-                          <div class="col-12">
-                            <label class="form-label small fw-bold d-block">週間固定上課日（多堂課時每週同一時段上課日）</label>
-                            <div class="d-flex flex-wrap gap-3 p-2 bg-light border rounded-2">
-                              <?php
-                              $wLabels = array('1' => '週一', '2' => '週二', '3' => '週三', '4' => '週四', '5' => '週五', '6' => '週六', '0' => '週日');
-                              foreach ($wLabels as $wKey => $wName):
-                                $chk = in_array((string)$wKey, $onWeekArr, true) ? 'checked' : '';
-                              ?>
-                                <div class="form-check mb-0">
-                                  <input class="form-check-input chk-onweek" type="checkbox" value="<?php echo $wKey; ?>" id="wk_<?php echo $wKey; ?>" name="wk_<?php echo $wKey; ?>" <?php echo $chk; ?>>
-                                  <label class="form-check-label small" for="wk_<?php echo $wKey; ?>"><?php echo $wName; ?></label>
-                                </div>
-                              <?php endforeach; ?>
-                            </div>
-                            <input type="hidden" name="sess_onweek" id="sess_onweek" value="<?php echo htmlspecialchars($res['sess_onweek'] ?? ''); ?>">
-                          </div>
-
-                          <div class="col-12">
-                            <div class="hr-more">Zoom 會議間建立與連線憑證</div>
-                            <hr class="my-1">
-                          </div>
-
-                          <div class="col-md-4">
-                            <label class="form-label small fw-bold">Zoom 會議室 ID (sess_meetingid)</label>
-                            <div class="input-group">
-                              <input type="text" class="form-control" id="sess_meetingid" name="sess_meetingid"
-                                value="<?php echo htmlspecialchars($res['sess_meetingid'] ?? ''); ?>" placeholder="例如：892 1045 6678">
-                              <button type="button" class="btn btn-outline-primary btn-sm" id="btnAutoZoomRoom" title="一鍵建立/產生 Zoom 會議間憑證">
-                                <i class="bi bi-magic"></i> 產生
-                              </button>
-                            </div>
-                          </div>
-                          <div class="col-md-4">
-                            <label class="form-label small fw-bold">Zoom 會議室密碼 (sess_passcode)</label>
-                            <input type="text" class="form-control" id="sess_passcode" name="sess_passcode"
-                              value="<?php echo htmlspecialchars($res['sess_passcode'] ?? ''); ?>" placeholder="6 碼英數字密碼">
-                          </div>
-                          <div class="col-md-4">
-                            <label class="form-label small fw-bold">梯次會議模式 (sess_batchmode)</label>
-                            <select class="form-select" name="sess_batchmode">
-                              <option value="1" <?php echo ((int)($res['sess_batchmode'] ?? 1) === 1) ? 'selected' : ''; ?>>1 - Zoom 線上互動直播室</option>
-                              <option value="2" <?php echo ((int)($res['sess_batchmode'] ?? 1) === 2) ? 'selected' : ''; ?>>2 - 線上 + 實體混合同步</option>
-                              <option value="0" <?php echo ((int)($res['sess_batchmode'] ?? 1) === 0) ? 'selected' : ''; ?>>0 - 純實體教室授課</option>
-                            </select>
-                          </div>
-
-                          <div class="col-md-6">
-                            <label class="form-label small fw-bold">學員通用加入連結 (sess_join_url)</label>
-                            <input type="url" class="form-control" id="sess_join_url" name="sess_join_url"
-                              value="<?php echo htmlspecialchars($res['sess_join_url'] ?? ''); ?>" placeholder="https://zoom.us...">
-                          </div>
-                          <div class="col-md-6">
-                            <label class="form-label small fw-bold">講師主持人啟動連結 (sess_start_url)</label>
-                            <input type="url" class="form-control" id="sess_start_url" name="sess_start_url"
-                              value="<?php echo htmlspecialchars($res['sess_start_url'] ?? ''); ?>" placeholder="https://zoom.us...">
-                          </div>
-
-                          <div class="col-12">
-                            <div class="hr-more">Zoom 會議室安全限制與課間預設參數</div>
-                            <hr class="my-1">
-                          </div>
-
-                          <div class="col-md-4">
-                            <div class="form-check form-switch">
-                              <input class="form-check-input" type="checkbox" id="sess_secured" name="sess_secured" data-unchecked="0" value="1" <?php echo !empty($res['sess_secured']) ? 'checked' : ''; ?>>
-                              <label class="form-check-label small fw-bold" for="sess_secured">安全限制模式 (等候室驗證)</label>
-                            </div>
-                          </div>
-                          <div class="col-md-4">
-                            <div class="form-check form-switch">
-                              <input class="form-check-input" type="checkbox" id="sess_approval" name="sess_approval" data-unchecked="0" value="1" <?php echo !empty($res['sess_approval']) ? 'checked' : ''; ?>>
-                              <label class="form-check-label small fw-bold" for="sess_approval">預先註冊審核模式</label>
-                            </div>
-                          </div>
-                          <div class="col-md-4">
-                            <div class="form-check form-switch">
-                              <input class="form-check-input" type="checkbox" id="sess_beforehost" name="sess_beforehost" data-unchecked="0" value="1" <?php echo !empty($res['sess_beforehost']) ? 'checked' : ''; ?>>
-                              <label class="form-check-label small fw-bold" for="sess_beforehost">允許學員提前進入教室</label>
-                            </div>
-                          </div>
-                          <div class="col-md-4">
-                            <div class="form-check form-switch">
-                              <input class="form-check-input" type="checkbox" id="sess_watermark" name="sess_watermark" data-unchecked="0" value="1" <?php echo !empty($res['sess_watermark']) ? 'checked' : ''; ?>>
-                              <label class="form-check-label small fw-bold" for="sess_watermark">開啟電子郵件浮水印防錄</label>
-                            </div>
-                          </div>
-                          <div class="col-md-4">
-                            <div class="form-check form-switch">
-                              <input class="form-check-input" type="checkbox" id="sess_muteentry" name="sess_muteentry" data-unchecked="0" value="1" <?php echo !empty($res['sess_muteentry']) ? 'checked' : ''; ?>>
-                              <label class="form-check-label small fw-bold" for="sess_muteentry">學員進入時麥克風預設靜音</label>
-                            </div>
-                          </div>
-                          <div class="col-md-4">
-                            <div class="input-group input-group-sm">
-                              <span class="input-group-text">提前進入時間</span>
-                              <input type="number" class="form-control" name="sess_jbhtime" min="0" max="60" value="<?php echo (int)($res['sess_jbhtime'] ?? 10); ?>">
-                              <span class="input-group-text">分鐘</span>
-                            </div>
-                          </div>
-                        </div>
-                      </form>
-                    </div>
+                 <!-- Tab 1: 梯次基本排程、Zoom 會議間建立與安全設定 -->
+                 <div class="tab-pane fade show active" id="tabMenu1" role="tabpanel">
+                   <?php
+                     $isModalSessForm = false;
+                     include('include_sess_form.php');
+                   ?>
+                 </div>
 
                     <?php if ($sessID > 0): ?>
                       <!-- Tab 2: 單堂課次排程與 Zoom 終結報告列表 -->
@@ -460,13 +299,18 @@ $currLive = (int)($res['sess_live_status'] ?? 0);
                               </tr>
                             </thead>
                             <tbody>
-                              <?php foreach ($lessonRows as $lr):
+                              <?php
+                              $sessMeetId = trim((string)($res['sess_meetingid'] ?? ''));
+                              foreach ($lessonRows as $lr):
                                 $lid      = (int)$lr['less_id'];
                                 $lStatus  = (int)($lr['less_status'] ?? 0);
+                                $lessZId  = trim((string)($lr['less_zoom_id'] ?? ''));
+                                $effZId   = ($lessZId !== '') ? $lessZId : $sessMeetId;
+                                $hasZoom  = ($effZId !== '');
                                 $hasRpt   = !empty(trim((string)($lr['less_zoom_report'] ?? '')));
                                 $lessJson = htmlspecialchars(json_encode($lr, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8');
                               ?>
-                                <tr id="lessRow_<?php echo $lid; ?>">
+                                <tr id="lessRow_<?php echo $lid; ?>" class="row-edit-lesson" data-lesson='<?php echo $lessJson; ?>' style="cursor: pointer;" title="點擊編輯本堂課次設定">
                                   <td class="text-center fw-bold">
                                     <span class="badge text-bg-dark">第 <?php echo (int)$lr['less_no']; ?> 堂</span>
                                   </td>
@@ -476,10 +320,12 @@ $currLive = (int)($res['sess_live_status'] ?? 0);
                                       <?php if (!empty($lr['less_location'])): ?>
                                         <span class="me-2"><i class="bi bi-geo-alt text-danger"></i> <?php echo htmlspecialchars($lr['less_location']); ?></span>
                                       <?php endif; ?>
-                                      <?php if (!empty($lr['less_zoom_id'])): ?>
-                                        <span class="text-primary"><i class="bi bi-camera-video"></i> ID: <?php echo htmlspecialchars($lr['less_zoom_id']); ?></span>
+                                      <?php if ($lessZId !== ''): ?>
+                                        <span class="text-primary fw-semibold"><i class="bi bi-camera-video"></i> 單堂專屬 ID: <?php echo htmlspecialchars($lessZId); ?></span>
+                                      <?php elseif ($sessMeetId !== ''): ?>
+                                        <span class="text-info"><i class="bi bi-camera-video"></i> 沿用梯次 ID: <?php echo htmlspecialchars($sessMeetId); ?></span>
                                       <?php else: ?>
-                                        <span>沿用梯次預設 Zoom 會議室</span>
+                                        <span class="text-warning-emphasis"><i class="bi bi-exclamation-circle"></i> 尚未建立 Zoom 會議室</span>
                                       <?php endif; ?>
                                     </div>
                                     <?php if (!empty($lr['less_note'])): ?>
@@ -499,12 +345,15 @@ $currLive = (int)($res['sess_live_status'] ?? 0);
                                     </select>
                                   </td>
                                   <td class="text-center text-nowrap">
-                                    <button type="button" class="btn btn-outline-primary btn-xs py-1 px-2 btn-open-edit-lesson" data-lesson='<?php echo $lessJson; ?>'>
-                                      <i class="bi bi-pencil-square me-1"></i>編輯課堂
-                                    </button>
-                                    <button type="button" class="btn <?php echo $hasRpt ? 'btn-success' : 'btn-outline-secondary'; ?> btn-xs py-1 px-2 btn-open-zoom-report" data-lesson='<?php echo $lessJson; ?>'>
-                                      <i class="bi bi-file-earmark-bar-graph me-1"></i><?php echo $hasRpt ? '已存報告' : 'Zoom 報告'; ?>
-                                    </button>
+                                    <?php if ($hasZoom): ?>
+                                      <button type="button" class="btn <?php echo $hasRpt ? 'btn-success' : 'btn-outline-secondary'; ?> btn-xs py-1 px-2 btn-open-zoom-report" data-lesson='<?php echo $lessJson; ?>'>
+                                        <i class="bi bi-file-earmark-bar-graph me-1"></i><?php echo $hasRpt ? '已存報告' : 'Zoom 報告'; ?>
+                                      </button>
+                                    <?php else: ?>
+                                      <button type="button" class="btn btn-primary btn-xs py-1 px-2 fw-bold btn-create-lesson-zoom" data-lid="<?php echo $lid; ?>">
+                                        <i class="bi bi-camera-video-fill me-1"></i>建立課堂會議室
+                                      </button>
+                                    <?php endif; ?>
                                   </td>
                                 </tr>
                               <?php endforeach; ?>
@@ -1005,8 +854,9 @@ $currLive = (int)($res['sess_live_status'] ?? 0);
         }, 'json');
       });
 
-      // 4. 開啟「編輯課堂」互動彈窗 (#modalEditLesson)
-      $(document).on('click', '.btn-open-edit-lesson', function() {
+      // 4. 點擊單堂列表列開啟「編輯課堂」互動彈窗 (#modalEditLesson)
+      $(document).on('click', '.row-edit-lesson', function(e) {
+        if ($(e.target).closest('select, button, a, input').length) return;
         const item = $(this).data('lesson');
         if (!item) return;
         $('#edit_less_id').val(item.less_id);
@@ -1022,6 +872,33 @@ $currLive = (int)($res['sess_live_status'] ?? 0);
         $('#edit_less_note').val(item.less_note || '');
         bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEditLesson')).show();
       });
+
+      // 4-1. 單堂無 Zoom 會議室時，點擊「建立課堂會議室」先確認詢問再連動 Zoom API 建房
+      $(document).on('click', '.btn-create-lesson-zoom', function(e) {
+        e.stopPropagation();
+        if (!confirm('確定要為此單堂課次呼叫 Zoom API 建立專屬線上會議室嗎？')) return;
+
+        const $btn = $(this).prop('disabled', true);
+        const lid  = $btn.data('lid');
+        $.post('../funcFiles/sess_act_func.php', {
+          'formAcce': 'func_sess_lessonCreateZoom',
+          'token': getTokenVal(),
+          'sessID': '<?php echo $sessID; ?>',
+          'lessID': lid
+        }, function(data) {
+          $btn.prop('disabled', false);
+          if (window.parent && window.parent.toastr) {
+            window.parent.toastr[data['msgType']](data['msgStr']);
+          } else if (data['msgStr']) {
+            alert(data['msgStr']);
+          }
+          if (data['RTN'] == 1) location.reload(true);
+        }, 'json').fail(function(xhr) {
+          $btn.prop('disabled', false);
+          alert('建立課堂會議室發生異常：' + (xhr.responseText || xhr.statusText));
+        });
+      });
+
 
       // 儲存「編輯課堂」並連動順延課前提醒
       $('#btnSaveEditLesson').on('click', function() {

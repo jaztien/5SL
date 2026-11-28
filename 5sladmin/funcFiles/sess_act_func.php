@@ -341,6 +341,67 @@ switch ($formAcce) {
     exit();
   break;
 
+  // =========================================================================
+  // 6-1. 為指定單堂課次建立專屬 Zoom 會議室 (func_sess_lessonCreateZoom)
+  // =========================================================================
+  case 'func_sess_lessonCreateZoom':
+    $lessID = (int)($_POST['lessID'] ?? 0);
+    if ($sessID <= 0 || $lessID <= 0) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '無效的梯次或課堂參數！']);
+      exit();
+    }
+
+    $info = DB->row("
+      SELECT l.*, s.sess_batch, s.sess_approval, c.course_title
+      FROM fsl_course_lessons l
+      INNER JOIN fsl_course_sessions s ON l.sess_id = s.sess_id
+      LEFT JOIN fsl_courses c ON s.course_id = c.course_id
+      WHERE l.less_id = ? AND l.sess_id = ?
+    ", [$lessID, $sessID]);
+
+    if (!$info) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => '找不到指定的單堂課次資料！']);
+      exit();
+    }
+
+    $cTitle   = $info['course_title'] ?? '課程直播';
+    $lTitle   = $info['less_title'] ?: ("第 {$info['less_no']} 堂");
+    $zTopic   = "【人生第五季】{$cTitle}（第 {$info['sess_batch']} 梯 - {$lTitle}）";
+    $startAt  = (string)$info['less_start_at'];
+    $endAt    = (string)$info['less_end_at'];
+    $duration = max(15, (int)round((strtotime($endAt) - strtotime($startAt)) / 60));
+
+    $zRes = _fn_zoom_create_meeting(
+      $zTopic,
+      $startAt,
+      $duration,
+      (string)($info['less_note'] ?? ''),
+      ((int)($info['sess_approval'] ?? 0) === 1)
+    );
+
+    if (!$zRes['ok']) {
+      echo json_encode(['RTN' => 0, 'msgType' => 'error', 'msgStr' => 'Zoom 單堂會議室建立失敗：' . $zRes['msg']]);
+      exit();
+    }
+
+    DB->update('fsl_course_lessons', [
+      'less_zoom_id'   => $zRes['meeting_id'],
+      'less_zoom_pass' => $zRes['password'],
+      'less_zoom_url'  => $zRes['join_url']
+    ], ['less_id' => $lessID, 'sess_id' => $sessID]);
+
+    echo json_encode([
+      'RTN'        => 1,
+      'msgType'    => 'success',
+      'msgStr'     => "第 {$info['less_no']} 堂專屬 Zoom 會議室已建立（ID：{$zRes['meeting_id']}）！",
+      'meeting_id' => $zRes['meeting_id']
+    ]);
+    exit();
+  break;
+
+
+
+
   case 'func_sess_zoomReportSync':
     $lessID = (int)($_POST['lessID'] ?? 0);
     if ($sessID <= 0 || $lessID <= 0) {

@@ -193,6 +193,8 @@ function treeviewCheck(itemCode, markCode, subItemCode) {
     $sidebar.find('.nav-link').removeClass('active');
     $sidebar.find('.nav-item').removeClass('menu-open');
     $sidebar.find('.nav-treeview').hide();
+    // 重置所有主分類加總 Badge 為可見
+    $sidebar.find('> ul > li > a span.badge').css('visibility', 'visible');
 
     const $targetLi = markCode ? $sidebar.find('li[data-pagecode="' + markCode + '"]') : $();
 
@@ -202,20 +204,25 @@ function treeviewCheck(itemCode, markCode, subItemCode) {
             $(this).addClass('menu-open');
             $(this).children('ul.nav-treeview').show();
             $(this).children('a.nav-link').addClass('active');
+            // 主分類展開時隱藏加總 Badge，讓子分類各自的 Badge 接手顯示
+            $(this).children('a.nav-link').find('span.badge').css('visibility', 'hidden');
         });
     } else if (itemCode) {
         const $itemLi = $sidebar.find('li[data-pagecode="' + itemCode + '"]');
         $itemLi.addClass('menu-open');
         $itemLi.children('ul.nav-treeview').show();
         $itemLi.children('a.nav-link').addClass('active');
+        $itemLi.children('a.nav-link').find('span.badge').css('visibility', 'hidden');
     }
 }
+
 
 function treeviewReset() {
     const $sidebar = $('#sidebarL');
     $sidebar.find('.nav-link').removeClass('active');
     $sidebar.find('.nav-item').removeClass('menu-open');
     $sidebar.find('.nav-treeview').slideUp(200);
+    $sidebar.find('> ul > li > a span.badge').css('visibility', 'visible');
 }
 
 // 5. 每當內頁發生網址切換，即時更新外框的 F5 記憶
